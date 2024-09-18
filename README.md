@@ -22,7 +22,7 @@
     ·
     <img alt="License" src="https://img.shields.io/github/license/conduktor/terraform-provider-conduktor?color=BCFE68">
     ·
-    <a href="https://registry.terraform.io/conduktor/conduktor"><img alt="Terraform registry" src="https://img.shields.io/badge/Registry-Terraform-BCFE68"></a>
+    <a href="https://registry.terraform.io/providers/conduktor/conduktor"><img alt="Terraform registry" src="https://img.shields.io/badge/Registry-Terraform-BCFE68"></a>
     <br />
     <br />
     <a href="https://conduktor.io/"><img src="https://img.shields.io/badge/Website-conduktor.io-192A4E?color=BCFE68" alt="Scale Data Streaming With Security and Control"></a>
