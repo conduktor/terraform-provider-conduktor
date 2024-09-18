@@ -1,0 +1,9 @@
+#cluster_a.yaml
+apiVersion: v2
+kind: KafkaCluster
+metadata:
+  name: cluster_a
+spec:
+  displayName: "Cluster A"
+  bootstrapServers: "localhost:9092"
+  ignoreUntrustedCertificate: false

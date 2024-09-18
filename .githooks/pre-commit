@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+echo "Run fmt"
+make go-fmt
+
+echo
+echo "Run linters"
+make go-lint

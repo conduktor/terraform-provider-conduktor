@@ -1,0 +1,44 @@
+---
+page_title: "Condutkor : conduktor_generic "
+description: |-
+    Generic Resource that use manifests in YAML format.
+    This resource allows you to create, read, update and delete any resource supported by Conduktor Console.
+---
+
+# {{ .Name }}
+
+Generic Resource that use manifests in YAML format.
+This resource allows you to create, read, update and delete any resource supported by Conduktor Console.
+
+> **Caution**
+>
+> This resource is experimental and have many [limitations](#limitations) and might have breaking changes in next releases.
+> Be aware that using it to manage production environement is not recommended as it will cause [migrations](./migrations-notes) issues in future.
+
+## Example Usage
+
+### Using embedded YAML string
+{{tffile "examples/resources/conduktor_generic/embedded.tf"}}
+
+### Using incuded YAML string
+{{tffile "examples/resources/conduktor_generic/include.tf"}}
+{{codefile "yaml" "examples/resources/conduktor_generic/cluster_a.yaml"}}
+
+{{ .SchemaMarkdown }}
+
+
+## Limitations
+
+Current limitation of this resource are :
+
+- `import` is not supported.
+- `plan` after `apply` show changes because of YAML automatic formatting and ordering.
+- only support Console resources for now
+
+## Migrations notes
+
+In future releases, this terraform provider will support more and more typed resources and you might end up migrating a resource from this generic resource to the typed one.
+
+This migration can only be done by destroying previous resource on Conduktor and recreate it after using the new typed resouce.
+
+Because of that you will need to be extra careful of the current state of the resource before doing migrations.

@@ -1,0 +1,57 @@
+{
+  "kind": "User",
+  "apiVersion": "v2",
+  "metadata": {
+    "name": "michael.scott@dunder.mifflin.com"
+  },
+  "spec": {
+    "firstName": "Michael",
+    "lastName": "Scott",
+    "permissions": [
+      {
+        "resourceType": "PLATFORM",
+        "permissions": ["userView", "clusterConnectionsManage"]
+      },
+      {
+        "resourceType": "CLUSTER",
+        "name": "scranton",
+        "permissions": ["clusterViewBroker", "clusterEditBroker"]
+      },
+      {
+        "resourceType": "TOPIC",
+        "name": "sales-*",
+        "patternType": "PREFIXED",
+        "cluster": "scranton",
+        "permissions": ["topicViewConfig", "topicConsume", "topicProduce"]
+      },
+      {
+        "resourceType": "SUBJECT",
+        "name": "sales-*",
+        "patternType": "PREFIXED",
+        "cluster": "scranton",
+        "permissions": ["subjectView", "subjectEditCompatibility"]
+      },
+      {
+        "resourceType": "CONSUMER_GROUP",
+        "name": "sales-*",
+        "patternType": "PREFIXED",
+        "cluster": "scranton",
+        "permissions": ["consumerGroupView"]
+      },
+      {
+        "resourceType": "KAFKA_CONNECT",
+        "name": "sales-*",
+        "patternType": "PREFIXED",
+        "kafkaConnect": "scranton",
+        "cluster": "scranton",
+        "permissions": ["subjectView", "kafkaConnectorDelete"]
+      },
+      {
+        "resourceType": "KSQLDB",
+        "name": "sales-ksqldb",
+        "cluster": "scranton",
+        "permissions": ["ksqldbAccess"]
+      }
+    ]
+  }
+}
