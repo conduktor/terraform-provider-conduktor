@@ -29,7 +29,7 @@
     ·
     <a href="https://twitter.com/getconduktor"><img alt="X (formerly Twitter) Follow" src="https://img.shields.io/twitter/follow/getconduktor?color=BCFE68"></a>
     ·
-    <a href="[https://conduktor.io/slack](https://conduktor.io/slack)"><img src="https://img.shields.io/badge/Slack-Join%20Community-BCFE68?logo=slack" alt="Slack"></a>
+    <a href="https://conduktor.io/slack"><img src="https://img.shields.io/badge/Slack-Join%20Community-BCFE68?logo=slack" alt="Slack"></a>
 </p>
 
 This repository contains the Conduktor Terraform provider, which defines Conduktor resources so that they can be deployed using Infrastructure as Code (IaC).
