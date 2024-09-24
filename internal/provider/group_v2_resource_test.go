@@ -68,7 +68,7 @@ func TestAccGroupV2Resource(t *testing.T) {
 }
 
 func TestAccGroupV2ExampleResource(t *testing.T) {
-
+	test.CheckEnterpriseEnabled(t)
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { test.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
