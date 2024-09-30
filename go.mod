@@ -7,7 +7,7 @@ toolchain go1.23.0
 require (
 	github.com/conduktor/ctl v0.3.0
 	github.com/ghodss/yaml v1.0.0
-	github.com/go-resty/resty/v2 v2.15.2
+	github.com/go-resty/resty/v2 v2.15.3
 	github.com/google/go-cmp v0.6.0
 	github.com/hashicorp/terraform-plugin-codegen-framework v0.4.0
 	github.com/hashicorp/terraform-plugin-docs v0.19.4
