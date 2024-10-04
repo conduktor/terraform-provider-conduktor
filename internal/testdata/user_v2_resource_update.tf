@@ -12,7 +12,7 @@ resource "conduktor_user_v2" "test" {
       {
         resource_type = "TOPIC"
         permissions   = ["topicViewConfig", "topicConsume", "topicProduce"]
-        name          = "test-topic"
+        name          = "team1.test-topic"
         pattern_type  = "LITERAL"
         cluster       = "*"
       }
