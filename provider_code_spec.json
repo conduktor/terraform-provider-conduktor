@@ -135,22 +135,7 @@
                           "name": "name",
                           "string": {
                             "description": "Name of the resource to apply permission could be a topic, a cluster, a consumer group, etc. depending on resource_type",
-                            "computed_optional_required": "optional",
-                            "validators": [
-                              {
-                                "custom": {
-                                  "imports": [
-                                    {
-                                      "path": "regexp"
-                                    },
-                                    {
-                                      "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-                                    }
-                                  ],
-                                  "schema_definition": "stringvalidator.RegexMatches(regexp.MustCompile(\"^[0-9a-z\\\\_\\\\-\\\\*]+$\"), \"\")"
-                                }
-                              }
-                            ]
+                            "computed_optional_required": "optional"
                           }
                         },
                         {
@@ -394,22 +379,7 @@
                           "name": "name",
                           "string": {
                             "description": "Name of the resource to apply permission could be a topic, a cluster, a consumer group, etc. depending on resource_type",
-                            "computed_optional_required": "optional",
-                            "validators": [
-                              {
-                                "custom": {
-                                  "imports": [
-                                    {
-                                      "path": "regexp"
-                                    },
-                                    {
-                                      "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-                                    }
-                                  ],
-                                  "schema_definition": "stringvalidator.RegexMatches(regexp.MustCompile(\"^[0-9a-z\\\\_\\\\-\\\\*]+$\"), \"\")"
-                                }
-                              }
-                            ]
+                            "computed_optional_required": "optional"
                           }
                         },
                         {

@@ -67,9 +67,6 @@ func UserV2ResourceSchema(ctx context.Context) schema.Schema {
 									Optional:            true,
 									Description:         "Name of the resource to apply permission could be a topic, a cluster, a consumer group, etc. depending on resource_type",
 									MarkdownDescription: "Name of the resource to apply permission could be a topic, a cluster, a consumer group, etc. depending on resource_type",
-									Validators: []validator.String{
-										stringvalidator.RegexMatches(regexp.MustCompile("^[0-9a-z\\_\\-\\*]+$"), ""),
-									},
 								},
 								"pattern_type": schema.StringAttribute{
 									Optional:            true,
