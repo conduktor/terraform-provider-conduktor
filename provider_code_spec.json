@@ -114,21 +114,21 @@
                   "name": "firstname",
                   "string": {
                     "description": "User firstname",
-                    "computed_optional_required": "required"
+                    "computed_optional_required": "optional"
                   }
                 },
                 {
                   "name": "lastname",
                   "string": {
                     "description": "User lastname",
-                    "computed_optional_required": "required"
+                    "computed_optional_required": "optional"
                   }
                 },
                 {
                   "name": "permissions",
                   "list_nested": {
                     "description": "Set of all user permissions",
-                    "computed_optional_required": "required",
+                    "computed_optional_required": "computed_optional",
                     "nested_object": {
                       "attributes": [
                         {
@@ -310,6 +310,16 @@
                     "element_type": {
                       "string": {}
                     },
+                    "default": {
+                      "custom": {
+                        "imports": [
+                          {
+                            "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
+                          }
+                        ],
+                        "schema_definition": "listdefault.StaticValue(basetypes.NewListValueMust(types.StringType, []attr.Value{}))"
+                      }
+                    },
                     "validators": [
                       {
                         "custom": {
@@ -331,6 +341,16 @@
                     "computed_optional_required": "computed_optional",
                     "element_type": {
                       "string": {}
+                    },
+                    "default": {
+                      "custom": {
+                        "imports": [
+                          {
+                            "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
+                          }
+                        ],
+                        "schema_definition": "listdefault.StaticValue(basetypes.NewListValueMust(types.StringType, []attr.Value{}))"
+                      }
                     },
                     "validators": [
                       {
@@ -354,6 +374,16 @@
                     "element_type": {
                       "string": {}
                     },
+                    "default": {
+                      "custom": {
+                        "imports": [
+                          {
+                            "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
+                          }
+                        ],
+                        "schema_definition": "listdefault.StaticValue(basetypes.NewListValueMust(types.StringType, []attr.Value{}))"
+                      }
+                    },
                     "validators": [
                       {
                         "custom": {
@@ -372,7 +402,7 @@
                   "name": "permissions",
                   "list_nested": {
                     "description": "Set of all group permissions",
-                    "computed_optional_required": "required",
+                    "computed_optional_required": "computed_optional",
                     "nested_object": {
                       "attributes": [
                         {
