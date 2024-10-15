@@ -67,6 +67,29 @@ func TestAccGroupV2Resource(t *testing.T) {
 	})
 }
 
+func TestAccGroupV2Minimal(t *testing.T) {
+	test.CheckEnterpriseEnabled(t)
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { test.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read from minimal example
+			{
+				Config: providerConfig + test.TestAccTestdata(t, "group_v2_resource_minimal.tf"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("conduktor_group_v2.minimal", "name", "minimal"),
+					resource.TestCheckResourceAttr("conduktor_group_v2.minimal", "spec.display_name", "Minimal"),
+					resource.TestCheckResourceAttr("conduktor_group_v2.minimal", "spec.external_groups.#", "0"),
+					resource.TestCheckResourceAttr("conduktor_group_v2.minimal", "spec.members.#", "0"),
+					resource.TestCheckResourceAttr("conduktor_group_v2.minimal", "spec.members_from_external_groups.#", "0"),
+					resource.TestCheckResourceAttr("conduktor_group_v2.minimal", "spec.permissions.#", "0"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
 func TestAccGroupV2ExampleResource(t *testing.T) {
 	test.CheckEnterpriseEnabled(t)
 	resource.Test(t, resource.TestCase{
