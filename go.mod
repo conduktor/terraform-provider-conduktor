@@ -5,7 +5,7 @@ go 1.23
 toolchain go1.23.0
 
 require (
-	github.com/conduktor/ctl v0.3.0
+	github.com/conduktor/ctl v0.3.1
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-resty/resty/v2 v2.15.3
 	github.com/google/go-cmp v0.6.0

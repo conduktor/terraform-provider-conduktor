@@ -71,9 +71,9 @@ jobs:
           - version: "1.9.*"
             name: "TF-1.9"
         console:
-          - "1.25.0"
           - "1.26.0"
           - "1.27.0"
+          - "1.28.0"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
