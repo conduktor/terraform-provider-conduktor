@@ -52,10 +52,6 @@ func NewStringValue(s string) basetypes.StringValue {
 
 // Convert a ListValue to a string array.
 func ListValueToStringArray(ctx context.Context, list basetypes.ListValue) ([]string, diag.Diagnostics) {
-	if list.IsNull() {
-		return nil, diag.Diagnostics{}
-	}
-
 	var result []string
 	diag := list.ElementsAs(ctx, &result, false)
 	return result, diag
