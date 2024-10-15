@@ -69,7 +69,7 @@ func (r *GenericResource) Create(ctx context.Context, req resource.CreateRequest
 	tflog.Info(ctx, fmt.Sprintf("Create %s kind named %s", data.Kind.String(), data.Name.String()))
 	tflog.Trace(ctx, fmt.Sprintf("Create resource with TF data: %+v", data))
 
-	cliResource, err := ctlresource.FromYamlByte([]byte(data.Manifest.ValueString()))
+	cliResource, err := ctlresource.FromYamlByte([]byte(data.Manifest.ValueString()), true)
 
 	if err != nil {
 		resp.Diagnostics.AddError("Model Error", fmt.Sprintf("Unable to create Generic, got error: %s", err))
@@ -120,7 +120,7 @@ func (r *GenericResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
-	cliResource, err := ctlresource.FromYamlByte(get)
+	cliResource, err := ctlresource.FromYamlByte(get, true)
 	if err != nil {
 		resp.Diagnostics.AddError("Model Error", fmt.Sprintf("Unable to read Generic resource, got error: %s", err))
 		return
@@ -166,7 +166,7 @@ func (r *GenericResource) Update(ctx context.Context, req resource.UpdateRequest
 	tflog.Info(ctx, fmt.Sprintf("Update %s kind named %s", data.Kind.String(), data.Name.String()))
 	tflog.Trace(ctx, fmt.Sprintf("Update resource with TF data: %+v", data))
 
-	cliResource, err := ctlresource.FromYamlByte([]byte(data.Manifest.ValueString()))
+	cliResource, err := ctlresource.FromYamlByte([]byte(data.Manifest.ValueString()), true)
 	if err != nil {
 		resp.Diagnostics.AddError("Model Error", fmt.Sprintf("Unable to create Generic, got error: %s", err))
 		return
