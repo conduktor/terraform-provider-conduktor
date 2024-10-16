@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -59,6 +60,7 @@ func GroupV2ResourceSchema(ctx context.Context) schema.Schema {
 						Validators: []validator.List{
 							listvalidator.UniqueValues(),
 						},
+						Default: listdefault.StaticValue(basetypes.NewListValueMust(types.StringType, []attr.Value{})),
 					},
 					"members": schema.ListAttribute{
 						ElementType:         types.StringType,
@@ -69,6 +71,7 @@ func GroupV2ResourceSchema(ctx context.Context) schema.Schema {
 						Validators: []validator.List{
 							listvalidator.UniqueValues(),
 						},
+						Default: listdefault.StaticValue(basetypes.NewListValueMust(types.StringType, []attr.Value{})),
 					},
 					"members_from_external_groups": schema.ListAttribute{
 						ElementType:         types.StringType,
@@ -78,6 +81,7 @@ func GroupV2ResourceSchema(ctx context.Context) schema.Schema {
 						Validators: []validator.List{
 							listvalidator.UniqueValues(),
 						},
+						Default: listdefault.StaticValue(basetypes.NewListValueMust(types.StringType, []attr.Value{})),
 					},
 					"permissions": schema.ListNestedAttribute{
 						NestedObject: schema.NestedAttributeObject{
@@ -130,7 +134,8 @@ func GroupV2ResourceSchema(ctx context.Context) schema.Schema {
 								},
 							},
 						},
-						Required:            true,
+						Optional:            true,
+						Computed:            true,
 						Description:         "Set of all group permissions",
 						MarkdownDescription: "Set of all group permissions",
 					},
@@ -694,11 +699,19 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 		)
 	}
 
-	externalGroupsVal, d := types.ListValue(types.StringType, v.ExternalGroups.Elements())
+	var externalGroupsVal basetypes.ListValue
+	switch {
+	case v.ExternalGroups.IsUnknown():
+		externalGroupsVal = types.ListUnknown(types.StringType)
+	case v.ExternalGroups.IsNull():
+		externalGroupsVal = types.ListNull(types.StringType)
+	default:
+		var d diag.Diagnostics
+		externalGroupsVal, d = types.ListValue(types.StringType, v.ExternalGroups.Elements())
+		diags.Append(d...)
+	}
 
-	diags.Append(d...)
-
-	if d.HasError() {
+	if diags.HasError() {
 		return types.ObjectUnknown(map[string]attr.Type{
 			"description":  basetypes.StringType{},
 			"display_name": basetypes.StringType{},
@@ -717,11 +730,19 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 		}), diags
 	}
 
-	membersVal, d := types.ListValue(types.StringType, v.Members.Elements())
+	var membersVal basetypes.ListValue
+	switch {
+	case v.Members.IsUnknown():
+		membersVal = types.ListUnknown(types.StringType)
+	case v.Members.IsNull():
+		membersVal = types.ListNull(types.StringType)
+	default:
+		var d diag.Diagnostics
+		membersVal, d = types.ListValue(types.StringType, v.Members.Elements())
+		diags.Append(d...)
+	}
 
-	diags.Append(d...)
-
-	if d.HasError() {
+	if diags.HasError() {
 		return types.ObjectUnknown(map[string]attr.Type{
 			"description":  basetypes.StringType{},
 			"display_name": basetypes.StringType{},
@@ -740,11 +761,19 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 		}), diags
 	}
 
-	membersFromExternalGroupsVal, d := types.ListValue(types.StringType, v.MembersFromExternalGroups.Elements())
+	var membersFromExternalGroupsVal basetypes.ListValue
+	switch {
+	case v.MembersFromExternalGroups.IsUnknown():
+		membersFromExternalGroupsVal = types.ListUnknown(types.StringType)
+	case v.MembersFromExternalGroups.IsNull():
+		membersFromExternalGroupsVal = types.ListNull(types.StringType)
+	default:
+		var d diag.Diagnostics
+		membersFromExternalGroupsVal, d = types.ListValue(types.StringType, v.MembersFromExternalGroups.Elements())
+		diags.Append(d...)
+	}
 
-	diags.Append(d...)
-
-	if d.HasError() {
+	if diags.HasError() {
 		return types.ObjectUnknown(map[string]attr.Type{
 			"description":  basetypes.StringType{},
 			"display_name": basetypes.StringType{},
@@ -1380,11 +1409,19 @@ func (v PermissionsValue) String() string {
 func (v PermissionsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	permissionsVal, d := types.ListValue(types.StringType, v.Permissions.Elements())
+	var permissionsVal basetypes.ListValue
+	switch {
+	case v.Permissions.IsUnknown():
+		permissionsVal = types.ListUnknown(types.StringType)
+	case v.Permissions.IsNull():
+		permissionsVal = types.ListNull(types.StringType)
+	default:
+		var d diag.Diagnostics
+		permissionsVal, d = types.ListValue(types.StringType, v.Permissions.Elements())
+		diags.Append(d...)
+	}
 
-	diags.Append(d...)
-
-	if d.HasError() {
+	if diags.HasError() {
 		return types.ObjectUnknown(map[string]attr.Type{
 			"cluster":       basetypes.StringType{},
 			"kafka_connect": basetypes.StringType{},

@@ -67,8 +67,8 @@ func (r *GroupV2Resource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("Create group named %s", data.Name.String()))
-	tflog.Trace(ctx, fmt.Sprintf("Create group with TF data: %+v", data))
+	tflog.Info(ctx, fmt.Sprintf("Creating group named %s", data.Name.String()))
+	tflog.Trace(ctx, fmt.Sprintf("Create group with desired state : %+v", data))
 
 	consoleResource, err := mapper.TFToInternalModel(ctx, &data)
 	if err != nil {
@@ -83,7 +83,21 @@ func (r *GroupV2Resource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	tflog.Debug(ctx, fmt.Sprintf("Group created with result: %s", apply))
+	tflog.Debug(ctx, fmt.Sprintf("Group created with result: %s", apply.UpsertResult))
+
+	var consoleRes = model.GroupConsoleResource{}
+	err = consoleRes.FromRawJsonInterface(apply.Resource)
+	if err != nil {
+		resp.Diagnostics.AddError("Unmarshall Error", fmt.Sprintf("Response resource can't be cast as group : %v, got error: %s", apply.Resource, err))
+		return
+	}
+	tflog.Debug(ctx, fmt.Sprintf("New group state : %+v", consoleRes))
+
+	data, err = mapper.InternalModelToTerraform(ctx, &consoleRes)
+	if err != nil {
+		resp.Diagnostics.AddError("Model Error", fmt.Sprintf("Unable to read group, got error: %s", err))
+		return
+	}
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -140,7 +154,7 @@ func (r *GroupV2Resource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("Update group named %s", data.Name.String()))
+	tflog.Info(ctx, fmt.Sprintf("Updating group named %s", data.Name.String()))
 	tflog.Trace(ctx, fmt.Sprintf("Update group with TF data: %+v", data))
 
 	consoleResource, err := mapper.TFToInternalModel(ctx, &data)
@@ -157,6 +171,19 @@ func (r *GroupV2Resource) Update(ctx context.Context, req resource.UpdateRequest
 	}
 	tflog.Debug(ctx, fmt.Sprintf("Group updated with result: %s", apply))
 
+	var consoleRes = model.GroupConsoleResource{}
+	err = consoleRes.FromRawJsonInterface(apply.Resource)
+	if err != nil {
+		resp.Diagnostics.AddError("Unmarshall Error", fmt.Sprintf("Response resource can't be cast as group : %v, got error: %s", apply.Resource, err))
+		return
+	}
+	tflog.Debug(ctx, fmt.Sprintf("New group state : %+v", consoleRes))
+
+	data, err = mapper.InternalModelToTerraform(ctx, &consoleRes)
+	if err != nil {
+		resp.Diagnostics.AddError("Model Error", fmt.Sprintf("Unable to read group, got error: %s", err))
+		return
+	}
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -167,7 +194,7 @@ func (r *GroupV2Resource) Delete(ctx context.Context, req resource.DeleteRequest
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 
-	tflog.Info(ctx, fmt.Sprintf("Delete group named %s", data.Name.String()))
+	tflog.Info(ctx, fmt.Sprintf("Deleting group named %s", data.Name.String()))
 
 	if resp.Diagnostics.HasError() {
 		return

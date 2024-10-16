@@ -10,11 +10,20 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 func TFToInternalModel(ctx context.Context, r *schema.GroupV2Model) (model.GroupConsoleResource, error) {
 
 	externalGroups, diag := schemaUtils.ListValueToStringArray(ctx, r.Spec.ExternalGroups)
+	if r.Spec.ExternalGroups.IsNull() {
+		tflog.Debug(ctx, "ListValue externalGroups is null")
+	}
+
+	if r.Spec.ExternalGroups.IsUnknown() {
+		tflog.Debug(ctx, "ListValue  externalGroups is unknown")
+	}
+
 	if diag.HasError() {
 		return model.GroupConsoleResource{}, mapper.WrapDiagError(diag, "externalGroups", mapper.FromTerraform)
 	}
@@ -30,25 +39,27 @@ func TFToInternalModel(ctx context.Context, r *schema.GroupV2Model) (model.Group
 	}
 
 	permissions := make([]model.Permission, 0)
-	var tfPermissions []schema.PermissionsValue
-	diag = r.Spec.Permissions.ElementsAs(ctx, &tfPermissions, false)
-	if diag.HasError() {
-		return model.GroupConsoleResource{}, mapper.WrapDiagError(diag, "permissions", mapper.FromTerraform)
-	}
-	for _, p := range tfPermissions {
-		flags, diag := schemaUtils.ListValueToStringArray(ctx, p.Permissions)
+	if !r.Spec.Permissions.IsNull() && !r.Spec.Permissions.IsUnknown() {
+		var tfPermissions []schema.PermissionsValue
+		diag = r.Spec.Permissions.ElementsAs(ctx, &tfPermissions, false)
 		if diag.HasError() {
-			return model.GroupConsoleResource{}, mapper.WrapDiagError(diag, "permissions.permissions", mapper.FromTerraform)
+			return model.GroupConsoleResource{}, mapper.WrapDiagError(diag, "permissions", mapper.FromTerraform)
 		}
+		for _, p := range tfPermissions {
+			flags, diag := schemaUtils.ListValueToStringArray(ctx, p.Permissions)
+			if diag.HasError() {
+				return model.GroupConsoleResource{}, mapper.WrapDiagError(diag, "permissions.permissions", mapper.FromTerraform)
+			}
 
-		permissions = append(permissions, model.Permission{
-			Name:         p.Name.ValueString(),
-			ResourceType: p.ResourceType.ValueString(),
-			Permissions:  flags,
-			PatternType:  p.PatternType.ValueString(),
-			Cluster:      p.Cluster.ValueString(),
-			KafkaConnect: p.KafkaConnect.ValueString(),
-		})
+			permissions = append(permissions, model.Permission{
+				Name:         p.Name.ValueString(),
+				ResourceType: p.ResourceType.ValueString(),
+				Permissions:  flags,
+				PatternType:  p.PatternType.ValueString(),
+				Cluster:      p.Cluster.ValueString(),
+				KafkaConnect: p.KafkaConnect.ValueString(),
+			})
+		}
 	}
 
 	return model.NewGroupConsoleResource(

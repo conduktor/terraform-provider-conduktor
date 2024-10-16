@@ -41,12 +41,12 @@ func UserV2ResourceSchema(ctx context.Context) schema.Schema {
 			"spec": schema.SingleNestedBlock{
 				Attributes: map[string]schema.Attribute{
 					"firstname": schema.StringAttribute{
-						Required:            true,
+						Optional:            true,
 						Description:         "User firstname",
 						MarkdownDescription: "User firstname",
 					},
 					"lastname": schema.StringAttribute{
-						Required:            true,
+						Optional:            true,
 						Description:         "User lastname",
 						MarkdownDescription: "User lastname",
 					},
@@ -101,7 +101,8 @@ func UserV2ResourceSchema(ctx context.Context) schema.Schema {
 								},
 							},
 						},
-						Required:            true,
+						Optional:            true,
+						Computed:            true,
 						Description:         "Set of all user permissions",
 						MarkdownDescription: "Set of all user permissions",
 					},
@@ -1099,11 +1100,19 @@ func (v PermissionsValue) String() string {
 func (v PermissionsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	permissionsVal, d := types.ListValue(types.StringType, v.Permissions.Elements())
+	var permissionsVal basetypes.ListValue
+	switch {
+	case v.Permissions.IsUnknown():
+		permissionsVal = types.ListUnknown(types.StringType)
+	case v.Permissions.IsNull():
+		permissionsVal = types.ListNull(types.StringType)
+	default:
+		var d diag.Diagnostics
+		permissionsVal, d = types.ListValue(types.StringType, v.Permissions.Elements())
+		diags.Append(d...)
+	}
 
-	diags.Append(d...)
-
-	if d.HasError() {
+	if diags.HasError() {
 		return types.ObjectUnknown(map[string]attr.Type{
 			"cluster":       basetypes.StringType{},
 			"kafka_connect": basetypes.StringType{},

@@ -38,7 +38,8 @@ type LoginResult struct {
 }
 
 type ApplyResult struct {
-	UpsertResult string
+	UpsertResult string      `json:"upsertResult"`
+	Resource     interface{} `json:"resource"`
 }
 
 func Make(ctx context.Context, apiParameter ApiParameter, providerVersion string) (*Client, error) {
@@ -168,28 +169,29 @@ func (client *Client) ApplyGeneric(ctx context.Context, cliResource ctlresource.
 	return upsertResponse.UpsertResult, nil
 }
 
-func (client *Client) Apply(ctx context.Context, path string, resource interface{}) (string, error) {
+func (client *Client) Apply(ctx context.Context, path string, resource interface{}) (ApplyResult, error) {
 	url := client.baseUrl + path
 	jsonData, err := jsoniter.Marshal(resource)
 	if err != nil {
-		return "", fmt.Errorf("Error marshalling resource: %s", err)
+		return ApplyResult{}, fmt.Errorf("Error marshalling resource: %s", err)
 	}
 
-	tflog.Trace(ctx, fmt.Sprintf("PUT on %s body : %s", path, string(jsonData)))
+	tflog.Trace(ctx, fmt.Sprintf("PUT %s request body : %s", path, string(jsonData)))
 	builder := client.client.R().SetBody(jsonData)
 	resp, err := builder.Put(url)
 	if err != nil {
-		return "", err
+		return ApplyResult{}, err
 	} else if resp.IsError() {
-		return "", fmt.Errorf("%s", extractApiError(resp))
+		return ApplyResult{}, fmt.Errorf("%s", extractApiError(resp))
 	}
 	bodyBytes := resp.Body()
+	tflog.Trace(ctx, fmt.Sprintf("PUT %s response body : %s", path, string(bodyBytes)))
 	var upsertResponse ApplyResult
 	err = jsoniter.Unmarshal(bodyBytes, &upsertResponse)
 	if err != nil {
-		return "", fmt.Errorf("Error unmarshalling response: %s", err)
+		return ApplyResult{}, fmt.Errorf("Error unmarshalling response: %s", err)
 	}
-	return upsertResponse.UpsertResult, nil
+	return upsertResponse, nil
 }
 
 func (client *Client) Describe(ctx context.Context, path string) ([]byte, error) {

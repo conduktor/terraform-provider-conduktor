@@ -59,6 +59,25 @@ func TestAccUserV2Resource(t *testing.T) {
 	})
 }
 
+func TestAccUserV2Minimal(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { test.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+
+		Steps: []resource.TestStep{
+			// Create and Read from minimal example
+			{
+				Config: providerConfig + test.TestAccTestdata(t, "user_v2_resource_minimal.tf"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("conduktor_user_v2.minimal", "name", "angela.martin@dunder.mifflin.com"),
+					resource.TestCheckResourceAttr("conduktor_user_v2.minimal", "spec.permissions.#", "0"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
 func TestAccUserV2ExampleResource(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { test.TestAccPreCheck(t) },

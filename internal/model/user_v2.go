@@ -21,8 +21,8 @@ func (r UserConsoleMetadata) String() string {
 }
 
 type UserConsoleSpec struct {
-	FirstName   string       `json:"firstName"`
-	LastName    string       `json:"lastName"`
+	FirstName   string       `json:"firstName,omitempty"`
+	LastName    string       `json:"lastName,omitempty"`
 	Permissions []Permission `json:"permissions"`
 }
 
@@ -66,6 +66,18 @@ func (r *UserConsoleResource) ToClientResource() (ctlresource.Resource, error) {
 
 func (r *UserConsoleResource) FromClientResource(cliResource ctlresource.Resource) error {
 	err := jsoniter.Unmarshal(cliResource.Json, r)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *UserConsoleResource) FromRawJsonInterface(jsonInterface interface{}) error {
+	jsonData, err := json.Marshal(jsonInterface)
+	if err != nil {
+		return err
+	}
+	err = jsoniter.Unmarshal(jsonData, r)
 	if err != nil {
 		return err
 	}

@@ -15,26 +15,29 @@ import (
 func TFToInternalModel(ctx context.Context, r *schema.UserV2Model) (model.UserConsoleResource, error) {
 
 	permissions := make([]model.Permission, 0)
-	var tfPermissions []schema.PermissionsValue
-	diag := r.Spec.Permissions.ElementsAs(ctx, &tfPermissions, false)
-	if diag.HasError() {
-		return model.UserConsoleResource{}, mapper.WrapDiagError(diag, "permissions", mapper.FromTerraform)
-	}
-	for _, p := range tfPermissions {
-		var flags []string
-		diag := p.Permissions.ElementsAs(ctx, &flags, false)
-		if diag.HasError() {
-			return model.UserConsoleResource{}, mapper.WrapDiagError(diag, "permissions.permissions", mapper.FromTerraform)
-		}
 
-		permissions = append(permissions, model.Permission{
-			Name:         p.Name.ValueString(),
-			ResourceType: p.ResourceType.ValueString(),
-			Permissions:  flags,
-			PatternType:  p.PatternType.ValueString(),
-			Cluster:      p.Cluster.ValueString(),
-			KafkaConnect: p.KafkaConnect.ValueString(),
-		})
+	if !r.Spec.Permissions.IsNull() && !r.Spec.Permissions.IsUnknown() {
+		var tfPermissions []schema.PermissionsValue
+		diag := r.Spec.Permissions.ElementsAs(ctx, &tfPermissions, false)
+		if diag.HasError() {
+			return model.UserConsoleResource{}, mapper.WrapDiagError(diag, "permissions", mapper.FromTerraform)
+		}
+		for _, p := range tfPermissions {
+			var flags []string
+			diag := p.Permissions.ElementsAs(ctx, &flags, false)
+			if diag.HasError() {
+				return model.UserConsoleResource{}, mapper.WrapDiagError(diag, "permissions.permissions", mapper.FromTerraform)
+			}
+
+			permissions = append(permissions, model.Permission{
+				Name:         p.Name.ValueString(),
+				ResourceType: p.ResourceType.ValueString(),
+				Permissions:  flags,
+				PatternType:  p.PatternType.ValueString(),
+				Cluster:      p.Cluster.ValueString(),
+				KafkaConnect: p.KafkaConnect.ValueString(),
+			})
+		}
 	}
 
 	return model.NewUserConsoleResource(

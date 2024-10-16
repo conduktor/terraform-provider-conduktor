@@ -21,7 +21,7 @@ func (r GroupConsoleMetadata) String() string {
 }
 
 type GroupConsoleSpec struct {
-	Description               string       `json:"description"`
+	Description               string       `json:"description,omitempty"`
 	DisplayName               string       `json:"displayName"`
 	ExternalGroups            []string     `json:"externalGroups"`
 	Members                   []string     `json:"members"`
@@ -69,6 +69,18 @@ func (r *GroupConsoleResource) ToClientResource() (ctlresource.Resource, error) 
 
 func (r *GroupConsoleResource) FromClientResource(cliResource ctlresource.Resource) error {
 	err := jsoniter.Unmarshal(cliResource.Json, r)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *GroupConsoleResource) FromRawJsonInterface(jsonInterface interface{}) error {
+	jsonData, err := json.Marshal(jsonInterface)
+	if err != nil {
+		return err
+	}
+	err = jsoniter.Unmarshal(jsonData, r)
 	if err != nil {
 		return err
 	}

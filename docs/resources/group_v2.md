@@ -20,8 +20,6 @@ resource "conduktor_group_v2" "example" {
   spec {
     display_name = "Simple Group"
     description  = "Simple group description"
-    members      = []
-    permissions  = []
   }
 }
 ```
@@ -79,13 +77,13 @@ resource "conduktor_group_v2" "example" {
 Required:
 
 - `display_name` (String) Group display name
-- `permissions` (Attributes List) Set of all group permissions (see [below for nested schema](#nestedatt--spec--permissions))
 
 Optional:
 
 - `description` (String) Group description
 - `external_groups` (List of String) List of external groups from SSO mapped to this group
 - `members` (List of String) List of members of the group
+- `permissions` (Attributes List) Set of all group permissions (see [below for nested schema](#nestedatt--spec--permissions))
 
 Read-Only:
 

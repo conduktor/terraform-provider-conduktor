@@ -18,9 +18,8 @@ This resource allows you to create, read, update and delete users in Conduktor.
 resource "conduktor_user_v2" "example" {
   name = "bob@company.io"
   spec {
-    firstname   = "Bob"
-    lastname    = "Smith"
-    permissions = []
+    firstname = "Bob"
+    lastname  = "Smith"
   }
 }
 ```
@@ -64,7 +63,7 @@ resource "conduktor_user_v2" "example" {
 <a id="nestedblock--spec"></a>
 ### Nested Schema for `spec`
 
-Required:
+Optional:
 
 - `firstname` (String) User firstname
 - `lastname` (String) User lastname
