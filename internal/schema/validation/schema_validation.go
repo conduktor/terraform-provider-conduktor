@@ -45,3 +45,12 @@ var ValidPermissions = []string{
 }
 var ValidPermissionTypes = []string{"CLUSTER", "CONSUMER_GROUP", "KAFKA_CONNECT", "KSQLDB", "PLATFORM", "SUBJECT", "TOPIC"}
 var ValidPermissionPatternTypes = []string{"LITERAL", "PREFIXED"}
+
+var ValidKafkaFlavorTypes = []string{"Confluent", "Aiven", "Gateway"}
+var ValidSchemaRegistryTypes = []string{"ConfluentLike", "Glue"}
+var ValidSchemaRegistrySecurityTypes = []string{
+	// ConfluentLike security
+	"BasicAuth", "BearerToken", "SSLAuth", "NoSecurity",
+	// Glue security
+	"Credentials", "FromContext", "FromRole", "IAMAnywhere",
+}
