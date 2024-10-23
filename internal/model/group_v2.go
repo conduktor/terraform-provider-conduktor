@@ -1,7 +1,6 @@
 package model
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 
@@ -48,23 +47,7 @@ func NewGroupConsoleResource(name string, spec GroupConsoleSpec) GroupConsoleRes
 }
 
 func (r *GroupConsoleResource) ToClientResource() (ctlresource.Resource, error) {
-	jsonData, err := json.Marshal(r)
-	if err != nil {
-		return ctlresource.Resource{}, err
-	}
-
-	var prettyJSON bytes.Buffer
-	err = json.Indent(&prettyJSON, jsonData, "", "\t")
-	if err != nil {
-		return ctlresource.Resource{}, err
-	}
-
-	ctlResource := ctlresource.Resource{}
-	err = ctlResource.UnmarshalJSON(prettyJSON.Bytes())
-	if err != nil {
-		return ctlresource.Resource{}, err
-	}
-	return ctlResource, nil
+	return toClientResource(r)
 }
 
 func (r *GroupConsoleResource) FromClientResource(cliResource ctlresource.Resource) error {
