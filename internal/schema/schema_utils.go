@@ -23,7 +23,7 @@ const (
 	USERS                  // 1
 )
 
-// Provider string configuration extracted from the schema and environment variables.
+// GetStringConfig Provider string configuration extracted from the schema and environment variables.
 // Priority order: configValue > envs.
 func GetStringConfig(configValue basetypes.StringValue, envs []string) string {
 	if !configValue.IsNull() {
@@ -37,7 +37,7 @@ func GetStringConfig(configValue basetypes.StringValue, envs []string) string {
 	return ""
 }
 
-// Provider bool configuration extracted from the schema and environment variables.
+// GetBooleanConfig Provider bool configuration extracted from the schema and environment variables.
 // Priority order: configValue > envs > fallback.
 func GetBooleanConfig(configValue basetypes.BoolValue, envs []string, fallback bool) bool {
 	if !configValue.IsNull() {
@@ -54,7 +54,7 @@ func GetBooleanConfig(configValue basetypes.BoolValue, envs []string, fallback b
 	return fallback
 }
 
-// Convert a string to a basetypes.StringValue.
+// NewStringValue Convert a string to a basetypes.StringValue.
 func NewStringValue(s string) basetypes.StringValue {
 	if s == "" {
 		return basetypes.NewStringNull()
@@ -62,14 +62,14 @@ func NewStringValue(s string) basetypes.StringValue {
 	return basetypes.NewStringValue(s)
 }
 
-// Convert a ListValue to a string array.
+// ListValueToStringArray Convert a ListValue to a string array.
 func ListValueToStringArray(ctx context.Context, list basetypes.ListValue) ([]string, diag.Diagnostics) {
 	var result []string
-	diag := list.ElementsAs(ctx, &result, false)
-	return result, diag
+	diagnostic := list.ElementsAs(ctx, &result, false)
+	return result, diagnostic
 }
 
-// Convert a string array to a ListValue.
+// StringArrayToListValue Convert a string array to a ListValue.
 func StringArrayToListValue(array []string) (basetypes.ListValue, diag.Diagnostics) {
 
 	var values []attr.Value
@@ -221,4 +221,34 @@ func SetValueToPermissionArray(ctx context.Context, resource Resource, set baset
 		}
 	}
 	return permissions, nil
+}
+
+// MapValueToStringMap Convert a MapValue to a map[string]string.
+func MapValueToStringMap(ctx context.Context, mapValue basetypes.MapValue) (map[string]string, diag.Diagnostics) {
+	result := make(map[string]string)
+	diagnostic := mapValue.ElementsAs(ctx, &result, false)
+	return result, diagnostic
+}
+
+// StringMapToMapValue Convert a MapValue to a map[string]string.
+func StringMapToMapValue(ctx context.Context, in map[string]string) (basetypes.MapValue, diag.Diagnostics) {
+	var values = make(map[string]attr.Value)
+	for k, v := range in {
+		values[k] = NewStringValue(v)
+	}
+	return types.MapValue(types.StringType, values)
+}
+
+// ObjectValueAsInterface Convert an ObjectValue to an generic interface{}.
+func ObjectValueAsInterface[V interface{}](ctx context.Context, obj basetypes.ObjectValue, target V) (V, diag.Diagnostics) {
+	if obj.IsNull() || obj.IsUnknown() {
+		return target, nil
+	}
+
+	asOption := basetypes.ObjectAsOptions{
+		UnhandledNullAsEmpty:    false,
+		UnhandledUnknownAsEmpty: false,
+	}
+	diagnostic := obj.As(ctx, target, asOption)
+	return target, diagnostic
 }

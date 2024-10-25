@@ -46,11 +46,34 @@ var ValidPermissions = []string{
 var ValidPermissionTypes = []string{"CLUSTER", "CONSUMER_GROUP", "KAFKA_CONNECT", "KSQLDB", "PLATFORM", "SUBJECT", "TOPIC"}
 var ValidPermissionPatternTypes = []string{"LITERAL", "PREFIXED"}
 
-var ValidKafkaFlavorTypes = []string{"Confluent", "Aiven", "Gateway"}
-var ValidSchemaRegistryTypes = []string{"ConfluentLike", "Glue"}
+var ConfluentKafkaFlavor = "Confluent"
+var AivenKafkaFlavor = "Aiven"
+var GatewayKafkaFlavor = "Gateway"
+var ValidKafkaFlavorTypes = []string{ConfluentKafkaFlavor, AivenKafkaFlavor, GatewayKafkaFlavor}
+
+var ConfluentLikeSchemaRegistry = "ConfluentLike"
+var GlueSchemaRegistry = "Glue"
+var ValidSchemaRegistryTypes = []string{ConfluentLikeSchemaRegistry, GlueSchemaRegistry}
+
+// ConfluentLike security.
+var NoSecuritySchemaRegistrySecurity = "NoSecurity"
+var BasicAuthSchemaRegistrySecurity = "BasicAuth"
+var BearerTokenSchemaRegistrySecurity = "BearerToken"
+var SSLAuthSchemaRegistrySecurity = "SSLAuth"
+
+// Glue security.
+var CredentialsSchemaRegistrySecurity = "Credentials"
+var FromContextSchemaRegistrySecurity = "FromContext"
+var FromRoleSchemaRegistrySecurity = "FromRole"
+var IAMAnywhereSchemaRegistrySecurity = "IAMAnywhere"
+
 var ValidSchemaRegistrySecurityTypes = []string{
-	// ConfluentLike security
-	"BasicAuth", "BearerToken", "SSLAuth", "NoSecurity",
-	// Glue security
-	"Credentials", "FromContext", "FromRole", "IAMAnywhere",
+	BasicAuthSchemaRegistrySecurity,
+	BearerTokenSchemaRegistrySecurity,
+	SSLAuthSchemaRegistrySecurity,
+	NoSecuritySchemaRegistrySecurity,
+	CredentialsSchemaRegistrySecurity,
+	FromContextSchemaRegistrySecurity,
+	FromRoleSchemaRegistrySecurity,
+	IAMAnywhereSchemaRegistrySecurity,
 }

@@ -49,9 +49,10 @@ func (s SchemaRegistry) MarshalJSON() ([]byte, error) {
 }
 
 type ConfluentLike struct {
+	Type                       string                              `json:"type"`
 	Url                        string                              `json:"url"`
 	Security                   ConfluentLikeSchemaRegistrySecurity `json:"security"`
-	Properties                 *string                             `json:"properties,omitempty"`
+	Properties                 string                              `json:"properties,omitempty"`
 	IgnoreUntrustedCertificate bool                                `json:"ignoreUntrustedCertificate"`
 }
 
@@ -133,12 +134,14 @@ type BearerToken struct {
 }
 
 type BasicAuth struct {
+	Type     string `json:"type"`
 	UserName string `json:"userName,omitempty"`
 	Password string `json:"password,omitempty"`
 }
 
 type Glue struct {
-	RegistryName *string        `json:"registryName,omitempty"`
+	Type         string         `json:"type"`
+	RegistryName string         `json:"registryName,omitempty"`
 	Region       string         `json:"region"`
 	Security     AmazonSecurity `json:"security"`
 }
@@ -212,8 +215,8 @@ type Credentials struct {
 }
 
 type FromContext struct {
-	Profile *string `json:"profile,omitempty"`
-	Type    string  `json:"type"`
+	Profile string `json:"profile,omitempty"`
+	Type    string `json:"type"`
 }
 
 type FromRole struct {
