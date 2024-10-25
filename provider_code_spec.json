@@ -692,13 +692,6 @@
                         }
                       },
                       {
-                        "name": "id",
-                        "string": {
-                          "description": "Schema registry generated ID",
-                          "computed_optional_required": "computed"
-                        }
-                      },
-                      {
                         "name": "url",
                         "string": {
                           "description": "Schema registry URL. Required if type is ConfluentLike",

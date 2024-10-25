@@ -168,11 +168,6 @@ func KafkaClusterV2ResourceSchema(ctx context.Context) schema.Schema {
 					},
 					"schema_registry": schema.SingleNestedAttribute{
 						Attributes: map[string]schema.Attribute{
-							"id": schema.StringAttribute{
-								Computed:            true,
-								Description:         "Schema registry generated ID",
-								MarkdownDescription: "Schema registry generated ID",
-							},
 							"ignore_untrusted_certificate": schema.BoolAttribute{
 								Optional:            true,
 								Description:         "Ignore untrusted certificate for schema registry. Only used if type is ConfluentLike",
@@ -1814,6 +1809,7 @@ type KafkaFlavorValue struct {
 }
 
 func (v KafkaFlavorValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	fmt.Println("####################### KafkaFlavorValue.ToTerraformValue")
 	attrTypes := make(map[string]tftypes.Type, 13)
 
 	var val tftypes.Value
@@ -2138,24 +2134,6 @@ func (t SchemaRegistryType) ValueFromObject(ctx context.Context, in basetypes.Ob
 
 	attributes := in.Attributes()
 
-	idAttribute, ok := attributes["id"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`id is missing from object`)
-
-		return nil, diags
-	}
-
-	idVal, ok := idAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`id expected to be basetypes.StringValue, was: %T`, idAttribute))
-	}
-
 	ignoreUntrustedCertificateAttribute, ok := attributes["ignore_untrusted_certificate"]
 
 	if !ok {
@@ -2287,7 +2265,6 @@ func (t SchemaRegistryType) ValueFromObject(ctx context.Context, in basetypes.Ob
 	}
 
 	return SchemaRegistryValue{
-		Id:                         idVal,
 		IgnoreUntrustedCertificate: ignoreUntrustedCertificateVal,
 		Properties:                 propertiesVal,
 		Region:                     regionVal,
@@ -2362,24 +2339,6 @@ func NewSchemaRegistryValue(attributeTypes map[string]attr.Type, attributes map[
 		return NewSchemaRegistryValueUnknown(), diags
 	}
 
-	idAttribute, ok := attributes["id"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`id is missing from object`)
-
-		return NewSchemaRegistryValueUnknown(), diags
-	}
-
-	idVal, ok := idAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`id expected to be basetypes.StringValue, was: %T`, idAttribute))
-	}
-
 	ignoreUntrustedCertificateAttribute, ok := attributes["ignore_untrusted_certificate"]
 
 	if !ok {
@@ -2511,7 +2470,6 @@ func NewSchemaRegistryValue(attributeTypes map[string]attr.Type, attributes map[
 	}
 
 	return SchemaRegistryValue{
-		Id:                         idVal,
 		IgnoreUntrustedCertificate: ignoreUntrustedCertificateVal,
 		Properties:                 propertiesVal,
 		Region:                     regionVal,
@@ -2591,7 +2549,6 @@ func (t SchemaRegistryType) ValueType(ctx context.Context) attr.Value {
 var _ basetypes.ObjectValuable = SchemaRegistryValue{}
 
 type SchemaRegistryValue struct {
-	Id                         basetypes.StringValue `tfsdk:"id"`
 	IgnoreUntrustedCertificate basetypes.BoolValue   `tfsdk:"ignore_untrusted_certificate"`
 	Properties                 basetypes.StringValue `tfsdk:"properties"`
 	Region                     basetypes.StringValue `tfsdk:"region"`
@@ -2603,12 +2560,11 @@ type SchemaRegistryValue struct {
 }
 
 func (v SchemaRegistryValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
-	attrTypes := make(map[string]tftypes.Type, 8)
+	attrTypes := make(map[string]tftypes.Type, 7)
 
 	var val tftypes.Value
 	var err error
 
-	attrTypes["id"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["ignore_untrusted_certificate"] = basetypes.BoolType{}.TerraformType(ctx)
 	attrTypes["properties"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["region"] = basetypes.StringType{}.TerraformType(ctx)
@@ -2623,15 +2579,7 @@ func (v SchemaRegistryValue) ToTerraformValue(ctx context.Context) (tftypes.Valu
 
 	switch v.state {
 	case attr.ValueStateKnown:
-		vals := make(map[string]tftypes.Value, 8)
-
-		val, err = v.Id.ToTerraformValue(ctx)
-
-		if err != nil {
-			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
-		}
-
-		vals["id"] = val
+		vals := make(map[string]tftypes.Value, 7)
 
 		val, err = v.IgnoreUntrustedCertificate.ToTerraformValue(ctx)
 
@@ -2740,7 +2688,6 @@ func (v SchemaRegistryValue) ToObjectValue(ctx context.Context) (basetypes.Objec
 	}
 
 	attributeTypes := map[string]attr.Type{
-		"id":                           basetypes.StringType{},
 		"ignore_untrusted_certificate": basetypes.BoolType{},
 		"properties":                   basetypes.StringType{},
 		"region":                       basetypes.StringType{},
@@ -2763,7 +2710,6 @@ func (v SchemaRegistryValue) ToObjectValue(ctx context.Context) (basetypes.Objec
 	objVal, diags := types.ObjectValue(
 		attributeTypes,
 		map[string]attr.Value{
-			"id":                           v.Id,
 			"ignore_untrusted_certificate": v.IgnoreUntrustedCertificate,
 			"properties":                   v.Properties,
 			"region":                       v.Region,
@@ -2789,10 +2735,6 @@ func (v SchemaRegistryValue) Equal(o attr.Value) bool {
 
 	if v.state != attr.ValueStateKnown {
 		return true
-	}
-
-	if !v.Id.Equal(other.Id) {
-		return false
 	}
 
 	if !v.IgnoreUntrustedCertificate.Equal(other.IgnoreUntrustedCertificate) {
@@ -2836,7 +2778,6 @@ func (v SchemaRegistryValue) Type(ctx context.Context) attr.Type {
 
 func (v SchemaRegistryValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 	return map[string]attr.Type{
-		"id":                           basetypes.StringType{},
 		"ignore_untrusted_certificate": basetypes.BoolType{},
 		"properties":                   basetypes.StringType{},
 		"region":                       basetypes.StringType{},
