@@ -7,7 +7,7 @@ import (
 	jsoniter "github.com/json-iterator/go"
 )
 
-const KafkaClusterV2Kind = "kafkaCluster"
+const KafkaClusterV2Kind = "KafkaCluster"
 const KafkaClusterV2ApiVersion = "v2"
 
 type KafkaClusterMetadata struct {
@@ -24,10 +24,10 @@ type KafkaClusterSpec struct {
 	Color                      string            `json:"color,omitempty"`
 	DisplayName                string            `json:"displayName"`
 	Icon                       string            `json:"icon,omitempty"`
-	IgnoreUntrustedCertificate bool              `json:"ignoreUntrustedCertificate,omitempty"`
-	KafkaFlavor                KafkaFlavor       `json:"kafkaFlavor,omitempty"`
+	IgnoreUntrustedCertificate bool              `json:"ignoreUntrustedCertificate"`
+	KafkaFlavor                *KafkaFlavor      `json:"kafkaFlavor,omitempty"`
 	Properties                 map[string]string `json:"properties,omitempty"`
-	SchemaRegistry             SchemaRegistry    `json:"schemaRegistry,omitempty"`
+	SchemaRegistry             *SchemaRegistry   `json:"schemaRegistry,omitempty"`
 }
 
 type KafkaFlavor struct {
@@ -71,7 +71,7 @@ func (dst *KafkaFlavor) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (src KafkaFlavor) MarshalJSON() ([]byte, error) {
+func (src *KafkaFlavor) MarshalJSON() ([]byte, error) {
 	if src.Aiven != nil {
 		return json.Marshal(src.Aiven)
 	} else if src.Confluent != nil {

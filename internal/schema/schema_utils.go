@@ -71,12 +71,10 @@ func ListValueToStringArray(ctx context.Context, list basetypes.ListValue) ([]st
 
 // StringArrayToListValue Convert a string array to a ListValue.
 func StringArrayToListValue(array []string) (basetypes.ListValue, diag.Diagnostics) {
-
 	var values []attr.Value
 	for _, f := range array {
 		values = append(values, types.StringValue(f))
 	}
-
 	return types.ListValue(types.StringType, values)
 }
 
@@ -231,7 +229,10 @@ func MapValueToStringMap(ctx context.Context, mapValue basetypes.MapValue) (map[
 }
 
 // StringMapToMapValue Convert a MapValue to a map[string]string.
-func StringMapToMapValue(ctx context.Context, in map[string]string) (basetypes.MapValue, diag.Diagnostics) {
+func StringMapToMapValue(_ context.Context, in map[string]string) (basetypes.MapValue, diag.Diagnostics) {
+	if in == nil {
+		return types.MapNull(types.StringType), nil
+	}
 	var values = make(map[string]attr.Value)
 	for k, v := range in {
 		values[k] = NewStringValue(v)
@@ -239,16 +240,10 @@ func StringMapToMapValue(ctx context.Context, in map[string]string) (basetypes.M
 	return types.MapValue(types.StringType, values)
 }
 
-// ObjectValueAsInterface Convert an ObjectValue to an generic interface{}.
-func ObjectValueAsInterface[V interface{}](ctx context.Context, obj basetypes.ObjectValue, target V) (V, diag.Diagnostics) {
-	if obj.IsNull() || obj.IsUnknown() {
-		return target, nil
+func ValueMapFromTypes(ctx context.Context, types map[string]attr.Type) map[string]attr.Value {
+	result := make(map[string]attr.Value)
+	for k, v := range types {
+		result[k] = v.ValueType(ctx)
 	}
-
-	asOption := basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    false,
-		UnhandledUnknownAsEmpty: false,
-	}
-	diagnostic := obj.As(ctx, target, asOption)
-	return target, diagnostic
+	return result
 }

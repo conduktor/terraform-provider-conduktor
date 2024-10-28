@@ -8,6 +8,7 @@ import (
 	schemaUtils "github.com/conduktor/terraform-provider-conduktor/internal/schema"
 	schema "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_kafka_cluster_v2"
 	"github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
 func TFToInternalModel(ctx context.Context, r *schema.KafkaClusterV2Model) (model.KafkaClusterResource, error) {
@@ -35,23 +36,12 @@ func specTFToInternalModel(ctx context.Context, r *schema.SpecValue) (model.Kafk
 		return model.KafkaClusterSpec{}, mapper.WrapDiagError(diag, "properties", mapper.FromTerraform)
 	}
 
-	kafkaFlavorValue := schema.KafkaFlavorValue{}
-	kafkaFlavorValue, diag = schemaUtils.ObjectValueAsInterface(ctx, r.KafkaFlavor, kafkaFlavorValue)
-	fmt.Printf("kafkaFlavor      %#v\n", r.KafkaFlavor)
-	fmt.Printf("kafkaFlavorValue %#v\n", kafkaFlavorValue)
-	if diag.HasError() {
-		return model.KafkaClusterSpec{}, mapper.WrapDiagError(diag, "kafka_flavor", mapper.FromTerraform)
-	}
-	kafkaFlavor, err := kafkaFlavorTFToInternalModel(ctx, &kafkaFlavorValue)
+	kafkaFlavor, err := kafkaFlavorTFToInternalModel(ctx, &r.KafkaFlavor)
 	if err != nil {
 		return model.KafkaClusterSpec{}, err
 	}
 
-	schemaRegistryValue, diag := schemaUtils.ObjectValueAsInterface(ctx, r.SchemaRegistry, schema.SchemaRegistryValue{})
-	if diag.HasError() {
-		return model.KafkaClusterSpec{}, mapper.WrapDiagError(diag, "schema_registry", mapper.FromTerraform)
-	}
-	schemaRegistry, err := schemaRegistryTFToInternalModel(ctx, &schemaRegistryValue)
+	schemaRegistry, err := schemaRegistryTFToInternalModel(ctx, &r.SchemaRegistry)
 	if err != nil {
 		return model.KafkaClusterSpec{}, err
 	}
@@ -68,42 +58,50 @@ func specTFToInternalModel(ctx context.Context, r *schema.SpecValue) (model.Kafk
 	}, nil
 }
 
-func kafkaFlavorTFToInternalModel(_ context.Context, r *schema.KafkaFlavorValue) (model.KafkaFlavor, error) {
-	fmt.Printf("kafkaFlavorTFToInternalModel %#v\n", r)
-	flavorType := r.KafkaFlavorType.ValueString()
+func kafkaFlavorTFToInternalModel(ctx context.Context, r *basetypes.ObjectValue) (*model.KafkaFlavor, error) {
+	if r.IsNull() {
+		return nil, nil
+	}
+
+	kafkaFlavorValue, diag := schema.NewKafkaFlavorValue(r.AttributeTypes(ctx), r.Attributes())
+	if diag.HasError() {
+		return nil, mapper.WrapDiagError(diag, "kafka_flavor", mapper.FromTerraform)
+	}
+
+	flavorType := kafkaFlavorValue.KafkaFlavorType.ValueString()
 	switch flavorType {
 	case validation.ConfluentKafkaFlavor:
-		return model.KafkaFlavor{
+		return &model.KafkaFlavor{
 			Confluent: &model.Confluent{
 				Type:                   flavorType,
-				Key:                    r.Key.ValueString(),
-				Secret:                 r.Secret.ValueString(),
-				ConfluentEnvironmentId: r.ConfluentEnvironmentId.ValueString(),
-				ConfluentClusterId:     r.ConfluentClusterId.ValueString(),
+				Key:                    kafkaFlavorValue.Key.ValueString(),
+				Secret:                 kafkaFlavorValue.Secret.ValueString(),
+				ConfluentEnvironmentId: kafkaFlavorValue.ConfluentEnvironmentId.ValueString(),
+				ConfluentClusterId:     kafkaFlavorValue.ConfluentClusterId.ValueString(),
 			},
 		}, nil
 	case validation.AivenKafkaFlavor:
-		return model.KafkaFlavor{
+		return &model.KafkaFlavor{
 			Aiven: &model.Aiven{
 				Type:        flavorType,
-				ApiToken:    r.ApiToken.ValueString(),
-				Project:     r.Project.ValueString(),
-				ServiceName: r.ServiceName.ValueString(),
+				ApiToken:    kafkaFlavorValue.ApiToken.ValueString(),
+				Project:     kafkaFlavorValue.Project.ValueString(),
+				ServiceName: kafkaFlavorValue.ServiceName.ValueString(),
 			},
 		}, nil
 	case validation.GatewayKafkaFlavor:
-		return model.KafkaFlavor{
+		return &model.KafkaFlavor{
 			Gateway: &model.Gateway{
 				Type:                       flavorType,
-				Url:                        r.Url.ValueString(),
-				User:                       r.User.ValueString(),
-				Password:                   r.Password.ValueString(),
-				VirtualCluster:             r.VirtualCluster.ValueString(),
-				IgnoreUntrustedCertificate: r.IgnoreUntrustedCertificate.ValueBool(),
+				Url:                        kafkaFlavorValue.Url.ValueString(),
+				User:                       kafkaFlavorValue.User.ValueString(),
+				Password:                   kafkaFlavorValue.Password.ValueString(),
+				VirtualCluster:             kafkaFlavorValue.VirtualCluster.ValueString(),
+				IgnoreUntrustedCertificate: kafkaFlavorValue.IgnoreUntrustedCertificate.ValueBool(),
 			},
 		}, nil
 	default:
-		return model.KafkaFlavor{}, mapper.WrapError(fmt.Errorf("unsupported KafkaFlavorType: %s", flavorType), "kafka_flavor", mapper.FromTerraform)
+		return nil, mapper.WrapError(fmt.Errorf("unsupported KafkaFlavorType: %s", flavorType), "kafka_flavor", mapper.FromTerraform)
 	}
 }
 
@@ -185,45 +183,53 @@ func amazonSchemaRegistrySecurityTFToInternalModel(_ context.Context, r *schema.
 	}
 }
 
-func schemaRegistryTFToInternalModel(ctx context.Context, r *schema.SchemaRegistryValue) (model.SchemaRegistry, error) {
-	schemaRegistryType := r.SchemaRegistryType.ValueString()
+func schemaRegistryTFToInternalModel(ctx context.Context, r *basetypes.ObjectValue) (*model.SchemaRegistry, error) {
+	if r.IsNull() {
+		return nil, nil
+	}
 
-	securityValue, diag := schemaUtils.ObjectValueAsInterface(ctx, r.Security, schema.SecurityValue{})
+	schemaRegistryValue, diag := schema.NewSchemaRegistryValue(r.AttributeTypes(ctx), r.Attributes())
 	if diag.HasError() {
-		return model.SchemaRegistry{}, mapper.WrapDiagError(diag, "schema_registry.security", mapper.FromTerraform)
+		return nil, mapper.WrapDiagError(diag, "schema_registry", mapper.FromTerraform)
+	}
+	schemaRegistryType := schemaRegistryValue.SchemaRegistryType.ValueString()
+
+	securityValue, diag := schema.NewSecurityValue(schemaRegistryValue.Security.AttributeTypes(ctx), schemaRegistryValue.Security.Attributes())
+	if diag.HasError() {
+		return nil, mapper.WrapDiagError(diag, "schema_registry.security", mapper.FromTerraform)
 	}
 
 	switch schemaRegistryType {
 	case validation.ConfluentLikeSchemaRegistry:
 		security, err := confluentLikeSchemaRegistrySecurityTFToInternalModel(ctx, &securityValue)
 		if err != nil {
-			return model.SchemaRegistry{}, err
+			return nil, err
 		}
 
-		return model.SchemaRegistry{
+		return &model.SchemaRegistry{
 			ConfluentLike: &model.ConfluentLike{
 				Type:                       schemaRegistryType,
-				Url:                        r.Url.ValueString(),
-				Properties:                 r.Properties.ValueString(),
-				IgnoreUntrustedCertificate: r.IgnoreUntrustedCertificate.ValueBool(),
+				Url:                        schemaRegistryValue.Url.ValueString(),
+				Properties:                 schemaRegistryValue.Properties.ValueString(),
+				IgnoreUntrustedCertificate: schemaRegistryValue.IgnoreUntrustedCertificate.ValueBool(),
 				Security:                   security,
 			},
 		}, nil
 	case validation.GlueSchemaRegistry:
 		security, err := amazonSchemaRegistrySecurityTFToInternalModel(ctx, &securityValue)
 		if err != nil {
-			return model.SchemaRegistry{}, err
+			return nil, err
 		}
 
-		return model.SchemaRegistry{
+		return &model.SchemaRegistry{
 			Glue: &model.Glue{
 				Type:         schemaRegistryType,
-				RegistryName: r.RegistryName.ValueString(),
-				Region:       r.Region.ValueString(),
+				RegistryName: schemaRegistryValue.RegistryName.ValueString(),
+				Region:       schemaRegistryValue.Region.ValueString(),
 				Security:     security,
 			},
 		}, nil
 	default:
-		return model.SchemaRegistry{}, mapper.WrapError(fmt.Errorf("unsupported SchemaRegistryType: %s", schemaRegistryType), "schema_registry", mapper.FromTerraform)
+		return nil, mapper.WrapError(fmt.Errorf("unsupported SchemaRegistryType: %s", schemaRegistryType), "schema_registry", mapper.FromTerraform)
 	}
 }

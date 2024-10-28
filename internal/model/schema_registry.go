@@ -135,7 +135,7 @@ type BearerToken struct {
 
 type BasicAuth struct {
 	Type     string `json:"type"`
-	UserName string `json:"userName,omitempty"`
+	UserName string `json:"username,omitempty"`
 	Password string `json:"password,omitempty"`
 }
 

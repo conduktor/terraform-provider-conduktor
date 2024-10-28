@@ -7,7 +7,6 @@ import (
 	schemaUtils "github.com/conduktor/terraform-provider-conduktor/internal/schema"
 	schema "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_kafka_cluster_v2"
 	"github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
@@ -38,7 +37,7 @@ func specInternalModelToTerraform(ctx context.Context, r *model.KafkaClusterSpec
 		return schema.SpecValue{}, mapper.WrapDiagError(diag, "properties", mapper.IntoTerraform)
 	}
 
-	kafkaFlavor, err := kafkaFlavorInternalModelToTerraform(ctx, &r.KafkaFlavor)
+	kafkaFlavor, err := kafkaFlavorInternalModelToTerraform(ctx, r.KafkaFlavor)
 	if err != nil {
 		return schema.SpecValue{}, err
 	}
@@ -47,7 +46,7 @@ func specInternalModelToTerraform(ctx context.Context, r *model.KafkaClusterSpec
 		return schema.SpecValue{}, mapper.WrapDiagError(diag, "kafka_flavor", mapper.IntoTerraform)
 	}
 
-	schemaRegistry, err := schemaRegistryInternalModelToTerraform(ctx, &r.SchemaRegistry)
+	schemaRegistry, err := schemaRegistryInternalModelToTerraform(ctx, r.SchemaRegistry)
 	if err != nil {
 		return schema.SpecValue{}, err
 	}
@@ -68,38 +67,17 @@ func specInternalModelToTerraform(ctx context.Context, r *model.KafkaClusterSpec
 	}, nil
 }
 
-func kafkaFlavorInternalModelToTerraform(_ context.Context, r *model.KafkaFlavor) (schema.KafkaFlavorValue, error) {
-	var typesMap = map[string]attr.Type{
-		"type":                         basetypes.StringType{},
-		"api_token":                    basetypes.StringType{},
-		"project":                      basetypes.StringType{},
-		"service_name":                 basetypes.StringType{},
-		"key":                          basetypes.StringType{},
-		"secret":                       basetypes.StringType{},
-		"confluent_environment_id":     basetypes.StringType{},
-		"confluent_cluster_id":         basetypes.StringType{},
-		"url":                          basetypes.StringType{},
-		"user":                         basetypes.StringType{},
-		"password":                     basetypes.StringType{},
-		"virtual_cluster":              basetypes.StringType{},
-		"ignore_untrusted_certificate": basetypes.BoolType{},
+func kafkaFlavorInternalModelToTerraform(ctx context.Context, r *model.KafkaFlavor) (schema.KafkaFlavorValue, error) {
+	if r == nil || (r.Aiven == nil && r.Confluent == nil && r.Gateway == nil) {
+		return schema.NewKafkaFlavorValueNull(), nil
 	}
 
-	var valuesMap = map[string]attr.Value{
-		"type":                         basetypes.NewStringUnknown(),
-		"api_token":                    basetypes.NewStringUnknown(),
-		"project":                      basetypes.NewStringUnknown(),
-		"service_name":                 basetypes.NewStringUnknown(),
-		"key":                          basetypes.NewStringUnknown(),
-		"secret":                       basetypes.NewStringUnknown(),
-		"confluent_environment_id":     basetypes.NewStringUnknown(),
-		"confluent_cluster_id":         basetypes.NewStringUnknown(),
-		"url":                          basetypes.NewStringUnknown(),
-		"user":                         basetypes.NewStringUnknown(),
-		"password":                     basetypes.NewStringUnknown(),
-		"virtual_cluster":              basetypes.NewStringUnknown(),
-		"ignore_untrusted_certificate": basetypes.NewBoolUnknown(),
+	unknownFlavorObjectValue, diag := schema.NewKafkaFlavorValueUnknown().ToObjectValue(ctx)
+	if diag.HasError() {
+		return schema.KafkaFlavorValue{}, mapper.WrapDiagError(diag, "kafka_flavor", mapper.IntoTerraform)
 	}
+	var typesMap = unknownFlavorObjectValue.AttributeTypes(ctx)
+	var valuesMap = schemaUtils.ValueMapFromTypes(ctx, typesMap)
 
 	if r.Aiven != nil {
 		valuesMap["type"] = schemaUtils.NewStringValue(validation.AivenKafkaFlavor)
@@ -131,27 +109,20 @@ func kafkaFlavorInternalModelToTerraform(_ context.Context, r *model.KafkaFlavor
 }
 
 func schemaRegistryInternalModelToTerraform(ctx context.Context, r *model.SchemaRegistry) (schema.SchemaRegistryValue, error) {
+	if r == nil || (r.Glue == nil && r.ConfluentLike == nil) {
+		return schema.NewSchemaRegistryValueNull(), nil
+	}
 
+	var unknownSR = schema.NewSchemaRegistryValueUnknown()
 	if r.ConfluentLike == nil && r.Glue == nil {
-		return schema.NewSchemaRegistryValueUnknown(), nil
+		return unknownSR, nil
 	}
-
-	var typesMap = map[string]attr.Type{
-		"type":                         basetypes.StringType{},
-		"url":                          basetypes.StringType{},
-		"registry_name":                basetypes.StringType{},
-		"region":                       basetypes.StringType{},
-		"security":                     schema.SecurityValue{}.Type(ctx),
-		"properties":                   basetypes.StringType{},
-		"ignore_untrusted_certificate": basetypes.BoolType{},
+	unknownSRObjectValue, diag := unknownSR.ToObjectValue(ctx)
+	if diag.HasError() {
+		return schema.SchemaRegistryValue{}, mapper.WrapDiagError(diag, "schema_registry", mapper.IntoTerraform)
 	}
-	var valuesMap = map[string]attr.Value{
-		"type":          basetypes.NewStringUnknown(),
-		"url":           basetypes.NewStringUnknown(),
-		"registry_name": basetypes.NewStringUnknown(),
-		"region":        basetypes.NewStringUnknown(),
-		"properties":    basetypes.NewStringUnknown(),
-	}
+	var typesMap = unknownSRObjectValue.AttributeTypes(ctx)
+	var valuesMap = schemaUtils.ValueMapFromTypes(ctx, typesMap)
 
 	if r.ConfluentLike != nil {
 		security, err := confluentSecurityInternalModelToTerraform(ctx, &r.ConfluentLike.Security)
@@ -179,12 +150,11 @@ func schemaRegistryInternalModelToTerraform(ctx context.Context, r *model.Schema
 			return schema.SchemaRegistryValue{}, mapper.WrapDiagError(diag2, "schema_registry", mapper.IntoTerraform)
 		}
 
-		valuesMap["type"] = schemaUtils.NewStringValue(validation.ConfluentLikeSchemaRegistry)
+		valuesMap["type"] = schemaUtils.NewStringValue(validation.GlueSchemaRegistry)
 		valuesMap["registry_name"] = schemaUtils.NewStringValue(r.Glue.RegistryName)
 		valuesMap["region"] = schemaUtils.NewStringValue(r.Glue.Region)
 		valuesMap["security"] = securityValue
 	}
-
 	typesMap["security"] = valuesMap["security"].Type(ctx)
 
 	value, diag := schema.NewSchemaRegistryValue(typesMap, valuesMap)
@@ -194,42 +164,13 @@ func schemaRegistryInternalModelToTerraform(ctx context.Context, r *model.Schema
 	return value, nil
 }
 
-func confluentSecurityInternalModelToTerraform(_ context.Context, r *model.ConfluentLikeSchemaRegistrySecurity) (schema.SecurityValue, error) {
-
-	var typesMap = map[string]attr.Type{
-		"type":              basetypes.StringType{},
-		"username":          basetypes.StringType{},
-		"password":          basetypes.StringType{},
-		"token":             basetypes.StringType{},
-		"certificate_chain": basetypes.StringType{},
-		"key":               basetypes.StringType{},
-		"access_key_id":     basetypes.StringType{},
-		"secret_key":        basetypes.StringType{},
-		"profile":           basetypes.StringType{},
-		"role":              basetypes.StringType{},
-		"certificate":       basetypes.StringType{},
-		"private_key":       basetypes.StringType{},
-		"profile_arn":       basetypes.StringType{},
-		"role_arn":          basetypes.StringType{},
-		"trust_anchor_arn":  basetypes.StringType{},
+func confluentSecurityInternalModelToTerraform(ctx context.Context, r *model.ConfluentLikeSchemaRegistrySecurity) (schema.SecurityValue, error) {
+	unknownSecurityObjectValue, diag := schema.NewSecurityValueUnknown().ToObjectValue(ctx)
+	if diag.HasError() {
+		return schema.SecurityValue{}, mapper.WrapDiagError(diag, "schema_registry.security", mapper.IntoTerraform)
 	}
-	var valuesMap = map[string]attr.Value{
-		"type":              basetypes.NewStringUnknown(),
-		"username":          basetypes.NewStringUnknown(),
-		"password":          basetypes.NewStringUnknown(),
-		"token":             basetypes.NewStringUnknown(),
-		"certificate_chain": basetypes.NewStringUnknown(),
-		"key":               basetypes.NewStringUnknown(),
-		"access_key_id":     basetypes.NewStringUnknown(),
-		"secret_key":        basetypes.NewStringUnknown(),
-		"profile":           basetypes.NewStringUnknown(),
-		"role":              basetypes.NewStringUnknown(),
-		"certificate":       basetypes.NewStringUnknown(),
-		"private_key":       basetypes.NewStringUnknown(),
-		"profile_arn":       basetypes.NewStringUnknown(),
-		"role_arn":          basetypes.NewStringUnknown(),
-		"trust_anchor_arn":  basetypes.NewStringUnknown(),
-	}
+	var typesMap = unknownSecurityObjectValue.AttributeTypes(ctx)
+	var valuesMap = schemaUtils.ValueMapFromTypes(ctx, typesMap)
 
 	if r.NoSecurity != nil {
 		valuesMap["type"] = schemaUtils.NewStringValue(validation.NoSecuritySchemaRegistrySecurity)
@@ -257,41 +198,13 @@ func confluentSecurityInternalModelToTerraform(_ context.Context, r *model.Confl
 
 }
 
-func ammazonSecurityInternalModelToTerraform(_ context.Context, r *model.AmazonSecurity) (schema.SecurityValue, error) {
-	var typesMap = map[string]attr.Type{
-		"type":              basetypes.StringType{},
-		"username":          basetypes.StringType{},
-		"password":          basetypes.StringType{},
-		"token":             basetypes.StringType{},
-		"certificate_chain": basetypes.StringType{},
-		"key":               basetypes.StringType{},
-		"access_key_id":     basetypes.StringType{},
-		"secret_key":        basetypes.StringType{},
-		"profile":           basetypes.StringType{},
-		"role":              basetypes.StringType{},
-		"certificate":       basetypes.StringType{},
-		"private_key":       basetypes.StringType{},
-		"profile_arn":       basetypes.StringType{},
-		"role_arn":          basetypes.StringType{},
-		"trust_anchor_arn":  basetypes.StringType{},
+func ammazonSecurityInternalModelToTerraform(ctx context.Context, r *model.AmazonSecurity) (schema.SecurityValue, error) {
+	unknownSecurityObjectValue, diag := schema.NewSecurityValueUnknown().ToObjectValue(ctx)
+	if diag.HasError() {
+		return schema.SecurityValue{}, mapper.WrapDiagError(diag, "schema_registry.security", mapper.IntoTerraform)
 	}
-	var valuesMap = map[string]attr.Value{
-		"type":              basetypes.NewStringUnknown(),
-		"username":          basetypes.NewStringUnknown(),
-		"password":          basetypes.NewStringUnknown(),
-		"token":             basetypes.NewStringUnknown(),
-		"certificate_chain": basetypes.NewStringUnknown(),
-		"key":               basetypes.NewStringUnknown(),
-		"access_key_id":     basetypes.NewStringUnknown(),
-		"secret_key":        basetypes.NewStringUnknown(),
-		"profile":           basetypes.NewStringUnknown(),
-		"role":              basetypes.NewStringUnknown(),
-		"certificate":       basetypes.NewStringUnknown(),
-		"private_key":       basetypes.NewStringUnknown(),
-		"profile_arn":       basetypes.NewStringUnknown(),
-		"role_arn":          basetypes.NewStringUnknown(),
-		"trust_anchor_arn":  basetypes.NewStringUnknown(),
-	}
+	var typesMap = unknownSecurityObjectValue.AttributeTypes(ctx)
+	var valuesMap = schemaUtils.ValueMapFromTypes(ctx, typesMap)
 
 	if r.Credentials != nil {
 		valuesMap["type"] = schemaUtils.NewStringValue(validation.CredentialsSchemaRegistrySecurity)
