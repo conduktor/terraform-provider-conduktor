@@ -650,7 +650,7 @@
                   "name": "ignore_untrusted_certificate",
                   "bool": {
                     "description": "Ignore untrusted certificate for Kafka cluster",
-                    "computed_optional_required": "optional",
+                    "computed_optional_required": "computed_optional",
                     "default": {
                       "custom": {
                         "imports": [
@@ -709,7 +709,7 @@
                         "name": "ignore_untrusted_certificate",
                         "bool": {
                           "description": "Ignore untrusted certificate for schema registry. Only used if type is ConfluentLike",
-                          "computed_optional_required": "optional",
+                          "computed_optional_required": "computed_optional",
                           "default": {
                             "custom": {
                               "imports": [
@@ -986,7 +986,7 @@
                         "name": "ignore_untrusted_certificate",
                         "bool": {
                           "description": "Ignore untrusted certificate for Gateway Admin API. Only used if type is Gateway",
-                          "computed_optional_required": "optional",
+                          "computed_optional_required": "computed_optional",
                           "default": {
                             "custom": {
                               "imports": [

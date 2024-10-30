@@ -71,6 +71,7 @@ func KafkaClusterV2ResourceSchema(ctx context.Context) schema.Schema {
 					},
 					"ignore_untrusted_certificate": schema.BoolAttribute{
 						Optional:            true,
+						Computed:            true,
 						Description:         "Ignore untrusted certificate for Kafka cluster",
 						MarkdownDescription: "Ignore untrusted certificate for Kafka cluster",
 						Default:             booldefault.StaticBool(false),
@@ -95,6 +96,7 @@ func KafkaClusterV2ResourceSchema(ctx context.Context) schema.Schema {
 							},
 							"ignore_untrusted_certificate": schema.BoolAttribute{
 								Optional:            true,
+								Computed:            true,
 								Description:         "Ignore untrusted certificate for Gateway Admin API. Only used if type is Gateway",
 								MarkdownDescription: "Ignore untrusted certificate for Gateway Admin API. Only used if type is Gateway",
 								Default:             booldefault.StaticBool(false),
@@ -170,6 +172,7 @@ func KafkaClusterV2ResourceSchema(ctx context.Context) schema.Schema {
 						Attributes: map[string]schema.Attribute{
 							"ignore_untrusted_certificate": schema.BoolAttribute{
 								Optional:            true,
+								Computed:            true,
 								Description:         "Ignore untrusted certificate for schema registry. Only used if type is ConfluentLike",
 								MarkdownDescription: "Ignore untrusted certificate for schema registry. Only used if type is ConfluentLike",
 								Default:             booldefault.StaticBool(false),
@@ -1809,7 +1812,6 @@ type KafkaFlavorValue struct {
 }
 
 func (v KafkaFlavorValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
-	fmt.Println("####################### KafkaFlavorValue.ToTerraformValue")
 	attrTypes := make(map[string]tftypes.Type, 13)
 
 	var val tftypes.Value
