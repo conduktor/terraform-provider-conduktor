@@ -67,6 +67,8 @@ func TestKafkaClusterV2ModelMapping(t *testing.T) {
 	}
 	assert.Equal(t, types.StringValue("cluster-name"), tfModel.Name)
 	assert.Equal(t, types.StringValue("Cluster display name"), tfModel.Spec.DisplayName)
+	assert.Equal(t, false, tfModel.Spec.IsNull())
+	assert.Equal(t, false, tfModel.Spec.IsUnknown())
 	assert.Equal(t, types.StringValue("localhost:9092"), tfModel.Spec.BootstrapServers)
 	assert.Equal(t, types.StringValue("#000000"), tfModel.Spec.Color)
 	assert.Equal(t, types.StringValue("kafka"), tfModel.Spec.Icon)
@@ -165,6 +167,8 @@ func TestAWSKafkaClusterV2ModelMapping(t *testing.T) {
 		return
 	}
 	assert.Equal(t, types.StringValue("aws-cluster"), tfModel.Name)
+	assert.Equal(t, false, tfModel.Spec.IsNull())
+	assert.Equal(t, false, tfModel.Spec.IsUnknown())
 	assert.Equal(t, types.StringValue("MSK Cluster display name"), tfModel.Spec.DisplayName)
 	assert.Equal(t, types.StringValue("a-3-public.xxxxx.xxxxx.a1.kafka.eu-west-1.amazonaws.com:9198"), tfModel.Spec.BootstrapServers)
 	assert.Equal(t, types.BoolValue(false), tfModel.Spec.IgnoreUntrustedCertificate)
@@ -233,6 +237,8 @@ func TestMinimalKafkaClusterV2ModelMapping(t *testing.T) {
 		return
 	}
 	assert.Equal(t, types.StringValue("cluster-minimal"), tfModel.Name)
+	assert.Equal(t, false, tfModel.Spec.IsNull())
+	assert.Equal(t, false, tfModel.Spec.IsUnknown())
 	assert.Equal(t, types.StringValue("Minimal Cluster display name"), tfModel.Spec.DisplayName)
 	assert.Equal(t, types.StringValue("localhost:9092"), tfModel.Spec.BootstrapServers)
 	assert.Equal(t, types.StringNull(), tfModel.Spec.Color)

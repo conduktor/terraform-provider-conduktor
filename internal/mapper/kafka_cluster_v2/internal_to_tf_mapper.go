@@ -32,10 +32,24 @@ func InternalModelToTerraform(ctx context.Context, r *model.KafkaClusterResource
 
 func specInternalModelToTerraform(ctx context.Context, r *model.KafkaClusterSpec) (schema.SpecValue, error) {
 
+	unknownSpecObjectValue, diag := schema.NewSpecValueUnknown().ToObjectValue(ctx)
+	if diag.HasError() {
+		return schema.SpecValue{}, mapper.WrapDiagError(diag, "spec", mapper.IntoTerraform)
+	}
+	var typesMap = unknownSpecObjectValue.AttributeTypes(ctx)
+	var valuesMap = schemaUtils.ValueMapFromTypes(ctx, typesMap)
+
+	valuesMap["bootstrap_servers"] = schemaUtils.NewStringValue(r.BootstrapServers)
+	valuesMap["display_name"] = schemaUtils.NewStringValue(r.DisplayName)
+	valuesMap["color"] = schemaUtils.NewStringValue(r.Color)
+	valuesMap["icon"] = schemaUtils.NewStringValue(r.Icon)
+	valuesMap["ignore_untrusted_certificate"] = basetypes.NewBoolValue(r.IgnoreUntrustedCertificate)
+
 	properties, diag := schemaUtils.StringMapToMapValue(ctx, r.Properties)
 	if diag.HasError() {
 		return schema.SpecValue{}, mapper.WrapDiagError(diag, "properties", mapper.IntoTerraform)
 	}
+	valuesMap["properties"] = properties
 
 	kafkaFlavor, err := kafkaFlavorInternalModelToTerraform(ctx, r.KafkaFlavor)
 	if err != nil {
@@ -45,6 +59,7 @@ func specInternalModelToTerraform(ctx context.Context, r *model.KafkaClusterSpec
 	if diag.HasError() {
 		return schema.SpecValue{}, mapper.WrapDiagError(diag, "kafka_flavor", mapper.IntoTerraform)
 	}
+	valuesMap["kafka_flavor"] = kafkaFlavorValue
 
 	schemaRegistry, err := schemaRegistryInternalModelToTerraform(ctx, r.SchemaRegistry)
 	if err != nil {
@@ -54,17 +69,13 @@ func specInternalModelToTerraform(ctx context.Context, r *model.KafkaClusterSpec
 	if diag.HasError() {
 		return schema.SpecValue{}, mapper.WrapDiagError(diag, "schema_registry", mapper.IntoTerraform)
 	}
+	valuesMap["schema_registry"] = schemaRegistryValue
 
-	return schema.SpecValue{
-		BootstrapServers:           schemaUtils.NewStringValue(r.BootstrapServers),
-		DisplayName:                schemaUtils.NewStringValue(r.DisplayName),
-		Color:                      schemaUtils.NewStringValue(r.Color),
-		Icon:                       schemaUtils.NewStringValue(r.Icon),
-		IgnoreUntrustedCertificate: basetypes.NewBoolValue(r.IgnoreUntrustedCertificate),
-		Properties:                 properties,
-		KafkaFlavor:                kafkaFlavorValue,
-		SchemaRegistry:             schemaRegistryValue,
-	}, nil
+	value, diag := schema.NewSpecValue(typesMap, valuesMap)
+	if diag.HasError() {
+		return schema.SpecValue{}, mapper.WrapDiagError(diag, "spec", mapper.IntoTerraform)
+	}
+	return value, nil
 }
 
 func kafkaFlavorInternalModelToTerraform(ctx context.Context, r *model.KafkaFlavor) (schema.KafkaFlavorValue, error) {
@@ -78,6 +89,7 @@ func kafkaFlavorInternalModelToTerraform(ctx context.Context, r *model.KafkaFlav
 	}
 	var typesMap = unknownFlavorObjectValue.AttributeTypes(ctx)
 	var valuesMap = schemaUtils.ValueMapFromTypes(ctx, typesMap)
+	valuesMap["ignore_untrusted_certificate"] = basetypes.NewBoolValue(false) // default value
 
 	if r.Aiven != nil {
 		valuesMap["type"] = schemaUtils.NewStringValue(validation.AivenKafkaFlavor)
@@ -123,6 +135,7 @@ func schemaRegistryInternalModelToTerraform(ctx context.Context, r *model.Schema
 	}
 	var typesMap = unknownSRObjectValue.AttributeTypes(ctx)
 	var valuesMap = schemaUtils.ValueMapFromTypes(ctx, typesMap)
+	valuesMap["ignore_untrusted_certificate"] = basetypes.NewBoolValue(false) // default value
 
 	if r.ConfluentLike != nil {
 		security, err := confluentSecurityInternalModelToTerraform(ctx, &r.ConfluentLike.Security)

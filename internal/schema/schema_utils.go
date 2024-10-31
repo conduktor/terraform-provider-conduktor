@@ -65,7 +65,7 @@ func NewStringValue(s string) basetypes.StringValue {
 // ListValueToStringArray Convert a ListValue to a string array.
 func ListValueToStringArray(ctx context.Context, list basetypes.ListValue) ([]string, diag.Diagnostics) {
 	var result []string
-	diagnostic := list.ElementsAs(ctx, &result, false)
+	diagnostic := list.ElementsAs(ctx, &result, true)
 	return result, diagnostic
 }
 
@@ -224,7 +224,7 @@ func SetValueToPermissionArray(ctx context.Context, resource Resource, set baset
 // MapValueToStringMap Convert a MapValue to a map[string]string.
 func MapValueToStringMap(ctx context.Context, mapValue basetypes.MapValue) (map[string]string, diag.Diagnostics) {
 	result := make(map[string]string)
-	diagnostic := mapValue.ElementsAs(ctx, &result, false)
+	diagnostic := mapValue.ElementsAs(ctx, &result, true)
 	return result, diagnostic
 }
 

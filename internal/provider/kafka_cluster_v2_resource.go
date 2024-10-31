@@ -3,7 +3,6 @@ package provider
 import (
 	"context"
 	"fmt"
-
 	"github.com/conduktor/terraform-provider-conduktor/internal/client"
 	mapper "github.com/conduktor/terraform-provider-conduktor/internal/mapper/kafka_cluster_v2"
 	"github.com/conduktor/terraform-provider-conduktor/internal/model"
@@ -29,15 +28,15 @@ type KafkaClusterV2Resource struct {
 	apiClient *client.Client
 }
 
-func (r *KafkaClusterV2Resource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *KafkaClusterV2Resource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_kafka_cluster_v2"
 }
 
-func (r *KafkaClusterV2Resource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *KafkaClusterV2Resource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.KafkaClusterV2ResourceSchema(ctx)
 }
 
-func (r *KafkaClusterV2Resource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *KafkaClusterV2Resource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
