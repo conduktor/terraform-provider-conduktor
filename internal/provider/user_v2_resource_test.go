@@ -69,7 +69,7 @@ func TestAccUserV2Minimal(t *testing.T) {
 			{
 				Config: providerConfig + test.TestAccTestdata(t, "user_v2_resource_minimal.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("conduktor_user_v2.minimal", "name", "angela.martin@dunder.mifflin.com"),
+					resource.TestCheckResourceAttr("conduktor_user_v2.minimal", "name", "angela.martin@dunder-mifflin.com"),
 					resource.TestCheckResourceAttr("conduktor_user_v2.minimal", "spec.permissions.#", "0"),
 				),
 			},
