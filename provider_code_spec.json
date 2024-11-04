@@ -618,7 +618,7 @@
                 {
                   "name": "bootstrap_servers",
                   "string": {
-                    "description": "List of bootstrap servers",
+                    "description": "List of bootstrap servers for the Kafka cluster separated by comma",
                     "computed_optional_required": "required"
                   }
                 },
@@ -635,14 +635,14 @@
                 {
                   "name": "color",
                   "string": {
-                    "description": "Kafka cluster icon color",
+                    "description": "Kafka cluster icon color in hexadecimal format like `#FF0000`",
                     "computed_optional_required": "computed_optional"
                   }
                 },
                 {
                   "name": "icon",
                   "string": {
-                    "description": "Kafka cluster icon",
+                    "description": "Kafka cluster icon. List of available icons can be found [here](https://docs.conduktor.io/platform/reference/resource-reference/console/#icon-sets)",
                     "computed_optional_required": "computed_optional"
                   }
                 },
@@ -672,7 +672,7 @@
                       {
                         "name": "type",
                         "string": {
-                          "description": "Schema registry type valid values are: ConfluentLike, Glue",
+                          "description": "Schema registry type valid values are: `ConfluentLike`, `Glue`\n\nMore detail on our [documentation](https://docs.conduktor.io/platform/reference/resource-reference/console/#schema-registry)",
                           "computed_optional_required": "required",
                           "validators": [
                             {
@@ -694,21 +694,21 @@
                       {
                         "name": "url",
                         "string": {
-                          "description": "Schema registry URL. Required if type is ConfluentLike",
+                          "description": "Schema registry URL. Required if type is `ConfluentLike`",
                           "computed_optional_required": "optional"
                         }
                       },
                       {
                         "name": "properties",
                         "string": {
-                          "description": "Schema registry properties. Only used if type is ConfluentLike",
+                          "description": "Schema registry properties. Only used if type is `ConfluentLike`",
                           "computed_optional_required": "optional"
                         }
                       },
                       {
                         "name": "ignore_untrusted_certificate",
                         "bool": {
-                          "description": "Ignore untrusted certificate for schema registry. Only used if type is ConfluentLike",
+                          "description": "Ignore untrusted certificate for schema registry. Only used if type is `ConfluentLike`",
                           "computed_optional_required": "computed_optional",
                           "default": {
                             "custom": {
@@ -725,13 +725,13 @@
                       {
                         "name": "security",
                         "single_nested": {
-                          "description": "Schema registry configuration. Required if type is ConfluentLike or Glue",
+                          "description": "Schema registry configuration. Required if type is `ConfluentLike` or `Glue`",
                           "computed_optional_required": "required",
                           "attributes": [
                             {
                               "name": "type",
                               "string": {
-                                "description": "Schema registry security type. Required if type is ConfluentLike or Glue.\n Valid values are:\nFor ConfluentLike : NoSecurity, BasicAuth, BearerToken, SSLAuth\nFor Glue : Credentials, FromContext, FromRole, IAMAnywhere",
+                                "description": "Schema registry security type. Required if type is `ConfluentLike` or `Glue`.\n\nValid values are:\n\n- For **ConfluentLike** : `NoSecurity`, `BasicAuth`, `BearerToken`, `SSLAuth` \n\n- For **Glue** : `Credentials`, `FromContext`, `FromRole`, `IAMAnywhere`\n\n More detail on our [documentation](https://docs.conduktor.io/platform/reference/resource-reference/console/#schema-registry)",
                                 "computed_optional_required": "required",
                                 "validators": [
                                   {
@@ -753,14 +753,14 @@
                             {
                               "name": "username",
                               "string": {
-                                "description": "Schema registry basic auth username. Required if security type is BasicAuth",
+                                "description": "Schema registry basic auth username. Required if security type is `BasicAuth`",
                                 "computed_optional_required": "optional"
                               }
                             },
                             {
                               "name": "password",
                               "string": {
-                                "description": "Schema registry basic auth password. Required if security type is BasicAuth",
+                                "description": "Schema registry basic auth password. Required if security type is `BasicAuth`",
                                 "computed_optional_required": "optional",
                                 "sensitive": true
                               }
@@ -768,7 +768,7 @@
                             {
                               "name": "token",
                               "string": {
-                                "description": "Schema registry bearer token. Required if security type is BearerToken",
+                                "description": "Schema registry bearer token. Required if security type is `BearerToken`",
                                 "computed_optional_required": "optional",
                                 "sensitive": true
                               }
@@ -776,7 +776,7 @@
                             {
                               "name": "key",
                               "string": {
-                                "description": "Schema registry SSL auth private key PEM. Required if security type is SSLAuth",
+                                "description": "Schema registry SSL auth private key PEM. Required if security type is `SSLAuth`",
                                 "computed_optional_required": "optional",
                                 "sensitive": true
                               }
@@ -784,14 +784,14 @@
                             {
                               "name": "certificate_chain",
                               "string": {
-                                "description": "Schema registry SSL auth certificate chain PEM. Required if security type is SSLAuth",
+                                "description": "Schema registry SSL auth certificate chain PEM. Required if security type is `SSLAuth`",
                                 "computed_optional_required": "optional"
                               }
                             },
                             {
                               "name": "access_key_id",
                               "string": {
-                                "description": "Glue Schema registry AWS access key ID. Required if type is Glue with security Credentials",
+                                "description": "Glue Schema registry AWS access key ID. Required if type is Glue with security `Credentials`",
                                 "computed_optional_required": "optional",
                                 "sensitive": true
                               }
@@ -799,7 +799,7 @@
                             {
                               "name": "secret_key",
                               "string": {
-                                "description": "Glue Schema registry AWS secret key. Required if type is Glue with security Credentials",
+                                "description": "Glue Schema registry AWS secret key. Required if type is Glue with security `Credentials`",
                                 "computed_optional_required": "optional",
                                 "sensitive": true
                               }
@@ -807,49 +807,49 @@
                             {
                               "name": "profile",
                               "string": {
-                                "description": "Glue Schema registry AWS profile name. Required if type is Glue with security FromContext",
+                                "description": "Glue Schema registry AWS profile name. Required if type is Glue with security `FromContext`",
                                 "computed_optional_required": "optional"
                               }
                             },
                             {
                               "name": "role",
                               "string": {
-                                "description": "Glue Schema registry AWS role ARN. Required if type is Glue with security FromRole",
+                                "description": "Glue Schema registry AWS role ARN. Required if type is Glue with security `FromRole`",
                                 "computed_optional_required": "optional"
                               }
                             },
                             {
                               "name": "trust_anchor_arn",
                               "string": {
-                                "description": "Glue Schema registry AWS trust anchor ARN. Required if type is Glue with security IAMAnywhere",
+                                "description": "Glue Schema registry AWS trust anchor ARN. Required if type is Glue with security `IAMAnywhere`",
                                 "computed_optional_required": "optional"
                               }
                             },
                             {
                               "name": "profile_arn",
                               "string": {
-                                "description": "Glue Schema registry AWS profile ARN. Required if type is Glue with security IAMAnywhere",
+                                "description": "Glue Schema registry AWS profile ARN. Required if type is Glue with security `IAMAnywhere`",
                                 "computed_optional_required": "optional"
                               }
                             },
                             {
                               "name": "role_arn",
                               "string": {
-                                "description": "Glue Schema registry AWS role ARN. Required if type is Glue with security IAMAnywhere",
+                                "description": "Glue Schema registry AWS role ARN. Required if type is Glue with security `IAMAnywhere`",
                                 "computed_optional_required": "optional"
                               }
                             },
                             {
                               "name": "certificate",
                               "string": {
-                                "description": "Glue Schema registry AWS certificate. Required if type is Glue with security IAMAnywhere",
+                                "description": "Glue Schema registry AWS certificate. Required if type is Glue with security `IAMAnywhere`",
                                 "computed_optional_required": "optional"
                               }
                             },
                             {
                               "name": "private_key",
                               "string": {
-                                "description": "Glue Schema registry AWS private key. Required if type is Glue with security IAMAnywhere",
+                                "description": "Glue Schema registry AWS private key. Required if type is Glue with security `IAMAnywhere`",
                                 "computed_optional_required": "optional"
                               }
                             }
@@ -859,14 +859,14 @@
                       {
                         "name": "registry_name",
                         "string": {
-                          "description": "Glue Schema registry name. Only used if type is Glue",
+                          "description": "Glue Schema registry name. Only used if type is `Glue`",
                           "computed_optional_required": "optional"
                         }
                       },
                       {
                         "name": "region",
                         "string": {
-                          "description": "Glue Schema registry AWS region. Required if type is Glue",
+                          "description": "Glue Schema registry AWS region. Required if type is `Glue`",
                           "computed_optional_required": "optional"
                         }
                       }
@@ -882,7 +882,7 @@
                       {
                         "name": "type",
                         "string": {
-                          "description": "Kafka provider type : Confluent, Aiven, Gateway",
+                          "description": "Kafka provider type : `Confluent`, `Aiven`, `Gateway`. More detail on our [documentation](https://docs.conduktor.io/platform/reference/resource-reference/console/#kafka-provider)",
                           "computed_optional_required": "required",
                           "validators": [
                             {
@@ -904,7 +904,7 @@
                       {
                         "name": "key",
                         "string": {
-                          "description": "Confluent API key. Required if type is Confluent",
+                          "description": "Confluent API key. Required if type is `Confluent`",
                           "computed_optional_required": "optional",
                           "sensitive": true
                         }
@@ -912,7 +912,7 @@
                       {
                         "name": "secret",
                         "string": {
-                          "description": "Confluent API secret. Required if type is Confluent",
+                          "description": "Confluent API secret. Required if type is `Confluent`",
                           "computed_optional_required": "optional",
                           "sensitive": true
                         }
@@ -920,21 +920,21 @@
                       {
                         "name": "confluent_environment_id",
                         "string": {
-                          "description": "Confluent environment identifier. Required if type is Confluent",
+                          "description": "Confluent environment identifier. Required if type is `Confluent`",
                           "computed_optional_required": "optional"
                         }
                       },
                       {
                         "name": "confluent_cluster_id",
                         "string": {
-                          "description": "Confluent cluster identifier. Required if type is Confluent",
+                          "description": "Confluent cluster identifier. Required if type is `Confluent`",
                           "computed_optional_required": "optional"
                         }
                       },
                       {
                         "name": "api_token",
                         "string": {
-                          "description": "Aiven API token. Required if type is Aiven",
+                          "description": "Aiven API token. Required if type is `Aiven`",
                           "computed_optional_required": "optional",
                           "sensitive": true
                         }
@@ -942,35 +942,35 @@
                       {
                         "name": "project",
                         "string": {
-                          "description": "Aiven project name. Required if type is Aiven",
+                          "description": "Aiven project name. Required if type is `Aiven`",
                           "computed_optional_required": "optional"
                         }
                       },
                       {
                         "name": "service_name",
                         "string": {
-                          "description": "Aiven service name. Required if type is Aiven",
+                          "description": "Aiven service name. Required if type is `Aiven`",
                           "computed_optional_required": "optional"
                         }
                       },
                       {
                         "name": "url",
                         "string": {
-                          "description": "Conduktor Gateway Admin API URL. Required if type is Gateway",
+                          "description": "Conduktor Gateway Admin API URL. Required if type is `Gateway`",
                           "computed_optional_required": "optional"
                         }
                       },
                       {
                         "name": "user",
                         "string": {
-                          "description": "Conduktor Gateway Admin user. Required if type is Gateway",
+                          "description": "Conduktor Gateway Admin user. Required if type is `Gateway`",
                           "computed_optional_required": "optional"
                         }
                       },
                       {
                         "name": "password",
                         "string": {
-                          "description": "Conduktor Gateway Admin password. Required if type is Gateway",
+                          "description": "Conduktor Gateway Admin password. Required if type is `Gateway`",
                           "computed_optional_required": "optional",
                           "sensitive": true
                         }
@@ -978,14 +978,14 @@
                       {
                         "name": "virtual_cluster",
                         "string": {
-                          "description": "Conduktor Gateway Virtual cluster name. Only used if type is Gateway",
+                          "description": "Conduktor Gateway Virtual cluster name. Only used if type is `Gateway`",
                           "computed_optional_required": "optional"
                         }
                       },
                       {
                         "name": "ignore_untrusted_certificate",
                         "bool": {
-                          "description": "Ignore untrusted certificate for Gateway Admin API. Only used if type is Gateway",
+                          "description": "Ignore untrusted certificate for Gateway Admin API. Only used if type is `Gateway`",
                           "computed_optional_required": "computed_optional",
                           "default": {
                             "custom": {

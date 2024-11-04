@@ -210,13 +210,13 @@ resource "conduktor_kafka_cluster_v2" "gateway" {
 
 Required:
 
-- `bootstrap_servers` (String) List of bootstrap servers
+- `bootstrap_servers` (String) List of bootstrap servers for the Kafka cluster separated by comma
 - `display_name` (String) Kafka cluster display name
 
 Optional:
 
-- `color` (String) Kafka cluster icon color
-- `icon` (String) Kafka cluster icon
+- `color` (String) Kafka cluster icon color in hexadecimal format like `#FF0000`
+- `icon` (String) Kafka cluster icon. List of available icons can be found [here](https://docs.conduktor.io/platform/reference/resource-reference/console/#icon-sets)
 - `ignore_untrusted_certificate` (Boolean) Ignore untrusted certificate for Kafka cluster
 - `kafka_flavor` (Attributes) Schema registry configuration (see [below for nested schema](#nestedatt--spec--kafka_flavor))
 - `properties` (Map of String) Kafka cluster properties
@@ -227,22 +227,22 @@ Optional:
 
 Required:
 
-- `type` (String) Kafka provider type : Confluent, Aiven, Gateway
+- `type` (String) Kafka provider type : `Confluent`, `Aiven`, `Gateway`. More detail on our [documentation](https://docs.conduktor.io/platform/reference/resource-reference/console/#kafka-provider)
 
 Optional:
 
-- `api_token` (String, Sensitive) Aiven API token. Required if type is Aiven
-- `confluent_cluster_id` (String) Confluent cluster identifier. Required if type is Confluent
-- `confluent_environment_id` (String) Confluent environment identifier. Required if type is Confluent
-- `ignore_untrusted_certificate` (Boolean) Ignore untrusted certificate for Gateway Admin API. Only used if type is Gateway
-- `key` (String, Sensitive) Confluent API key. Required if type is Confluent
-- `password` (String, Sensitive) Conduktor Gateway Admin password. Required if type is Gateway
-- `project` (String) Aiven project name. Required if type is Aiven
-- `secret` (String, Sensitive) Confluent API secret. Required if type is Confluent
-- `service_name` (String) Aiven service name. Required if type is Aiven
-- `url` (String) Conduktor Gateway Admin API URL. Required if type is Gateway
-- `user` (String) Conduktor Gateway Admin user. Required if type is Gateway
-- `virtual_cluster` (String) Conduktor Gateway Virtual cluster name. Only used if type is Gateway
+- `api_token` (String, Sensitive) Aiven API token. Required if type is `Aiven`
+- `confluent_cluster_id` (String) Confluent cluster identifier. Required if type is `Confluent`
+- `confluent_environment_id` (String) Confluent environment identifier. Required if type is `Confluent`
+- `ignore_untrusted_certificate` (Boolean) Ignore untrusted certificate for Gateway Admin API. Only used if type is `Gateway`
+- `key` (String, Sensitive) Confluent API key. Required if type is `Confluent`
+- `password` (String, Sensitive) Conduktor Gateway Admin password. Required if type is `Gateway`
+- `project` (String) Aiven project name. Required if type is `Aiven`
+- `secret` (String, Sensitive) Confluent API secret. Required if type is `Confluent`
+- `service_name` (String) Aiven service name. Required if type is `Aiven`
+- `url` (String) Conduktor Gateway Admin API URL. Required if type is `Gateway`
+- `user` (String) Conduktor Gateway Admin user. Required if type is `Gateway`
+- `virtual_cluster` (String) Conduktor Gateway Virtual cluster name. Only used if type is `Gateway`
 
 
 <a id="nestedatt--spec--schema_registry"></a>
@@ -250,43 +250,50 @@ Optional:
 
 Required:
 
-- `security` (Attributes) Schema registry configuration. Required if type is ConfluentLike or Glue (see [below for nested schema](#nestedatt--spec--schema_registry--security))
-- `type` (String) Schema registry type valid values are: ConfluentLike, Glue
+- `security` (Attributes) Schema registry configuration. Required if type is `ConfluentLike` or `Glue` (see [below for nested schema](#nestedatt--spec--schema_registry--security))
+- `type` (String) Schema registry type valid values are: `ConfluentLike`, `Glue`
+
+More detail on our [documentation](https://docs.conduktor.io/platform/reference/resource-reference/console/#schema-registry)
 
 Optional:
 
-- `ignore_untrusted_certificate` (Boolean) Ignore untrusted certificate for schema registry. Only used if type is ConfluentLike
-- `properties` (String) Schema registry properties. Only used if type is ConfluentLike
-- `region` (String) Glue Schema registry AWS region. Required if type is Glue
-- `registry_name` (String) Glue Schema registry name. Only used if type is Glue
-- `url` (String) Schema registry URL. Required if type is ConfluentLike
+- `ignore_untrusted_certificate` (Boolean) Ignore untrusted certificate for schema registry. Only used if type is `ConfluentLike`
+- `properties` (String) Schema registry properties. Only used if type is `ConfluentLike`
+- `region` (String) Glue Schema registry AWS region. Required if type is `Glue`
+- `registry_name` (String) Glue Schema registry name. Only used if type is `Glue`
+- `url` (String) Schema registry URL. Required if type is `ConfluentLike`
 
 <a id="nestedatt--spec--schema_registry--security"></a>
 ### Nested Schema for `spec.schema_registry.security`
 
 Required:
 
-- `type` (String) Schema registry security type. Required if type is ConfluentLike or Glue.
- Valid values are:
-For ConfluentLike : NoSecurity, BasicAuth, BearerToken, SSLAuth
-For Glue : Credentials, FromContext, FromRole, IAMAnywhere
+- `type` (String) Schema registry security type. Required if type is `ConfluentLike` or `Glue`.
+
+Valid values are:
+
+- For **ConfluentLike** : `NoSecurity`, `BasicAuth`, `BearerToken`, `SSLAuth` 
+
+- For **Glue** : `Credentials`, `FromContext`, `FromRole`, `IAMAnywhere`
+
+ More detail on our [documentation](https://docs.conduktor.io/platform/reference/resource-reference/console/#schema-registry)
 
 Optional:
 
-- `access_key_id` (String, Sensitive) Glue Schema registry AWS access key ID. Required if type is Glue with security Credentials
-- `certificate` (String) Glue Schema registry AWS certificate. Required if type is Glue with security IAMAnywhere
-- `certificate_chain` (String) Schema registry SSL auth certificate chain PEM. Required if security type is SSLAuth
-- `key` (String, Sensitive) Schema registry SSL auth private key PEM. Required if security type is SSLAuth
-- `password` (String, Sensitive) Schema registry basic auth password. Required if security type is BasicAuth
-- `private_key` (String) Glue Schema registry AWS private key. Required if type is Glue with security IAMAnywhere
-- `profile` (String) Glue Schema registry AWS profile name. Required if type is Glue with security FromContext
-- `profile_arn` (String) Glue Schema registry AWS profile ARN. Required if type is Glue with security IAMAnywhere
-- `role` (String) Glue Schema registry AWS role ARN. Required if type is Glue with security FromRole
-- `role_arn` (String) Glue Schema registry AWS role ARN. Required if type is Glue with security IAMAnywhere
-- `secret_key` (String, Sensitive) Glue Schema registry AWS secret key. Required if type is Glue with security Credentials
-- `token` (String, Sensitive) Schema registry bearer token. Required if security type is BearerToken
-- `trust_anchor_arn` (String) Glue Schema registry AWS trust anchor ARN. Required if type is Glue with security IAMAnywhere
-- `username` (String) Schema registry basic auth username. Required if security type is BasicAuth
+- `access_key_id` (String, Sensitive) Glue Schema registry AWS access key ID. Required if type is Glue with security `Credentials`
+- `certificate` (String) Glue Schema registry AWS certificate. Required if type is Glue with security `IAMAnywhere`
+- `certificate_chain` (String) Schema registry SSL auth certificate chain PEM. Required if security type is `SSLAuth`
+- `key` (String, Sensitive) Schema registry SSL auth private key PEM. Required if security type is `SSLAuth`
+- `password` (String, Sensitive) Schema registry basic auth password. Required if security type is `BasicAuth`
+- `private_key` (String) Glue Schema registry AWS private key. Required if type is Glue with security `IAMAnywhere`
+- `profile` (String) Glue Schema registry AWS profile name. Required if type is Glue with security `FromContext`
+- `profile_arn` (String) Glue Schema registry AWS profile ARN. Required if type is Glue with security `IAMAnywhere`
+- `role` (String) Glue Schema registry AWS role ARN. Required if type is Glue with security `FromRole`
+- `role_arn` (String) Glue Schema registry AWS role ARN. Required if type is Glue with security `IAMAnywhere`
+- `secret_key` (String, Sensitive) Glue Schema registry AWS secret key. Required if type is Glue with security `Credentials`
+- `token` (String, Sensitive) Schema registry bearer token. Required if security type is `BearerToken`
+- `trust_anchor_arn` (String) Glue Schema registry AWS trust anchor ARN. Required if type is Glue with security `IAMAnywhere`
+- `username` (String) Schema registry basic auth username. Required if security type is `BasicAuth`
 
 
 
