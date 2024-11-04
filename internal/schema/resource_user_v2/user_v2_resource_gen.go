@@ -33,7 +33,7 @@ func UserV2ResourceSchema(ctx context.Context) schema.Schema {
 					stringplanmodifier.RequiresReplace(),
 				},
 				Validators: []validator.String{
-					stringvalidator.RegexMatches(regexp.MustCompile("^([\\w\\-_.]*[^.])(@\\w+)(\\.\\w+(\\.\\w+)?[^.\\W])$"), ""),
+					stringvalidator.RegexMatches(regexp.MustCompile("^([\\w\\-_.]*[^.])@([\\w-]+\\.)+[\\w-]{2,4}$"), ""),
 				},
 			},
 		},

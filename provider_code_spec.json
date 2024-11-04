@@ -98,7 +98,7 @@
                         "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
                       }
                     ],
-                    "schema_definition": "stringvalidator.RegexMatches(regexp.MustCompile(\"^([\\\\w\\\\-_.]*[^.])(@\\\\w+)(\\\\.\\\\w+(\\\\.\\\\w+)?[^.\\\\W])$\"), \"\")"
+                    "schema_definition": "stringvalidator.RegexMatches(regexp.MustCompile(\"^([\\\\w\\\\-_.]*[^.])@([\\\\w-]+\\\\.)+[\\\\w-]{2,4}$\"), \"\")"
                   }
                 }
               ]
