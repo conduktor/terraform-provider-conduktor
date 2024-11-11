@@ -58,7 +58,7 @@ func InternalModelToTerraform(ctx context.Context, r *model.UserConsoleResource)
 			flags = append(flags, types.StringValue(f))
 		}
 
-		flagsList, diag := types.ListValue(types.StringType, flags)
+		flagsList, diag := types.SetValue(types.StringType, flags)
 		if diag.HasError() {
 			return schema.UserV2Model{}, mapper.WrapDiagError(diag, "permissions.permissions", mapper.IntoTerraform)
 		}
@@ -87,9 +87,9 @@ func InternalModelToTerraform(ctx context.Context, r *model.UserConsoleResource)
 		tfPermissions = append(tfPermissions, permObj)
 	}
 
-	permissionsList, diag := types.ListValue(schema.PermissionsValue{}.Type(ctx), tfPermissions)
+	permissionsList, diag := types.SetValue(schema.PermissionsValue{}.Type(ctx), tfPermissions)
 	if diag.HasError() {
-		return schema.UserV2Model{}, mapper.WrapDiagError(diag, "permissions (ListValue)", mapper.IntoTerraform)
+		return schema.UserV2Model{}, mapper.WrapDiagError(diag, "permissions (SetValue)", mapper.IntoTerraform)
 	}
 
 	specValue, diag := schema.NewSpecValue(

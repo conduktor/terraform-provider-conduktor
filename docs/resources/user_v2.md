@@ -67,14 +67,14 @@ Optional:
 
 - `firstname` (String) User firstname
 - `lastname` (String) User lastname
-- `permissions` (Attributes List) Set of all user permissions (see [below for nested schema](#nestedatt--spec--permissions))
+- `permissions` (Attributes Set) Set of all user permissions (see [below for nested schema](#nestedatt--spec--permissions))
 
 <a id="nestedatt--spec--permissions"></a>
 ### Nested Schema for `spec.permissions`
 
 Required:
 
-- `permissions` (List of String) Set of all permissions to apply on the resource. See https://docs.conduktor.io/platform/reference/resource-reference/console/#permissions for more details
+- `permissions` (Set of String) Set of all permissions to apply on the resource. See https://docs.conduktor.io/platform/reference/resource-reference/console/#permissions for more details
 - `resource_type` (String) Type of the resource to apply permission on valid values are: CLUSTER, CONSUMER_GROUP, KAFKA_CONNECT, KSQLDB, PLATFORM, SUBJECT, TOPIC
 
 Optional:

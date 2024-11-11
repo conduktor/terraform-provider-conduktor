@@ -126,7 +126,7 @@
                 },
                 {
                   "name": "permissions",
-                  "list_nested": {
+                  "set_nested": {
                     "description": "Set of all user permissions",
                     "computed_optional_required": "computed_optional",
                     "nested_object": {
@@ -198,7 +198,7 @@
                         },
                         {
                           "name": "permissions",
-                          "list": {
+                          "set": {
                             "description": "Set of all permissions to apply on the resource. See https://docs.conduktor.io/platform/reference/resource-reference/console/#permissions for more details",
                             "computed_optional_required": "required",
                             "element_type": {
@@ -209,17 +209,7 @@
                                 "custom": {
                                   "imports": [
                                     {
-                                      "path": "github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
-                                    }
-                                  ],
-                                  "schema_definition": "listvalidator.UniqueValues()"
-                                }
-                              },
-                              {
-                                "custom": {
-                                  "imports": [
-                                    {
-                                      "path": "github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+                                      "path": "github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
                                     },
                                     {
                                       "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -228,7 +218,7 @@
                                       "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
                                     }
                                   ],
-                                  "schema_definition": "listvalidator.ValueStringsAre(stringvalidator.OneOf(validation.ValidPermissions ...))"
+                                  "schema_definition": "setvalidator.ValueStringsAre(stringvalidator.OneOf(validation.ValidPermissions ...))"
                                 }
                               }
                             ]
