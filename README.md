@@ -48,7 +48,7 @@ This repository contains the Conduktor Terraform provider, which defines Condukt
 
 ## Install
 
-Provider should be installed automatically with `terraform init`, but it's recommended to pin a specific version or range of version using following [`required_providers` configuration](https://developer.hashicorp.com/terraform/language/providers/requirements) :
+Provider should be installed automatically with `terraform init`, but it's recommended to pin a specific version or range of versions using the following [`required_providers` configuration](https://developer.hashicorp.com/terraform/language/providers/requirements) :
 
 ```hcl
 terraform {
@@ -215,7 +215,7 @@ The project uses different codegen tool to generate source files.
 export CDK_LICENSE="your_license_here"
 make testacc
 ```
-This action will start a testing environment using [Docker Compose](./docker-compose.yaml) and run all acceptance tests against it. Test environment is destroy at the end.
+This action will start a testing environment using [Docker Compose](./docker-compose.yaml) and run all acceptance tests against it. Test environment is destroyed at the end.
 
 You can also start/stop environment and run tests in separate actions using `make start_test_env` / `make test` / `make clean`.
 
