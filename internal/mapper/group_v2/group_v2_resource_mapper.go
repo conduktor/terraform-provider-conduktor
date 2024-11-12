@@ -46,7 +46,8 @@ func TFToInternalModel(ctx context.Context, r *schema.GroupV2Model) (model.Group
 			return model.GroupConsoleResource{}, mapper.WrapDiagError(diag, "permissions", mapper.FromTerraform)
 		}
 		for _, p := range tfPermissions {
-			flags, diag := schemaUtils.ListValueToStringArray(ctx, p.Permissions)
+			var flags []string
+			diag := p.Permissions.ElementsAs(ctx, &flags, false)
 			if diag.HasError() {
 				return model.GroupConsoleResource{}, mapper.WrapDiagError(diag, "permissions.permissions", mapper.FromTerraform)
 			}
@@ -94,7 +95,12 @@ func InternalModelToTerraform(ctx context.Context, r *model.GroupConsoleResource
 
 	var tfPermissions []attr.Value
 	for _, p := range r.Spec.Permissions {
-		flagsList, diag := schemaUtils.StringArrayToListValue(p.Permissions)
+		var flags []attr.Value
+		for _, f := range p.Permissions {
+			flags = append(flags, types.StringValue(f))
+		}
+
+		flagsList, diag := types.SetValue(types.StringType, flags)
 		if diag.HasError() {
 			return schema.GroupV2Model{}, mapper.WrapDiagError(diag, "permissions.permissions", mapper.IntoTerraform)
 		}
@@ -123,7 +129,7 @@ func InternalModelToTerraform(ctx context.Context, r *model.GroupConsoleResource
 		tfPermissions = append(tfPermissions, permObj)
 	}
 
-	permissionsList, diag := types.ListValue(schema.PermissionsValue{}.Type(ctx), tfPermissions)
+	permissionsList, diag := types.SetValue(schema.PermissionsValue{}.Type(ctx), tfPermissions)
 	if diag.HasError() {
 		return schema.GroupV2Model{}, mapper.WrapDiagError(diag, "permissions", mapper.IntoTerraform)
 	}
