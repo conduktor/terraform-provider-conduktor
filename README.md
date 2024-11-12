@@ -37,13 +37,13 @@ This repository contains the Conduktor Terraform provider, which defines Condukt
 > [!WARNING]
 > - The Conduktor Terraform provider is currently in **Alpha**.
 > - It does not support all Console and Gateway resources yet. See our [resources roadmap](#resources-roadmap).
-> - Let us know if you have [feedback](https://product.conduktor.help/c/74-terraform-provider) or wish to be a design partner.
+> - Let us know if you have [feedback](https://support.conduktor.io/hc/en-gb/requests/new?ticket_form_id=17438365654417) or wish to be a design partner.
 
 ## Supported resources
 
 - [Console user](./docs/resources/user_v2.md)
 - [Console group](./docs/resources/group_v2.md)
-- [Kafka Clusters with Schema Regsitry](https://docs.conduktor.io/platform/reference/resource-reference/console/#kafkacluster)
+- [Kafka Clusters with Schema Registry](https://docs.conduktor.io/platform/reference/resource-reference/console/#kafkacluster)
 - [Generic](./docs/resources/generic.md) :warning: This resource is experimental and should be used with care.
 
 ## Install
@@ -232,9 +232,9 @@ make go-lint    # run golangci-lint linter
 
 Future versions of the Conduktor Terraform provider will evolve to support more resources.
 
-Need a resource to unblock a use case? [Feedback](https://product.conduktor.help/c/74-terraform-provider) to the Product team directly.
+Need a resource to unblock a use case? [Feedback](https://support.conduktor.io/hc/en-gb/requests/new?ticket_form_id=17438365654417) to the Product team directly.
 
-Our current order of priority is:
+We are currently reviewing the following resources:
 
 1. Console resources:
   - [Kafka Connect Cluster](https://docs.conduktor.io/platform/reference/resource-reference/console/#kafkaconnectcluster)
@@ -258,7 +258,7 @@ Our current order of priority is:
 
 > [!NOTE]
 >
-> This list is not exaustive and can change depending on requests and needs.
+> This list is not exhaustive and can change depending on requests and needs.
 
 ## Contributing
 
