@@ -1,20 +1,20 @@
 ---
-page_title: "Condutkor : conduktor_kafka_cluster_v2 "
+page_title: "Conduktor : conduktor_kafka_cluster_v2 "
 subcategory: "console/v2"
 description: |-
-    Resource for managing Conduktor Kafka cluster and Schema registry.
-    This resource allows you to create, read, update and delete Kafka clusters and Schema registries in Conduktor.
+    Resource for managing Conduktor Kafka cluster definition with optional Schema registry.
+    This resource allows you to create, read, update and delete Kafka cluster and Schema registry definitions in Conduktor.
 ---
 
 # conduktor_kafka_cluster_v2
 
-Resource for managing Conduktor Kafka cluster and Schema registry.
-This resource allows you to create, read, update and delete Kafka clusters and Schema registries in Conduktor.
+Resource for managing Conduktor Kafka cluster and Schema registry definitions.
+This resource allows you to create, read, update and delete Kafka clusters and Schema registry definitions in Conduktor.
 
 ## Example Usage
 
 ### Simple Kafka cluster without Schema registry
-This example creates a simple Kafka cluster without authentication resource and without Schema Registry.
+This example creates a simple Kafka cluster definition without authentication resource and without Schema Registry.
 ```terraform
 resource "conduktor_kafka_cluster_v2" "simple" {
   name = "simple-cluster"
@@ -29,8 +29,8 @@ resource "conduktor_kafka_cluster_v2" "simple" {
 ```
 
 ### Confluent Kafka cluster with Schema registry
-This example creates a Confluent Kafka cluster and Schema Registry resource.
-The Schema Registry authentication use mTLS.
+This example creates a Confluent Kafka cluster and Schema Registry definition resource.
+The Schema Registry authentication uses mTLS.
 ```terraform
 resource "conduktor_kafka_cluster_v2" "confluent" {
   name = "confluent-cluster"
@@ -81,8 +81,8 @@ EOT
 ```
 
 ### Aiven Kafka cluster with Schema registry
-This example creates an Aiven Kafka cluster and Schema Registry resource.
-The Schema Registry authentication use basic auth.
+This example creates an Aiven Kafka cluster and Schema Registry definition resource.
+The Schema Registry authentication uses basic auth.
 ```terraform
 resource "conduktor_kafka_cluster_v2" "aiven" {
   name = "aiven-cluster"
@@ -120,7 +120,7 @@ resource "conduktor_kafka_cluster_v2" "aiven" {
 ```
 
 ### AWS MSK with Glue Schema registry
-This example creates an AWS MSK Kafka Cluster resource and a Glue Schema Registry.
+This example creates an AWS MSK Kafka Cluster and a Glue Schema Registry definition resource.
 ```terraform
 resource "conduktor_kafka_cluster_v2" "aws_msk" {
   name = "aws-cluster"
@@ -154,8 +154,8 @@ resource "conduktor_kafka_cluster_v2" "aws_msk" {
 ```
 
 ### Conduktor Gateway Kafka cluster with Schema registry
-This example creates a Conduktor Gateway Kafka Cluster resource and a Schema Registry.
-The Schema Registry authentication use bearer token.
+This example creates a Conduktor Gateway Kafka Cluster and Schema Registry definition resource.
+The Schema Registry authentication uses a bearer token.
 ```terraform
 resource "conduktor_kafka_cluster_v2" "gateway" {
   name = "gateway-cluster"
@@ -198,7 +198,7 @@ resource "conduktor_kafka_cluster_v2" "gateway" {
 
 ### Required
 
-- `name` (String) Kafka cluster name, must be unique, act as ID for import
+- `name` (String) Kafka cluster name, must be unique, acts as an ID for import
 
 ### Optional
 
@@ -294,8 +294,4 @@ Optional:
 - `token` (String, Sensitive) Schema registry bearer token. Required if security type is `BearerToken`
 - `trust_anchor_arn` (String) Glue Schema registry AWS trust anchor ARN. Required if type is Glue with security `IAMAnywhere`
 - `username` (String) Schema registry basic auth username. Required if security type is `BasicAuth`
-
-
-
-
 
