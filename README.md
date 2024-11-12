@@ -39,6 +39,26 @@ This repository contains the Conduktor Terraform provider, which defines Condukt
 > - It does not support all Console and Gateway resources yet. See our [resources roadmap](#resources-roadmap).
 > - Let us know if you have [feedback](https://support.conduktor.io/hc/en-gb/requests/new?ticket_form_id=17438365654417) or wish to be a design partner.
 
+**Table of Contents**
+- [Supported resources](#supported-resources)
+- [Install](#install)
+- [Usage/Examples](#usageexamples)
+  - [Provider authentication](#provider-authentication)
+    - [API key](#api-key)
+    - [Admin credentials](#admin-credentials)
+- [Development](#development)
+  - [Requirements](#requirements)
+  - [Install git hooks](#install-git-hooks)
+  - [Building The Provider](#building-the-provider)
+    - [Build and install provider in local Terraform registry](#build-and-install-provider-in-local-terraform-registry)
+  - [Adding Dependencies](#adding-dependencies)
+  - [Codegen](#codegen)
+  - [Run acceptance tests](#run-acceptance-tests)
+  - [Misc](#misc)
+- [Resources Roadmap](#resources-roadmap)
+- [Contributing](#contributing)
+- [License](#license)
+
 ## Supported resources
 
 - [Console user](./docs/resources/user_v2.md)
