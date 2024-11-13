@@ -63,7 +63,7 @@ This repository contains the Conduktor Terraform provider, which defines Condukt
 
 - [Console user](./docs/resources/user_v2.md)
 - [Console group](./docs/resources/group_v2.md)
-- [Kafka Clusters with Schema Registry](https://docs.conduktor.io/platform/reference/resource-reference/console/#kafkacluster)
+- [Kafka Clusters with Schema Registry](./docs/resources/kafka_cluster_v2.md)
 - [Generic](./docs/resources/generic.md) :warning: This resource is experimental and should be used with care.
 
 ## Install
