@@ -90,6 +90,7 @@ func kafkaFlavorInternalModelToTerraform(ctx context.Context, r *model.KafkaFlav
 	var typesMap = unknownFlavorObjectValue.AttributeTypes(ctx)
 	var valuesMap = schemaUtils.ValueMapFromTypes(ctx, typesMap)
 	valuesMap["ignore_untrusted_certificate"] = basetypes.NewBoolValue(false) // default value
+	valuesMap["virtual_cluster"] = basetypes.NewStringValue("passthrough")    // default value
 
 	if r.Aiven != nil {
 		valuesMap["type"] = schemaUtils.NewStringValue(validation.AivenKafkaFlavor)
