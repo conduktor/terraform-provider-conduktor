@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -149,8 +150,10 @@ func KafkaClusterV2ResourceSchema(ctx context.Context) schema.Schema {
 							},
 							"virtual_cluster": schema.StringAttribute{
 								Optional:            true,
-								Description:         "Conduktor Gateway Virtual cluster name. Only used if type is `Gateway`",
-								MarkdownDescription: "Conduktor Gateway Virtual cluster name. Only used if type is `Gateway`",
+								Computed:            true,
+								Description:         "Conduktor Gateway Virtual cluster name (default `passthrough`). Only used if type is `Gateway`",
+								MarkdownDescription: "Conduktor Gateway Virtual cluster name (default `passthrough`). Only used if type is `Gateway`",
+								Default:             stringdefault.StaticString("passthrough"),
 							},
 						},
 						CustomType: KafkaFlavorType{

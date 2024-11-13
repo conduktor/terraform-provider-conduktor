@@ -5,7 +5,7 @@ resource "conduktor_kafka_cluster_v2" "gateway" {
   }
   spec {
     display_name      = "Gateway Cluster"
-    bootstrap_servers = "gateway:9092"
+    bootstrap_servers = "gateway:6969"
     properties = {
       "sasl.jaas.config"  = "org.apache.kafka.common.security.plain.PlainLoginModule required username='admin' password='admin-secret';"
       "security.protocol" = "SASL_SSL"
@@ -15,10 +15,10 @@ resource "conduktor_kafka_cluster_v2" "gateway" {
     ignore_untrusted_certificate = true
     kafka_flavor = {
       type                         = "Gateway"
-      url                          = "http://gateway:8088"
+      url                          = "http://gateway:8888"
       user                         = "admin"
       password                     = "admin"
-      virtual_cluster              = "vc1"
+      virtual_cluster              = "passthrough"
       ignore_untrusted_certificate = true
     }
     schema_registry = {

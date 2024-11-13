@@ -164,7 +164,7 @@ resource "conduktor_kafka_cluster_v2" "gateway" {
   }
   spec {
     display_name      = "Gateway Cluster"
-    bootstrap_servers = "gateway:9092"
+    bootstrap_servers = "gateway:6969"
     properties = {
       "sasl.jaas.config"  = "org.apache.kafka.common.security.plain.PlainLoginModule required username='admin' password='admin-secret';"
       "security.protocol" = "SASL_SSL"
@@ -174,10 +174,10 @@ resource "conduktor_kafka_cluster_v2" "gateway" {
     ignore_untrusted_certificate = true
     kafka_flavor = {
       type                         = "Gateway"
-      url                          = "http://gateway:8088"
+      url                          = "http://gateway:8888"
       user                         = "admin"
       password                     = "admin"
-      virtual_cluster              = "vc1"
+      virtual_cluster              = "passthrough"
       ignore_untrusted_certificate = true
     }
     schema_registry = {
@@ -242,7 +242,7 @@ Optional:
 - `service_name` (String) Aiven service name. Required if type is `Aiven`
 - `url` (String) Conduktor Gateway Admin API URL. Required if type is `Gateway`
 - `user` (String) Conduktor Gateway Admin user. Required if type is `Gateway`
-- `virtual_cluster` (String) Conduktor Gateway Virtual cluster name. Only used if type is `Gateway`
+- `virtual_cluster` (String) Conduktor Gateway Virtual cluster name (default `passthrough`). Only used if type is `Gateway`
 
 
 <a id="nestedatt--spec--schema_registry"></a>

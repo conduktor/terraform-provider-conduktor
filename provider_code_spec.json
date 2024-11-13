@@ -978,8 +978,18 @@
                       {
                         "name": "virtual_cluster",
                         "string": {
-                          "description": "Conduktor Gateway Virtual cluster name. Only used if type is `Gateway`",
-                          "computed_optional_required": "optional"
+                          "description": "Conduktor Gateway Virtual cluster name (default `passthrough`). Only used if type is `Gateway`",
+                          "computed_optional_required": "computed_optional",
+                          "default": {
+                            "custom": {
+                              "imports": [
+                                {
+                                  "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+                                }
+                              ],
+                              "schema_definition": "stringdefault.StaticString(\"passthrough\")"
+                            }
+                          }
                         }
                       },
                       {
