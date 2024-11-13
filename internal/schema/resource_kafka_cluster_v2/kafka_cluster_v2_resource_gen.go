@@ -153,7 +153,10 @@ func KafkaClusterV2ResourceSchema(ctx context.Context) schema.Schema {
 								Computed:            true,
 								Description:         "Conduktor Gateway Virtual cluster name (default `passthrough`). Only used if type is `Gateway`",
 								MarkdownDescription: "Conduktor Gateway Virtual cluster name (default `passthrough`). Only used if type is `Gateway`",
-								Default:             stringdefault.StaticString("passthrough"),
+								Validators: []validator.String{
+									validation.NonEmptyString(),
+								},
+								Default: stringdefault.StaticString("passthrough"),
 							},
 						},
 						CustomType: KafkaFlavorType{

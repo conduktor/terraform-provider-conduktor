@@ -989,7 +989,19 @@
                               ],
                               "schema_definition": "stringdefault.StaticString(\"passthrough\")"
                             }
-                          }
+                          },
+                          "validators": [
+                            {
+                              "custom": {
+                                "imports": [
+                                  {
+                                    "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
+                                  }
+                                ],
+                                "schema_definition": "validation.NonEmptyString()"
+                              }
+                            }
+                          ]
                         }
                       },
                       {
