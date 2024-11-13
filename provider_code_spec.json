@@ -561,7 +561,7 @@
           {
             "name": "name",
             "string": {
-              "description": "Kafka cluster name, must be unique, act as ID for import",
+              "description": "Kafka cluster name, must be unique, acts as an ID for import",
               "computed_optional_required": "required",
               "plan_modifiers": [
                 {

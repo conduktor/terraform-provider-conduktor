@@ -295,3 +295,7 @@ Optional:
 - `trust_anchor_arn` (String) Glue Schema registry AWS trust anchor ARN. Required if type is Glue with security `IAMAnywhere`
 - `username` (String) Schema registry basic auth username. Required if security type is `BasicAuth`
 
+
+
+
+
