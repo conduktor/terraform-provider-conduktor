@@ -294,8 +294,8 @@
                 },
                 {
                   "name": "external_groups",
-                  "list": {
-                    "description": "List of external groups from SSO mapped to this group",
+                  "set": {
+                    "description": "Set of external groups from SSO mapped to this group",
                     "computed_optional_required": "computed_optional",
                     "element_type": {
                       "string": {}
@@ -304,24 +304,12 @@
                       "custom": {
                         "imports": [
                           {
-                            "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
+                            "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
                           }
                         ],
-                        "schema_definition": "listdefault.StaticValue(basetypes.NewListValueMust(types.StringType, []attr.Value{}))"
+                        "schema_definition": "setdefault.StaticValue(basetypes.NewSetValueMust(types.StringType, []attr.Value{}))"
                       }
-                    },
-                    "validators": [
-                      {
-                        "custom": {
-                          "imports": [
-                            {
-                              "path": "github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
-                            }
-                          ],
-                          "schema_definition": "listvalidator.UniqueValues()"
-                        }
-                      }
-                    ]
+                    }
                   }
                 },
                 {

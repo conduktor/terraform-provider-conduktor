@@ -81,7 +81,7 @@ Required:
 Optional:
 
 - `description` (String) Group description
-- `external_groups` (List of String) List of external groups from SSO mapped to this group
+- `external_groups` (Set of String) Set of external groups from SSO mapped to this group
 - `members` (List of String) List of members of the group
 - `permissions` (Attributes Set) Set of all group permissions (see [below for nested schema](#nestedatt--spec--permissions))
 

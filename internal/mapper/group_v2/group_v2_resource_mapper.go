@@ -7,6 +7,7 @@ import (
 	"github.com/conduktor/terraform-provider-conduktor/internal/model"
 	schemaUtils "github.com/conduktor/terraform-provider-conduktor/internal/schema"
 	schema "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_group_v2"
+	helpers "github.com/conduktor/terraform-provider-conduktor/internal/test"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -14,20 +15,18 @@ import (
 )
 
 func TFToInternalModel(ctx context.Context, r *schema.GroupV2Model) (model.GroupConsoleResource, error) {
-
-	externalGroups, diag := schemaUtils.ListValueToStringArray(ctx, r.Spec.ExternalGroups)
+	// ExternalGroups
 	if r.Spec.ExternalGroups.IsNull() {
-		tflog.Debug(ctx, "ListValue externalGroups is null")
+		tflog.Debug(ctx, "SetValue externalGroups is null")
+	} else if r.Spec.ExternalGroups.IsUnknown() {
+		tflog.Debug(ctx, "SetValue externalGroups is unknown")
 	}
-
-	if r.Spec.ExternalGroups.IsUnknown() {
-		tflog.Debug(ctx, "ListValue  externalGroups is unknown")
-	}
-
+	externalGroups, diag := helpers.SetValueToStringArray(ctx, r.Spec.ExternalGroups)
 	if diag.HasError() {
 		return model.GroupConsoleResource{}, mapper.WrapDiagError(diag, "externalGroups", mapper.FromTerraform)
 	}
 
+	// Members
 	members, diag := schemaUtils.ListValueToStringArray(ctx, r.Spec.Members)
 	if diag.HasError() {
 		return model.GroupConsoleResource{}, mapper.WrapDiagError(diag, "members", mapper.FromTerraform)
@@ -38,29 +37,15 @@ func TFToInternalModel(ctx context.Context, r *schema.GroupV2Model) (model.Group
 		return model.GroupConsoleResource{}, mapper.WrapDiagError(diag, "membersFromExternalGroups", mapper.FromTerraform)
 	}
 
-	permissions := make([]model.Permission, 0)
-	if !r.Spec.Permissions.IsNull() && !r.Spec.Permissions.IsUnknown() {
-		var tfPermissions []schema.PermissionsValue
-		diag = r.Spec.Permissions.ElementsAs(ctx, &tfPermissions, false)
-		if diag.HasError() {
-			return model.GroupConsoleResource{}, mapper.WrapDiagError(diag, "permissions", mapper.FromTerraform)
-		}
-		for _, p := range tfPermissions {
-			var flags []string
-			diag := p.Permissions.ElementsAs(ctx, &flags, false)
-			if diag.HasError() {
-				return model.GroupConsoleResource{}, mapper.WrapDiagError(diag, "permissions.permissions", mapper.FromTerraform)
-			}
-
-			permissions = append(permissions, model.Permission{
-				Name:         p.Name.ValueString(),
-				ResourceType: p.ResourceType.ValueString(),
-				Permissions:  flags,
-				PatternType:  p.PatternType.ValueString(),
-				Cluster:      p.Cluster.ValueString(),
-				KafkaConnect: p.KafkaConnect.ValueString(),
-			})
-		}
+	// Permissions
+	if r.Spec.Permissions.IsNull() {
+		tflog.Debug(ctx, "SetValue permissions is null")
+	} else if r.Spec.Permissions.IsUnknown() {
+		tflog.Debug(ctx, "SetValue permissions is unknown")
+	}
+	permissions, err := helpers.SetValueToPermissionArray(ctx, "groups", r.Spec.Permissions)
+	if err != nil {
+		return model.GroupConsoleResource{}, err
 	}
 
 	return model.NewGroupConsoleResource(
@@ -78,7 +63,7 @@ func TFToInternalModel(ctx context.Context, r *schema.GroupV2Model) (model.Group
 
 func InternalModelToTerraform(ctx context.Context, r *model.GroupConsoleResource) (schema.GroupV2Model, error) {
 
-	externalGroupsList, diag := schemaUtils.StringArrayToListValue(r.Spec.ExternalGroups)
+	externalGroupsList, diag := helpers.StringArrayToSetValue(r.Spec.ExternalGroups)
 	if diag.HasError() {
 		return schema.GroupV2Model{}, mapper.WrapDiagError(diag, "external_groups", mapper.IntoTerraform)
 	}
@@ -93,45 +78,9 @@ func InternalModelToTerraform(ctx context.Context, r *model.GroupConsoleResource
 		return schema.GroupV2Model{}, mapper.WrapDiagError(diag, "members_from_external_groups", mapper.IntoTerraform)
 	}
 
-	var tfPermissions []attr.Value
-	for _, p := range r.Spec.Permissions {
-		var flags []attr.Value
-		for _, f := range p.Permissions {
-			flags = append(flags, types.StringValue(f))
-		}
-
-		flagsList, diag := types.SetValue(types.StringType, flags)
-		if diag.HasError() {
-			return schema.GroupV2Model{}, mapper.WrapDiagError(diag, "permissions.permissions", mapper.IntoTerraform)
-		}
-		permObj, diag := schema.NewPermissionsValue(
-			map[string]attr.Type{
-				"name":          basetypes.StringType{},
-				"resource_type": basetypes.StringType{},
-				"permissions":   flagsList.Type(ctx),
-				"pattern_type":  basetypes.StringType{},
-				"cluster":       basetypes.StringType{},
-				"kafka_connect": basetypes.StringType{},
-			},
-			map[string]attr.Value{
-				"name":          schemaUtils.NewStringValue(p.Name),
-				"resource_type": schemaUtils.NewStringValue(p.ResourceType),
-				"permissions":   flagsList,
-				"pattern_type":  schemaUtils.NewStringValue(p.PatternType),
-				"cluster":       schemaUtils.NewStringValue(p.Cluster),
-				"kafka_connect": schemaUtils.NewStringValue(p.KafkaConnect),
-			},
-		)
-		if diag.HasError() {
-			return schema.GroupV2Model{}, mapper.WrapDiagError(diag, "permissions", mapper.IntoTerraform)
-		}
-
-		tfPermissions = append(tfPermissions, permObj)
-	}
-
-	permissionsList, diag := types.SetValue(schema.PermissionsValue{}.Type(ctx), tfPermissions)
-	if diag.HasError() {
-		return schema.GroupV2Model{}, mapper.WrapDiagError(diag, "permissions", mapper.IntoTerraform)
+	permissionsList, err := helpers.PermissionArrayToSetValue(ctx, "groups", r.Spec.Permissions)
+	if err != nil {
+		return schema.GroupV2Model{}, err
 	}
 
 	specValue, diag := schema.NewSpecValue(
