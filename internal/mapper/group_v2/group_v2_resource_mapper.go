@@ -5,45 +5,33 @@ import (
 
 	mapper "github.com/conduktor/terraform-provider-conduktor/internal/mapper"
 	"github.com/conduktor/terraform-provider-conduktor/internal/model"
-	schemaUtils "github.com/conduktor/terraform-provider-conduktor/internal/schema"
-	schema "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_group_v2"
-	helpers "github.com/conduktor/terraform-provider-conduktor/internal/test"
+	schema "github.com/conduktor/terraform-provider-conduktor/internal/schema"
+	groups "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_group_v2"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
-func TFToInternalModel(ctx context.Context, r *schema.GroupV2Model) (model.GroupConsoleResource, error) {
+func TFToInternalModel(ctx context.Context, r *groups.GroupV2Model) (model.GroupConsoleResource, error) {
 	// ExternalGroups
-	if r.Spec.ExternalGroups.IsNull() {
-		tflog.Debug(ctx, "SetValue externalGroups is null")
-	} else if r.Spec.ExternalGroups.IsUnknown() {
-		tflog.Debug(ctx, "SetValue externalGroups is unknown")
-	}
-	externalGroups, diag := helpers.SetValueToStringArray(ctx, r.Spec.ExternalGroups)
+	externalGroups, diag := schema.SetValueToStringArray(ctx, r.Spec.ExternalGroups)
 	if diag.HasError() {
 		return model.GroupConsoleResource{}, mapper.WrapDiagError(diag, "externalGroups", mapper.FromTerraform)
 	}
 
 	// Members
-	members, diag := helpers.SetValueToStringArray(ctx, r.Spec.Members)
+	members, diag := schema.SetValueToStringArray(ctx, r.Spec.Members)
 	if diag.HasError() {
 		return model.GroupConsoleResource{}, mapper.WrapDiagError(diag, "members", mapper.FromTerraform)
 	}
 
-	membersFromExternalGroups, diag := helpers.SetValueToStringArray(ctx, r.Spec.MembersFromExternalGroups)
+	membersFromExternalGroups, diag := schema.SetValueToStringArray(ctx, r.Spec.MembersFromExternalGroups)
 	if diag.HasError() {
 		return model.GroupConsoleResource{}, mapper.WrapDiagError(diag, "membersFromExternalGroups", mapper.FromTerraform)
 	}
 
 	// Permissions
-	if r.Spec.Permissions.IsNull() {
-		tflog.Debug(ctx, "SetValue permissions is null")
-	} else if r.Spec.Permissions.IsUnknown() {
-		tflog.Debug(ctx, "SetValue permissions is unknown")
-	}
-	permissions, err := helpers.SetValueToPermissionArray(ctx, "groups", r.Spec.Permissions)
+	permissions, err := schema.SetValueToPermissionArray(ctx, schema.GROUPS, r.Spec.Permissions)
 	if err != nil {
 		return model.GroupConsoleResource{}, err
 	}
@@ -61,28 +49,28 @@ func TFToInternalModel(ctx context.Context, r *schema.GroupV2Model) (model.Group
 	), nil
 }
 
-func InternalModelToTerraform(ctx context.Context, r *model.GroupConsoleResource) (schema.GroupV2Model, error) {
-	externalGroupsList, diag := helpers.StringArrayToSetValue(r.Spec.ExternalGroups)
+func InternalModelToTerraform(ctx context.Context, r *model.GroupConsoleResource) (groups.GroupV2Model, error) {
+	externalGroupsList, diag := schema.StringArrayToSetValue(r.Spec.ExternalGroups)
 	if diag.HasError() {
-		return schema.GroupV2Model{}, mapper.WrapDiagError(diag, "external_groups", mapper.IntoTerraform)
+		return groups.GroupV2Model{}, mapper.WrapDiagError(diag, "external_groups", mapper.IntoTerraform)
 	}
 
-	membersList, diag := helpers.StringArrayToSetValue(r.Spec.Members)
+	membersList, diag := schema.StringArrayToSetValue(r.Spec.Members)
 	if diag.HasError() {
-		return schema.GroupV2Model{}, mapper.WrapDiagError(diag, "members", mapper.IntoTerraform)
+		return groups.GroupV2Model{}, mapper.WrapDiagError(diag, "members", mapper.IntoTerraform)
 	}
 
-	membersFromExternalGroupsList, diag := helpers.StringArrayToSetValue(r.Spec.MembersFromExternalGroups)
+	membersFromExternalGroupsList, diag := schema.StringArrayToSetValue(r.Spec.MembersFromExternalGroups)
 	if diag.HasError() {
-		return schema.GroupV2Model{}, mapper.WrapDiagError(diag, "members_from_external_groups", mapper.IntoTerraform)
+		return groups.GroupV2Model{}, mapper.WrapDiagError(diag, "members_from_external_groups", mapper.IntoTerraform)
 	}
 
-	permissionsList, err := helpers.PermissionArrayToSetValue(ctx, "groups", r.Spec.Permissions)
+	permissionsList, err := schema.PermissionArrayToSetValue(ctx, schema.GROUPS, r.Spec.Permissions)
 	if err != nil {
-		return schema.GroupV2Model{}, err
+		return groups.GroupV2Model{}, err
 	}
 
-	specValue, diag := schema.NewSpecValue(
+	specValue, diag := groups.NewSpecValue(
 		map[string]attr.Type{
 			"description":                  basetypes.StringType{},
 			"display_name":                 basetypes.StringType{},
@@ -92,8 +80,8 @@ func InternalModelToTerraform(ctx context.Context, r *model.GroupConsoleResource
 			"permissions":                  permissionsList.Type(ctx),
 		},
 		map[string]attr.Value{
-			"description":                  schemaUtils.NewStringValue(r.Spec.Description),
-			"display_name":                 schemaUtils.NewStringValue(r.Spec.DisplayName),
+			"description":                  schema.NewStringValue(r.Spec.Description),
+			"display_name":                 schema.NewStringValue(r.Spec.DisplayName),
 			"external_groups":              externalGroupsList,
 			"members":                      membersList,
 			"members_from_external_groups": membersFromExternalGroupsList,
@@ -101,10 +89,10 @@ func InternalModelToTerraform(ctx context.Context, r *model.GroupConsoleResource
 		},
 	)
 	if diag.HasError() {
-		return schema.GroupV2Model{}, mapper.WrapDiagError(diag, "spec", mapper.IntoTerraform)
+		return groups.GroupV2Model{}, mapper.WrapDiagError(diag, "spec", mapper.IntoTerraform)
 	}
 
-	return schema.GroupV2Model{
+	return groups.GroupV2Model{
 		Name: types.StringValue(r.Metadata.Name),
 		Spec: specValue,
 	}, nil
