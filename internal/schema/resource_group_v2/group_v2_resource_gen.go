@@ -6,12 +6,10 @@ import (
 	"context"
 	"fmt"
 	"github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
-	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -61,26 +59,20 @@ func GroupV2ResourceSchema(ctx context.Context) schema.Schema {
 						MarkdownDescription: "Set of external groups from SSO mapped to this group",
 						Default:             setdefault.StaticValue(basetypes.NewSetValueMust(types.StringType, []attr.Value{})),
 					},
-					"members": schema.ListAttribute{
+					"members": schema.SetAttribute{
 						ElementType:         types.StringType,
 						Optional:            true,
 						Computed:            true,
-						Description:         "List of members of the group",
-						MarkdownDescription: "List of members of the group",
-						Validators: []validator.List{
-							listvalidator.UniqueValues(),
-						},
-						Default: listdefault.StaticValue(basetypes.NewListValueMust(types.StringType, []attr.Value{})),
+						Description:         "Set of members of the group",
+						MarkdownDescription: "Set of members of the group",
+						Default:             setdefault.StaticValue(basetypes.NewSetValueMust(types.StringType, []attr.Value{})),
 					},
-					"members_from_external_groups": schema.ListAttribute{
+					"members_from_external_groups": schema.SetAttribute{
 						ElementType:         types.StringType,
 						Computed:            true,
-						Description:         "List of members of the group",
-						MarkdownDescription: "List of members of the group",
-						Validators: []validator.List{
-							listvalidator.UniqueValues(),
-						},
-						Default: listdefault.StaticValue(basetypes.NewListValueMust(types.StringType, []attr.Value{})),
+						Description:         "Set of members of the group",
+						MarkdownDescription: "Set of members of the group",
+						Default:             setdefault.StaticValue(basetypes.NewSetValueMust(types.StringType, []attr.Value{})),
 					},
 					"permissions": schema.SetNestedAttribute{
 						NestedObject: schema.NestedAttributeObject{
@@ -242,12 +234,12 @@ func (t SpecType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue)
 		return nil, diags
 	}
 
-	membersVal, ok := membersAttribute.(basetypes.ListValue)
+	membersVal, ok := membersAttribute.(basetypes.SetValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`members expected to be basetypes.ListValue, was: %T`, membersAttribute))
+			fmt.Sprintf(`members expected to be basetypes.SetValue, was: %T`, membersAttribute))
 	}
 
 	membersFromExternalGroupsAttribute, ok := attributes["members_from_external_groups"]
@@ -260,12 +252,12 @@ func (t SpecType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue)
 		return nil, diags
 	}
 
-	membersFromExternalGroupsVal, ok := membersFromExternalGroupsAttribute.(basetypes.ListValue)
+	membersFromExternalGroupsVal, ok := membersFromExternalGroupsAttribute.(basetypes.SetValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`members_from_external_groups expected to be basetypes.ListValue, was: %T`, membersFromExternalGroupsAttribute))
+			fmt.Sprintf(`members_from_external_groups expected to be basetypes.SetValue, was: %T`, membersFromExternalGroupsAttribute))
 	}
 
 	permissionsAttribute, ok := attributes["permissions"]
@@ -428,12 +420,12 @@ func NewSpecValue(attributeTypes map[string]attr.Type, attributes map[string]att
 		return NewSpecValueUnknown(), diags
 	}
 
-	membersVal, ok := membersAttribute.(basetypes.ListValue)
+	membersVal, ok := membersAttribute.(basetypes.SetValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`members expected to be basetypes.ListValue, was: %T`, membersAttribute))
+			fmt.Sprintf(`members expected to be basetypes.SetValue, was: %T`, membersAttribute))
 	}
 
 	membersFromExternalGroupsAttribute, ok := attributes["members_from_external_groups"]
@@ -446,12 +438,12 @@ func NewSpecValue(attributeTypes map[string]attr.Type, attributes map[string]att
 		return NewSpecValueUnknown(), diags
 	}
 
-	membersFromExternalGroupsVal, ok := membersFromExternalGroupsAttribute.(basetypes.ListValue)
+	membersFromExternalGroupsVal, ok := membersFromExternalGroupsAttribute.(basetypes.SetValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`members_from_external_groups expected to be basetypes.ListValue, was: %T`, membersFromExternalGroupsAttribute))
+			fmt.Sprintf(`members_from_external_groups expected to be basetypes.SetValue, was: %T`, membersFromExternalGroupsAttribute))
 	}
 
 	permissionsAttribute, ok := attributes["permissions"]
@@ -558,8 +550,8 @@ type SpecValue struct {
 	Description               basetypes.StringValue `tfsdk:"description"`
 	DisplayName               basetypes.StringValue `tfsdk:"display_name"`
 	ExternalGroups            basetypes.SetValue    `tfsdk:"external_groups"`
-	Members                   basetypes.ListValue   `tfsdk:"members"`
-	MembersFromExternalGroups basetypes.ListValue   `tfsdk:"members_from_external_groups"`
+	Members                   basetypes.SetValue    `tfsdk:"members"`
+	MembersFromExternalGroups basetypes.SetValue    `tfsdk:"members_from_external_groups"`
 	Permissions               basetypes.SetValue    `tfsdk:"permissions"`
 	state                     attr.ValueState
 }
@@ -575,10 +567,10 @@ func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) 
 	attrTypes["external_groups"] = basetypes.SetType{
 		ElemType: types.StringType,
 	}.TerraformType(ctx)
-	attrTypes["members"] = basetypes.ListType{
+	attrTypes["members"] = basetypes.SetType{
 		ElemType: types.StringType,
 	}.TerraformType(ctx)
-	attrTypes["members_from_external_groups"] = basetypes.ListType{
+	attrTypes["members_from_external_groups"] = basetypes.SetType{
 		ElemType: types.StringType,
 	}.TerraformType(ctx)
 	attrTypes["permissions"] = basetypes.SetType{
@@ -716,10 +708,10 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 			"external_groups": basetypes.SetType{
 				ElemType: types.StringType,
 			},
-			"members": basetypes.ListType{
+			"members": basetypes.SetType{
 				ElemType: types.StringType,
 			},
-			"members_from_external_groups": basetypes.ListType{
+			"members_from_external_groups": basetypes.SetType{
 				ElemType: types.StringType,
 			},
 			"permissions": basetypes.SetType{
@@ -728,15 +720,15 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 		}), diags
 	}
 
-	var membersVal basetypes.ListValue
+	var membersVal basetypes.SetValue
 	switch {
 	case v.Members.IsUnknown():
-		membersVal = types.ListUnknown(types.StringType)
+		membersVal = types.SetUnknown(types.StringType)
 	case v.Members.IsNull():
-		membersVal = types.ListNull(types.StringType)
+		membersVal = types.SetNull(types.StringType)
 	default:
 		var d diag.Diagnostics
-		membersVal, d = types.ListValue(types.StringType, v.Members.Elements())
+		membersVal, d = types.SetValue(types.StringType, v.Members.Elements())
 		diags.Append(d...)
 	}
 
@@ -747,10 +739,10 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 			"external_groups": basetypes.SetType{
 				ElemType: types.StringType,
 			},
-			"members": basetypes.ListType{
+			"members": basetypes.SetType{
 				ElemType: types.StringType,
 			},
-			"members_from_external_groups": basetypes.ListType{
+			"members_from_external_groups": basetypes.SetType{
 				ElemType: types.StringType,
 			},
 			"permissions": basetypes.SetType{
@@ -759,15 +751,15 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 		}), diags
 	}
 
-	var membersFromExternalGroupsVal basetypes.ListValue
+	var membersFromExternalGroupsVal basetypes.SetValue
 	switch {
 	case v.MembersFromExternalGroups.IsUnknown():
-		membersFromExternalGroupsVal = types.ListUnknown(types.StringType)
+		membersFromExternalGroupsVal = types.SetUnknown(types.StringType)
 	case v.MembersFromExternalGroups.IsNull():
-		membersFromExternalGroupsVal = types.ListNull(types.StringType)
+		membersFromExternalGroupsVal = types.SetNull(types.StringType)
 	default:
 		var d diag.Diagnostics
-		membersFromExternalGroupsVal, d = types.ListValue(types.StringType, v.MembersFromExternalGroups.Elements())
+		membersFromExternalGroupsVal, d = types.SetValue(types.StringType, v.MembersFromExternalGroups.Elements())
 		diags.Append(d...)
 	}
 
@@ -778,10 +770,10 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 			"external_groups": basetypes.SetType{
 				ElemType: types.StringType,
 			},
-			"members": basetypes.ListType{
+			"members": basetypes.SetType{
 				ElemType: types.StringType,
 			},
-			"members_from_external_groups": basetypes.ListType{
+			"members_from_external_groups": basetypes.SetType{
 				ElemType: types.StringType,
 			},
 			"permissions": basetypes.SetType{
@@ -796,10 +788,10 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 		"external_groups": basetypes.SetType{
 			ElemType: types.StringType,
 		},
-		"members": basetypes.ListType{
+		"members": basetypes.SetType{
 			ElemType: types.StringType,
 		},
-		"members_from_external_groups": basetypes.ListType{
+		"members_from_external_groups": basetypes.SetType{
 			ElemType: types.StringType,
 		},
 		"permissions": basetypes.SetType{
@@ -886,10 +878,10 @@ func (v SpecValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 		"external_groups": basetypes.SetType{
 			ElemType: types.StringType,
 		},
-		"members": basetypes.ListType{
+		"members": basetypes.SetType{
 			ElemType: types.StringType,
 		},
-		"members_from_external_groups": basetypes.ListType{
+		"members_from_external_groups": basetypes.SetType{
 			ElemType: types.StringType,
 		},
 		"permissions": basetypes.SetType{

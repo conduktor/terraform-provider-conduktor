@@ -314,8 +314,8 @@
                 },
                 {
                   "name": "members",
-                  "list": {
-                    "description": "List of members of the group",
+                  "set": {
+                    "description": "Set of members of the group",
                     "computed_optional_required": "computed_optional",
                     "element_type": {
                       "string": {}
@@ -324,30 +324,19 @@
                       "custom": {
                         "imports": [
                           {
-                            "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
+                            "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
                           }
                         ],
-                        "schema_definition": "listdefault.StaticValue(basetypes.NewListValueMust(types.StringType, []attr.Value{}))"
+                        "schema_definition": "setdefault.StaticValue(basetypes.NewSetValueMust(types.StringType, []attr.Value{}))"
                       }
                     },
-                    "validators": [
-                      {
-                        "custom": {
-                          "imports": [
-                            {
-                              "path": "github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
-                            }
-                          ],
-                          "schema_definition": "listvalidator.UniqueValues()"
-                        }
-                      }
-                    ]
+                    "validators": []
                   }
                 },
                 {
                   "name": "members_from_external_groups",
-                  "list": {
-                    "description": "List of members of the group",
+                  "set": {
+                    "description": "Set of members of the group",
                     "computed_optional_required": "computed",
                     "element_type": {
                       "string": {}
@@ -356,24 +345,13 @@
                       "custom": {
                         "imports": [
                           {
-                            "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
+                            "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
                           }
                         ],
-                        "schema_definition": "listdefault.StaticValue(basetypes.NewListValueMust(types.StringType, []attr.Value{}))"
+                        "schema_definition": "setdefault.StaticValue(basetypes.NewSetValueMust(types.StringType, []attr.Value{}))"
                       }
                     },
-                    "validators": [
-                      {
-                        "custom": {
-                          "imports": [
-                            {
-                              "path": "github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
-                            }
-                          ],
-                          "schema_definition": "listvalidator.UniqueValues()"
-                        }
-                      }
-                    ]
+                    "validators": []
                   }
                 },
                 {

@@ -175,6 +175,7 @@ func SetValueToPermissionArray(ctx context.Context, resource string, set basetyp
 
 	// Ideally the switch within groups and users would have less replication.
 	// This might be worth a re-work in the future.
+	// NOTE: an idea would be to use ObjectValue instead of user/group PermissionsValue.
 	if !set.IsNull() && !set.IsUnknown() {
 		// Case for groups
 		if resource == "groups" {

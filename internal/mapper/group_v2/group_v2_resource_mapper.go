@@ -27,12 +27,12 @@ func TFToInternalModel(ctx context.Context, r *schema.GroupV2Model) (model.Group
 	}
 
 	// Members
-	members, diag := schemaUtils.ListValueToStringArray(ctx, r.Spec.Members)
+	members, diag := helpers.SetValueToStringArray(ctx, r.Spec.Members)
 	if diag.HasError() {
 		return model.GroupConsoleResource{}, mapper.WrapDiagError(diag, "members", mapper.FromTerraform)
 	}
 
-	membersFromExternalGroups, diag := schemaUtils.ListValueToStringArray(ctx, r.Spec.MembersFromExternalGroups)
+	membersFromExternalGroups, diag := helpers.SetValueToStringArray(ctx, r.Spec.MembersFromExternalGroups)
 	if diag.HasError() {
 		return model.GroupConsoleResource{}, mapper.WrapDiagError(diag, "membersFromExternalGroups", mapper.FromTerraform)
 	}
@@ -62,18 +62,17 @@ func TFToInternalModel(ctx context.Context, r *schema.GroupV2Model) (model.Group
 }
 
 func InternalModelToTerraform(ctx context.Context, r *model.GroupConsoleResource) (schema.GroupV2Model, error) {
-
 	externalGroupsList, diag := helpers.StringArrayToSetValue(r.Spec.ExternalGroups)
 	if diag.HasError() {
 		return schema.GroupV2Model{}, mapper.WrapDiagError(diag, "external_groups", mapper.IntoTerraform)
 	}
 
-	membersList, diag := schemaUtils.StringArrayToListValue(r.Spec.Members)
+	membersList, diag := helpers.StringArrayToSetValue(r.Spec.Members)
 	if diag.HasError() {
 		return schema.GroupV2Model{}, mapper.WrapDiagError(diag, "members", mapper.IntoTerraform)
 	}
 
-	membersFromExternalGroupsList, diag := schemaUtils.StringArrayToListValue(r.Spec.MembersFromExternalGroups)
+	membersFromExternalGroupsList, diag := helpers.StringArrayToSetValue(r.Spec.MembersFromExternalGroups)
 	if diag.HasError() {
 		return schema.GroupV2Model{}, mapper.WrapDiagError(diag, "members_from_external_groups", mapper.IntoTerraform)
 	}
