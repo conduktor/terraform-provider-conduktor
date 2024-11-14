@@ -6,7 +6,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
-	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -50,7 +50,7 @@ func UserV2ResourceSchema(ctx context.Context) schema.Schema {
 						Description:         "User lastname",
 						MarkdownDescription: "User lastname",
 					},
-					"permissions": schema.ListNestedAttribute{
+					"permissions": schema.SetNestedAttribute{
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"cluster": schema.StringAttribute{
@@ -76,14 +76,13 @@ func UserV2ResourceSchema(ctx context.Context) schema.Schema {
 										stringvalidator.OneOf(validation.ValidPermissionPatternTypes...),
 									},
 								},
-								"permissions": schema.ListAttribute{
+								"permissions": schema.SetAttribute{
 									ElementType:         types.StringType,
 									Required:            true,
 									Description:         "Set of all permissions to apply on the resource. See https://docs.conduktor.io/platform/reference/resource-reference/console/#permissions for more details",
 									MarkdownDescription: "Set of all permissions to apply on the resource. See https://docs.conduktor.io/platform/reference/resource-reference/console/#permissions for more details",
-									Validators: []validator.List{
-										listvalidator.UniqueValues(),
-										listvalidator.ValueStringsAre(stringvalidator.OneOf(validation.ValidPermissions...)),
+									Validators: []validator.Set{
+										setvalidator.ValueStringsAre(stringvalidator.OneOf(validation.ValidPermissions...)),
 									},
 								},
 								"resource_type": schema.StringAttribute{
@@ -193,12 +192,12 @@ func (t SpecType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue)
 		return nil, diags
 	}
 
-	permissionsVal, ok := permissionsAttribute.(basetypes.ListValue)
+	permissionsVal, ok := permissionsAttribute.(basetypes.SetValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`permissions expected to be basetypes.ListValue, was: %T`, permissionsAttribute))
+			fmt.Sprintf(`permissions expected to be basetypes.SetValue, was: %T`, permissionsAttribute))
 	}
 
 	if diags.HasError() {
@@ -322,12 +321,12 @@ func NewSpecValue(attributeTypes map[string]attr.Type, attributes map[string]att
 		return NewSpecValueUnknown(), diags
 	}
 
-	permissionsVal, ok := permissionsAttribute.(basetypes.ListValue)
+	permissionsVal, ok := permissionsAttribute.(basetypes.SetValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`permissions expected to be basetypes.ListValue, was: %T`, permissionsAttribute))
+			fmt.Sprintf(`permissions expected to be basetypes.SetValue, was: %T`, permissionsAttribute))
 	}
 
 	if diags.HasError() {
@@ -412,7 +411,7 @@ var _ basetypes.ObjectValuable = SpecValue{}
 type SpecValue struct {
 	Firstname   basetypes.StringValue `tfsdk:"firstname"`
 	Lastname    basetypes.StringValue `tfsdk:"lastname"`
-	Permissions basetypes.ListValue   `tfsdk:"permissions"`
+	Permissions basetypes.SetValue    `tfsdk:"permissions"`
 	state       attr.ValueState
 }
 
@@ -424,7 +423,7 @@ func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) 
 
 	attrTypes["firstname"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["lastname"] = basetypes.StringType{}.TerraformType(ctx)
-	attrTypes["permissions"] = basetypes.ListType{
+	attrTypes["permissions"] = basetypes.SetType{
 		ElemType: PermissionsValue{}.Type(ctx),
 	}.TerraformType(ctx)
 
@@ -487,7 +486,7 @@ func (v SpecValue) String() string {
 func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	permissions := types.ListValueMust(
+	permissions := types.SetValueMust(
 		PermissionsType{
 			basetypes.ObjectType{
 				AttrTypes: PermissionsValue{}.AttributeTypes(ctx),
@@ -497,7 +496,7 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 	)
 
 	if v.Permissions.IsNull() {
-		permissions = types.ListNull(
+		permissions = types.SetNull(
 			PermissionsType{
 				basetypes.ObjectType{
 					AttrTypes: PermissionsValue{}.AttributeTypes(ctx),
@@ -507,7 +506,7 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 	}
 
 	if v.Permissions.IsUnknown() {
-		permissions = types.ListUnknown(
+		permissions = types.SetUnknown(
 			PermissionsType{
 				basetypes.ObjectType{
 					AttrTypes: PermissionsValue{}.AttributeTypes(ctx),
@@ -519,7 +518,7 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 	attributeTypes := map[string]attr.Type{
 		"firstname": basetypes.StringType{},
 		"lastname":  basetypes.StringType{},
-		"permissions": basetypes.ListType{
+		"permissions": basetypes.SetType{
 			ElemType: PermissionsValue{}.Type(ctx),
 		},
 	}
@@ -585,7 +584,7 @@ func (v SpecValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 	return map[string]attr.Type{
 		"firstname": basetypes.StringType{},
 		"lastname":  basetypes.StringType{},
-		"permissions": basetypes.ListType{
+		"permissions": basetypes.SetType{
 			ElemType: PermissionsValue{}.Type(ctx),
 		},
 	}
@@ -698,12 +697,12 @@ func (t PermissionsType) ValueFromObject(ctx context.Context, in basetypes.Objec
 		return nil, diags
 	}
 
-	permissionsVal, ok := permissionsAttribute.(basetypes.ListValue)
+	permissionsVal, ok := permissionsAttribute.(basetypes.SetValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`permissions expected to be basetypes.ListValue, was: %T`, permissionsAttribute))
+			fmt.Sprintf(`permissions expected to be basetypes.SetValue, was: %T`, permissionsAttribute))
 	}
 
 	resourceTypeAttribute, ok := attributes["resource_type"]
@@ -884,12 +883,12 @@ func NewPermissionsValue(attributeTypes map[string]attr.Type, attributes map[str
 		return NewPermissionsValueUnknown(), diags
 	}
 
-	permissionsVal, ok := permissionsAttribute.(basetypes.ListValue)
+	permissionsVal, ok := permissionsAttribute.(basetypes.SetValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`permissions expected to be basetypes.ListValue, was: %T`, permissionsAttribute))
+			fmt.Sprintf(`permissions expected to be basetypes.SetValue, was: %T`, permissionsAttribute))
 	}
 
 	resourceTypeAttribute, ok := attributes["resource_type"]
@@ -997,7 +996,7 @@ type PermissionsValue struct {
 	KafkaConnect basetypes.StringValue `tfsdk:"kafka_connect"`
 	Name         basetypes.StringValue `tfsdk:"name"`
 	PatternType  basetypes.StringValue `tfsdk:"pattern_type"`
-	Permissions  basetypes.ListValue   `tfsdk:"permissions"`
+	Permissions  basetypes.SetValue    `tfsdk:"permissions"`
 	ResourceType basetypes.StringValue `tfsdk:"resource_type"`
 	state        attr.ValueState
 }
@@ -1012,7 +1011,7 @@ func (v PermissionsValue) ToTerraformValue(ctx context.Context) (tftypes.Value, 
 	attrTypes["kafka_connect"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["name"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["pattern_type"] = basetypes.StringType{}.TerraformType(ctx)
-	attrTypes["permissions"] = basetypes.ListType{
+	attrTypes["permissions"] = basetypes.SetType{
 		ElemType: types.StringType,
 	}.TerraformType(ctx)
 	attrTypes["resource_type"] = basetypes.StringType{}.TerraformType(ctx)
@@ -1100,15 +1099,15 @@ func (v PermissionsValue) String() string {
 func (v PermissionsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	var permissionsVal basetypes.ListValue
+	var permissionsVal basetypes.SetValue
 	switch {
 	case v.Permissions.IsUnknown():
-		permissionsVal = types.ListUnknown(types.StringType)
+		permissionsVal = types.SetUnknown(types.StringType)
 	case v.Permissions.IsNull():
-		permissionsVal = types.ListNull(types.StringType)
+		permissionsVal = types.SetNull(types.StringType)
 	default:
 		var d diag.Diagnostics
-		permissionsVal, d = types.ListValue(types.StringType, v.Permissions.Elements())
+		permissionsVal, d = types.SetValue(types.StringType, v.Permissions.Elements())
 		diags.Append(d...)
 	}
 
@@ -1118,7 +1117,7 @@ func (v PermissionsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectVa
 			"kafka_connect": basetypes.StringType{},
 			"name":          basetypes.StringType{},
 			"pattern_type":  basetypes.StringType{},
-			"permissions": basetypes.ListType{
+			"permissions": basetypes.SetType{
 				ElemType: types.StringType,
 			},
 			"resource_type": basetypes.StringType{},
@@ -1130,7 +1129,7 @@ func (v PermissionsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectVa
 		"kafka_connect": basetypes.StringType{},
 		"name":          basetypes.StringType{},
 		"pattern_type":  basetypes.StringType{},
-		"permissions": basetypes.ListType{
+		"permissions": basetypes.SetType{
 			ElemType: types.StringType,
 		},
 		"resource_type": basetypes.StringType{},
@@ -1214,7 +1213,7 @@ func (v PermissionsValue) AttributeTypes(ctx context.Context) map[string]attr.Ty
 		"kafka_connect": basetypes.StringType{},
 		"name":          basetypes.StringType{},
 		"pattern_type":  basetypes.StringType{},
-		"permissions": basetypes.ListType{
+		"permissions": basetypes.SetType{
 			ElemType: types.StringType,
 		},
 		"resource_type": basetypes.StringType{},
