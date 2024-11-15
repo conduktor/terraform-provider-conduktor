@@ -1,0 +1,12 @@
+{
+  "apiVersion": "v2",
+  "kind": "KafkaCluster",
+  "metadata": {
+    "name": "cluster-minimal"
+  },
+  "spec": {
+    "bootstrapServers": "localhost:9092",
+    "displayName": "Minimal Cluster display name",
+    "ignoreUntrustedCertificate": false
+  }
+}

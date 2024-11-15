@@ -37,17 +37,38 @@ This repository contains the Conduktor Terraform provider, which defines Condukt
 > [!WARNING]
 > - The Conduktor Terraform provider is currently in **Alpha**.
 > - It does not support all Console and Gateway resources yet. See our [resources roadmap](#resources-roadmap).
-> - Let us know if you have [feedback](https://product.conduktor.help/c/74-terraform-provider) or wish to be a design partner.
+> - Let us know if you have [feedback](https://support.conduktor.io/hc/en-gb/requests/new?ticket_form_id=17438365654417) or wish to be a design partner.
+
+**Table of Contents**
+- [Supported resources](#supported-resources)
+- [Install](#install)
+- [Usage/Examples](#usageexamples)
+  - [Provider authentication](#provider-authentication)
+    - [API key](#api-key)
+    - [Admin credentials](#admin-credentials)
+- [Development](#development)
+  - [Requirements](#requirements)
+  - [Install git hooks](#install-git-hooks)
+  - [Building The Provider](#building-the-provider)
+    - [Build and install provider in local Terraform registry](#build-and-install-provider-in-local-terraform-registry)
+  - [Adding Dependencies](#adding-dependencies)
+  - [Codegen](#codegen)
+  - [Run acceptance tests](#run-acceptance-tests)
+  - [Misc](#misc)
+- [Resources Roadmap](#resources-roadmap)
+- [Contributing](#contributing)
+- [License](#license)
 
 ## Supported resources
 
 - [Console user](./docs/resources/user_v2.md)
 - [Console group](./docs/resources/group_v2.md)
+- [Kafka Clusters with Schema Registry](./docs/resources/kafka_cluster_v2.md)
 - [Generic](./docs/resources/generic.md) :warning: This resource is experimental and should be used with care.
 
 ## Install
 
-Provider should be installed automatically with `terraform init`, but it's recommended to pin a specific version or range of version using following [`required_providers` configuration](https://developer.hashicorp.com/terraform/language/providers/requirements) :
+Provider should be installed automatically with `terraform init`, but it's recommended to pin a specific version or range of versions using the following [`required_providers` configuration](https://developer.hashicorp.com/terraform/language/providers/requirements) :
 
 ```hcl
 terraform {
@@ -214,7 +235,7 @@ The project uses different codegen tool to generate source files.
 export CDK_LICENSE="your_license_here"
 make testacc
 ```
-This action will start a testing environment using [Docker Compose](./docker-compose.yaml) and run all acceptance tests against it. Test environment is destroy at the end.
+This action will start a testing environment using [Docker Compose](./docker-compose.yaml) and run all acceptance tests against it. Test environment is destroyed at the end.
 
 You can also start/stop environment and run tests in separate actions using `make start_test_env` / `make test` / `make clean`.
 
@@ -231,12 +252,11 @@ make go-lint    # run golangci-lint linter
 
 Future versions of the Conduktor Terraform provider will evolve to support more resources.
 
-Need a resource to unblock a use case? [Feedback](https://product.conduktor.help/c/74-terraform-provider) to the Product team directly.
+Need a resource to unblock a use case? [Feedback](https://support.conduktor.io/hc/en-gb/requests/new?ticket_form_id=17438365654417) to the Product team directly.
 
-Our current order of priority is:
+We are currently reviewing the following resources:
 
 1. Console resources:
-  - [Kafka Clusters with Schema Regsitry](https://docs.conduktor.io/platform/reference/resource-reference/console/#kafkacluster)
   - [Kafka Connect Cluster](https://docs.conduktor.io/platform/reference/resource-reference/console/#kafkaconnectcluster)
 2. Kafka resources:
   - [Topic](https://docs.conduktor.io/platform/reference/resource-reference/kafka/#topic)
@@ -258,7 +278,7 @@ Our current order of priority is:
 
 > [!NOTE]
 >
-> This list is not exaustive and can change depending on requests and needs.
+> This list is not exhaustive and can change depending on requests and needs.
 
 ## Contributing
 

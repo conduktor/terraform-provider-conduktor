@@ -3,7 +3,8 @@
 set -eu
 SCRIPT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
 
-CLI_VERSION="v0.3.0"
+CLI_VERSION=$(cat "$SCRIPT_DIR/../go.mod" | grep "github.com/conduktor/ctl" | awk '{print $2}')
+echo "Using CLI version: $CLI_VERSION"
 
 # re-export as CDK_USER and CDK_PASSWORD for CLI
 export CDK_USER=${CDK_ADMIN_EMAIL}

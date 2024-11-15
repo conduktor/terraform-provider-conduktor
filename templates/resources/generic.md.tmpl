@@ -1,5 +1,5 @@
 ---
-page_title: "Condutkor : conduktor_generic "
+page_title: "Conduktor : conduktor_generic "
 description: |-
     Generic Resource that use manifests in YAML format.
     This resource allows you to create, read, update and delete any resource supported by Conduktor Console.

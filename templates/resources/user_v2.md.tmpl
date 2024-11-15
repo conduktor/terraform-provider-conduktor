@@ -1,5 +1,5 @@
 ---
-page_title: "Condutkor : conduktor_user_v2 "
+page_title: "Conduktor : conduktor_user_v2 "
 subcategory: "iam/v2"
 description: |-
     Resource for managing Conduktor users.

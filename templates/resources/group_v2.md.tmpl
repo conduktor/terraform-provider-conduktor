@@ -1,5 +1,5 @@
 ---
-page_title: "Condutkor : conduktor_group_v2 "
+page_title: "Conduktor : conduktor_group_v2 "
 subcategory: "iam/v2"
 description: |-
     Resource for managing Conduktor groups.
