@@ -29,9 +29,9 @@ type KafkaConnectSpec struct {
 }
 
 type KafkaConnectSecurity struct {
-	BasicAuth   *BasicAuth
-	BearerToken *BearerToken
-	SSLAuth     *SSLAuth
+	BasicAuth   *KafkaConnectBasicAuth
+	BearerToken *KafkaConnectBearerToken
+	SSLAuth     *KafkaConnectSSLAuth
 }
 
 func (s *KafkaConnectSecurity) UnmarshalJSON(bytes []byte) error {
@@ -42,28 +42,28 @@ func (s *KafkaConnectSecurity) UnmarshalJSON(bytes []byte) error {
 	}
 	switch disc.Type {
 	case "BasicAuth":
-		var basic BasicAuth
+		var basic KafkaConnectBasicAuth
 		err = json.Unmarshal(bytes, &basic)
 		if err != nil {
 			return err
 		}
 		s.BasicAuth = &basic
 	case "BearerToken":
-		var bearertoken BearerToken
+		var bearertoken KafkaConnectBearerToken
 		err = json.Unmarshal(bytes, &bearertoken)
 		if err != nil {
 			return err
 		}
 		s.BearerToken = &bearertoken
 	case "SSLAuth":
-		var sslauth SSLAuth
+		var sslauth KafkaConnectSSLAuth
 		err = json.Unmarshal(bytes, &sslauth)
 		if err != nil {
 			return err
 		}
 		s.SSLAuth = &sslauth
 	default:
-		return fmt.Errorf("unknown confluentLikeSchemaRegistrySecurity type %s", disc.Type)
+		//return fmt.Errorf("unknown security type %s", disc.Type)
 	}
 	return nil
 }
@@ -76,22 +76,22 @@ func (s KafkaConnectSecurity) MarshalJSON() ([]byte, error) {
 	} else if s.SSLAuth != nil {
 		return json.Marshal(s.SSLAuth)
 	} else {
-		return nil, fmt.Errorf("unknown confluentLikeSchemaRegistrySecurity type")
+		return nil, nil
 	}
 }
 
-type SSLAuth struct {
+type KafkaConnectSSLAuth struct {
 	Key              string `json:"key"`
 	CertificateChain string `json:"certificateChain"`
 	Type             string `json:"type"`
 }
 
-type BearerToken struct {
+type KafkaConnectBearerToken struct {
 	Token string `json:"token"`
 	Type  string `json:"type"`
 }
 
-type BasicAuth struct {
+type KafkaConnectBasicAuth struct {
 	Type     string `json:"type"`
 	Username string `json:"username,omitempty"`
 	Password string `json:"password,omitempty"`
