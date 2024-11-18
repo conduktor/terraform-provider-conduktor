@@ -63,7 +63,7 @@ func (s *KafkaConnectSecurity) UnmarshalJSON(bytes []byte) error {
 		}
 		s.SSLAuth = &sslauth
 	default:
-		//return fmt.Errorf("unknown security type %s", disc.Type)
+		return nil
 	}
 	return nil
 }
