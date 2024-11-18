@@ -1,4 +1,3 @@
-
 resource "conduktor_kafka_cluster_v2" "minimal" {
   name = "mini-cluster"
   spec {
@@ -7,24 +6,24 @@ resource "conduktor_kafka_cluster_v2" "minimal" {
   }
 }
 
-resource "conduktor_kafka_connect_v2" "test" {
-  name = "test-connect"
+resource "conduktor_kafka_connect_v2" "basic" {
+  name    = "basic-connect"
   cluster = conduktor_kafka_cluster_v2.minimal.name
   labels = {
-    env = "test"
-    security = "C1"
+    description   = "This is a complex connect using basic authentication"
+    documentation = "https://docs.mycompany.com/complex-connect"
+    env           = "dev"
   }
   spec {
-    display_name      = "Test Connect updated"
-    urls = "http://localhost:8083"
-    headers         = {
+    display_name = "Basic Connect server"
+    urls         = "http://localhost:8083"
+    headers = {
       X-PROJECT-HEADER = "value"
-      AnotherHeader = "test"
-      Cache-Control = "no-store"
+      Cache-Control : "no-cache"
     }
     ignore_untrusted_certificate = false
     security = {
-      type  = "BasicAuth"
+      type     = "BasicAuth"
       username = "user"
       password = "password"
     }

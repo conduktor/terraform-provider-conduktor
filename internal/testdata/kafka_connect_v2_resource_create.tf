@@ -11,7 +11,7 @@ resource "conduktor_kafka_connect_v2" "test" {
   name = "test-connect"
   cluster = conduktor_kafka_cluster_v2.minimal.name
   labels = {
-    "env" = "test"
+    env = "test"
   }
   spec {
     display_name      = "Test Connect"
