@@ -2,19 +2,19 @@
 page_title: "Conduktor : conduktor_kafka_connect_v2 "
 subcategory: "console/v2"
 description: |-
-    Resource for managing Conduktor Kafka Connect servers definition linked to an existing Kafka cluster inside Console.
-    This resource allows you to create, read, update and delete Kafka Connect servers in Conduktor.
+    Resource for managing Conduktor Kafka Connect servers definition linked to an existing Kafka cluster definition inside Conduktor Console.
+    This resource allows you to create, read, update and delete Kafka Connect servers connections from Conduktor Console.
 ---
 
 # conduktor_kafka_connect_v2
 
-Resource for managing Conduktor Kafka connect servers definition linked to an existing Kafka cluster inside Console.
-This resource allows you to create, read, update and delete Kafka Connect servers in Conduktor.
+Resource for managing Conduktor Kafka Connect servers definition linked to an existing Kafka cluster definition inside Conduktor Console.
+This resource allows you to create, read, update and delete Kafka Connect servers connections from Conduktor Console.
 
 ## Example Usage
 
 ### Simple Kafka Connect server
-This example creates a simple Kafka Connect server without any authentication.
+This example creates a simple Kafka Connect server connection without any authentication.
 ```terraform
 resource "conduktor_kafka_cluster_v2" "minimal" {
   name = "mini-cluster"
@@ -35,7 +35,7 @@ resource "conduktor_kafka_connect_v2" "simple" {
 ```
 
 ### Basic Kafka Connect server
-This example creates a complex Kafka Connect server with basic authentication.
+This example creates a complex Kafka Connect server connection with basic authentication.
 ```terraform
 resource "conduktor_kafka_cluster_v2" "minimal" {
   name = "mini-cluster"
@@ -71,7 +71,7 @@ resource "conduktor_kafka_connect_v2" "basic" {
 ```
 
 ### Bearer token Kafka Connect server
-This example creates a complex Kafka Connect server with bearer token authentication.
+This example creates a complex Kafka Connect server connection with bearer token authentication.
 ```terraform
 resource "conduktor_kafka_cluster_v2" "minimal" {
   name = "mini-cluster"
@@ -106,7 +106,7 @@ resource "conduktor_kafka_connect_v2" "bearer" {
 ```
 
 ### mTLS Kafka Connect server
-This example creates a complex Kafka Connect server with mTLS authentication.
+This example creates a complex Kafka Connect server connection with mTLS authentication.
 ```terraform
 resource "conduktor_kafka_cluster_v2" "minimal" {
   name = "mini-cluster"
@@ -203,7 +203,7 @@ Optional:
 
 ## Import
 
-In order to import a Kafka Connect server into Conduktor, you need to know the Kafka cluster ID and the Kafka Connect server ID.
+In order to import a Kafka Connect server connection into Conduktor, you need to know the Kafka cluster ID and the Kafka Connect server ID.
 
 The import ID is constructed as follows: `< cluster_id >/< connect_id >`.
 
