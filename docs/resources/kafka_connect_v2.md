@@ -58,7 +58,7 @@ resource "conduktor_kafka_connect_v2" "basic" {
     urls         = "http://localhost:8083"
     headers = {
       X-PROJECT-HEADER = "value"
-      Cache-Control : "no-cache"
+      Cache-Control    = "no-cache"
     }
     ignore_untrusted_certificate = false
     security = {
@@ -94,7 +94,7 @@ resource "conduktor_kafka_connect_v2" "bearer" {
     urls         = "http://localhost:8083"
     headers = {
       X-PROJECT-HEADER = "value"
-      Cache-Control : "no-cache"
+      Cache-Control    = "no-cache"
     }
     ignore_untrusted_certificate = false
     security = {
@@ -129,7 +129,7 @@ resource "conduktor_kafka_connect_v2" "mtls" {
     urls         = "http://localhost:8083"
     headers = {
       X-PROJECT-HEADER = "value"
-      Cache-Control : "no-cache"
+      Cache-Control    = "no-cache"
     }
     ignore_untrusted_certificate = false
     security = {
