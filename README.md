@@ -64,6 +64,7 @@ This repository contains the Conduktor Terraform provider, which defines Condukt
 - [Console user](./docs/resources/user_v2.md)
 - [Console group](./docs/resources/group_v2.md)
 - [Kafka Clusters with Schema Registry](./docs/resources/kafka_cluster_v2.md)
+- [Kafka Connect Server](./docs/resources/kafka_connect_v2.md)
 - [Generic](./docs/resources/generic.md) :warning: This resource is experimental and should be used with care.
 
 ## Install
@@ -257,7 +258,8 @@ Need a resource to unblock a use case? [Feedback](https://support.conduktor.io/h
 We are currently reviewing the following resources:
 
 1. Console resources:
-  - [Kafka Connect Cluster](https://docs.conduktor.io/platform/reference/resource-reference/console/#kafkaconnectcluster)
+  - [KsqlDBCluster](https://docs.conduktor.io/platform/reference/resource-reference/console/#ksqldbcluster)
+  - [Alert](https://docs.conduktor.io/platform/reference/resource-reference/console/#alert)
 2. Kafka resources:
   - [Topic](https://docs.conduktor.io/platform/reference/resource-reference/kafka/#topic)
   - [Subject](https://docs.conduktor.io/platform/reference/resource-reference/kafka/#subject)

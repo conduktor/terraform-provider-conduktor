@@ -1,0 +1,25 @@
+{
+  "apiVersion": "v2",
+  "kind": "KafkaConnectCluster",
+  "metadata": {
+    "name": "connect-name",
+    "cluster": "cluster-name",
+    "labels": {
+      "key1": "value1"
+    }
+  },
+  "spec": {
+    "urls": "http://localhost:8083",
+    "displayName": "Connect 1",
+    "headers": {
+      "X-PROJECT-HEADER": "value",
+      "AnotherHeader": "test"
+    },
+    "security": {
+      "type": "BasicAuth",
+      "username": "some_user",
+      "password": "some_password"
+    },
+    "ignoreUntrustedCertificate": false
+  }
+}

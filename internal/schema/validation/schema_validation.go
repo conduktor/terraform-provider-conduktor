@@ -77,3 +77,14 @@ var ValidSchemaRegistrySecurityTypes = []string{
 	FromRoleSchemaRegistrySecurity,
 	IAMAnywhereSchemaRegistrySecurity,
 }
+
+// KafkaConnect security.
+var BasicAuthKafkaConnectSecurity = "BasicAuth"
+var BearerTokenKafkaConnectSecurity = "BearerToken"
+var SSLAuthKafkaConnectSecurity = "SSLAuth"
+
+var ValidKafkaConnectSecurityTypes = []string{
+	BasicAuthKafkaConnectSecurity,
+	BearerTokenKafkaConnectSecurity,
+	SSLAuthKafkaConnectSecurity,
+}

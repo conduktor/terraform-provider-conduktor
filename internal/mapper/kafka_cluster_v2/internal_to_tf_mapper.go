@@ -155,7 +155,7 @@ func schemaRegistryInternalModelToTerraform(ctx context.Context, r *model.Schema
 		valuesMap["security"] = securityValue
 	}
 	if r.Glue != nil {
-		security, err := ammazonSecurityInternalModelToTerraform(ctx, &r.Glue.Security)
+		security, err := amazonSecurityInternalModelToTerraform(ctx, &r.Glue.Security)
 		if err != nil {
 			return schema.SchemaRegistryValue{}, err
 		}
@@ -212,7 +212,7 @@ func confluentSecurityInternalModelToTerraform(ctx context.Context, r *model.Con
 
 }
 
-func ammazonSecurityInternalModelToTerraform(ctx context.Context, r *model.AmazonSecurity) (schema.SecurityValue, error) {
+func amazonSecurityInternalModelToTerraform(ctx context.Context, r *model.AmazonSecurity) (schema.SecurityValue, error) {
 	unknownSecurityObjectValue, diag := schema.NewSecurityValueUnknown().ToObjectValue(ctx)
 	if diag.HasError() {
 		return schema.SecurityValue{}, mapper.WrapDiagError(diag, "schema_registry.security", mapper.IntoTerraform)
