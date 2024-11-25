@@ -50,14 +50,64 @@
         {
           "name": "cert",
           "string": {
-            "description": "Cert in PEM format to authenticate using client certificates. May be set using environment variable `CDK_CERT`. Must be used with key. If key is provided, cert is required. Useful when Console behind a reverse proxy with client certificate authentication.",
+            "description": "Cert in PEM format to authenticate using client certificates. May be set using environment variable `CDK_CERT`. Must be used with key. If key is provided, cert is required. Useful when Console is behind a reverse proxy with client certificate authentication.",
             "optional_required": "optional"
           }
         },
         {
           "name": "key",
           "string": {
-            "description": "Key in PEM format to authenticate using client certificates. May be set using environment variable `CDK_KEY`. Must be used with cert. If cert is provided, key is required. Useful when Console behind a reverse proxy with client certificate authentication.",
+            "description": "Key in PEM format to authenticate using client certificates. May be set using environment variable `CDK_KEY`. Must be used with cert. If cert is provided, key is required. Useful when Console is behind a reverse proxy with client certificate authentication.",
+            "optional_required": "optional"
+          }
+        },
+        {
+          "name": "gateway_url",
+          "string": {
+            "description": "The URL of the Conduktor Gateway. May also be set using environment variable `CDK_GATEWAY_BASE_URL`. Required either here or in the environment.",
+            "optional_required": "optional"
+          }
+        },
+        {
+          "name": "gateway_user",
+          "string": {
+            "description": "The email of the Gateway admin user. May be set using environment variable `CDK_GATEWAY_USER`. Required if gateway_url is set.",
+            "optional_required": "optional"
+          }
+        },
+        {
+          "name": "gateway_password",
+          "string": {
+            "description": "The password of Gateway the admin user. May be set using environment variable `CDK_GATEWAY_PASSWORD`. Required if gateway_url is set.",
+            "optional_required": "optional",
+            "sensitive": true
+          }
+        },
+        {
+          "name": "gateway_cacert",
+          "string": {
+            "description": "Root CA certificate in PEM format to verify the Conduktor Gateway certificate. May be set using environment variable `CDK_GATEWAY_CACERT`. If not provided, the system's root CA certificates will be used.",
+            "optional_required": "optional"
+          }
+        },
+        {
+          "name": "gateway_insecure",
+          "bool": {
+            "description": "Skip TLS verification flag. May be set using environment variable `CDK_GATEWAY_INSECURE`.",
+            "optional_required": "optional"
+          }
+        },
+        {
+          "name": "gateway_cert",
+          "string": {
+            "description": "Cert in PEM format to authenticate using client certificates. May be set using environment variable `CDK_GATEWAY_CERT`. Must be used with key. If key is provided, cert is required. Useful when Gateway is behind a reverse proxy with client certificate authentication.",
+            "optional_required": "optional"
+          }
+        },
+        {
+          "name": "gateway_key",
+          "string": {
+            "description": "Key in PEM format to authenticate using client certificates. May be set using environment variable `CDK_GATEWAY_KEY`. Must be used with cert. If cert is provided, key is required. Useful when Gateway is behind a reverse proxy with client certificate authentication.",
             "optional_required": "optional"
           }
         }

@@ -45,9 +45,16 @@ provider "conduktor" {
 - `admin_password` (String, Sensitive) The password of the admin user. May be set using environment variable `CDK_ADMIN_PASSWORD`. Required if admin_email is set. If not provided, the API token will be used to authenticater.
 - `api_token` (String, Sensitive) The API token to authenticate with the Conduktor API. May be set using environment variable `CDK_API_TOKEN` or `CDK_API_KEY`. If not provided, admin_email and admin_password will be used to authenticate. See [documentation](https://docs.conduktor.io/platform/reference/api-reference/#generate-an-api-key) for more information.
 - `cacert` (String) Root CA certificate in PEM format to verify the Conduktor Console certificate. May be set using environment variable `CDK_CACERT`. If not provided, the system's root CA certificates will be used.
-- `cert` (String) Cert in PEM format to authenticate using client certificates. May be set using environment variable `CDK_CERT`. Must be used with key. If key is provided, cert is required. Useful when Console behind a reverse proxy with client certificate authentication.
+- `cert` (String) Cert in PEM format to authenticate using client certificates. May be set using environment variable `CDK_CERT`. Must be used with key. If key is provided, cert is required. Useful when Console is behind a reverse proxy with client certificate authentication.
 - `console_url` (String) The URL of the Conduktor Console. May be set using environment variable `CDK_BASE_URL` or `CDK_CONSOLE_URL`. Required either here or in the environment.
+- `gateway_cacert` (String) Root CA certificate in PEM format to verify the Conduktor Gateway certificate. May be set using environment variable `CDK_GATEWAY_CACERT`. If not provided, the system's root CA certificates will be used.
+- `gateway_cert` (String) Cert in PEM format to authenticate using client certificates. May be set using environment variable `CDK_GATEWAY_CERT`. Must be used with key. If key is provided, cert is required. Useful when Gateway is behind a reverse proxy with client certificate authentication.
+- `gateway_insecure` (Boolean) Skip TLS verification flag. May be set using environment variable `CDK_GATEWAY_INSECURE`.
+- `gateway_key` (String) Key in PEM format to authenticate using client certificates. May be set using environment variable `CDK_GATEWAY_KEY`. Must be used with cert. If cert is provided, key is required. Useful when Gateway is behind a reverse proxy with client certificate authentication.
+- `gateway_password` (String, Sensitive) The password of Gateway the admin user. May be set using environment variable `CDK_GATEWAY_PASSWORD`. Required if gateway_url is set.
+- `gateway_url` (String) The URL of the Conduktor Gateway. May also be set using environment variable `CDK_GATEWAY_BASE_URL`. Required either here or in the environment.
+- `gateway_user` (String) The email of the Gateway admin user. May be set using environment variable `CDK_GATEWAY_USER`. Required if gateway_url is set.
 - `insecure` (Boolean) Skip TLS verification flag. May be set using environment variable `CDK_INSECURE`.
-- `key` (String) Key in PEM format to authenticate using client certificates. May be set using environment variable `CDK_KEY`. Must be used with cert. If cert is provided, key is required. Useful when Console behind a reverse proxy with client certificate authentication.
+- `key` (String) Key in PEM format to authenticate using client certificates. May be set using environment variable `CDK_KEY`. Must be used with cert. If cert is provided, key is required. Useful when Console is behind a reverse proxy with client certificate authentication.
 
 

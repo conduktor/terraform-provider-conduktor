@@ -58,6 +58,52 @@ services:
     healthcheck:
       test: ["CMD", "/opt/conduktor/scripts/healthcheck.sh"]
 
+  redpanda:
+    image: docker.redpanda.com/redpandadata/redpanda:v22.3.11
+    hostname: redpanda
+    command:
+      - redpanda
+      - start
+      - --kafka-addr
+      - internal://0.0.0.0:9092,external://0.0.0.0:19092
+      - --advertise-kafka-addr
+      - internal://redpanda:9092,external://localhost:19092
+      - --pandaproxy-addr
+      - internal://0.0.0.0:8082,external://0.0.0.0:18082
+      - --advertise-pandaproxy-addr
+      - internal://redpanda:8082,external://localhost:18082
+      - --schema-registry-addr
+      - internal://0.0.0.0:8081,external://0.0.0.0:18081
+      - --rpc-addr
+      - redpanda:33145
+      - --advertise-rpc-addr
+      - redpanda:33145
+      - --smp 1
+      - --memory 1G
+      - --reserve-memory 0M
+      - --overprovisioned
+      - --default-log-level=debug
+    ports:
+      - 18081:18081
+      - 18082:18082
+      - 19092:19092
+      - 19644:9644
+
+  conduktor-gateway:
+    image: ${CONDUKTOR_GATEWAY_IMAGE}
+    hostname: gateway
+    ports:
+      - "9094:9094"
+      - "8888:8888"
+    depends_on:
+      - redpanda
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: redpanda:9092
+      GATEWAY_ADVERTISED_HOST: gateway
+      GATEWAY_HTTP_PORT: 8888
+      GATEWAY_PORT_START: 9094
+      GATEWAY_PORT_COUNT: 1
+
 volumes:
   pg_data: {}
   conduktor_data: {}
