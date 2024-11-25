@@ -32,7 +32,7 @@ type ConduktorProvider struct {
 }
 
 type ProviderData struct {
-	Client        *client.Client
+	ConsoleClient *client.ConsoleClient
 	GatewayClient *client.GatewayClient
 }
 
@@ -47,7 +47,9 @@ func (p *ConduktorProvider) Schema(ctx context.Context, req provider.SchemaReque
 
 func (p *ConduktorProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
 	var config schema.ConduktorModel
+	var consoleApiClient *client.ConsoleClient
 	var gatewayApiClient *client.GatewayClient
+	var err error
 
 	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
 	if resp.Diagnostics.HasError() {
@@ -71,26 +73,29 @@ func (p *ConduktorProvider) Configure(ctx context.Context, req provider.Configur
 	gatewayInsecure := schemaUtils.GetBooleanConfig(config.Insecure, []string{"CDK_GATEWAY_INSECURE"}, false)
 
 	// Validate mandatory configurations
-	if consoleUrl == "" {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("console_url"),
-			"Missing Console URL",
-			"The provider cannot create the Console API client as there is a missing or empty value for the Console URL. "+
-				"Set the host value in the configuration or use the CDK_BASE_URL or CDK_CONSOLE_URL environment variable. "+
-				"If either is already set, ensure the value is not empty.",
-		)
-	}
-
-	if apiToken == "" && adminEmail == "" && adminPassword == "" {
-		details := "The provider cannot create the Console API client as there is a missing or empty value for the API Token and missing or empty values for the admin email/password. " +
+	if consoleUrl == "" && gatewayUrl == "" {
+		details := "The provider cannot create any API client as there is a missing or empty value for both the Console and Gateway URL. " +
 			"Set either : " +
-			" - the api_token value in the configuration or use the CDK_API_TOKEN environment variable. " +
-			" - the admin_email and admin_password value in the configuration or use the CDK_ADMIN_EMAIL/CDK_ADMIN_PASSWORD environment variable. " +
+			" - the console_url value in the configuration or use the CDK_BASE_URL or CDK_CONSOLE_URL environment variable. " +
+			" - the gateway_url value in the configuration or use the CDK_GATEWAY_BASE_URL environment variable. " +
 			"If either is already set, ensure the value is not empty."
 
-		resp.Diagnostics.AddAttributeError(path.Root("api_token"), "Missing API token", details)
-		resp.Diagnostics.AddAttributeError(path.Root("admin_email"), "Missing Admin email", details)
-		resp.Diagnostics.AddAttributeError(path.Root("admin_password"), "Missing Admin password", details)
+		resp.Diagnostics.AddAttributeError(path.Root("console_url"), "Missing Console URL", details)
+		resp.Diagnostics.AddAttributeError(path.Root("gateway_url"), "Missing Gateway URL", details)
+	}
+
+	if consoleUrl != "" {
+		if apiToken == "" && adminEmail == "" && adminPassword == "" {
+			details := "The provider cannot create the Console API client as there is a missing or empty value for the API Token and missing or empty values for the admin email/password. " +
+				"Set either : " +
+				" - the api_token value in the configuration or use the CDK_API_TOKEN environment variable. " +
+				" - the admin_email and admin_password value in the configuration or use the CDK_ADMIN_EMAIL/CDK_ADMIN_PASSWORD environment variable. " +
+				"If either is already set, ensure the value is not empty."
+
+			resp.Diagnostics.AddAttributeError(path.Root("api_token"), "Missing API token", details)
+			resp.Diagnostics.AddAttributeError(path.Root("admin_email"), "Missing Admin email", details)
+			resp.Diagnostics.AddAttributeError(path.Root("admin_password"), "Missing Admin password", details)
+		}
 	}
 
 	if gatewayUrl != "" && (gatewayUser == "" || gatewayPassword == "") {
@@ -131,25 +136,27 @@ func (p *ConduktorProvider) Configure(ctx context.Context, req provider.Configur
 	ctx = tflog.MaskFieldValuesWithFieldKeys(ctx, "gatewayKey")
 	tflog.Debug(ctx, "Creating Conduktor Console client")
 
-	// Create client
-	apiClient, err := client.Make(ctx,
-		client.ApiParameter{
-			ApiKey:      apiToken,
-			BaseUrl:     consoleUrl,
-			CdkUser:     adminEmail,
-			CdkPassword: adminPassword,
-			TLSParameters: client.TLSParameters{
-				Key:      key,
-				Cert:     cert,
-				Cacert:   cacert,
-				Insecure: insecure,
+	if consoleUrl != "" {
+		// Create client
+		consoleApiClient, err = client.Make(ctx,
+			client.ApiParameter{
+				ApiKey:      apiToken,
+				BaseUrl:     consoleUrl,
+				CdkUser:     adminEmail,
+				CdkPassword: adminPassword,
+				TLSParameters: client.TLSParameters{
+					Key:      key,
+					Cert:     cert,
+					Cacert:   cacert,
+					Insecure: insecure,
+				},
 			},
-		},
-		p.version,
-	)
-	if err != nil {
-		resp.Diagnostics.AddError("Could not create the Conduktor Console API client", err.Error())
-		return
+			p.version,
+		)
+		if err != nil {
+			resp.Diagnostics.AddError("Could not create the Conduktor Console API client", err.Error())
+			return
+		}
 	}
 
 	// Create Gateway client only if the URL is provided
@@ -175,7 +182,7 @@ func (p *ConduktorProvider) Configure(ctx context.Context, req provider.Configur
 	}
 
 	data := &ProviderData{
-		Client:        apiClient,
+		ConsoleClient: consoleApiClient,
 		GatewayClient: gatewayApiClient,
 	}
 	resp.DataSourceData = data

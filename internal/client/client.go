@@ -13,7 +13,7 @@ import (
 	jsoniter "github.com/json-iterator/go"
 )
 
-type Client struct {
+type ConsoleClient struct {
 	apiKey  string
 	baseUrl string
 	client  *resty.Client
@@ -61,7 +61,7 @@ type ApplyResult struct {
 	Resource     interface{} `json:"resource"`
 }
 
-func Make(ctx context.Context, apiParameter ApiParameter, providerVersion string) (*Client, error) {
+func Make(ctx context.Context, apiParameter ApiParameter, providerVersion string) (*ConsoleClient, error) {
 	restyClient := resty.New().SetHeader("X-CDK-CLIENT", "TF/"+providerVersion)
 
 	// Enable http client debug logs when provider log is set to TRACE
@@ -79,7 +79,7 @@ func Make(ctx context.Context, apiParameter ApiParameter, providerVersion string
 		return nil, err
 	}
 
-	result := &Client{
+	result := &ConsoleClient{
 		apiKey:  apiParameter.ApiKey,
 		baseUrl: uniformizeBaseUrl(apiParameter.BaseUrl),
 		client:  restyClient,
@@ -113,6 +113,9 @@ func Make(ctx context.Context, apiParameter ApiParameter, providerVersion string
 
 func MakeGateway(ctx context.Context, apiParameter GatewayApiParameters, providerVersion string) (*GatewayClient, error) {
 	restyClient := resty.New().SetHeader("X-CDK-CLIENT", "TF/"+providerVersion)
+
+	// Enable http client debug logs when provider log is set to TRACE
+	restyClient.SetDebug(TraceLogEnabled())
 
 	restyClient, err := ConfigureTLS(ctx, restyClient, apiParameter.TLSParameters)
 	if err != nil {
@@ -154,7 +157,7 @@ func ConfigureTLS(ctx context.Context, restyClient *resty.Client, tlsParameter T
 	return restyClient, nil
 }
 
-func (client *Client) login(username, password string) (LoginResult, error) {
+func (client *ConsoleClient) login(username, password string) (LoginResult, error) {
 	url := client.baseUrl + "/login"
 	resp, err := client.client.R().SetBody(map[string]string{"username": username, "password": password}).Post(url)
 	if err != nil {
@@ -174,7 +177,7 @@ func (client *Client) login(username, password string) (LoginResult, error) {
 	return result, nil
 }
 
-func (client *Client) ApplyGeneric(ctx context.Context, cliResource ctlresource.Resource) (string, error) {
+func (client *ConsoleClient) ApplyGeneric(ctx context.Context, cliResource ctlresource.Resource) (string, error) {
 	kinds := ctlschema.ConsoleDefaultKind() // TODO support gateway kind and client too
 
 	kindName := cliResource.Kind
@@ -207,7 +210,7 @@ func (client *Client) ApplyGeneric(ctx context.Context, cliResource ctlresource.
 	return upsertResponse.UpsertResult, nil
 }
 
-func (client *Client) Apply(ctx context.Context, path string, resource interface{}) (ApplyResult, error) {
+func (client *ConsoleClient) Apply(ctx context.Context, path string, resource interface{}) (ApplyResult, error) {
 	url := client.baseUrl + path
 	jsonData, err := jsoniter.Marshal(resource)
 	if err != nil {
@@ -232,7 +235,7 @@ func (client *Client) Apply(ctx context.Context, path string, resource interface
 	return upsertResponse, nil
 }
 
-func (client *Client) Describe(ctx context.Context, path string) ([]byte, error) {
+func (client *ConsoleClient) Describe(ctx context.Context, path string) ([]byte, error) {
 	url := client.baseUrl + path
 	resp, err := client.client.R().Get(url)
 	if err != nil {
@@ -247,7 +250,7 @@ func (client *Client) Describe(ctx context.Context, path string) ([]byte, error)
 	return resp.Body(), nil
 }
 
-func (client *Client) Delete(ctx context.Context, path string) error {
+func (client *ConsoleClient) Delete(ctx context.Context, path string) error {
 	url := client.baseUrl + path
 	tflog.Trace(ctx, fmt.Sprintf("DELETE %s", path))
 	resp, err := client.client.R().Delete(url)
