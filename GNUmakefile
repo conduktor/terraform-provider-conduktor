@@ -1,4 +1,4 @@
-export SHELL:=/bin/sh
+export SHELL:=/bin/bash
 export SHELLOPTS:=$(if $(SHELLOPTS),$(SHELLOPTS):)pipefail:errexit
 
 include .env
