@@ -32,7 +32,8 @@ type ConduktorProvider struct {
 }
 
 type ProviderData struct {
-	Client *client.Client
+	Client        *client.Client
+	GatewayClient *client.GatewayClient
 }
 
 func (p *ConduktorProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -46,6 +47,7 @@ func (p *ConduktorProvider) Schema(ctx context.Context, req provider.SchemaReque
 
 func (p *ConduktorProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
 	var config schema.ConduktorModel
+	var gatewayApiClient *client.GatewayClient
 
 	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
 	if resp.Diagnostics.HasError() {
@@ -56,10 +58,17 @@ func (p *ConduktorProvider) Configure(ctx context.Context, req provider.Configur
 	apiToken := schemaUtils.GetStringConfig(config.ApiToken, []string{"CDK_API_TOKEN", "CDK_API_KEY"})
 	adminEmail := schemaUtils.GetStringConfig(config.AdminEmail, []string{"CDK_ADMIN_EMAIL"})
 	adminPassword := schemaUtils.GetStringConfig(config.AdminPassword, []string{"CDK_ADMIN_PASSWORD"})
+	gatewayUrl := schemaUtils.GetStringConfig(config.GatewayUrl, []string{"CDK_GATEWAY_BASE_URL"})
+	gatewayUser := schemaUtils.GetStringConfig(config.GatewayUser, []string{"CDK_GATEWAY_USER"})
+	gatewayPassword := schemaUtils.GetStringConfig(config.GatewayPassword, []string{"CDK_GATEWAY_PASSWORD"})
 	cert := schemaUtils.GetStringConfig(config.Cert, []string{"CDK_CERT"})
 	cacert := schemaUtils.GetStringConfig(config.Cacert, []string{"CDK_CACERT"})
 	key := schemaUtils.GetStringConfig(config.Key, []string{"CDK_KEY"})
 	insecure := schemaUtils.GetBooleanConfig(config.Insecure, []string{"CDK_INSECURE"}, false)
+	gatewayCert := schemaUtils.GetStringConfig(config.Cert, []string{"CDK_GATEWAY_CERT"})
+	gatewayCacert := schemaUtils.GetStringConfig(config.Cacert, []string{"CDK_GATEWAY_CACERT"})
+	gatewayKey := schemaUtils.GetStringConfig(config.Key, []string{"CDK_GATEWAY_KEY"})
+	gatewayInsecure := schemaUtils.GetBooleanConfig(config.Insecure, []string{"CDK_GATEWAY_INSECURE"}, false)
 
 	// Validate mandatory configurations
 	if consoleUrl == "" {
@@ -84,6 +93,17 @@ func (p *ConduktorProvider) Configure(ctx context.Context, req provider.Configur
 		resp.Diagnostics.AddAttributeError(path.Root("admin_password"), "Missing Admin password", details)
 	}
 
+	if gatewayUrl != "" && (gatewayUser == "" || gatewayPassword == "") {
+		details := "The provider cannot create the Gateway API client as there is a missing or empty value for the admin email/password. " +
+			"Set both : " +
+			" - the gateway_admin_login value in the configuration or use the CDK_GATEWAY_USER environment variable. " +
+			" - the gateway_admin_password value in the configuration or use the CDK_GATEWAY_PASSWORD environment variable. " +
+			"If either is already set, ensure the value is not empty."
+
+		resp.Diagnostics.AddAttributeError(path.Root("gateway_user"), "Missing Gateway Admin login", details)
+		resp.Diagnostics.AddAttributeError(path.Root("gateway_password"), "Missing Gateway Admin password", details)
+	}
+
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -92,14 +112,23 @@ func (p *ConduktorProvider) Configure(ctx context.Context, req provider.Configur
 	ctx = tflog.SetField(ctx, "api_token", apiToken)
 	ctx = tflog.SetField(ctx, "admin_email", adminEmail)
 	ctx = tflog.SetField(ctx, "admin_password", adminPassword)
+	ctx = tflog.SetField(ctx, "gateway_url", gatewayUrl)
+	ctx = tflog.SetField(ctx, "gateway_admin_login", gatewayUser)
+	ctx = tflog.SetField(ctx, "gateway_admin_password", gatewayPassword)
 	ctx = tflog.SetField(ctx, "cert", cert)
 	ctx = tflog.SetField(ctx, "cacert", cacert)
 	ctx = tflog.SetField(ctx, "key", key)
 	ctx = tflog.SetField(ctx, "insecure", insecure)
+	ctx = tflog.SetField(ctx, "gatewayCert", gatewayCert)
+	ctx = tflog.SetField(ctx, "gatewayCacert", gatewayCacert)
+	ctx = tflog.SetField(ctx, "gatewayKey", gatewayKey)
+	ctx = tflog.SetField(ctx, "gatewayIsecure", gatewayInsecure)
 	// Avoid leaking sensitive information in logs
 	ctx = tflog.MaskFieldValuesWithFieldKeys(ctx, "api_token")
 	ctx = tflog.MaskFieldValuesWithFieldKeys(ctx, "admin_password")
+	ctx = tflog.MaskFieldValuesWithFieldKeys(ctx, "gateway_password")
 	ctx = tflog.MaskFieldValuesWithFieldKeys(ctx, "key")
+	ctx = tflog.MaskFieldValuesWithFieldKeys(ctx, "gatewayKey")
 	tflog.Debug(ctx, "Creating Conduktor Console client")
 
 	// Create client
@@ -107,12 +136,14 @@ func (p *ConduktorProvider) Configure(ctx context.Context, req provider.Configur
 		client.ApiParameter{
 			ApiKey:      apiToken,
 			BaseUrl:     consoleUrl,
-			Key:         key,
-			Cert:        cert,
-			Cacert:      cacert,
 			CdkUser:     adminEmail,
 			CdkPassword: adminPassword,
-			Insecure:    insecure,
+			TLSParameters: client.TLSParameters{
+				Key:      key,
+				Cert:     cert,
+				Cacert:   cacert,
+				Insecure: insecure,
+			},
 		},
 		p.version,
 	)
@@ -121,13 +152,37 @@ func (p *ConduktorProvider) Configure(ctx context.Context, req provider.Configur
 		return
 	}
 
+	// Create Gateway client only if the URL is provided
+	if gatewayUrl != "" {
+		gatewayApiClient, err = client.MakeGateway(ctx,
+			client.GatewayApiParameters{
+				BaseUrl:         gatewayUrl,
+				GatewayUser:     gatewayUser,
+				GatewayPassword: gatewayPassword,
+				TLSParameters: client.TLSParameters{
+					Key:      gatewayKey,
+					Cert:     gatewayCert,
+					Cacert:   gatewayCacert,
+					Insecure: gatewayInsecure,
+				},
+			},
+			p.version,
+		)
+		if err != nil {
+			resp.Diagnostics.AddError("Could not create the Conduktor Gateway API client", err.Error())
+			return
+		}
+	}
+
 	data := &ProviderData{
-		Client: apiClient,
+		Client:        apiClient,
+		GatewayClient: gatewayApiClient,
 	}
 	resp.DataSourceData = data
 	resp.ResourceData = data
 
 	tflog.Info(ctx, "Configured Conduktor Console client", map[string]any{"success": true})
+	tflog.Info(ctx, "Configured Conduktor Gateway client", map[string]any{"success": true})
 }
 
 func (p *ConduktorProvider) Resources(ctx context.Context) []func() resource.Resource {
