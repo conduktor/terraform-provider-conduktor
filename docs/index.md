@@ -52,8 +52,8 @@ provider "conduktor" {
 - `gateway_insecure` (Boolean) Skip TLS verification flag. May be set using environment variable `CDK_GATEWAY_INSECURE`.
 - `gateway_key` (String) Key in PEM format to authenticate using client certificates. May be set using environment variable `CDK_GATEWAY_KEY`. Must be used with cert. If cert is provided, key is required. Useful when Gateway is behind a reverse proxy with client certificate authentication.
 - `gateway_password` (String, Sensitive) The password of Gateway the admin user. May be set using environment variable `CDK_GATEWAY_PASSWORD`. Required if gateway_url is set.
-- `gateway_url` (String) The URL of the Conduktor Gateway. May also be set using environment variable `CDK_GATEWAY_BASE_URL`. Required either here or in the environment.
-- `gateway_user` (String) The email of the Gateway admin user. May be set using environment variable `CDK_GATEWAY_USER`. Required if gateway_url is set.
+- `gateway_url` (String) The administration URL of the Conduktor Gateway. May also be set using environment variable `CDK_GATEWAY_BASE_URL`. Required either here or in the environment.
+- `gateway_user` (String) The login of a Gateway admin user. May be set using environment variable `CDK_GATEWAY_USER`. Required if gateway_url is set.
 - `insecure` (Boolean) Skip TLS verification flag. May be set using environment variable `CDK_INSECURE`.
 - `key` (String) Key in PEM format to authenticate using client certificates. May be set using environment variable `CDK_KEY`. Must be used with cert. If cert is provided, key is required. Useful when Console is behind a reverse proxy with client certificate authentication.
 

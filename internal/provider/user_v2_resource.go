@@ -57,7 +57,7 @@ func (r *UserV2Resource) Configure(ctx context.Context, req resource.ConfigureRe
 	if data.ConsoleClient == nil {
 		resp.Diagnostics.AddError(
 			"Unexpected Resource Configure Type",
-			"Console Client not configured. Please provide client configuration details.",
+			"Console Client not configured. Please provide client configuration details for Console API.",
 		)
 		return
 	}

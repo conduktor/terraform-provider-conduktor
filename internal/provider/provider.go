@@ -67,10 +67,10 @@ func (p *ConduktorProvider) Configure(ctx context.Context, req provider.Configur
 	cacert := schemaUtils.GetStringConfig(config.Cacert, []string{"CDK_CACERT"})
 	key := schemaUtils.GetStringConfig(config.Key, []string{"CDK_KEY"})
 	insecure := schemaUtils.GetBooleanConfig(config.Insecure, []string{"CDK_INSECURE"}, false)
-	gatewayCert := schemaUtils.GetStringConfig(config.Cert, []string{"CDK_GATEWAY_CERT"})
-	gatewayCacert := schemaUtils.GetStringConfig(config.Cacert, []string{"CDK_GATEWAY_CACERT"})
-	gatewayKey := schemaUtils.GetStringConfig(config.Key, []string{"CDK_GATEWAY_KEY"})
-	gatewayInsecure := schemaUtils.GetBooleanConfig(config.Insecure, []string{"CDK_GATEWAY_INSECURE"}, false)
+	gatewayCert := schemaUtils.GetStringConfig(config.GatewayCert, []string{"CDK_GATEWAY_CERT"})
+	gatewayCacert := schemaUtils.GetStringConfig(config.GatewayCacert, []string{"CDK_GATEWAY_CACERT"})
+	gatewayKey := schemaUtils.GetStringConfig(config.GatewayKey, []string{"CDK_GATEWAY_KEY"})
+	gatewayInsecure := schemaUtils.GetBooleanConfig(config.GatewayInsecure, []string{"CDK_GATEWAY_INSECURE"}, false)
 
 	// Validate mandatory configurations
 	if consoleUrl == "" && gatewayUrl == "" {
@@ -101,8 +101,8 @@ func (p *ConduktorProvider) Configure(ctx context.Context, req provider.Configur
 	if gatewayUrl != "" && (gatewayUser == "" || gatewayPassword == "") {
 		details := "The provider cannot create the Gateway API client as there is a missing or empty value for the admin email/password. " +
 			"Set both : " +
-			" - the gateway_admin_login value in the configuration or use the CDK_GATEWAY_USER environment variable. " +
-			" - the gateway_admin_password value in the configuration or use the CDK_GATEWAY_PASSWORD environment variable. " +
+			" - the gateway_user value in the configuration or use the CDK_GATEWAY_USER environment variable. " +
+			" - the gateway_password value in the configuration or use the CDK_GATEWAY_PASSWORD environment variable. " +
 			"If either is already set, ensure the value is not empty."
 
 		resp.Diagnostics.AddAttributeError(path.Root("gateway_user"), "Missing Gateway Admin login", details)
@@ -118,16 +118,16 @@ func (p *ConduktorProvider) Configure(ctx context.Context, req provider.Configur
 	ctx = tflog.SetField(ctx, "admin_email", adminEmail)
 	ctx = tflog.SetField(ctx, "admin_password", adminPassword)
 	ctx = tflog.SetField(ctx, "gateway_url", gatewayUrl)
-	ctx = tflog.SetField(ctx, "gateway_admin_login", gatewayUser)
-	ctx = tflog.SetField(ctx, "gateway_admin_password", gatewayPassword)
+	ctx = tflog.SetField(ctx, "gateway_user", gatewayUser)
+	ctx = tflog.SetField(ctx, "gateway_password", gatewayPassword)
 	ctx = tflog.SetField(ctx, "cert", cert)
 	ctx = tflog.SetField(ctx, "cacert", cacert)
 	ctx = tflog.SetField(ctx, "key", key)
 	ctx = tflog.SetField(ctx, "insecure", insecure)
-	ctx = tflog.SetField(ctx, "gatewayCert", gatewayCert)
-	ctx = tflog.SetField(ctx, "gatewayCacert", gatewayCacert)
-	ctx = tflog.SetField(ctx, "gatewayKey", gatewayKey)
-	ctx = tflog.SetField(ctx, "gatewayIsecure", gatewayInsecure)
+	ctx = tflog.SetField(ctx, "gateway_cert", gatewayCert)
+	ctx = tflog.SetField(ctx, "gateway_cacert", gatewayCacert)
+	ctx = tflog.SetField(ctx, "gateway_key", gatewayKey)
+	ctx = tflog.SetField(ctx, "gateway_insecure", gatewayInsecure)
 	// Avoid leaking sensitive information in logs
 	ctx = tflog.MaskFieldValuesWithFieldKeys(ctx, "api_token")
 	ctx = tflog.MaskFieldValuesWithFieldKeys(ctx, "admin_password")
@@ -187,8 +187,12 @@ func (p *ConduktorProvider) Configure(ctx context.Context, req provider.Configur
 	resp.DataSourceData = data
 	resp.ResourceData = data
 
-	tflog.Info(ctx, "Configured Conduktor Console client", map[string]any{"success": true})
-	tflog.Info(ctx, "Configured Conduktor Gateway client", map[string]any{"success": true})
+	if consoleApiClient != nil {
+		tflog.Info(ctx, "Configured Conduktor Console client", map[string]any{"success": true})
+	}
+	if gatewayApiClient != nil {
+		tflog.Info(ctx, "Configured Conduktor Gateway client", map[string]any{"success": true})
+	}
 }
 
 func (p *ConduktorProvider) Resources(ctx context.Context) []func() resource.Resource {

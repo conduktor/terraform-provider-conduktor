@@ -72,13 +72,13 @@ func ConduktorProviderSchema(ctx context.Context) schema.Schema {
 			},
 			"gateway_url": schema.StringAttribute{
 				Optional:            true,
-				Description:         "The URL of the Conduktor Gateway. May also be set using environment variable `CDK_GATEWAY_BASE_URL`. Required either here or in the environment.",
-				MarkdownDescription: "The URL of the Conduktor Gateway. May also be set using environment variable `CDK_GATEWAY_BASE_URL`. Required either here or in the environment.",
+				Description:         "The administration URL of the Conduktor Gateway. May also be set using environment variable `CDK_GATEWAY_BASE_URL`. Required either here or in the environment.",
+				MarkdownDescription: "The administration URL of the Conduktor Gateway. May also be set using environment variable `CDK_GATEWAY_BASE_URL`. Required either here or in the environment.",
 			},
 			"gateway_user": schema.StringAttribute{
 				Optional:            true,
-				Description:         "The email of the Gateway admin user. May be set using environment variable `CDK_GATEWAY_USER`. Required if gateway_url is set.",
-				MarkdownDescription: "The email of the Gateway admin user. May be set using environment variable `CDK_GATEWAY_USER`. Required if gateway_url is set.",
+				Description:         "The login of a Gateway admin user. May be set using environment variable `CDK_GATEWAY_USER`. Required if gateway_url is set.",
+				MarkdownDescription: "The login of a Gateway admin user. May be set using environment variable `CDK_GATEWAY_USER`. Required if gateway_url is set.",
 			},
 			"insecure": schema.BoolAttribute{
 				Optional:            true,
