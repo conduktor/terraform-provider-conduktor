@@ -136,8 +136,8 @@ func (p *ConduktorProvider) Configure(ctx context.Context, req provider.Configur
 	ctx = tflog.MaskFieldValuesWithFieldKeys(ctx, "gatewayKey")
 	tflog.Debug(ctx, "Creating Conduktor Console client")
 
+	// Create Console or Gateway clients only if the respective URL is provided
 	if consoleUrl != "" {
-		// Create client
 		consoleApiClient, err = client.Make(ctx,
 			client.ApiParameter{
 				ApiKey:      apiToken,
@@ -159,7 +159,6 @@ func (p *ConduktorProvider) Configure(ctx context.Context, req provider.Configur
 		}
 	}
 
-	// Create Gateway client only if the URL is provided
 	if gatewayUrl != "" {
 		gatewayApiClient, err = client.MakeGateway(ctx,
 			client.GatewayApiParameters{

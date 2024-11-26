@@ -36,7 +36,6 @@ type ApiParameter struct {
 
 type GatewayApiParameters struct {
 	BaseUrl         string
-	Debug           bool
 	GatewayUser     string
 	GatewayPassword string
 	TLSParameters   TLSParameters
@@ -123,6 +122,16 @@ func MakeGateway(ctx context.Context, apiParameter GatewayApiParameters, provide
 	}
 
 	restyClient.SetBasicAuth(apiParameter.GatewayUser, apiParameter.GatewayPassword)
+
+	// Testing authentication parameters against /metrics API
+	// returning error after 3 retries
+	testUrl := apiParameter.BaseUrl + "/metrics"
+	resp, err := restyClient.SetRetryCount(3).SetRetryWaitTime(1 * time.Second).R().Get(testUrl)
+	if err != nil {
+		return &GatewayClient{}, err
+	} else if resp.StatusCode() != 200 {
+		return &GatewayClient{}, fmt.Errorf("Invalid username or password")
+	}
 
 	return &GatewayClient{
 		GatewayUser:     apiParameter.GatewayUser,
