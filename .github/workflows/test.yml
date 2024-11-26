@@ -75,6 +75,8 @@ jobs:
           - "1.27.0"
           - "1.28.0"
           - "1.29.0"
+        gateway:
+          - "3.4.0"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -99,6 +101,7 @@ jobs:
           TESTARGS: "-cover ./internal/provider/"
           CONDUKTOR_CONSOLE_IMAGE: conduktor/conduktor-console:${{ matrix.console }}
           CONDUKTOR_CONSOLE_CORTEX_IMAGE: conduktor/conduktor-console-cortex:${{ matrix.console }}
+          CONDUKTOR_GATEWAY_IMAGE: conduktor/conduktor-gateway:${{ matrix.gateway }}
           CDK_BASE_URL: http://localhost:8080
           CDK_ADMIN_EMAIL: admin@conduktor.io
           CDK_ADMIN_PASSWORD: testP4ss!
