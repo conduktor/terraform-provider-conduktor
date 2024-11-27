@@ -32,7 +32,7 @@ func NewKafkaConnectV2Resource() resource.Resource {
 
 // KafkaConnectV2Resource defines the resource implementation.
 type KafkaConnectV2Resource struct {
-	apiClient *client.Client
+	apiClient *client.ConsoleClient
 }
 
 func (r *KafkaConnectV2Resource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -60,7 +60,15 @@ func (r *KafkaConnectV2Resource) Configure(_ context.Context, req resource.Confi
 		return
 	}
 
-	r.apiClient = data.Client
+	if data.ConsoleClient == nil {
+		resp.Diagnostics.AddError(
+			"Unexpected Resource Configure Type",
+			"Console Client not configured. Please provide client configuration details for Console API.",
+		)
+		return
+	}
+
+	r.apiClient = data.ConsoleClient
 }
 
 func (r *KafkaConnectV2Resource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {

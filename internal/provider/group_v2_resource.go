@@ -26,7 +26,7 @@ func NewGroupV2Resource() resource.Resource {
 
 // GroupV2Resource defines the resource implementation.
 type GroupV2Resource struct {
-	apiClient *client.Client
+	apiClient *client.ConsoleClient
 }
 
 func (r *GroupV2Resource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -54,7 +54,15 @@ func (r *GroupV2Resource) Configure(ctx context.Context, req resource.ConfigureR
 		return
 	}
 
-	r.apiClient = data.Client
+	if data.ConsoleClient == nil {
+		resp.Diagnostics.AddError(
+			"Unexpected Resource Configure Type",
+			"Console Client not configured. Please provide client configuration details for Console API.",
+		)
+		return
+	}
+
+	r.apiClient = data.ConsoleClient
 }
 
 func (r *GroupV2Resource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {

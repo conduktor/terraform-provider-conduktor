@@ -26,7 +26,7 @@ func NewUserV2Resource() resource.Resource {
 
 // UserV2Resource defines the resource implementation.
 type UserV2Resource struct {
-	apiClient *client.Client
+	apiClient *client.ConsoleClient
 }
 
 func (r *UserV2Resource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -54,7 +54,15 @@ func (r *UserV2Resource) Configure(ctx context.Context, req resource.ConfigureRe
 		return
 	}
 
-	r.apiClient = data.Client
+	if data.ConsoleClient == nil {
+		resp.Diagnostics.AddError(
+			"Unexpected Resource Configure Type",
+			"Console Client not configured. Please provide client configuration details for Console API.",
+		)
+		return
+	}
+
+	r.apiClient = data.ConsoleClient
 }
 
 func (r *UserV2Resource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {

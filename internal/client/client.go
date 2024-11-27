@@ -13,21 +13,39 @@ import (
 	jsoniter "github.com/json-iterator/go"
 )
 
-type Client struct {
+type ConsoleClient struct {
 	apiKey  string
 	baseUrl string
 	client  *resty.Client
 }
 
+type GatewayClient struct {
+	GatewayUser     string
+	GatewayPassword string
+	baseUrl         string
+	client          *resty.Client
+}
+
 type ApiParameter struct {
-	ApiKey      string
-	BaseUrl     string
-	Key         string
-	Cert        string
-	Cacert      string
-	CdkUser     string
-	CdkPassword string
-	Insecure    bool
+	ApiKey        string
+	BaseUrl       string
+	CdkUser       string
+	CdkPassword   string
+	TLSParameters TLSParameters
+}
+
+type GatewayApiParameters struct {
+	BaseUrl         string
+	GatewayUser     string
+	GatewayPassword string
+	TLSParameters   TLSParameters
+}
+
+type TLSParameters struct {
+	Key      string
+	Cert     string
+	Cacert   string
+	Insecure bool
 }
 
 type LoginResult struct {
@@ -42,26 +60,11 @@ type ApplyResult struct {
 	Resource     interface{} `json:"resource"`
 }
 
-func Make(ctx context.Context, apiParameter ApiParameter, providerVersion string) (*Client, error) {
+func Make(ctx context.Context, apiParameter ApiParameter, providerVersion string) (*ConsoleClient, error) {
 	restyClient := resty.New().SetHeader("X-CDK-CLIENT", "TF/"+providerVersion)
 
 	// Enable http client debug logs when provider log is set to TRACE
 	restyClient.SetDebug(TraceLogEnabled())
-
-	if apiParameter.BaseUrl == "" {
-		return nil, fmt.Errorf("Please set api base url")
-	}
-
-	if (apiParameter.Key == "" && apiParameter.Cert != "") || (apiParameter.Key != "" && apiParameter.Cert == "") {
-		return nil, fmt.Errorf("Certificate and Key must be provided together")
-	} else if apiParameter.Key != "" && apiParameter.Cert != "" {
-		tflog.Debug(ctx, fmt.Sprintf("Loading certificate and key from files %s and %s", apiParameter.Cert, apiParameter.Key))
-		certificate, err := tls.LoadX509KeyPair(apiParameter.Cert, apiParameter.Key)
-		restyClient.SetCertificates(certificate)
-		if err != nil {
-			return nil, err
-		}
-	}
 
 	if (apiParameter.CdkUser != "" && apiParameter.CdkPassword == "") || (apiParameter.CdkUser == "" && apiParameter.CdkPassword != "") {
 		return nil, fmt.Errorf("CDK_USER and CDK_PASSWORD must be provided together")
@@ -70,24 +73,18 @@ func Make(ctx context.Context, apiParameter ApiParameter, providerVersion string
 		return nil, fmt.Errorf("Can't set both CDK_USER and CDK_API_KEY")
 	}
 
-	if apiParameter.Cacert != "" {
-		tflog.Debug(ctx, fmt.Sprintf("Loading cacert from file %s", apiParameter.Cacert))
-		restyClient.SetRootCertificate(apiParameter.Cacert)
+	restyClient, err := ConfigureTLS(ctx, restyClient, apiParameter.TLSParameters)
+	if err != nil {
+		return nil, err
 	}
 
-	if apiParameter.Insecure {
-		tflog.Debug(ctx, "Insecure mode enabled (skipping TLS verification)")
-		restyClient.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
-	}
-
-	result := &Client{
+	result := &ConsoleClient{
 		apiKey:  apiParameter.ApiKey,
 		baseUrl: uniformizeBaseUrl(apiParameter.BaseUrl),
 		client:  restyClient,
 	}
 
 	if apiParameter.CdkUser != "" {
-
 		retry3Time := retry(3, 1*time.Second, ctx)
 		loginResult, err := retry3Time(
 			func(err error) bool {
@@ -101,9 +98,6 @@ func Make(ctx context.Context, apiParameter ApiParameter, providerVersion string
 			return nil, fmt.Errorf("Could not login: %s", err)
 		}
 		tokens, _ := loginResult.(LoginResult)
-		if err != nil {
-			return nil, fmt.Errorf("Could not login: %s", err)
-		}
 
 		result.apiKey = tokens.AccessToken
 	}
@@ -116,7 +110,63 @@ func Make(ctx context.Context, apiParameter ApiParameter, providerVersion string
 	return result, nil
 }
 
-func (client *Client) login(username, password string) (LoginResult, error) {
+func MakeGateway(ctx context.Context, apiParameter GatewayApiParameters, providerVersion string) (*GatewayClient, error) {
+	restyClient := resty.New().SetHeader("X-CDK-CLIENT", "TF/"+providerVersion)
+
+	// Enable http client debug logs when provider log is set to TRACE
+	restyClient.SetDebug(TraceLogEnabled())
+
+	restyClient, err := ConfigureTLS(ctx, restyClient, apiParameter.TLSParameters)
+	if err != nil {
+		return nil, err
+	}
+
+	restyClient.SetBasicAuth(apiParameter.GatewayUser, apiParameter.GatewayPassword)
+
+	// Testing authentication parameters against /metrics API
+	// returning error after 3 retries
+	testUrl := apiParameter.BaseUrl + "/metrics"
+	resp, err := restyClient.SetRetryCount(3).SetRetryWaitTime(1 * time.Second).R().Get(testUrl)
+	if err != nil {
+		return &GatewayClient{}, err
+	} else if resp.StatusCode() != 200 {
+		return &GatewayClient{}, fmt.Errorf("Invalid username or password")
+	}
+
+	return &GatewayClient{
+		GatewayUser:     apiParameter.GatewayUser,
+		GatewayPassword: apiParameter.GatewayPassword,
+		baseUrl:         apiParameter.BaseUrl,
+		client:          restyClient,
+	}, nil
+}
+
+func ConfigureTLS(ctx context.Context, restyClient *resty.Client, tlsParameter TLSParameters) (*resty.Client, error) {
+	if (tlsParameter.Key == "" && tlsParameter.Cert != "") || (tlsParameter.Key != "" && tlsParameter.Cert == "") {
+		return nil, fmt.Errorf("Certificate and Key must be provided together")
+	} else if tlsParameter.Key != "" && tlsParameter.Cert != "" {
+		tflog.Debug(ctx, fmt.Sprintf("Loading certificate and key from files %s and %s", tlsParameter.Cert, tlsParameter.Key))
+		certificate, err := tls.LoadX509KeyPair(tlsParameter.Cert, tlsParameter.Key)
+		restyClient.SetCertificates(certificate)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if tlsParameter.Cacert != "" {
+		tflog.Debug(ctx, fmt.Sprintf("Loading cacert from file %s", tlsParameter.Cacert))
+		restyClient.SetRootCertificate(tlsParameter.Cacert)
+	}
+
+	if tlsParameter.Insecure {
+		tflog.Debug(ctx, "Insecure mode enabled (skipping TLS verification)")
+		restyClient.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
+	}
+
+	return restyClient, nil
+}
+
+func (client *ConsoleClient) login(username, password string) (LoginResult, error) {
 	url := client.baseUrl + "/login"
 	resp, err := client.client.R().SetBody(map[string]string{"username": username, "password": password}).Post(url)
 	if err != nil {
@@ -136,7 +186,7 @@ func (client *Client) login(username, password string) (LoginResult, error) {
 	return result, nil
 }
 
-func (client *Client) ApplyGeneric(ctx context.Context, cliResource ctlresource.Resource) (string, error) {
+func (client *ConsoleClient) ApplyGeneric(ctx context.Context, cliResource ctlresource.Resource) (string, error) {
 	kinds := ctlschema.ConsoleDefaultKind() // TODO support gateway kind and client too
 
 	kindName := cliResource.Kind
@@ -169,7 +219,7 @@ func (client *Client) ApplyGeneric(ctx context.Context, cliResource ctlresource.
 	return upsertResponse.UpsertResult, nil
 }
 
-func (client *Client) Apply(ctx context.Context, path string, resource interface{}) (ApplyResult, error) {
+func (client *ConsoleClient) Apply(ctx context.Context, path string, resource interface{}) (ApplyResult, error) {
 	url := client.baseUrl + path
 	jsonData, err := jsoniter.Marshal(resource)
 	if err != nil {
@@ -194,7 +244,7 @@ func (client *Client) Apply(ctx context.Context, path string, resource interface
 	return upsertResponse, nil
 }
 
-func (client *Client) Describe(ctx context.Context, path string) ([]byte, error) {
+func (client *ConsoleClient) Describe(ctx context.Context, path string) ([]byte, error) {
 	url := client.baseUrl + path
 	resp, err := client.client.R().Get(url)
 	if err != nil {
@@ -209,7 +259,7 @@ func (client *Client) Describe(ctx context.Context, path string) ([]byte, error)
 	return resp.Body(), nil
 }
 
-func (client *Client) Delete(ctx context.Context, path string) error {
+func (client *ConsoleClient) Delete(ctx context.Context, path string) error {
 	url := client.baseUrl + path
 	tflog.Trace(ctx, fmt.Sprintf("DELETE %s", path))
 	resp, err := client.client.R().Delete(url)

@@ -25,7 +25,7 @@ func NewGenericResource() resource.Resource {
 
 // GenericResource defines the resource implementation.
 type GenericResource struct {
-	client *client.Client
+	client *client.ConsoleClient
 }
 
 func (r *GenericResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -53,7 +53,15 @@ func (r *GenericResource) Configure(ctx context.Context, req resource.ConfigureR
 		return
 	}
 
-	r.client = data.Client
+	if data.ConsoleClient == nil {
+		resp.Diagnostics.AddError(
+			"Unexpected Resource Configure Type",
+			"Console Client not configured. Please provide client configuration details for Console API.",
+		)
+		return
+	}
+
+	r.client = data.ConsoleClient
 }
 
 func (r *GenericResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {

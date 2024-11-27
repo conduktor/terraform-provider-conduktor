@@ -36,13 +36,49 @@ func ConduktorProviderSchema(ctx context.Context) schema.Schema {
 			},
 			"cert": schema.StringAttribute{
 				Optional:            true,
-				Description:         "Cert in PEM format to authenticate using client certificates. May be set using environment variable `CDK_CERT`. Must be used with key. If key is provided, cert is required. Useful when Console behind a reverse proxy with client certificate authentication.",
-				MarkdownDescription: "Cert in PEM format to authenticate using client certificates. May be set using environment variable `CDK_CERT`. Must be used with key. If key is provided, cert is required. Useful when Console behind a reverse proxy with client certificate authentication.",
+				Description:         "Cert in PEM format to authenticate using client certificates. May be set using environment variable `CDK_CERT`. Must be used with key. If key is provided, cert is required. Useful when Console is behind a reverse proxy with client certificate authentication.",
+				MarkdownDescription: "Cert in PEM format to authenticate using client certificates. May be set using environment variable `CDK_CERT`. Must be used with key. If key is provided, cert is required. Useful when Console is behind a reverse proxy with client certificate authentication.",
 			},
 			"console_url": schema.StringAttribute{
 				Optional:            true,
 				Description:         "The URL of the Conduktor Console. May be set using environment variable `CDK_BASE_URL` or `CDK_CONSOLE_URL`. Required either here or in the environment.",
 				MarkdownDescription: "The URL of the Conduktor Console. May be set using environment variable `CDK_BASE_URL` or `CDK_CONSOLE_URL`. Required either here or in the environment.",
+			},
+			"gateway_cacert": schema.StringAttribute{
+				Optional:            true,
+				Description:         "Root CA certificate in PEM format to verify the Conduktor Gateway certificate. May be set using environment variable `CDK_GATEWAY_CACERT`. If not provided, the system's root CA certificates will be used.",
+				MarkdownDescription: "Root CA certificate in PEM format to verify the Conduktor Gateway certificate. May be set using environment variable `CDK_GATEWAY_CACERT`. If not provided, the system's root CA certificates will be used.",
+			},
+			"gateway_cert": schema.StringAttribute{
+				Optional:            true,
+				Description:         "Cert in PEM format to authenticate using client certificates. May be set using environment variable `CDK_GATEWAY_CERT`. Must be used with key. If key is provided, cert is required. Useful when Gateway is behind a reverse proxy with client certificate authentication.",
+				MarkdownDescription: "Cert in PEM format to authenticate using client certificates. May be set using environment variable `CDK_GATEWAY_CERT`. Must be used with key. If key is provided, cert is required. Useful when Gateway is behind a reverse proxy with client certificate authentication.",
+			},
+			"gateway_insecure": schema.BoolAttribute{
+				Optional:            true,
+				Description:         "Skip TLS verification flag. May be set using environment variable `CDK_GATEWAY_INSECURE`.",
+				MarkdownDescription: "Skip TLS verification flag. May be set using environment variable `CDK_GATEWAY_INSECURE`.",
+			},
+			"gateway_key": schema.StringAttribute{
+				Optional:            true,
+				Description:         "Key in PEM format to authenticate using client certificates. May be set using environment variable `CDK_GATEWAY_KEY`. Must be used with cert. If cert is provided, key is required. Useful when Gateway is behind a reverse proxy with client certificate authentication.",
+				MarkdownDescription: "Key in PEM format to authenticate using client certificates. May be set using environment variable `CDK_GATEWAY_KEY`. Must be used with cert. If cert is provided, key is required. Useful when Gateway is behind a reverse proxy with client certificate authentication.",
+			},
+			"gateway_password": schema.StringAttribute{
+				Optional:            true,
+				Sensitive:           true,
+				Description:         "The password of Gateway the admin user. May be set using environment variable `CDK_GATEWAY_PASSWORD`. Required if gateway_url is set.",
+				MarkdownDescription: "The password of Gateway the admin user. May be set using environment variable `CDK_GATEWAY_PASSWORD`. Required if gateway_url is set.",
+			},
+			"gateway_url": schema.StringAttribute{
+				Optional:            true,
+				Description:         "The administration URL of the Conduktor Gateway. May also be set using environment variable `CDK_GATEWAY_BASE_URL`. Required either here or in the environment.",
+				MarkdownDescription: "The administration URL of the Conduktor Gateway. May also be set using environment variable `CDK_GATEWAY_BASE_URL`. Required either here or in the environment.",
+			},
+			"gateway_user": schema.StringAttribute{
+				Optional:            true,
+				Description:         "The login of a Gateway admin user. May be set using environment variable `CDK_GATEWAY_USER`. Required if gateway_url is set.",
+				MarkdownDescription: "The login of a Gateway admin user. May be set using environment variable `CDK_GATEWAY_USER`. Required if gateway_url is set.",
 			},
 			"insecure": schema.BoolAttribute{
 				Optional:            true,
@@ -51,20 +87,27 @@ func ConduktorProviderSchema(ctx context.Context) schema.Schema {
 			},
 			"key": schema.StringAttribute{
 				Optional:            true,
-				Description:         "Key in PEM format to authenticate using client certificates. May be set using environment variable `CDK_KEY`. Must be used with cert. If cert is provided, key is required. Useful when Console behind a reverse proxy with client certificate authentication.",
-				MarkdownDescription: "Key in PEM format to authenticate using client certificates. May be set using environment variable `CDK_KEY`. Must be used with cert. If cert is provided, key is required. Useful when Console behind a reverse proxy with client certificate authentication.",
+				Description:         "Key in PEM format to authenticate using client certificates. May be set using environment variable `CDK_KEY`. Must be used with cert. If cert is provided, key is required. Useful when Console is behind a reverse proxy with client certificate authentication.",
+				MarkdownDescription: "Key in PEM format to authenticate using client certificates. May be set using environment variable `CDK_KEY`. Must be used with cert. If cert is provided, key is required. Useful when Console is behind a reverse proxy with client certificate authentication.",
 			},
 		},
 	}
 }
 
 type ConduktorModel struct {
-	AdminEmail    types.String `tfsdk:"admin_email"`
-	AdminPassword types.String `tfsdk:"admin_password"`
-	ApiToken      types.String `tfsdk:"api_token"`
-	Cacert        types.String `tfsdk:"cacert"`
-	Cert          types.String `tfsdk:"cert"`
-	ConsoleUrl    types.String `tfsdk:"console_url"`
-	Insecure      types.Bool   `tfsdk:"insecure"`
-	Key           types.String `tfsdk:"key"`
+	AdminEmail      types.String `tfsdk:"admin_email"`
+	AdminPassword   types.String `tfsdk:"admin_password"`
+	ApiToken        types.String `tfsdk:"api_token"`
+	Cacert          types.String `tfsdk:"cacert"`
+	Cert            types.String `tfsdk:"cert"`
+	ConsoleUrl      types.String `tfsdk:"console_url"`
+	GatewayCacert   types.String `tfsdk:"gateway_cacert"`
+	GatewayCert     types.String `tfsdk:"gateway_cert"`
+	GatewayInsecure types.Bool   `tfsdk:"gateway_insecure"`
+	GatewayKey      types.String `tfsdk:"gateway_key"`
+	GatewayPassword types.String `tfsdk:"gateway_password"`
+	GatewayUrl      types.String `tfsdk:"gateway_url"`
+	GatewayUser     types.String `tfsdk:"gateway_user"`
+	Insecure        types.Bool   `tfsdk:"insecure"`
+	Key             types.String `tfsdk:"key"`
 }
