@@ -88,3 +88,6 @@ var ValidKafkaConnectSecurityTypes = []string{
 	BearerTokenKafkaConnectSecurity,
 	SSLAuthKafkaConnectSecurity,
 }
+
+// Gateway Service Accounlts
+var ValidServiceAccountTypes = []string{"LOCAL", "EXTERNAL"}
