@@ -12,7 +12,8 @@ const GatewayServiceAccountV2Kind = "GatewayServiceAccount"
 const GatewayServiceAccountV2ApiVersion = "v2"
 
 type GatewayServiceAccountMetadata struct {
-	Name string `json:"name"`
+	Name     string `json:"name"`
+	VCluster string `json:"vCluster,omitempty"`
 }
 
 func (r GatewayServiceAccountMetadata) String() string {
@@ -31,14 +32,12 @@ type GatewayServiceAccountResource struct {
 	Spec       GatewayServiceAccountSpec     `json:"spec"`
 }
 
-func NewGatewayServiceAccountResource(name string, spec GatewayServiceAccountSpec) GatewayServiceAccountResource {
+func NewGatewayServiceAccountResource(metadata GatewayServiceAccountMetadata, spec GatewayServiceAccountSpec) GatewayServiceAccountResource {
 	return GatewayServiceAccountResource{
 		Kind:       GatewayServiceAccountV2Kind,
 		ApiVersion: GatewayServiceAccountV2ApiVersion,
-		Metadata: GatewayServiceAccountMetadata{
-			Name: name,
-		},
-		Spec: spec,
+		Metadata:   metadata,
+		Spec:       spec,
 	}
 }
 

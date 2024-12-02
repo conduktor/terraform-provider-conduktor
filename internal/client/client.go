@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"crypto/tls"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -263,6 +264,69 @@ func (client *ConsoleClient) Delete(ctx context.Context, path string) error {
 	url := client.baseUrl + path
 	tflog.Trace(ctx, fmt.Sprintf("DELETE %s", path))
 	resp, err := client.client.R().Delete(url)
+	if err != nil {
+		return err
+	} else if resp.IsError() {
+		return fmt.Errorf("%s", extractApiError(resp))
+	}
+
+	return nil
+}
+
+// This is a temporary workaround - will be revisited with the future client works
+func (client *GatewayClient) Apply(ctx context.Context, path string, resource interface{}) (ApplyResult, error) {
+	url := client.baseUrl + path
+	jsonData, err := jsoniter.Marshal(resource)
+	if err != nil {
+		return ApplyResult{}, fmt.Errorf("Error marshalling resource: %s", err)
+	}
+
+	tflog.Trace(ctx, fmt.Sprintf("PUT %s request body : %s", path, string(jsonData)))
+	builder := client.client.R().SetBody(jsonData)
+	resp, err := builder.Put(url)
+	if err != nil {
+		return ApplyResult{}, err
+	} else if resp.IsError() {
+		return ApplyResult{}, fmt.Errorf("%s", extractApiError(resp))
+	}
+	bodyBytes := resp.Body()
+	tflog.Trace(ctx, fmt.Sprintf("PUT %s response body : %s", path, string(bodyBytes)))
+	var upsertResponse ApplyResult
+	err = jsoniter.Unmarshal(bodyBytes, &upsertResponse)
+	if err != nil {
+		return ApplyResult{}, fmt.Errorf("Error unmarshalling response: %s", err)
+	}
+	return upsertResponse, nil
+}
+
+func (client *GatewayClient) Describe(ctx context.Context, path string) ([]byte, error) {
+	url := client.baseUrl + path
+	resp, err := client.client.R().Get(url)
+	if err != nil {
+		return []byte{}, err
+	} else if resp.IsError() {
+		if resp.StatusCode() == 404 {
+			return nil, nil
+		}
+		return []byte{}, fmt.Errorf("error describing resources %s, got status code: %d:\n %s", path, resp.StatusCode(), string(resp.Body()))
+	}
+	tflog.Trace(ctx, fmt.Sprintf("GET %s response : %s", path, string(resp.Body())))
+	return resp.Body(), nil
+}
+
+func (client *GatewayClient) Delete(ctx context.Context, path string, resource interface{}) error {
+	url := client.baseUrl + path
+
+	jsonData, err := json.Marshal(resource)
+	if err != nil {
+		return fmt.Errorf("Error marshalling resource: %s", err)
+	}
+	tflog.Debug(ctx, string(jsonData))
+
+	tflog.Trace(ctx, fmt.Sprintf("PUT %s request body : %s", path, string(jsonData)))
+	builder := client.client.R().SetBody(string(jsonData))
+	tflog.Trace(ctx, fmt.Sprintf("DELETE %s", path))
+	resp, err := builder.Delete(url)
 	if err != nil {
 		return err
 	} else if resp.IsError() {
