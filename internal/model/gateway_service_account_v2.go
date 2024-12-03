@@ -9,7 +9,7 @@ import (
 )
 
 const GatewayServiceAccountV2Kind = "GatewayServiceAccount"
-const GatewayServiceAccountV2ApiVersion = "v2"
+const GatewayServiceAccountV2ApiVersion = "gateway/v2"
 
 type GatewayServiceAccountMetadata struct {
 	Name     string `json:"name"`

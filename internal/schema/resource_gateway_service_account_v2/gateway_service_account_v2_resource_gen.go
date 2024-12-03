@@ -68,8 +68,8 @@ func GatewayServiceAccountV2ResourceSchema(ctx context.Context) schema.Schema {
 					},
 					"type": schema.StringAttribute{
 						Required:            true,
-						Description:         "The type of the Service Accound. Can only be either LOCAL or EXTERNAL. Default value is LOCAL.",
-						MarkdownDescription: "The type of the Service Accound. Can only be either LOCAL or EXTERNAL. Default value is LOCAL.",
+						Description:         "The type of the Service Accound. Can only be either LOCAL or EXTERNAL.",
+						MarkdownDescription: "The type of the Service Accound. Can only be either LOCAL or EXTERNAL.",
 						Validators: []validator.String{
 							stringvalidator.OneOf(validation.ValidServiceAccountTypes...),
 						},

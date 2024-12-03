@@ -120,8 +120,14 @@ func (r *GatewayServiceAccountV2Resource) Read(ctx context.Context, req resource
 		return
 	}
 
+	// Only appending vcluster if present
+	queryString := "name=" + data.Name.ValueString()
+	if data.Vcluster.ValueString() != "" {
+		queryString += "&vcluster=" + data.Vcluster.ValueString()
+	}
+
 	tflog.Info(ctx, fmt.Sprintf("Read service account named %s", data.Name.String()))
-	get, err := r.apiClient.Describe(ctx, fmt.Sprintf("%s?vcluster=%s&name=%s", gatewayServiceAccountV2ApiPath, data.Vcluster.ValueString(), data.Name.ValueString()))
+	get, err := r.apiClient.Describe(ctx, fmt.Sprintf("%s?%s", gatewayServiceAccountV2ApiPath, queryString))
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read service account, got error: %s", err))
 		return
@@ -135,7 +141,7 @@ func (r *GatewayServiceAccountV2Resource) Read(ctx context.Context, req resource
 
 	var gatewayRes = []model.GatewayServiceAccountResource{}
 	err = json.Unmarshal(get, &gatewayRes)
-	if err != nil {
+	if err != nil || len(gatewayRes) < 1 {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read service account, got error: %s", err))
 		return
 	}

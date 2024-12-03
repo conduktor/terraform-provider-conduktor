@@ -273,7 +273,7 @@ func (client *ConsoleClient) Delete(ctx context.Context, path string) error {
 	return nil
 }
 
-// This is a temporary workaround - will be revisited with the future client works
+// This is a temporary workaround - will be revisited with the future client works.
 func (client *GatewayClient) Apply(ctx context.Context, path string, resource interface{}) (ApplyResult, error) {
 	url := client.baseUrl + path
 	jsonData, err := jsoniter.Marshal(resource)

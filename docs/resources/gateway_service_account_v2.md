@@ -29,7 +29,7 @@ description: |-
 
 Required:
 
-- `type` (String) The type of the Service Accound. Can only be either LOCAL or EXTERNAL. Default value is LOCAL.
+- `type` (String) The type of the Service Accound. Can only be either LOCAL or EXTERNAL.
 
 Optional:
 
