@@ -35,7 +35,7 @@ func GatewayServiceAccountV2ResourceSchema(ctx context.Context) schema.Schema {
 					stringplanmodifier.RequiresReplace(),
 				},
 				Validators: []validator.String{
-					stringvalidator.RegexMatches(regexp.MustCompile("^[0-9a-z\\_\\-.]+$"), ""),
+					stringvalidator.RegexMatches(regexp.MustCompile("^[a-zA-Z0-9_-]{3,64}$"), ""),
 				},
 			},
 			"vcluster": schema.StringAttribute{
@@ -47,7 +47,7 @@ func GatewayServiceAccountV2ResourceSchema(ctx context.Context) schema.Schema {
 					stringplanmodifier.RequiresReplace(),
 				},
 				Validators: []validator.String{
-					stringvalidator.RegexMatches(regexp.MustCompile("^[0-9a-z\\_\\-.]+$"), ""),
+					stringvalidator.RegexMatches(regexp.MustCompile("^[a-zA-Z0-9_-]+$"), ""),
 				},
 				Default: stringdefault.StaticString("passthrough"),
 			},

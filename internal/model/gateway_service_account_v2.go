@@ -17,7 +17,7 @@ type GatewayServiceAccountMetadata struct {
 }
 
 func (r GatewayServiceAccountMetadata) String() string {
-	return fmt.Sprintf(`name: %s`, r.Name)
+	return fmt.Sprintf(`name: %s, vCluster: %s`, r.Name, r.VCluster)
 }
 
 type GatewayServiceAccountSpec struct {

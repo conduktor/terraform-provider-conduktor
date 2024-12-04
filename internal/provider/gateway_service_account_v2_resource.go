@@ -74,7 +74,7 @@ func (r *GatewayServiceAccountV2Resource) Create(ctx context.Context, req resour
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	tflog.Info(ctx, fmt.Sprintf("Create service accouunt named %s", data.Name.String()))
+	tflog.Info(ctx, fmt.Sprintf("Create service account named %s", data.Name.String()))
 	tflog.Trace(ctx, fmt.Sprintf("Create service account with TF data: %+v", data))
 
 	gatewayResource, err := mapper.TFToInternalModel(ctx, &data)
