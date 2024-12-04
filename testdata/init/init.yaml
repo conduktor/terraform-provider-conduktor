@@ -1,1 +1,8 @@
 # Init manifests are used to initialize Console with the necessary resources using CLI.
+---
+apiVersion: gateway/v2
+kind: VirtualCluster
+metadata:
+ name: "vcluster_sa"
+spec:
+ aclEnabled: false # defaults to false

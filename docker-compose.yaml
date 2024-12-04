@@ -103,6 +103,12 @@ services:
       GATEWAY_HTTP_PORT: 8888
       GATEWAY_PORT_START: 9094
       GATEWAY_PORT_COUNT: 1
+      # OAuth config needed to test EXTERNAL service accounts
+      GATEWAY_SECURITY_PROTOCOL: SASL_PLAINTEXT
+      GATEWAY_LICENSE_KEY: ${CDK_LICENSE:-}
+      GATEWAY_OAUTH_JWKS_URL: "https://login.microsoftonline.com/common/discovery/keys"
+      GATEWAY_OAUTH_EXPECTED_ISSUER: "https://sts.windows.net/38755287-df00-48cd-805b-1ebe914e8b11/"
+      GATEWAY_OAUTH_EXPECTED_AUDIENCES: "[00000002-0000-0000-c000-000000000000]"
 
 volumes:
   pg_data: {}
