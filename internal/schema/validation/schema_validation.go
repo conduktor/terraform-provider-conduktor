@@ -44,7 +44,7 @@ var ValidPermissions = []string{
 	"topicDelete",
 }
 
-// Provider modes
+// Provider modes.
 var ValidProviderMode = []string{"console", "gateway"}
 
 var ValidPermissionTypes = []string{"CLUSTER", "CONSUMER_GROUP", "KAFKA_CONNECT", "KSQLDB", "PLATFORM", "SUBJECT", "TOPIC"}

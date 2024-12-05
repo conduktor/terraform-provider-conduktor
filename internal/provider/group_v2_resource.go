@@ -26,7 +26,7 @@ func NewGroupV2Resource() resource.Resource {
 
 // GroupV2Resource defines the resource implementation.
 type GroupV2Resource struct {
-	apiClient *client.ConsoleClient
+	apiClient *client.Client
 }
 
 func (r *GroupV2Resource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -54,7 +54,7 @@ func (r *GroupV2Resource) Configure(ctx context.Context, req resource.ConfigureR
 		return
 	}
 
-	if data.ConsoleClient == nil {
+	if data.Client == nil || data.Mode != client.CONSOLE {
 		resp.Diagnostics.AddError(
 			"Unexpected Resource Configure Type",
 			"Console Client not configured. Please provide client configuration details for Console API.",
@@ -62,7 +62,7 @@ func (r *GroupV2Resource) Configure(ctx context.Context, req resource.ConfigureR
 		return
 	}
 
-	r.apiClient = data.ConsoleClient
+	r.apiClient = data.Client
 }
 
 func (r *GroupV2Resource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -208,7 +208,8 @@ func (r *GroupV2Resource) Delete(ctx context.Context, req resource.DeleteRequest
 		return
 	}
 
-	err := r.apiClient.Delete(ctx, fmt.Sprintf("%s/%s", groupV2ApiPath, data.Name.ValueString()))
+	resourcePath := fmt.Sprintf("%s/%s", groupV2ApiPath, data.Name.ValueString())
+	err := r.apiClient.Delete(ctx, client.CONSOLE, resourcePath, nil)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete group, got error: %s", err))
 		return

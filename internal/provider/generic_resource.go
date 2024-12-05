@@ -25,7 +25,7 @@ func NewGenericResource() resource.Resource {
 
 // GenericResource defines the resource implementation.
 type GenericResource struct {
-	client *client.ConsoleClient
+	client *client.Client
 }
 
 func (r *GenericResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -53,7 +53,7 @@ func (r *GenericResource) Configure(ctx context.Context, req resource.ConfigureR
 		return
 	}
 
-	if data.ConsoleClient == nil {
+	if data.Client == nil || data.Mode != client.CONSOLE {
 		resp.Diagnostics.AddError(
 			"Unexpected Resource Configure Type",
 			"Console Client not configured. Please provide client configuration details for Console API.",
@@ -61,7 +61,7 @@ func (r *GenericResource) Configure(ctx context.Context, req resource.ConfigureR
 		return
 	}
 
-	r.client = data.ConsoleClient
+	r.client = data.Client
 }
 
 func (r *GenericResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -211,7 +211,7 @@ func (r *GenericResource) Delete(ctx context.Context, req resource.DeleteRequest
 	}
 	tflog.Debug(ctx, fmt.Sprintf("Delete resource on path %s", resourcePath))
 
-	err = r.client.Delete(ctx, resourcePath)
+	err = r.client.Delete(ctx, client.CONSOLE, resourcePath, nil)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete Generic, got error: %s", err))
 		return

@@ -32,8 +32,8 @@ type ConduktorProvider struct {
 }
 
 type ProviderData struct {
-	ConsoleClient *client.ConsoleClient
-	GatewayClient *client.GatewayClient
+	Mode   client.Mode
+	Client *client.Client
 }
 
 func (p *ConduktorProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -46,59 +46,103 @@ func (p *ConduktorProvider) Schema(ctx context.Context, req provider.SchemaReque
 }
 
 func (p *ConduktorProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
-	var config schema.ConduktorModel
-	var consoleApiClient *client.ConsoleClient
-	var gatewayApiClient *client.GatewayClient
-	var baseUrl, apiToken, adminUser, adminPassword, cert, cacert, key string
-	var insecure bool
+	var input schema.ConduktorModel
+	var apiClient *client.Client
+	var data ProviderData
 	var err error
 
-	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	resp.Diagnostics.Append(req.Config.Get(ctx, &input)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	mode := schemaUtils.GetStringConfig(config.Mode, []string{"CDK_PROVIDER_MODE"})
+	mode := schemaUtils.GetStringConfig(input.Mode, []string{"CDK_PROVIDER_MODE"})
+
+	// Data will only contain the mode being either CONSOLE or GATEWAY
+	apiParameter, data, resp := p.PreFlightChecks(mode, input, resp)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	ctx = tflog.SetField(ctx, "api_token", apiParameter.ApiKey)
+	ctx = tflog.SetField(ctx, "base_url", apiParameter.BaseUrl)
+	ctx = tflog.SetField(ctx, "admin_user", apiParameter.CdkUser)
+	ctx = tflog.SetField(ctx, "admin_password", apiParameter.CdkPassword)
+	ctx = tflog.SetField(ctx, "cert", apiParameter.TLSParameters.Cert)
+	ctx = tflog.SetField(ctx, "cacert", apiParameter.TLSParameters.Cacert)
+	ctx = tflog.SetField(ctx, "key", apiParameter.TLSParameters.Key)
+	ctx = tflog.SetField(ctx, "insecure", apiParameter.TLSParameters.Insecure)
+	// Avoid leaking sensitive information in logs
+	ctx = tflog.MaskFieldValuesWithFieldKeys(ctx, "api_token")
+	ctx = tflog.MaskFieldValuesWithFieldKeys(ctx, "admin_password")
+	ctx = tflog.MaskFieldValuesWithFieldKeys(ctx, "key")
+
+	tflog.Debug(ctx, "Creating Conduktor client for: "+string(data.Mode))
+
+	apiClient, err = client.Make(ctx, data.Mode, apiParameter, p.version)
+
+	if err != nil {
+		resp.Diagnostics.AddError("Could not create the Conduktor "+string(data.Mode)+" API client", err.Error())
+		return
+	}
+
+	data.Client = apiClient
+
+	tflog.Info(ctx, "Configured Conduktor "+string(data.Mode)+" client", map[string]any{"success": true})
+
+	resp.DataSourceData = &data
+	resp.ResourceData = &data
+}
+
+func (p *ConduktorProvider) PreFlightChecks(mode string, input schema.ConduktorModel, resp *provider.ConfigureResponse) (client.ApiParameter, ProviderData, *provider.ConfigureResponse) {
+	var data ProviderData
+	var apiParameter client.ApiParameter
 
 	switch mode {
 	case "console":
 		{
-			baseUrl = schemaUtils.GetStringConfig(config.BaseUrl, []string{"CDK_BASE_URL", "CDK_CONSOLE_URL"})
-			apiToken = schemaUtils.GetStringConfig(config.ApiToken, []string{"CDK_API_TOKEN", "CDK_API_KEY"})
-			adminUser = schemaUtils.GetStringConfig(config.AdminUser, []string{"CDK_ADMIN_EMAIL"})
-			adminPassword = schemaUtils.GetStringConfig(config.AdminPassword, []string{"CDK_ADMIN_PASSWORD"})
-			cert = schemaUtils.GetStringConfig(config.Cert, []string{"CDK_CERT"})
-			cacert = schemaUtils.GetStringConfig(config.Cacert, []string{"CDK_CACERT"})
-			key = schemaUtils.GetStringConfig(config.Key, []string{"CDK_KEY"})
-			insecure = schemaUtils.GetBooleanConfig(config.Insecure, []string{"CDK_INSECURE"}, false)
+			data.Mode = client.CONSOLE
+			apiParameter.BaseUrl = schemaUtils.GetStringConfig(input.BaseUrl, []string{"CDK_BASE_URL", "CDK_CONSOLE_URL"})
+			apiParameter.ApiKey = schemaUtils.GetStringConfig(input.ApiToken, []string{"CDK_API_TOKEN", "CDK_API_KEY"})
+			apiParameter.CdkUser = schemaUtils.GetStringConfig(input.AdminUser, []string{"CDK_ADMIN_EMAIL"})
+			apiParameter.CdkPassword = schemaUtils.GetStringConfig(input.AdminPassword, []string{"CDK_ADMIN_PASSWORD"})
+			apiParameter.TLSParameters.Key = schemaUtils.GetStringConfig(input.Cert, []string{"CDK_CERT"})
+			apiParameter.TLSParameters.Cacert = schemaUtils.GetStringConfig(input.Cacert, []string{"CDK_CACERT"})
+			apiParameter.TLSParameters.Key = schemaUtils.GetStringConfig(input.Key, []string{"CDK_KEY"})
+			apiParameter.TLSParameters.Insecure = schemaUtils.GetBooleanConfig(input.Insecure, []string{"CDK_INSECURE"}, false)
 
-			if apiToken == "" && adminUser == "" && adminPassword == "" {
-				details := "The provider cannot create the Console API client as there is a missing or empty value for the API Token and missing or empty values for the admin email/password. " +
-					"Set either : " +
-					" - the api_token value in the configuration or use the CDK_API_TOKEN environment variable. " +
-					" - the admin_email and admin_password value in the configuration or use the CDK_ADMIN_EMAIL/CDK_ADMIN_PASSWORD environment variable. " +
-					"If either is already set, ensure the value is not empty."
+			if apiParameter.ApiKey == "" {
+				// We only need to check user and password if no apiToken is provided.
+				if apiParameter.CdkUser == "" || apiParameter.CdkPassword == "" {
+					details := "The provider cannot create the Console API client as there is a missing or empty value for the API Token and missing or empty values for the admin user and password. " +
+						"Set either : " +
+						" - the api_token value in the configuration or use the CDK_API_TOKEN environment variable. " +
+						" - the admin_user and admin_password value in the configuration or use the CDK_ADMIN_EMAIL and CDK_ADMIN_PASSWORD environment variable. " +
+						"If either is already set, ensure the value is not empty."
 
-				resp.Diagnostics.AddAttributeError(path.Root("api_token"), "Missing API token", details)
-				resp.Diagnostics.AddAttributeError(path.Root("admin_user"), "Missing Admin email", details)
-				resp.Diagnostics.AddAttributeError(path.Root("admin_password"), "Missing Admin password", details)
+					resp.Diagnostics.AddAttributeError(path.Root("api_token"), "Missing API token", details)
+					resp.Diagnostics.AddAttributeError(path.Root("admin_user"), "Missing Admin email", details)
+					resp.Diagnostics.AddAttributeError(path.Root("admin_password"), "Missing Admin password", details)
+				}
 			}
 		}
 	case "gateway":
 		{
-			baseUrl = schemaUtils.GetStringConfig(config.BaseUrl, []string{"CDK_GATEWAY_BASE_URL"})
-			adminUser = schemaUtils.GetStringConfig(config.AdminUser, []string{"CDK_GATEWAY_USER"})
-			adminPassword = schemaUtils.GetStringConfig(config.AdminPassword, []string{"CDK_GATEWAY_PASSWORD"})
-			cert = schemaUtils.GetStringConfig(config.Cert, []string{"CDK_GATEWAY_CERT"})
-			cacert = schemaUtils.GetStringConfig(config.Cacert, []string{"CDK_GATEWAY_CACERT"})
-			key = schemaUtils.GetStringConfig(config.Key, []string{"CDK_GATEWAY_KEY"})
-			insecure = schemaUtils.GetBooleanConfig(config.Insecure, []string{"CDK_GATEWAY_INSECURE"}, false)
+			data.Mode = client.GATEWAY
+			apiParameter.BaseUrl = schemaUtils.GetStringConfig(input.BaseUrl, []string{"CDK_GATEWAY_BASE_URL"})
+			apiParameter.CdkUser = schemaUtils.GetStringConfig(input.AdminUser, []string{"CDK_GATEWAY_USER"})
+			apiParameter.CdkPassword = schemaUtils.GetStringConfig(input.AdminPassword, []string{"CDK_GATEWAY_PASSWORD"})
+			apiParameter.TLSParameters.Cacert = schemaUtils.GetStringConfig(input.Cert, []string{"CDK_GATEWAY_CERT"})
+			apiParameter.TLSParameters.Cacert = schemaUtils.GetStringConfig(input.Cacert, []string{"CDK_GATEWAY_CACERT"})
+			apiParameter.TLSParameters.Key = schemaUtils.GetStringConfig(input.Key, []string{"CDK_GATEWAY_KEY"})
+			apiParameter.TLSParameters.Insecure = schemaUtils.GetBooleanConfig(input.Insecure, []string{"CDK_GATEWAY_INSECURE"}, false)
 
-			if adminUser == "" || adminPassword == "" {
-				details := "The provider cannot create the Gateway API client as there is a missing or empty value for the admin email/password. " +
+			if apiParameter.CdkUser == "" || apiParameter.CdkPassword == "" {
+				details := "The provider cannot create the Gateway API client as there is a missing or empty value for the admin user and password. " +
 					"Set both : " +
-					" - the gateway_user value in the configuration or use the CDK_GATEWAY_USER environment variable. " +
-					" - the gateway_password value in the configuration or use the CDK_GATEWAY_PASSWORD environment variable. " +
+					" - the admin_user value in the configuration or use the CDK_GATEWAY_USER environment variable. " +
+					" - the admin_password value in the configuration or use the CDK_GATEWAY_PASSWORD environment variable. " +
 					"If either is already set, ensure the value is not empty."
 
 				resp.Diagnostics.AddAttributeError(path.Root("admin_user"), "Missing Gateway Admin login", details)
@@ -107,96 +151,16 @@ func (p *ConduktorProvider) Configure(ctx context.Context, req provider.Configur
 		}
 	}
 
-	// Validate mandatory configurations
-	if baseUrl == "" {
-		details := "The provider cannot create any API client as there is a missing or empty value for both the Console and Gateway URL. " +
-			"Set either : " +
-			" - the console_url value in the configuration or use the CDK_BASE_URL or CDK_CONSOLE_URL environment variable. " +
-			" - the gateway_url value in the configuration or use the CDK_GATEWAY_BASE_URL environment variable. " +
+	if apiParameter.BaseUrl == "" {
+		details := "The provider cannot create any API client as there is a missing or empty value for the Base URL. " +
+			"Set: " +
+			" - the base_url value in the configuration or use the following environment variables: CDK_BASE_URL or CDK_CONSOLE_URL for Console, CDK_GATEWAY_BASE_URL for Gateway. " +
 			"If either is already set, ensure the value is not empty."
 
-		resp.Diagnostics.AddAttributeError(path.Root("console_url"), "Missing Console URL", details)
-		resp.Diagnostics.AddAttributeError(path.Root("gateway_url"), "Missing Gateway URL", details)
+		resp.Diagnostics.AddAttributeError(path.Root("base_url"), "Missing Console URL", details)
 	}
 
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	ctx = tflog.SetField(ctx, "api_token", apiToken)
-	ctx = tflog.SetField(ctx, "base_url", baseUrl)
-	ctx = tflog.SetField(ctx, "admin_user", adminUser)
-	ctx = tflog.SetField(ctx, "admin_password", adminPassword)
-	ctx = tflog.SetField(ctx, "cert", cert)
-	ctx = tflog.SetField(ctx, "cacert", cacert)
-	ctx = tflog.SetField(ctx, "key", key)
-	ctx = tflog.SetField(ctx, "insecure", insecure)
-
-	// Avoid leaking sensitive information in logs
-	ctx = tflog.MaskFieldValuesWithFieldKeys(ctx, "api_token")
-	ctx = tflog.MaskFieldValuesWithFieldKeys(ctx, "admin_password")
-	ctx = tflog.MaskFieldValuesWithFieldKeys(ctx, "key")
-	tflog.Debug(ctx, "Creating Conduktor client for: "+mode)
-
-	switch mode {
-	case "console":
-		{
-			consoleApiClient, err = client.Make(ctx,
-				client.ApiParameter{
-					ApiKey:      apiToken,
-					BaseUrl:     baseUrl,
-					CdkUser:     adminUser,
-					CdkPassword: adminPassword,
-					TLSParameters: client.TLSParameters{
-						Key:      key,
-						Cert:     cert,
-						Cacert:   cacert,
-						Insecure: insecure,
-					},
-				},
-				p.version,
-			)
-			if err != nil {
-				resp.Diagnostics.AddError("Could not create the Conduktor Console API client", err.Error())
-				return
-			}
-		}
-	case "gateway":
-		{
-			gatewayApiClient, err = client.MakeGateway(ctx,
-				client.GatewayApiParameters{
-					BaseUrl:         baseUrl,
-					GatewayUser:     adminUser,
-					GatewayPassword: adminPassword,
-					TLSParameters: client.TLSParameters{
-						Key:      key,
-						Cert:     cert,
-						Cacert:   cacert,
-						Insecure: insecure,
-					},
-				},
-				p.version,
-			)
-			if err != nil {
-				resp.Diagnostics.AddError("Could not create the Conduktor Gateway API client", err.Error())
-				return
-			}
-		}
-	}
-
-	data := &ProviderData{
-		ConsoleClient: consoleApiClient,
-		GatewayClient: gatewayApiClient,
-	}
-	resp.DataSourceData = data
-	resp.ResourceData = data
-
-	if consoleApiClient != nil {
-		tflog.Info(ctx, "Configured Conduktor Console client", map[string]any{"success": true})
-	}
-	if gatewayApiClient != nil {
-		tflog.Info(ctx, "Configured Conduktor Gateway client", map[string]any{"success": true})
-	}
+	return apiParameter, data, resp
 }
 
 func (p *ConduktorProvider) Resources(ctx context.Context) []func() resource.Resource {

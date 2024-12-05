@@ -25,7 +25,7 @@ func NewKafkaClusterV2Resource() resource.Resource {
 
 // KafkaClusterV2Resource defines the resource implementation.
 type KafkaClusterV2Resource struct {
-	apiClient *client.ConsoleClient
+	apiClient *client.Client
 }
 
 func (r *KafkaClusterV2Resource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -53,7 +53,7 @@ func (r *KafkaClusterV2Resource) Configure(_ context.Context, req resource.Confi
 		return
 	}
 
-	if data.ConsoleClient == nil {
+	if data.Client == nil || data.Mode != client.CONSOLE {
 		resp.Diagnostics.AddError(
 			"Unexpected Resource Configure Type",
 			"Console Client not configured. Please provide client configuration details for Console API.",
@@ -61,7 +61,7 @@ func (r *KafkaClusterV2Resource) Configure(_ context.Context, req resource.Confi
 		return
 	}
 
-	r.apiClient = data.ConsoleClient
+	r.apiClient = data.Client
 }
 
 func (r *KafkaClusterV2Resource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -207,7 +207,8 @@ func (r *KafkaClusterV2Resource) Delete(ctx context.Context, req resource.Delete
 		return
 	}
 
-	err := r.apiClient.Delete(ctx, fmt.Sprintf("%s/%s", kafkaClusterV2ApiPath, data.Name.ValueString()))
+	resourcePath := fmt.Sprintf("%s/%s", kafkaClusterV2ApiPath, data.Name.ValueString())
+	err := r.apiClient.Delete(ctx, client.CONSOLE, resourcePath, nil)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete kafka cluster, got error: %s", err))
 		return

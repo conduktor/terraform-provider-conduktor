@@ -32,7 +32,7 @@ func NewKafkaConnectV2Resource() resource.Resource {
 
 // KafkaConnectV2Resource defines the resource implementation.
 type KafkaConnectV2Resource struct {
-	apiClient *client.ConsoleClient
+	apiClient *client.Client
 }
 
 func (r *KafkaConnectV2Resource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -60,7 +60,7 @@ func (r *KafkaConnectV2Resource) Configure(_ context.Context, req resource.Confi
 		return
 	}
 
-	if data.ConsoleClient == nil {
+	if data.Client == nil || data.Mode != client.CONSOLE {
 		resp.Diagnostics.AddError(
 			"Unexpected Resource Configure Type",
 			"Console Client not configured. Please provide client configuration details for Console API.",
@@ -68,7 +68,7 @@ func (r *KafkaConnectV2Resource) Configure(_ context.Context, req resource.Confi
 		return
 	}
 
-	r.apiClient = data.ConsoleClient
+	r.apiClient = data.Client
 }
 
 func (r *KafkaConnectV2Resource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -214,7 +214,8 @@ func (r *KafkaConnectV2Resource) Delete(ctx context.Context, req resource.Delete
 		return
 	}
 
-	err := r.apiClient.Delete(ctx, kafkaConnectV2ApiGetPath(data.Cluster.ValueString(), data.Name.ValueString()))
+	resourcePath := kafkaConnectV2ApiGetPath(data.Cluster.ValueString(), data.Name.ValueString())
+	err := r.apiClient.Delete(ctx, client.CONSOLE, resourcePath, nil)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete kafka connect server, got error: %s", err))
 		return

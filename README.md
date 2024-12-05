@@ -89,7 +89,7 @@ terraform {
 # configure provider
 provider "conduktor" {
   mode        = "console"
-  console_url = "http://localhost:8080"
+  base_url    = "http://localhost:8080"
   api_token   = "your-api-key" # can also use admin email/password to authenticate.
 }
 
