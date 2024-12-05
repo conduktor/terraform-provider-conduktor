@@ -23,7 +23,7 @@ resource "conduktor_gateway_service_account_v2" "local_sa" {
 }
 ```
 
-### Complex service account of EXTERNAL type with expernal names and a vCluster
+### Complex service account of EXTERNAL type with external names and a vCluster
 ```terraform
 resource "conduktor_gateway_service_account_v2" "external_sa" {
   name     = "complex-service-account"
