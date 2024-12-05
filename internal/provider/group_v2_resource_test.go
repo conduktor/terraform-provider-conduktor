@@ -17,7 +17,7 @@ func TestAccGroupV2Resource(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read testing
 			{
-				Config: providerConfig + test.TestAccTestdata(t, "group_v2_resource_create.tf"),
+				Config: providerConfigConsole + test.TestAccTestdata(t, "group_v2_resource_create.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceRef, "name", "sales"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.display_name", "Sales Department"),
@@ -41,7 +41,7 @@ func TestAccGroupV2Resource(t *testing.T) {
 			},
 			// Update and Read testing
 			{
-				Config: providerConfig + test.TestAccTestdata(t, "group_v2_resource_update.tf"),
+				Config: providerConfigConsole + test.TestAccTestdata(t, "group_v2_resource_update.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceRef, "name", "sales"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.display_name", "New Sales Department"),
@@ -75,7 +75,7 @@ func TestAccGroupV2Minimal(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read from minimal example
 			{
-				Config: providerConfig + test.TestAccTestdata(t, "group_v2_resource_minimal.tf"),
+				Config: providerConfigConsole + test.TestAccTestdata(t, "group_v2_resource_minimal.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("conduktor_group_v2.minimal", "name", "minimal"),
 					resource.TestCheckResourceAttr("conduktor_group_v2.minimal", "spec.display_name", "Minimal"),
@@ -99,7 +99,7 @@ func TestAccGroupV2ExampleResource(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read from simple example
 			{
-				Config: providerConfig + test.TestAccExample(t, "resources", "conduktor_group_v2", "simple.tf"),
+				Config: providerConfigConsole + test.TestAccExample(t, "resources", "conduktor_group_v2", "simple.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("conduktor_group_v2.example", "name", "simple-group"),
 					resource.TestCheckResourceAttr("conduktor_group_v2.example", "spec.display_name", "Simple Group"),
@@ -112,7 +112,7 @@ func TestAccGroupV2ExampleResource(t *testing.T) {
 			},
 			// Create and Read from complex example
 			{
-				Config: providerConfig + test.TestAccExample(t, "resources", "conduktor_group_v2", "complex.tf"),
+				Config: providerConfigConsole + test.TestAccExample(t, "resources", "conduktor_group_v2", "complex.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("conduktor_group_v2.example", "name", "complex-group"),
 					resource.TestCheckResourceAttr("conduktor_group_v2.example", "spec.display_name", "Complex group"),

@@ -1,10 +1,11 @@
 provider "conduktor" {
+  mode = "console"
   # mandatory console URL
-  console_url = "http://localhost:8080" # or env vars CDK_CONSOLE_URL or CDK_BASE_URL
+  base_url = "http://localhost:8080" # or env vars CDK_CONSOLE_URL or CDK_BASE_URL
 
   # authentication either with api token or admin credentials
   api_token = "your-api-token" # or env var CDK_API_TOKEN or CDK_API_KEY
-  #admin_email    = "admin@my-org.com" # or env var CDK_ADMIN_EMAIL
+  #admin_user     = "admin@my-org.com" # or env var CDK_ADMIN_EMAIL
   #admin_password = "admin-password"   # or env var CDK_ADMIN_PASSWORD
 
   # optional http client TLS configuration

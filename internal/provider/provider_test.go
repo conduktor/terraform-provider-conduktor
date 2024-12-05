@@ -10,8 +10,14 @@ const (
 	// test configuration so the Conduktor Console client is properly configured.
 	// It is also possible to use the CDK_ environment variables instead,
 	// such as updating the Makefile and running the testing through that tool.
-	providerConfig = `
+	providerConfigConsole = `
 provider "conduktor" {
+  mode = "console"
+}
+`
+	providerConfigGateway = `
+provider "conduktor" {
+  mode = "gateway"
 }
 `
 )
