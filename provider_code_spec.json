@@ -1257,7 +1257,7 @@
                 {
                   "name": "type",
                   "string": {
-                    "description": "The type of the Service Accound. Can only be either LOCAL or EXTERNAL.",
+                    "description": "The type of the Service Account. Can only be either LOCAL or EXTERNAL.",
                     "computed_optional_required": "required",
                     "validators": [
                       {
@@ -1279,7 +1279,7 @@
                 {
                   "name": "external_names",
                   "set": {
-                    "description": "Set of the external names of the service account. Required if spec.type is set to EXTERNAL. At the moment, an external service account should have exactly one external name (The support for many external names will be available soon)",
+                    "description": "Set of the external names of the service account. Required if spec.type is set to EXTERNAL. An external service account should have exactly one external name.",
                     "computed_optional_required": "computed_optional",
                     "element_type": {
                       "string": {}
