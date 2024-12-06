@@ -57,7 +57,9 @@ func (r *GatewayServiceAccountV2Resource) Configure(ctx context.Context, req res
 	if data.Client == nil || data.Mode != client.GATEWAY {
 		resp.Diagnostics.AddError(
 			"Unexpected Resource Configure Type",
-			"Gateway Client not configured. Please provide client configuration details for Gateway API.",
+			"Gateway Client not configured. Please provide client configuration details for Gateway API and ensure you have set the right provider mode for this resource. \n"+
+				"More info here: \n"+
+				" - https://registry.terraform.io/providers/conduktor/conduktor/latest/docs",
 		)
 		return
 	}

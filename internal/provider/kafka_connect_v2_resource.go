@@ -63,7 +63,9 @@ func (r *KafkaConnectV2Resource) Configure(_ context.Context, req resource.Confi
 	if data.Client == nil || data.Mode != client.CONSOLE {
 		resp.Diagnostics.AddError(
 			"Unexpected Resource Configure Type",
-			"Console Client not configured. Please provide client configuration details for Console API.",
+			"Console Client not configured. Please provide client configuration details for Console API and ensure you have set the right provider mode for this resource. \n"+
+				"More info here: \n"+
+				" - https://registry.terraform.io/providers/conduktor/conduktor/latest/docs",
 		)
 		return
 	}
