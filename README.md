@@ -88,8 +88,9 @@ terraform {
 ```hcl
 # configure provider
 provider "conduktor" {
-  console_url = "http://localhost:8080"
-  api_token = "your-api-key" # can also use admin email/password to authenticate.
+  mode        = "console"
+  base_url    = "http://localhost:8080"
+  api_token   = "your-api-key" # can also use admin email/password to authenticate.
 }
 
 # register an external user bob with PLATFORM.userView permission

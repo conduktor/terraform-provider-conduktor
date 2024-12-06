@@ -16,7 +16,7 @@ func TestAccKafkaClusterV2Resource(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read testing
 			{
-				Config: providerConfig + test.TestAccTestdata(t, "kafka_cluster_v2_resource_create.tf"),
+				Config: providerConfigConsole + test.TestAccTestdata(t, "kafka_cluster_v2_resource_create.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceRef, "name", "test-cluster"),
 					resource.TestCheckResourceAttr(resourceRef, "labels.%", "1"),
@@ -51,7 +51,7 @@ func TestAccKafkaClusterV2Resource(t *testing.T) {
 			},
 			// Update and Read testing
 			{
-				Config: providerConfig + test.TestAccTestdata(t, "kafka_cluster_v2_resource_update.tf"),
+				Config: providerConfigConsole + test.TestAccTestdata(t, "kafka_cluster_v2_resource_update.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceRef, "name", "test-cluster"),
 					resource.TestCheckResourceAttr(resourceRef, "labels.%", "2"),
@@ -91,7 +91,7 @@ func TestAccKafkaClusterV2Minimal(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read from minimal example
 			{
-				Config: providerConfig + test.TestAccTestdata(t, "kafka_cluster_v2_resource_minimal.tf"),
+				Config: providerConfigConsole + test.TestAccTestdata(t, "kafka_cluster_v2_resource_minimal.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceRef, "name", "mini-cluster"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.display_name", "Minimal Cluster"),
@@ -122,7 +122,7 @@ func TestAccKafkaClusterV2ExampleResource(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read from simple example
 			{
-				Config: providerConfig + test.TestAccExample(t, "resources", "conduktor_kafka_cluster_v2", "simple.tf"),
+				Config: providerConfigConsole + test.TestAccExample(t, "resources", "conduktor_kafka_cluster_v2", "simple.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(simpleResourceRef, "name", "simple-cluster"),
 					resource.TestCheckResourceAttr(simpleResourceRef, "labels.%", "0"),
@@ -133,7 +133,7 @@ func TestAccKafkaClusterV2ExampleResource(t *testing.T) {
 				),
 			},
 			{
-				Config: providerConfig + test.TestAccExample(t, "resources", "conduktor_kafka_cluster_v2", "gateway.tf"),
+				Config: providerConfigConsole + test.TestAccExample(t, "resources", "conduktor_kafka_cluster_v2", "gateway.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(gatewayResourceRef, "name", "gateway-cluster"),
 					resource.TestCheckResourceAttr(gatewayResourceRef, "labels.%", "1"),
@@ -154,7 +154,7 @@ func TestAccKafkaClusterV2ExampleResource(t *testing.T) {
 				),
 			},
 			{
-				Config: providerConfig + test.TestAccExample(t, "resources", "conduktor_kafka_cluster_v2", "aiven.tf"),
+				Config: providerConfigConsole + test.TestAccExample(t, "resources", "conduktor_kafka_cluster_v2", "aiven.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(aivenResourceRef, "name", "aiven-cluster"),
 					resource.TestCheckResourceAttr(aivenResourceRef, "labels.%", "1"),
@@ -175,7 +175,7 @@ func TestAccKafkaClusterV2ExampleResource(t *testing.T) {
 				),
 			},
 			{
-				Config: providerConfig + test.TestAccExample(t, "resources", "conduktor_kafka_cluster_v2", "aws_msk.tf"),
+				Config: providerConfigConsole + test.TestAccExample(t, "resources", "conduktor_kafka_cluster_v2", "aws_msk.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(awsResourceRef, "name", "aws-cluster"),
 					resource.TestCheckResourceAttr(awsResourceRef, "labels.%", "1"),
@@ -192,7 +192,7 @@ func TestAccKafkaClusterV2ExampleResource(t *testing.T) {
 				),
 			},
 			{
-				Config: providerConfig + test.TestAccExample(t, "resources", "conduktor_kafka_cluster_v2", "confluent.tf"),
+				Config: providerConfigConsole + test.TestAccExample(t, "resources", "conduktor_kafka_cluster_v2", "confluent.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(confluentResourceRef, "name", "confluent-cluster"),
 					resource.TestCheckResourceAttr(confluentResourceRef, "labels.%", "1"),

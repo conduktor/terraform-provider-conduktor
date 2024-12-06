@@ -26,7 +26,7 @@ func NewUserV2Resource() resource.Resource {
 
 // UserV2Resource defines the resource implementation.
 type UserV2Resource struct {
-	apiClient *client.ConsoleClient
+	apiClient *client.Client
 }
 
 func (r *UserV2Resource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -54,15 +54,17 @@ func (r *UserV2Resource) Configure(ctx context.Context, req resource.ConfigureRe
 		return
 	}
 
-	if data.ConsoleClient == nil {
+	if data.Client == nil || data.Mode != client.CONSOLE {
 		resp.Diagnostics.AddError(
 			"Unexpected Resource Configure Type",
-			"Console Client not configured. Please provide client configuration details for Console API.",
+			"Console Client not configured. Please provide client configuration details for Console API and ensure you have set the right provider mode for this resource. \n"+
+				"More info here: \n"+
+				" - https://registry.terraform.io/providers/conduktor/conduktor/latest/docs",
 		)
 		return
 	}
 
-	r.apiClient = data.ConsoleClient
+	r.apiClient = data.Client
 }
 
 func (r *UserV2Resource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -207,7 +209,8 @@ func (r *UserV2Resource) Delete(ctx context.Context, req resource.DeleteRequest,
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	err := r.apiClient.Delete(ctx, fmt.Sprintf("%s/%s", userV2ApiPath, data.Name.ValueString()))
+	resourcePath := fmt.Sprintf("%s/%s", userV2ApiPath, data.Name.ValueString())
+	err := r.apiClient.Delete(ctx, client.CONSOLE, resourcePath, nil)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete user, got error: %s", err))
 		return

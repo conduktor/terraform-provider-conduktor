@@ -26,7 +26,7 @@ func NewGatewayServiceAccountV2Resource() resource.Resource {
 
 // GatewayServiceAccountV2Resource defines the resource implementation.
 type GatewayServiceAccountV2Resource struct {
-	apiClient *client.GatewayClient
+	apiClient *client.Client
 }
 
 func (r *GatewayServiceAccountV2Resource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -54,15 +54,17 @@ func (r *GatewayServiceAccountV2Resource) Configure(ctx context.Context, req res
 		return
 	}
 
-	if data.GatewayClient == nil {
+	if data.Client == nil || data.Mode != client.GATEWAY {
 		resp.Diagnostics.AddError(
 			"Unexpected Resource Configure Type",
-			"Gateway Client not configured. Please provide client configuration details for Gateway API.",
+			"Gateway Client not configured. Please provide client configuration details for Gateway API and ensure you have set the right provider mode for this resource. \n"+
+				"More info here: \n"+
+				" - https://registry.terraform.io/providers/conduktor/conduktor/latest/docs",
 		)
 		return
 	}
 
-	r.apiClient = data.GatewayClient
+	r.apiClient = data.Client
 }
 
 func (r *GatewayServiceAccountV2Resource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -219,7 +221,7 @@ func (r *GatewayServiceAccountV2Resource) Delete(ctx context.Context, req resour
 		VCluster: data.Vcluster.ValueString(),
 	}
 
-	err := r.apiClient.Delete(ctx, gatewayServiceAccountV2ApiPath, deleteRes)
+	err := r.apiClient.Delete(ctx, client.GATEWAY, gatewayServiceAccountV2ApiPath, deleteRes)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete service account, got error: %s", err))
 		return
