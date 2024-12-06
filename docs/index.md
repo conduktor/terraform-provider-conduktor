@@ -61,7 +61,7 @@ provider "conduktor" {
 }
 ```
 
-### Multi client configuration
+### Multi client configuration using [terraform alias](https://developer.hashicorp.com/terraform/language/providers/configuration#alias-multiple-provider-configurations)
 
 ```terraform
 provider "conduktor" {
