@@ -14,17 +14,18 @@ import (
 	jsoniter "github.com/json-iterator/go"
 )
 
-type ConsoleClient struct {
-	apiKey  string
+// Enum used to perform different actions based on provider mode.
+// Setting as string so it can be used for log messages.
+type Mode string
+
+const (
+	CONSOLE Mode = "Console"
+	GATEWAY Mode = "Gateway"
+)
+
+type Client struct {
 	baseUrl string
 	client  *resty.Client
-}
-
-type GatewayClient struct {
-	GatewayUser     string
-	GatewayPassword string
-	baseUrl         string
-	client          *resty.Client
 }
 
 type ApiParameter struct {
@@ -33,13 +34,6 @@ type ApiParameter struct {
 	CdkUser       string
 	CdkPassword   string
 	TLSParameters TLSParameters
-}
-
-type GatewayApiParameters struct {
-	BaseUrl         string
-	GatewayUser     string
-	GatewayPassword string
-	TLSParameters   TLSParameters
 }
 
 type TLSParameters struct {
@@ -61,85 +55,92 @@ type ApplyResult struct {
 	Resource     interface{} `json:"resource"`
 }
 
-func Make(ctx context.Context, apiParameter ApiParameter, providerVersion string) (*ConsoleClient, error) {
+func Make(ctx context.Context, mode Mode, apiParameter ApiParameter, providerVersion string) (*Client, error) {
 	restyClient := resty.New().SetHeader("X-CDK-CLIENT", "TF/"+providerVersion)
+	if mode == CONSOLE {
+		apiParameter.BaseUrl = uniformizeBaseUrl(apiParameter.BaseUrl)
+	}
+	var err error
 
 	// Enable http client debug logs when provider log is set to TRACE
 	restyClient.SetDebug(TraceLogEnabled())
 
-	if (apiParameter.CdkUser != "" && apiParameter.CdkPassword == "") || (apiParameter.CdkUser == "" && apiParameter.CdkPassword != "") {
-		return nil, fmt.Errorf("CDK_USER and CDK_PASSWORD must be provided together")
-	}
-	if apiParameter.CdkUser != "" && apiParameter.ApiKey != "" {
-		return nil, fmt.Errorf("Can't set both CDK_USER and CDK_API_KEY")
-	}
-
-	restyClient, err := ConfigureTLS(ctx, restyClient, apiParameter.TLSParameters)
+	restyClient, err = ConfigureTLS(ctx, restyClient, apiParameter.TLSParameters)
 	if err != nil {
 		return nil, err
 	}
 
-	result := &ConsoleClient{
-		apiKey:  apiParameter.ApiKey,
-		baseUrl: uniformizeBaseUrl(apiParameter.BaseUrl),
+	restyClient, err = ConfigureAuth(ctx, mode, restyClient, apiParameter)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Client{
+		baseUrl: apiParameter.BaseUrl,
 		client:  restyClient,
-	}
-
-	if apiParameter.CdkUser != "" {
-		retry3Time := retry(3, 1*time.Second, ctx)
-		loginResult, err := retry3Time(
-			func(err error) bool {
-				return err.Error() == "Invalid username or password"
-			}, func() (interface{}, error) {
-				return result.login(apiParameter.CdkUser, apiParameter.CdkPassword)
-			},
-		)
-
-		if err != nil {
-			return nil, fmt.Errorf("Could not login: %s", err)
-		}
-		tokens, _ := loginResult.(LoginResult)
-
-		result.apiKey = tokens.AccessToken
-	}
-
-	if result.apiKey != "" {
-		result.client = result.client.SetAuthScheme("Bearer")
-		result.client = result.client.SetAuthToken(result.apiKey)
-	}
-
-	return result, nil
+	}, nil
 }
 
-func MakeGateway(ctx context.Context, apiParameter GatewayApiParameters, providerVersion string) (*GatewayClient, error) {
-	restyClient := resty.New().SetHeader("X-CDK-CLIENT", "TF/"+providerVersion)
+func ConfigureAuth(ctx context.Context, mode Mode, restyClient *resty.Client, apiParameter ApiParameter) (*resty.Client, error) {
+	var err error
+	switch mode {
+	case CONSOLE:
+		{
+			apiKey := apiParameter.ApiKey
+			if apiKey == "" {
+				// Only Login with username and password if no apiKey has been provided.
+				apiKey, err = Login(apiParameter, restyClient)
+				if err != nil {
+					return nil, fmt.Errorf("Could not login: %s", err)
+				}
+			}
 
-	// Enable http client debug logs when provider log is set to TRACE
-	restyClient.SetDebug(TraceLogEnabled())
+			restyClient = restyClient.SetAuthScheme("Bearer")
+			restyClient = restyClient.SetAuthToken(apiKey)
+		}
+	case GATEWAY:
+		{
+			restyClient.SetBasicAuth(apiParameter.CdkUser, apiParameter.CdkPassword)
 
-	restyClient, err := ConfigureTLS(ctx, restyClient, apiParameter.TLSParameters)
-	if err != nil {
-		return nil, err
+			// Testing authentication parameters against /metrics API.
+			// Returning error after 3 retries.
+			testUrl := apiParameter.BaseUrl + "/metrics"
+			resp, err := restyClient.SetRetryCount(3).SetRetryWaitTime(1 * time.Second).R().Get(testUrl)
+			if err != nil {
+				return nil, err
+			} else if resp.StatusCode() != 200 {
+				return nil, fmt.Errorf("Invalid username or password")
+			}
+		}
 	}
 
-	restyClient.SetBasicAuth(apiParameter.GatewayUser, apiParameter.GatewayPassword)
+	return restyClient, nil
+}
 
-	// Testing authentication parameters against /metrics API
-	// returning error after 3 retries
-	testUrl := apiParameter.BaseUrl + "/metrics"
-	resp, err := restyClient.SetRetryCount(3).SetRetryWaitTime(1 * time.Second).R().Get(testUrl)
-	if err != nil {
-		return &GatewayClient{}, err
-	} else if resp.StatusCode() != 200 {
-		return &GatewayClient{}, fmt.Errorf("Invalid username or password")
+// Helper function for Console Auth flow to retrieve access token.
+func Login(apiParameter ApiParameter, client *resty.Client) (string, error) {
+	url := apiParameter.BaseUrl + "/login"
+	body := map[string]string{
+		"username": apiParameter.CdkUser,
+		"password": apiParameter.CdkPassword,
 	}
 
-	return &GatewayClient{
-		GatewayUser:     apiParameter.GatewayUser,
-		GatewayPassword: apiParameter.GatewayPassword,
-		baseUrl:         apiParameter.BaseUrl,
-		client:          restyClient,
-	}, nil
+	resp, err := client.SetRetryCount(3).SetRetryWaitTime(1 * time.Second).R().SetBody(body).Post(url)
+	if err != nil {
+		return "", err
+	} else if resp.IsError() {
+		if resp.StatusCode() == 401 {
+			return "", fmt.Errorf("Invalid username or password")
+		} else {
+			return "", fmt.Errorf("%s", extractApiError(resp))
+		}
+	}
+	result := LoginResult{}
+	err = jsoniter.Unmarshal(resp.Body(), &result)
+	if err != nil {
+		return "", err
+	}
+	return result.AccessToken, nil
 }
 
 func ConfigureTLS(ctx context.Context, restyClient *resty.Client, tlsParameter TLSParameters) (*resty.Client, error) {
@@ -167,27 +168,7 @@ func ConfigureTLS(ctx context.Context, restyClient *resty.Client, tlsParameter T
 	return restyClient, nil
 }
 
-func (client *ConsoleClient) login(username, password string) (LoginResult, error) {
-	url := client.baseUrl + "/login"
-	resp, err := client.client.R().SetBody(map[string]string{"username": username, "password": password}).Post(url)
-	if err != nil {
-		return LoginResult{}, err
-	} else if resp.IsError() {
-		if resp.StatusCode() == 401 {
-			return LoginResult{}, fmt.Errorf("Invalid username or password")
-		} else {
-			return LoginResult{}, fmt.Errorf("%s", extractApiError(resp))
-		}
-	}
-	result := LoginResult{}
-	err = jsoniter.Unmarshal(resp.Body(), &result)
-	if err != nil {
-		return LoginResult{}, err
-	}
-	return result, nil
-}
-
-func (client *ConsoleClient) ApplyGeneric(ctx context.Context, cliResource ctlresource.Resource) (string, error) {
+func (client *Client) ApplyGeneric(ctx context.Context, cliResource ctlresource.Resource) (string, error) {
 	kinds := ctlschema.ConsoleDefaultKind() // TODO support gateway kind and client too
 
 	kindName := cliResource.Kind
@@ -220,7 +201,7 @@ func (client *ConsoleClient) ApplyGeneric(ctx context.Context, cliResource ctlre
 	return upsertResponse.UpsertResult, nil
 }
 
-func (client *ConsoleClient) Apply(ctx context.Context, path string, resource interface{}) (ApplyResult, error) {
+func (client *Client) Apply(ctx context.Context, path string, resource interface{}) (ApplyResult, error) {
 	url := client.baseUrl + path
 	jsonData, err := jsoniter.Marshal(resource)
 	if err != nil {
@@ -245,7 +226,7 @@ func (client *ConsoleClient) Apply(ctx context.Context, path string, resource in
 	return upsertResponse, nil
 }
 
-func (client *ConsoleClient) Describe(ctx context.Context, path string) ([]byte, error) {
+func (client *Client) Describe(ctx context.Context, path string) ([]byte, error) {
 	url := client.baseUrl + path
 	resp, err := client.client.R().Get(url)
 	if err != nil {
@@ -260,73 +241,28 @@ func (client *ConsoleClient) Describe(ctx context.Context, path string) ([]byte,
 	return resp.Body(), nil
 }
 
-func (client *ConsoleClient) Delete(ctx context.Context, path string) error {
+func (client *Client) Delete(ctx context.Context, mode Mode, path string, resource interface{}) error {
+	var req *resty.Request
 	url := client.baseUrl + path
 	tflog.Trace(ctx, fmt.Sprintf("DELETE %s", path))
-	resp, err := client.client.R().Delete(url)
-	if err != nil {
-		return err
-	} else if resp.IsError() {
-		return fmt.Errorf("%s", extractApiError(resp))
-	}
 
-	return nil
-}
-
-// This is a temporary workaround - will be revisited with the future client works.
-func (client *GatewayClient) Apply(ctx context.Context, path string, resource interface{}) (ApplyResult, error) {
-	url := client.baseUrl + path
-	jsonData, err := jsoniter.Marshal(resource)
-	if err != nil {
-		return ApplyResult{}, fmt.Errorf("Error marshalling resource: %s", err)
-	}
-
-	tflog.Trace(ctx, fmt.Sprintf("PUT %s request body : %s", path, string(jsonData)))
-	builder := client.client.R().SetBody(jsonData)
-	resp, err := builder.Put(url)
-	if err != nil {
-		return ApplyResult{}, err
-	} else if resp.IsError() {
-		return ApplyResult{}, fmt.Errorf("%s", extractApiError(resp))
-	}
-	bodyBytes := resp.Body()
-	tflog.Trace(ctx, fmt.Sprintf("PUT %s response body : %s", path, string(bodyBytes)))
-	var upsertResponse ApplyResult
-	err = jsoniter.Unmarshal(bodyBytes, &upsertResponse)
-	if err != nil {
-		return ApplyResult{}, fmt.Errorf("Error unmarshalling response: %s", err)
-	}
-	return upsertResponse, nil
-}
-
-func (client *GatewayClient) Describe(ctx context.Context, path string) ([]byte, error) {
-	url := client.baseUrl + path
-	resp, err := client.client.R().Get(url)
-	if err != nil {
-		return []byte{}, err
-	} else if resp.IsError() {
-		if resp.StatusCode() == 404 {
-			return nil, nil
+	if mode == CONSOLE {
+		req = client.client.R()
+	} else if mode == GATEWAY {
+		// Gateway API handles deletion in a different way
+		// It needs information about the resource in the body of the request
+		// as opposed to Console API who needs them in the URL
+		jsonData, err := json.Marshal(resource)
+		if err != nil {
+			return fmt.Errorf("Error marshalling resource: %s", err)
 		}
-		return []byte{}, fmt.Errorf("error describing resources %s, got status code: %d:\n %s", path, resp.StatusCode(), string(resp.Body()))
+		tflog.Debug(ctx, string(jsonData))
+		tflog.Trace(ctx, fmt.Sprintf("DELETE %s request body : %s", path, string(jsonData)))
+
+		req = client.client.R().SetBody(string(jsonData))
 	}
-	tflog.Trace(ctx, fmt.Sprintf("GET %s response : %s", path, string(resp.Body())))
-	return resp.Body(), nil
-}
 
-func (client *GatewayClient) Delete(ctx context.Context, path string, resource interface{}) error {
-	url := client.baseUrl + path
-
-	jsonData, err := json.Marshal(resource)
-	if err != nil {
-		return fmt.Errorf("Error marshalling resource: %s", err)
-	}
-	tflog.Debug(ctx, string(jsonData))
-
-	tflog.Trace(ctx, fmt.Sprintf("PUT %s request body : %s", path, string(jsonData)))
-	builder := client.client.R().SetBody(string(jsonData))
-	tflog.Trace(ctx, fmt.Sprintf("DELETE %s", path))
-	resp, err := builder.Delete(url)
+	resp, err := req.Delete(url)
 	if err != nil {
 		return err
 	} else if resp.IsError() {

@@ -16,6 +16,16 @@ The Conduktor provider is used to interact with the resources supported by Condu
 
 ## Example Usage
 
-{{tffile "examples/provider/provider.tf"}}
+### Console client only
+
+{{tffile "examples/provider/console_provider.tf"}}
+
+### Gateway client only
+
+{{tffile "examples/provider/gateway_provider.tf"}}
+
+### Multi client configuration using [terraform alias](https://developer.hashicorp.com/terraform/language/providers/configuration#alias-multiple-provider-configurations)
+
+{{tffile "examples/provider/multi_provider.tf"}}
 
 {{ .SchemaMarkdown }}

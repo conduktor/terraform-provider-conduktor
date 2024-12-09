@@ -16,7 +16,7 @@ func TestAccKafkaConnectV2Resource(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read testing
 			{
-				Config: providerConfig + test.TestAccTestdata(t, "kafka_connect_v2_resource_create.tf"),
+				Config: providerConfigConsole + test.TestAccTestdata(t, "kafka_connect_v2_resource_create.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceRef, "name", "test-connect"),
 					resource.TestCheckResourceAttr(resourceRef, "cluster", "mini-cluster"),
@@ -42,7 +42,7 @@ func TestAccKafkaConnectV2Resource(t *testing.T) {
 			},
 			// Update and Read testing
 			{
-				Config: providerConfig + test.TestAccTestdata(t, "kafka_connect_v2_resource_update.tf"),
+				Config: providerConfigConsole + test.TestAccTestdata(t, "kafka_connect_v2_resource_update.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceRef, "name", "test-connect"),
 					resource.TestCheckResourceAttr(resourceRef, "cluster", "mini-cluster"),
@@ -75,7 +75,7 @@ func TestAccKafkaConnectV2Minimal(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read from minimal example
 			{
-				Config: providerConfig + test.TestAccTestdata(t, "kafka_connect_v2_resource_minimal.tf"),
+				Config: providerConfigConsole + test.TestAccTestdata(t, "kafka_connect_v2_resource_minimal.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceRef, "name", "minimal-connect"),
 					resource.TestCheckResourceAttr(resourceRef, "cluster", "mini-cluster"),
@@ -107,7 +107,7 @@ func TestAccKafkaConnectV2ExampleResource(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read from simple example
 			{
-				Config: providerConfig + test.TestAccExample(t, "resources", "conduktor_kafka_connect_v2", "simple.tf"),
+				Config: providerConfigConsole + test.TestAccExample(t, "resources", "conduktor_kafka_connect_v2", "simple.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(simpleResourceRef, "name", "simple-connect"),
 					resource.TestCheckResourceAttr(simpleResourceRef, "cluster", "mini-cluster"),
@@ -119,7 +119,7 @@ func TestAccKafkaConnectV2ExampleResource(t *testing.T) {
 				),
 			},
 			{
-				Config: providerConfig + test.TestAccExample(t, "resources", "conduktor_kafka_connect_v2", "mtls.tf"),
+				Config: providerConfigConsole + test.TestAccExample(t, "resources", "conduktor_kafka_connect_v2", "mtls.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(mtlsResourceRef, "name", "mtls-connect"),
 					resource.TestCheckResourceAttr(mtlsResourceRef, "cluster", "mini-cluster"),
@@ -137,7 +137,7 @@ func TestAccKafkaConnectV2ExampleResource(t *testing.T) {
 				),
 			},
 			{
-				Config: providerConfig + test.TestAccExample(t, "resources", "conduktor_kafka_connect_v2", "basicAuth.tf"),
+				Config: providerConfigConsole + test.TestAccExample(t, "resources", "conduktor_kafka_connect_v2", "basicAuth.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(basicResourceRef, "name", "basic-connect"),
 					resource.TestCheckResourceAttr(basicResourceRef, "cluster", "mini-cluster"),
@@ -157,7 +157,7 @@ func TestAccKafkaConnectV2ExampleResource(t *testing.T) {
 				),
 			},
 			{
-				Config: providerConfig + test.TestAccExample(t, "resources", "conduktor_kafka_connect_v2", "bearerToken.tf"),
+				Config: providerConfigConsole + test.TestAccExample(t, "resources", "conduktor_kafka_connect_v2", "bearerToken.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(bearerResourceRef, "name", "bearer-connect"),
 					resource.TestCheckResourceAttr(bearerResourceRef, "cluster", "mini-cluster"),

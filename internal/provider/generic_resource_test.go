@@ -15,7 +15,7 @@ func TestAccGenericResource(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create embedded and Read testing
 			{
-				Config: providerConfig + test.TestAccTestdata(t, "generic_resource_create_embedded.tf"),
+				Config: providerConfigConsole + test.TestAccTestdata(t, "generic_resource_create_embedded.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceRef, "name", "jim.halpert@dunder.mifflin.com"),
 					resource.TestCheckResourceAttr(resourceRef, "kind", "User"),
@@ -28,7 +28,7 @@ func TestAccGenericResource(t *testing.T) {
 			// ImportState testing
 			// Update and Read testing
 			{
-				Config: providerConfig + test.TestAccTestdata(t, "generic_resource_update_embedded.tf"),
+				Config: providerConfigConsole + test.TestAccTestdata(t, "generic_resource_update_embedded.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceRef, "name", "jim.halpert@dunder.mifflin.com"),
 					resource.TestCheckResourceAttr(resourceRef, "kind", "User"),
@@ -50,7 +50,7 @@ func TestAccGenericExample2Resource(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read from example
 			{
-				Config:             providerConfig + test.TestAccExample(t, "resources", "conduktor_generic", "embedded.tf"),
+				Config:             providerConfigConsole + test.TestAccExample(t, "resources", "conduktor_generic", "embedded.tf"),
 				ExpectNonEmptyPlan: true, // Example YAML are not properly formatted to prevent dirty plan on apply
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("conduktor_generic.example", "name", "bob@company.io"),
