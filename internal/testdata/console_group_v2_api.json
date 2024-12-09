@@ -1,0 +1,85 @@
+{
+  "kind": "Group",
+  "apiVersion": "v2",
+  "metadata": {
+    "name": "sales"
+  },
+  "spec": {
+    "displayName": "Sales Department",
+    "description": "Sales Department Group",
+    "externalGroups": [
+      "sales"
+    ],
+    "members": [
+      "jim.halpert@dunder.mifflin.com",
+      "dwight.schrute@dunder.mifflin.com"
+    ],
+    "membersFromExternalGroups": [],
+    "permissions": [
+      {
+        "resourceType": "PLATFORM",
+        "permissions": [
+          "groupView",
+          "clusterConnectionsManage"
+        ]
+      },
+      {
+        "resourceType": "CLUSTER",
+        "name": "scranton",
+        "permissions": [
+          "clusterViewBroker",
+          "clusterEditBroker"
+        ]
+      },
+      {
+        "resourceType": "TOPIC",
+        "name": "sales-*",
+        "patternType": "PREFIXED",
+        "cluster": "scranton",
+        "permissions": [
+          "topicViewConfig",
+          "topicConsume",
+          "topicProduce"
+        ]
+      },
+      {
+        "resourceType": "SUBJECT",
+        "name": "sales-*",
+        "patternType": "PREFIXED",
+        "cluster": "scranton",
+        "permissions": [
+          "subjectView",
+          "subjectEditCompatibility"
+        ]
+      },
+      {
+        "resourceType": "CONSUMER_GROUP",
+        "name": "sales-*",
+        "patternType": "PREFIXED",
+        "cluster": "scranton",
+        "permissions": [
+          "consumerGroupView"
+        ]
+      },
+      {
+        "resourceType": "KAFKA_CONNECT",
+        "name": "sales-*",
+        "patternType": "PREFIXED",
+        "kafkaConnect": "scranton",
+        "cluster": "scranton",
+        "permissions": [
+          "subjectView",
+          "kafkaConnectorDelete"
+        ]
+      },
+      {
+        "resourceType": "KSQLDB",
+        "name": "sales-ksqldb",
+        "cluster": "scranton",
+        "permissions": [
+          "ksqldbAccess"
+        ]
+      }
+    ]
+  }
+}

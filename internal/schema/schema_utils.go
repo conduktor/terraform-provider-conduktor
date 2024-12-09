@@ -7,8 +7,8 @@ import (
 
 	mapper "github.com/conduktor/terraform-provider-conduktor/internal/mapper"
 	"github.com/conduktor/terraform-provider-conduktor/internal/model"
-	groups "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_group_v2"
-	users "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_user_v2"
+	groups "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_console_group_v2"
+	users "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_console_user_v2"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
