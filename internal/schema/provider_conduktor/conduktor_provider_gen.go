@@ -18,8 +18,8 @@ func ConduktorProviderSchema(ctx context.Context) schema.Schema {
 			"admin_password": schema.StringAttribute{
 				Optional:            true,
 				Sensitive:           true,
-				Description:         "The password of the admin user. May be set using environment variable `CDK_CONSOLE_PASSWORD` or `CDK_ADMIN_PASSWORD` for Console, `CDK_GATEWAY_PASSWORD` or `CDK_ADMIN_PASSWORD` for Gateway. Required if admin_email is set. If not provided, the API token will be used to authenticater.",
-				MarkdownDescription: "The password of the admin user. May be set using environment variable `CDK_CONSOLE_PASSWORD` or `CDK_ADMIN_PASSWORD` for Console, `CDK_GATEWAY_PASSWORD` or `CDK_ADMIN_PASSWORD` for Gateway. Required if admin_email is set. If not provided, the API token will be used to authenticater.",
+				Description:         "The password of the admin user. May be set using environment variable `CDK_CONSOLE_PASSWORD` or `CDK_ADMIN_PASSWORD` for Console, `CDK_GATEWAY_PASSWORD` or `CDK_ADMIN_PASSWORD` for Gateway. Required if admin_user is set. If not provided, the API token will be used to authenticater.",
+				MarkdownDescription: "The password of the admin user. May be set using environment variable `CDK_CONSOLE_PASSWORD` or `CDK_ADMIN_PASSWORD` for Console, `CDK_GATEWAY_PASSWORD` or `CDK_ADMIN_PASSWORD` for Gateway. Required if admin_user is set. If not provided, the API token will be used to authenticater.",
 			},
 			"admin_user": schema.StringAttribute{
 				Optional:            true,

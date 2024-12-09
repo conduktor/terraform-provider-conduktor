@@ -50,7 +50,7 @@
         {
           "name": "admin_password",
           "string": {
-            "description": "The password of the admin user. May be set using environment variable `CDK_CONSOLE_PASSWORD` or `CDK_ADMIN_PASSWORD` for Console, `CDK_GATEWAY_PASSWORD` or `CDK_ADMIN_PASSWORD` for Gateway. Required if admin_email is set. If not provided, the API token will be used to authenticater.",
+            "description": "The password of the admin user. May be set using environment variable `CDK_CONSOLE_PASSWORD` or `CDK_ADMIN_PASSWORD` for Console, `CDK_GATEWAY_PASSWORD` or `CDK_ADMIN_PASSWORD` for Gateway. Required if admin_user is set. If not provided, the API token will be used to authenticater.",
             "optional_required": "optional",
             "sensitive": true
           }
@@ -89,175 +89,7 @@
   "datasources": [],
   "resources": [
     {
-      "name": "user_v2",
-      "schema": {
-        "attributes": [
-          {
-            "name": "name",
-            "string": {
-              "description": "User email, must be unique, act as ID for import",
-              "computed_optional_required": "required",
-              "plan_modifiers": [
-                {
-                  "custom": {
-                    "imports": [
-                      {
-                        "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
-                      }
-                    ],
-                    "schema_definition": "stringplanmodifier.RequiresReplace()"
-                  }
-                }
-              ],
-              "validators": [
-                {
-                  "custom": {
-                    "imports": [
-                      {
-                        "path": "regexp"
-                      },
-                      {
-                        "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-                      }
-                    ],
-                    "schema_definition": "stringvalidator.RegexMatches(regexp.MustCompile(\"^([\\\\w\\\\-_.]*[^.])@([\\\\w-]+\\\\.)+[\\\\w-]{2,4}$\"), \"\")"
-                  }
-                }
-              ]
-            }
-          }
-        ],
-        "blocks": [
-          {
-            "name": "spec",
-            "single_nested": {
-              "attributes": [
-                {
-                  "name": "firstname",
-                  "string": {
-                    "description": "User firstname",
-                    "computed_optional_required": "optional"
-                  }
-                },
-                {
-                  "name": "lastname",
-                  "string": {
-                    "description": "User lastname",
-                    "computed_optional_required": "optional"
-                  }
-                },
-                {
-                  "name": "permissions",
-                  "set_nested": {
-                    "description": "Set of all user permissions",
-                    "computed_optional_required": "computed_optional",
-                    "nested_object": {
-                      "attributes": [
-                        {
-                          "name": "name",
-                          "string": {
-                            "description": "Name of the resource to apply permission could be a topic, a cluster, a consumer group, etc. depending on resource_type",
-                            "computed_optional_required": "optional"
-                          }
-                        },
-                        {
-                          "name": "resource_type",
-                          "string": {
-                            "description": "Type of the resource to apply permission on valid values are: CLUSTER, CONSUMER_GROUP, KAFKA_CONNECT, KSQLDB, PLATFORM, SUBJECT, TOPIC",
-                            "computed_optional_required": "required",
-                            "validators": [
-                              {
-                                "custom": {
-                                  "imports": [
-                                    {
-                                      "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-                                    },
-                                    {
-                                      "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
-                                    }
-                                  ],
-                                  "schema_definition": "stringvalidator.OneOf(validation.ValidPermissionTypes...)"
-                                }
-                              }
-                            ]
-                          }
-                        },
-                        {
-                          "name": "cluster",
-                          "string": {
-                            "description": "Name of the cluster to apply permission, only required if resource_type is TOPIC, SUBJECT, CONSUMER_GROUP, KAFKA_CONNECT, KSQLDB",
-                            "computed_optional_required": "optional"
-                          }
-                        },
-                        {
-                          "name": "kafka_connect",
-                          "string": {
-                            "description": "Name of the Kafka Connect to apply permission, only required if resource_type is KAFKA_CONNECT",
-                            "computed_optional_required": "optional"
-                          }
-                        },
-                        {
-                          "name": "pattern_type",
-                          "string": {
-                            "description": "Type of the pattern to apply permission on valid values are: LITERAL, PREFIXED",
-                            "computed_optional_required": "optional",
-                            "validators": [
-                              {
-                                "custom": {
-                                  "imports": [
-                                    {
-                                      "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-                                    },
-                                    {
-                                      "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
-                                    }
-                                  ],
-                                  "schema_definition": "stringvalidator.OneOf(validation.ValidPermissionPatternTypes...)"
-                                }
-                              }
-                            ]
-                          }
-                        },
-                        {
-                          "name": "permissions",
-                          "set": {
-                            "description": "Set of all permissions to apply on the resource. See https://docs.conduktor.io/platform/reference/resource-reference/console/#permissions for more details",
-                            "computed_optional_required": "required",
-                            "element_type": {
-                              "string": {}
-                            },
-                            "validators": [
-                              {
-                                "custom": {
-                                  "imports": [
-                                    {
-                                      "path": "github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
-                                    },
-                                    {
-                                      "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-                                    },
-                                    {
-                                      "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
-                                    }
-                                  ],
-                                  "schema_definition": "setvalidator.ValueStringsAre(stringvalidator.OneOf(validation.ValidPermissions ...))"
-                                }
-                              }
-                            ]
-                          }
-                        }
-                      ]
-                    }
-                  }
-                }
-              ]
-            }
-          }
-        ]
-      }
-    },
-    {
-      "name": "group_v2",
+      "name": "console_group_v2",
       "schema": {
         "attributes": [
           {
@@ -487,97 +319,7 @@
       }
     },
     {
-      "name": "generic",
-      "schema": {
-        "attributes": [
-          {
-            "name": "kind",
-            "string": {
-              "description": "resource kind",
-              "computed_optional_required": "required",
-              "plan_modifiers": [
-                {
-                  "custom": {
-                    "imports": [
-                      {
-                        "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
-                      }
-                    ],
-                    "schema_definition": "stringplanmodifier.RequiresReplace()"
-                  }
-                }
-              ]
-            }
-          },
-          {
-            "name": "version",
-            "string": {
-              "description": "resource version",
-              "computed_optional_required": "required",
-              "plan_modifiers": [
-                {
-                  "custom": {
-                    "imports": [
-                      {
-                        "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
-                      }
-                    ],
-                    "schema_definition": "stringplanmodifier.RequiresReplace()"
-                  }
-                }
-              ]
-            }
-          },
-          {
-            "name": "name",
-            "string": {
-              "description": "resource name",
-              "computed_optional_required": "required",
-              "plan_modifiers": [
-                {
-                  "custom": {
-                    "imports": [
-                      {
-                        "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
-                      }
-                    ],
-                    "schema_definition": "stringplanmodifier.RequiresReplace()"
-                  }
-                }
-              ]
-            }
-          },
-          {
-            "name": "cluster",
-            "string": {
-              "description": "resource parent cluster (if any)",
-              "computed_optional_required": "optional",
-              "plan_modifiers": [
-                {
-                  "custom": {
-                    "imports": [
-                      {
-                        "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
-                      }
-                    ],
-                    "schema_definition": "stringplanmodifier.RequiresReplace()"
-                  }
-                }
-              ]
-            }
-          },
-          {
-            "name": "manifest",
-            "string": {
-              "description": "resource manifest in yaml format. See [reference documentation](https://docs.conduktor.io/platform/reference/resource-reference/console/#manifests) for more details",
-              "computed_optional_required": "required"
-            }
-          }
-        ]
-      }
-    },
-    {
-      "name": "kafka_cluster_v2",
+      "name": "console_kafka_cluster_v2",
       "schema": {
         "attributes": [
           {
@@ -1053,7 +795,7 @@
       }
     },
     {
-      "name": "kafka_connect_v2",
+      "name": "console_kafka_connect_v2",
       "schema": {
         "attributes": [
           {
@@ -1257,6 +999,174 @@
       }
     },
     {
+      "name": "console_user_v2",
+      "schema": {
+        "attributes": [
+          {
+            "name": "name",
+            "string": {
+              "description": "User email, must be unique, act as ID for import",
+              "computed_optional_required": "required",
+              "plan_modifiers": [
+                {
+                  "custom": {
+                    "imports": [
+                      {
+                        "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+                      }
+                    ],
+                    "schema_definition": "stringplanmodifier.RequiresReplace()"
+                  }
+                }
+              ],
+              "validators": [
+                {
+                  "custom": {
+                    "imports": [
+                      {
+                        "path": "regexp"
+                      },
+                      {
+                        "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                      }
+                    ],
+                    "schema_definition": "stringvalidator.RegexMatches(regexp.MustCompile(\"^([\\\\w\\\\-_.]*[^.])@([\\\\w-]+\\\\.)+[\\\\w-]{2,4}$\"), \"\")"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "blocks": [
+          {
+            "name": "spec",
+            "single_nested": {
+              "attributes": [
+                {
+                  "name": "firstname",
+                  "string": {
+                    "description": "User firstname",
+                    "computed_optional_required": "optional"
+                  }
+                },
+                {
+                  "name": "lastname",
+                  "string": {
+                    "description": "User lastname",
+                    "computed_optional_required": "optional"
+                  }
+                },
+                {
+                  "name": "permissions",
+                  "set_nested": {
+                    "description": "Set of all user permissions",
+                    "computed_optional_required": "computed_optional",
+                    "nested_object": {
+                      "attributes": [
+                        {
+                          "name": "name",
+                          "string": {
+                            "description": "Name of the resource to apply permission could be a topic, a cluster, a consumer group, etc. depending on resource_type",
+                            "computed_optional_required": "optional"
+                          }
+                        },
+                        {
+                          "name": "resource_type",
+                          "string": {
+                            "description": "Type of the resource to apply permission on valid values are: CLUSTER, CONSUMER_GROUP, KAFKA_CONNECT, KSQLDB, PLATFORM, SUBJECT, TOPIC",
+                            "computed_optional_required": "required",
+                            "validators": [
+                              {
+                                "custom": {
+                                  "imports": [
+                                    {
+                                      "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                    },
+                                    {
+                                      "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
+                                    }
+                                  ],
+                                  "schema_definition": "stringvalidator.OneOf(validation.ValidPermissionTypes...)"
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "name": "cluster",
+                          "string": {
+                            "description": "Name of the cluster to apply permission, only required if resource_type is TOPIC, SUBJECT, CONSUMER_GROUP, KAFKA_CONNECT, KSQLDB",
+                            "computed_optional_required": "optional"
+                          }
+                        },
+                        {
+                          "name": "kafka_connect",
+                          "string": {
+                            "description": "Name of the Kafka Connect to apply permission, only required if resource_type is KAFKA_CONNECT",
+                            "computed_optional_required": "optional"
+                          }
+                        },
+                        {
+                          "name": "pattern_type",
+                          "string": {
+                            "description": "Type of the pattern to apply permission on valid values are: LITERAL, PREFIXED",
+                            "computed_optional_required": "optional",
+                            "validators": [
+                              {
+                                "custom": {
+                                  "imports": [
+                                    {
+                                      "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                    },
+                                    {
+                                      "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
+                                    }
+                                  ],
+                                  "schema_definition": "stringvalidator.OneOf(validation.ValidPermissionPatternTypes...)"
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "name": "permissions",
+                          "set": {
+                            "description": "Set of all permissions to apply on the resource. See https://docs.conduktor.io/platform/reference/resource-reference/console/#permissions for more details",
+                            "computed_optional_required": "required",
+                            "element_type": {
+                              "string": {}
+                            },
+                            "validators": [
+                              {
+                                "custom": {
+                                  "imports": [
+                                    {
+                                      "path": "github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
+                                    },
+                                    {
+                                      "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                    },
+                                    {
+                                      "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
+                                    }
+                                  ],
+                                  "schema_definition": "setvalidator.ValueStringsAre(stringvalidator.OneOf(validation.ValidPermissions ...))"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "gateway_service_account_v2",
       "schema": {
         "attributes": [
@@ -1405,6 +1315,96 @@
                   }
                 }
               ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "generic",
+      "schema": {
+        "attributes": [
+          {
+            "name": "kind",
+            "string": {
+              "description": "resource kind",
+              "computed_optional_required": "required",
+              "plan_modifiers": [
+                {
+                  "custom": {
+                    "imports": [
+                      {
+                        "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+                      }
+                    ],
+                    "schema_definition": "stringplanmodifier.RequiresReplace()"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "version",
+            "string": {
+              "description": "resource version",
+              "computed_optional_required": "required",
+              "plan_modifiers": [
+                {
+                  "custom": {
+                    "imports": [
+                      {
+                        "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+                      }
+                    ],
+                    "schema_definition": "stringplanmodifier.RequiresReplace()"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "name",
+            "string": {
+              "description": "resource name",
+              "computed_optional_required": "required",
+              "plan_modifiers": [
+                {
+                  "custom": {
+                    "imports": [
+                      {
+                        "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+                      }
+                    ],
+                    "schema_definition": "stringplanmodifier.RequiresReplace()"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "cluster",
+            "string": {
+              "description": "resource parent cluster (if any)",
+              "computed_optional_required": "optional",
+              "plan_modifiers": [
+                {
+                  "custom": {
+                    "imports": [
+                      {
+                        "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+                      }
+                    ],
+                    "schema_definition": "stringplanmodifier.RequiresReplace()"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "manifest",
+            "string": {
+              "description": "resource manifest in yaml format. See [reference documentation](https://docs.conduktor.io/platform/reference/resource-reference/console/#manifests) for more details",
+              "computed_optional_required": "required"
             }
           }
         ]

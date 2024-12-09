@@ -109,7 +109,7 @@ resource "conduktor_gateway_service_account_v2" "gateway_sa" {
 
 ### Optional
 
-- `admin_password` (String, Sensitive) The password of the admin user. May be set using environment variable `CDK_CONSOLE_PASSWORD` or `CDK_ADMIN_PASSWORD` for Console, `CDK_GATEWAY_PASSWORD` or `CDK_ADMIN_PASSWORD` for Gateway. Required if admin_email is set. If not provided, the API token will be used to authenticater.
+- `admin_password` (String, Sensitive) The password of the admin user. May be set using environment variable `CDK_CONSOLE_PASSWORD` or `CDK_ADMIN_PASSWORD` for Console, `CDK_GATEWAY_PASSWORD` or `CDK_ADMIN_PASSWORD` for Gateway. Required if admin_user is set. If not provided, the API token will be used to authenticater.
 - `admin_user` (String) The login credentials of the admin user. May be set using environment variable `CDK_CONSOLE_USER`, `CDK_ADMIN_EMAIL` or `CDK_ADMIN_USER` for Console, `CDK_GATEWAY_USER` or `CDK_ADMIN_USER` for Gateway. Required if admin_password is set. If not provided and `mode` is Console, the API token will be used to authenticate.
 - `api_token` (String, Sensitive) The API token to authenticate with the Conduktor Console API. May be set using environment variable `CDK_API_TOKEN` or `CDK_API_KEY`. If not provided, admin_user and admin_password will be used to authenticate. See [documentation](https://docs.conduktor.io/platform/reference/api-reference/#generate-an-api-key) for more information. Not used if `mode` is Gateway.
 - `base_url` (String) The URL of either Conduktor Console or Gateway, depending on the `mode`. May be set using environment variable `CDK_CONSOLE_BASE_URL` or `CDK_BASE_URL` for Console, `CDK_GATEWAY_BASE_URL` or `CDK_BASE_URL` for Gateway. Required either here or in the environment.

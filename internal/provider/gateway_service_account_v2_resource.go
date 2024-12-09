@@ -7,7 +7,7 @@ import (
 
 	"github.com/conduktor/terraform-provider-conduktor/internal/client"
 	mapper "github.com/conduktor/terraform-provider-conduktor/internal/mapper/gateway_service_account_v2"
-	"github.com/conduktor/terraform-provider-conduktor/internal/model"
+	gateway "github.com/conduktor/terraform-provider-conduktor/internal/model/gateway"
 	schema "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_gateway_service_account_v2"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -94,7 +94,7 @@ func (r *GatewayServiceAccountV2Resource) Create(ctx context.Context, req resour
 
 	tflog.Debug(ctx, fmt.Sprintf("Service account created with result: %s", apply))
 
-	var gatewayRes model.GatewayServiceAccountResource
+	var gatewayRes gateway.GatewayServiceAccountResource
 	err = gatewayRes.FromRawJsonInterface(apply.Resource)
 	if err != nil {
 		resp.Diagnostics.AddError("Unmarshall Error", fmt.Sprintf("Response resource can't be cast as service account : %v, got error: %s", apply.Resource, err))
@@ -141,7 +141,7 @@ func (r *GatewayServiceAccountV2Resource) Read(ctx context.Context, req resource
 		return
 	}
 
-	var gatewayRes = []model.GatewayServiceAccountResource{}
+	var gatewayRes = []gateway.GatewayServiceAccountResource{}
 	err = json.Unmarshal(get, &gatewayRes)
 	if err != nil || len(gatewayRes) < 1 {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read service account, got error: %s", err))
@@ -186,7 +186,7 @@ func (r *GatewayServiceAccountV2Resource) Update(ctx context.Context, req resour
 	}
 	tflog.Debug(ctx, fmt.Sprintf("Service account updated with result: %s", apply))
 
-	var gatewayRes model.GatewayServiceAccountResource
+	var gatewayRes gateway.GatewayServiceAccountResource
 	err = gatewayRes.FromRawJsonInterface(apply.Resource)
 	if err != nil {
 		resp.Diagnostics.AddError("Unmarshall Error", fmt.Sprintf("Response resource can't be cast as service account : %v, got error: %s", apply.Resource, err))
@@ -216,7 +216,7 @@ func (r *GatewayServiceAccountV2Resource) Delete(ctx context.Context, req resour
 		return
 	}
 
-	deleteRes := model.GatewayServiceAccountMetadata{
+	deleteRes := gateway.GatewayServiceAccountMetadata{
 		Name:     data.Name.ValueString(),
 		VCluster: data.Vcluster.ValueString(),
 	}
