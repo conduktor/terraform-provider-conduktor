@@ -1,0 +1,46 @@
+---
+page_title: "Conduktor : conduktor_console_kafka_connect_v2 "
+subcategory: "console/v2"
+description: |-
+    Resource for managing Conduktor Kafka Connect servers definition linked to an existing Kafka cluster definition inside Conduktor Console.
+    This resource allows you to create, read, update and delete Kafka Connect servers connections from Conduktor Console.
+---
+
+# {{ .Name }}
+
+Resource for managing Conduktor Kafka Connect servers definition linked to an existing Kafka cluster definition inside Conduktor Console.
+This resource allows you to create, read, update and delete Kafka Connect servers connections from Conduktor Console.
+
+## Example Usage
+
+### Simple Kafka Connect server
+This example creates a simple Kafka Connect server connection without any authentication.
+{{tffile "examples/resources/conduktor_console_kafka_connect_v2/simple.tf"}}
+
+### Basic Kafka Connect server
+This example creates a complex Kafka Connect server connection with basic authentication.
+{{tffile "examples/resources/conduktor_console_kafka_connect_v2/basicAuth.tf"}}
+
+### Bearer token Kafka Connect server
+This example creates a complex Kafka Connect server connection with bearer token authentication.
+{{tffile "examples/resources/conduktor_console_kafka_connect_v2/bearerToken.tf"}}
+
+### mTLS Kafka Connect server
+This example creates a complex Kafka Connect server connection with mTLS authentication.
+{{tffile "examples/resources/conduktor_console_kafka_connect_v2/mtls.tf"}}
+
+{{ .SchemaMarkdown }}
+
+## Import
+
+In order to import a Kafka Connect server connection into Conduktor, you need to know the Kafka cluster ID and the Kafka Connect server ID.
+
+The import ID is constructed as follows: `< cluster_id >/< connect_id >`.
+
+For example, using an [`import` block](https://developer.hashicorp.com/terraform/language/import) :
+{{tffile "examples/resources/conduktor_console_kafka_connect_v2/import.tf"}}
+
+Using the `terraform import` command:
+```shell
+terraform import conduktor_console_kafka_connect_v2.example mini-cluster/import-connect
+```
