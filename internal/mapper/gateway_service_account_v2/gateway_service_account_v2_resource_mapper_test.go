@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	ctlresource "github.com/conduktor/ctl/resource"
-	"github.com/conduktor/terraform-provider-conduktor/internal/model"
+	gateway "github.com/conduktor/terraform-provider-conduktor/internal/model/gateway"
 	"github.com/conduktor/terraform-provider-conduktor/internal/test"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -32,7 +32,7 @@ func TestGatewayServiceAccountV2ModelMapping(t *testing.T) {
 	assert.Equal(t, jsonServiceAccountV2Resource, ctlResource.Json)
 
 	// convert into internal model
-	internal, err := model.NewGatewayServiceAccountResourceFromClientResource(ctlResource)
+	internal, err := gateway.NewGatewayServiceAccountResourceFromClientResource(ctlResource)
 	if err != nil {
 		t.Fatal(err)
 		return

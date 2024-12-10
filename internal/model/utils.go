@@ -10,7 +10,7 @@ type Discriminable struct {
 	Type string `json:"type"`
 }
 
-func toClientResource(o interface{}) (ctlresource.Resource, error) {
+func ToClientResource(o interface{}) (ctlresource.Resource, error) {
 	jsonData, err := json.Marshal(o)
 	if err != nil {
 		return ctlresource.Resource{}, err

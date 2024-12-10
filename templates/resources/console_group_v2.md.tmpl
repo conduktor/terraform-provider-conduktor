@@ -1,0 +1,23 @@
+---
+page_title: "Conduktor : conduktor_console_group_v2 "
+subcategory: "iam/v2"
+description: |-
+    Resource for managing Conduktor groups.
+    This resource allows you to create, read, update and delete groups in Conduktor.
+---
+
+# {{ .Name }}
+
+Resource for managing Conduktor groups.
+This resource allows you to create, read, update and delete groups in Conduktor.
+
+## Example Usage
+
+### Simple group without members or permissions
+{{tffile "examples/resources/conduktor_console_group_v2/simple.tf"}}
+
+### Complex group with members, external reference and permissions
+{{tffile "examples/resources/conduktor_console_group_v2/complex.tf"}}
+
+
+{{ .SchemaMarkdown }}

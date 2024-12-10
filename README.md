@@ -94,7 +94,7 @@ provider "conduktor" {
 }
 
 # register an external user bob with PLATFORM.userView permission
-resource "conduktor_user_v2" "bob" {
+resource "conduktor_console_user_v2" "bob" {
   name = "bob@mycompany.io"
   spec {
     firstname = "Bob"
@@ -109,7 +109,7 @@ resource "conduktor_user_v2" "bob" {
 }
 
 # create a group with Bob as a member
-resource "conduktor_group_v2" "qa" {
+resource "conduktor_console_group_v2" "qa" {
   name = "qa"
   spec {
     display_name                 = "QA team"
@@ -153,10 +153,10 @@ Using environment variables `CDK_API_TOKEN` or `CDK_API_KEY`.
 Use local user (usually admin) credentials pair. This will login against the API and use an ephemeral access token to make API calls.
 
 
-Using HCL `admin_email`/`admin_password` attributes
+Using HCL `admin_user`/`admin_password` attributes
 ```hcl
 provider "conduktor" {
-  admin_email    = "admin@my-org.com"
+  admin_user     = "admin@my-org.com"
   admin_password = "admin-password"
 }
 ```
