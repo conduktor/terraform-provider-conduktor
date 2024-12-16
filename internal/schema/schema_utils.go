@@ -63,12 +63,12 @@ func NewStringValue(s string) basetypes.StringValue {
 	return basetypes.NewStringValue(s)
 }
 
-// NewInt32Value Convert a int32 to a basetypes.Int32Value.
-func NewInt32Value(i int32) basetypes.Int32Value {
+// NewInt64Value Convert a int64 to a basetypes.Int64Value.
+func NewInt64Value(i int64) basetypes.Int64Value {
 	if i == 0 {
-		return basetypes.NewInt32Null()
+		return basetypes.NewInt64Null()
 	}
-	return basetypes.NewInt32Value(i)
+	return basetypes.NewInt64Value(i)
 }
 
 // ListValueToStringArray Convert a ListValue to a string array.
@@ -259,9 +259,11 @@ func ValueMapFromTypes(ctx context.Context, types map[string]attr.Type) map[stri
 
 // MapValueToStringMap Convert a MapValue to a map[string]string.
 func StringToNormalizedJson(ctx context.Context, input string) (jsontypes.Normalized, diag.Diagnostics) {
-	return jsontypes.NewNormalizedNull(), nil
+	return jsontypes.NewNormalizedValue(input), nil
 }
 
-func NormalizedJsonToString(ctx context.Context, input basetypes.StringValue) (string, diag.Diagnostics) {
-	return "", nil
+func JsonToNormalizedString(ctx context.Context, input basetypes.StringValue) (string, diag.Diagnostics) {
+	// jsontypes.NewNormalizedUnknown()
+	return jsontypes.NewExactValue(input.String()).String(), nil
+	// return "", nil
 }

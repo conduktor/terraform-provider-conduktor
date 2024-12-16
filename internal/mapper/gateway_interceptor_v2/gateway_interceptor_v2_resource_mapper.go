@@ -7,14 +7,13 @@ import (
 	gateway "github.com/conduktor/terraform-provider-conduktor/internal/model/gateway"
 	schema "github.com/conduktor/terraform-provider-conduktor/internal/schema"
 	gwinterceptor "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_gateway_interceptor_v2"
-	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
 func TFToInternalModel(ctx context.Context, r *gwinterceptor.GatewayInterceptorV2Model) (gateway.GatewayInterceptorResource, error) {
-	config, diag := schema.NormalizedJsonToString(ctx, r.Spec.Config)
+	config, diag := schema.JsonToNormalizedString(ctx, r.Spec.Config)
 	if diag.HasError() {
 		return gateway.GatewayInterceptorResource{}, mapper.WrapDiagError(diag, "external_names", mapper.FromTerraform)
 	}
@@ -31,42 +30,38 @@ func TFToInternalModel(ctx context.Context, r *gwinterceptor.GatewayInterceptorV
 			Scope: scope,
 		},
 		gateway.GatewayInterceptorSpec{
-			Config: config,
+			Comment:     r.Spec.Comment.ValueString(),
+			PluginClass: r.Spec.PluginClass.ValueString(),
+			Priority:    r.Spec.Priority.ValueInt64(),
+			Config:      config,
 		},
 	), nil
 }
 
 func InternalModelToTerraform(ctx context.Context, r *gateway.GatewayInterceptorResource) (gwinterceptor.GatewayInterceptorV2Model, error) {
-	normalizedJson, diag := schema.StringToNormalizedJson(ctx, r.Spec.Config)
-	if diag.HasError() {
-		return gwinterceptor.GatewayInterceptorV2Model{}, mapper.WrapDiagError(diag, "config", mapper.IntoTerraform)
-	}
+	// normalizedJson, diag := schema.StringToNormalizedJson(ctx, r.Spec.Config)
+	// if diag.HasError() {
+	// 	return gwinterceptor.GatewayInterceptorV2Model{}, mapper.WrapDiagError(diag, "config", mapper.IntoTerraform)
+	// }
 
-	scopeValue, diag := gwinterceptor.NewScopeValue(
-		map[string]attr.Type{
-			"group":    basetypes.StringType{},
-			"vCluster": basetypes.StringType{},
-			"username": basetypes.StringType{},
-		},
-		map[string]attr.Value{
-			"group":    schema.NewStringValue(r.Metadata.Scope.Group),
-			"vCluster": schema.NewStringValue(r.Metadata.Scope.VCluster),
-			"username": schema.NewStringValue(r.Metadata.Scope.Username),
-		},
-	)
+	scopeValue := gwinterceptor.ScopeValue{
+		Group:    schema.NewStringValue(r.Metadata.Scope.Group),
+		Vcluster: schema.NewStringValue(r.Metadata.Scope.VCluster),
+		Username: schema.NewStringValue(r.Metadata.Scope.Username),
+	}
 
 	specValue, diag := gwinterceptor.NewSpecValue(
 		map[string]attr.Type{
-			"comment":     basetypes.StringType{},
-			"pluginClass": basetypes.StringType{},
-			"priority":    basetypes.Int32Type{},
-			"config":      jsontypes.NormalizedType{},
+			"comment":      basetypes.StringType{},
+			"plugin_class": basetypes.StringType{},
+			"priority":     basetypes.Int64Type{},
+			"config":       basetypes.StringType{},
 		},
 		map[string]attr.Value{
-			"comment":     schema.NewStringValue(r.Spec.Comment),
-			"pluginClass": schema.NewStringValue(r.Spec.PluginClass),
-			"priority":    schema.NewInt32Value(r.Spec.Priority),
-			"config":      normalizedJson,
+			"comment":      schema.NewStringValue(r.Spec.Comment),
+			"plugin_class": schema.NewStringValue(r.Spec.PluginClass),
+			"priority":     schema.NewInt64Value(r.Spec.Priority),
+			"config":       schema.NewStringValue(r.Spec.Config),
 		},
 	)
 	if diag.HasError() {
