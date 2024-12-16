@@ -9,6 +9,7 @@ import (
 	"github.com/conduktor/terraform-provider-conduktor/internal/model"
 	groups "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_console_group_v2"
 	users "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_console_user_v2"
+	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -60,6 +61,14 @@ func NewStringValue(s string) basetypes.StringValue {
 		return basetypes.NewStringNull()
 	}
 	return basetypes.NewStringValue(s)
+}
+
+// NewInt32Value Convert a int32 to a basetypes.Int32Value.
+func NewInt32Value(i int32) basetypes.Int32Value {
+	if i == 0 {
+		return basetypes.NewInt32Null()
+	}
+	return basetypes.NewInt32Value(i)
 }
 
 // ListValueToStringArray Convert a ListValue to a string array.
@@ -246,4 +255,13 @@ func ValueMapFromTypes(ctx context.Context, types map[string]attr.Type) map[stri
 		result[k] = v.ValueType(ctx)
 	}
 	return result
+}
+
+// MapValueToStringMap Convert a MapValue to a map[string]string.
+func StringToNormalizedJson(ctx context.Context, input string) (jsontypes.Normalized, diag.Diagnostics) {
+	return jsontypes.NewNormalizedNull(), nil
+}
+
+func NormalizedJsonToString(ctx context.Context, input basetypes.StringValue) (string, diag.Diagnostics) {
+	return "", nil
 }
