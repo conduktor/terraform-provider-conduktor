@@ -34,7 +34,7 @@ func (r GatewayInterceptorMetadata) String() string {
 type GatewayInterceptorSpec struct {
 	Comment     string `json:"comment,omitempty"`
 	PluginClass string `json:"pluginClass"`
-	Priority    int32  `json:"priority"`
+	Priority    int64  `json:"priority"` // API accepts int32 but terraform doesn't support that.
 	Config      string `json:"config"`
 }
 
