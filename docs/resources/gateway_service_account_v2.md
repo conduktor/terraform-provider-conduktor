@@ -4,6 +4,7 @@ subcategory: "gateway/v2"
 description: |-
     Resource for managing Conduktor Gateway Service Accounts.
     This resource allows you to create, read, update and delete service accounts in Conduktor Gateway.
+    For a full description of what Gateway service accounts are, refer to our [docs site](https://docs.conduktor.io/gateway/concepts/service-accounts-authentication-authorization/).
 ---
 
 # conduktor_gateway_service_account_v2
@@ -23,7 +24,7 @@ resource "conduktor_gateway_service_account_v2" "local_sa" {
 }
 ```
 
-### Complex service account of EXTERNAL type with expernal names and a vCluster
+### Complex service account of EXTERNAL type with external names and a vCluster
 ```terraform
 resource "conduktor_gateway_service_account_v2" "external_sa" {
   name     = "complex-service-account"
@@ -53,11 +54,11 @@ resource "conduktor_gateway_service_account_v2" "external_sa" {
 
 Required:
 
-- `type` (String) The type of the Service Accound. Can only be either LOCAL or EXTERNAL.
+- `type` (String) The type of the Service Account. Can only be either LOCAL or EXTERNAL.
 
 Optional:
 
-- `external_names` (Set of String) Set of the external names of the service account. Required if spec.type is set to EXTERNAL. At the moment, an external service account should have exactly one external name (The support for many external names will be available soon)
+- `external_names` (Set of String) Set of the external names of the service account. Required if spec.type is set to EXTERNAL. An external service account should have exactly one external name.
 
 
 

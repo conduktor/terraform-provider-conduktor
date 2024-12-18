@@ -59,8 +59,8 @@ func GatewayServiceAccountV2ResourceSchema(ctx context.Context) schema.Schema {
 						ElementType:         types.StringType,
 						Optional:            true,
 						Computed:            true,
-						Description:         "Set of the external names of the service account. Required if spec.type is set to EXTERNAL. At the moment, an external service account should have exactly one external name (The support for many external names will be available soon)",
-						MarkdownDescription: "Set of the external names of the service account. Required if spec.type is set to EXTERNAL. At the moment, an external service account should have exactly one external name (The support for many external names will be available soon)",
+						Description:         "Set of the external names of the service account. Required if spec.type is set to EXTERNAL. An external service account should have exactly one external name.",
+						MarkdownDescription: "Set of the external names of the service account. Required if spec.type is set to EXTERNAL. An external service account should have exactly one external name.",
 						Validators: []validator.Set{
 							setvalidator.SizeAtMost(1),
 						},
@@ -68,8 +68,8 @@ func GatewayServiceAccountV2ResourceSchema(ctx context.Context) schema.Schema {
 					},
 					"type": schema.StringAttribute{
 						Required:            true,
-						Description:         "The type of the Service Accound. Can only be either LOCAL or EXTERNAL.",
-						MarkdownDescription: "The type of the Service Accound. Can only be either LOCAL or EXTERNAL.",
+						Description:         "The type of the Service Account. Can only be either LOCAL or EXTERNAL.",
+						MarkdownDescription: "The type of the Service Account. Can only be either LOCAL or EXTERNAL.",
 						Validators: []validator.String{
 							stringvalidator.OneOf(validation.ValidServiceAccountTypes...),
 						},

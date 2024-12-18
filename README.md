@@ -226,7 +226,7 @@ Then commit the changes to `go.mod` and `go.sum`.
 
 The project uses different codegen tool to generate source files.
 
-**Documentation** in [`docs`](./docs/) folder is generated using [tfplugindocs](https://github.com/hashicorp/terraform-plugin-docs)
+**Documentation** in [`docs`](./docs/) folder is generated using [tfplugindocs](https://github.com/hashicorp/terraform-plugin-docs).
 
 **Terraform schema definition** in [`schema`](./internal/schema/) module are generated using [tfplugingen-framework](https://github.com/hashicorp/terraform-plugin-codegen-framework) from currently manually maintained code spec [json file](./provider_code_spec.json).
 
