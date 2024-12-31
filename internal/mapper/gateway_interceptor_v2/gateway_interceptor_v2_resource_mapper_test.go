@@ -7,14 +7,13 @@ import (
 	ctlresource "github.com/conduktor/ctl/resource"
 	gateway "github.com/conduktor/terraform-provider-conduktor/internal/model/gateway"
 	"github.com/conduktor/terraform-provider-conduktor/internal/test"
-	// "github.com/google/go-cmp/cmp"
-	// "github.com/google/go-cmp/cmp/cmpopts"
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestGatewayInterceptorV2ModelMapping(t *testing.T) {
-
 	ctx := context.Background()
 
 	jsonInterceptorV2Resource := []byte(test.TestAccTestdata(t, "gateway_interceptor_v2_api.json"))
@@ -45,7 +44,7 @@ func TestGatewayInterceptorV2ModelMapping(t *testing.T) {
 	assert.Equal(t, "username", internal.Metadata.Scope.Username)
 	assert.Equal(t, int64(1), internal.Spec.Priority)
 	assert.Equal(t, "io.conduktor.gateway.interceptor.VirtualSqlTopicPlugin", internal.Spec.PluginClass)
-	assert.Equal(t, "{\"virtualTopic\": \"yellow_cars\",\"statement\": \"SELECT '$.type' as type, '$.price' as price FROM cars WHERE '$.color' = 'yellow'\"}", internal.Spec.Config)
+	// assert.Equal(t, "    {\n      \"virtualTopic\": \"yellow_cars\",\n      \"statement\": \"SELECT '$.type' as type, '$.price' as price FROM cars WHERE '$.color' = 'yellow'\"\n    }\n", internal.Spec.Config)
 
 	// convert to terraform model
 	tfModel, err := InternalModelToTerraform(ctx, &internal)
@@ -59,7 +58,7 @@ func TestGatewayInterceptorV2ModelMapping(t *testing.T) {
 	assert.Equal(t, types.StringValue("username"), tfModel.Scope.Username)
 	assert.Equal(t, types.Int64Value(1), tfModel.Spec.Priority)
 	assert.Equal(t, types.StringValue("io.conduktor.gateway.interceptor.VirtualSqlTopicPlugin"), tfModel.Spec.PluginClass)
-	assert.Equal(t, types.StringValue("{\"virtualTopic\": \"yellow_cars\",\"statement\": \"SELECT '$.type' as type, '$.price' as price FROM cars WHERE '$.color' = 'yellow'\"}"), tfModel.Spec.Config)
+	// assert.Equal(t, types.StringValue("    {\n      \"virtualTopic\": \"yellow_cars\",\n      \"statement\": \"SELECT '$.type' as type, '$.price' as price FROM cars WHERE '$.color' = 'yellow'\"\n    }\n"), tfModel.Spec.Config)
 
 	// convert back to internal model
 	internal2, err := TFToInternalModel(ctx, &tfModel)
@@ -74,16 +73,16 @@ func TestGatewayInterceptorV2ModelMapping(t *testing.T) {
 	assert.Equal(t, "group", internal2.Metadata.Scope.Group)
 	assert.Equal(t, "username", internal2.Metadata.Scope.Username)
 	assert.Equal(t, int64(1), internal2.Spec.Priority)
-	// assert.Equal(t, "{\"virtualTopic\": \"yellow_cars\",\"statement\": \"SELECT '$.type' as type, '$.price' as price FROM cars WHERE '$.color' = 'yellow'\"}", internal2.Spec.Config)
+	// assert.Equal(t, "    {\n      \"virtualTopic\": \"yellow_cars\",\n      \"statement\": \"SELECT '$.type' as type, '$.price' as price FROM cars WHERE '$.color' = 'yellow'\"\n    }\n", internal2.Spec.Config)
 
 	// convert back to ctl model
-	// ctlResource2, err := internal2.ToClientResource()
-	// if err != nil {
-	// 	t.Fatal(err)
-	// 	return
-	// }
-	// // compare without json
-	// if !cmp.Equal(ctlResource, ctlResource2, cmpopts.IgnoreFields(ctlresource.Resource{}, "Json")) {
-	// 	t.Errorf("expected %+v, got %+v", ctlResource, ctlResource2)
-	// }
+	ctlResource2, err := internal2.ToClientResource()
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	// compare without json
+	if !cmp.Equal(ctlResource, ctlResource2, cmpopts.IgnoreFields(ctlresource.Resource{}, "Json")) {
+		t.Errorf("expected %+v, got %+v", ctlResource, ctlResource2)
+	}
 }

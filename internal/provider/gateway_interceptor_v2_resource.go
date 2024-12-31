@@ -123,10 +123,11 @@ func (r *GatewayInterceptorV2Resource) Read(ctx context.Context, req resource.Re
 	}
 
 	// Only appending vcluster if present
+	// TODO: add user and group
 	queryString := "name=" + data.Name.ValueString()
-	// if data.Vcluster.ValueString() != "" {
-	// 	queryString += "&vcluster=" + data.Vcluster.ValueString()
-	// }
+	if data.Scope.Vcluster.ValueString() != "" {
+		queryString += "&vcluster=" + data.Scope.Vcluster.ValueString()
+	}
 
 	tflog.Info(ctx, fmt.Sprintf("Read interceptor named %s", data.Name.String()))
 	get, err := r.apiClient.Describe(ctx, fmt.Sprintf("%s?%s", gatewayInterceptorV2ApiPath, queryString))
@@ -218,10 +219,12 @@ func (r *GatewayInterceptorV2Resource) Delete(ctx context.Context, req resource.
 
 	deleteRes := gateway.GatewayInterceptorMetadata{
 		Name: data.Name.ValueString(),
-		// VCluster: data.Vcluster.ValueString(),
+		Scope: gateway.GatewayInterceptorScope{
+			VCluster: data.Scope.Vcluster.ValueString(),
+		},
 	}
 
-	err := r.apiClient.Delete(ctx, client.GATEWAY, gatewayInterceptorV2ApiPath, deleteRes)
+	err := r.apiClient.Delete(ctx, client.GATEWAY, gatewayInterceptorV2ApiPath+"/"+deleteRes.Name, deleteRes.Scope)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete interceptor, got error: %s", err))
 		return
