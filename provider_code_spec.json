@@ -1294,22 +1294,7 @@
                   "name": "plugin_class",
                   "string": {
                     "description": "The class of the plugin",
-                    "computed_optional_required": "optional",
-                    "validators": [
-                      {
-                        "custom": {
-                          "imports": [
-                            {
-                              "path": "regexp"
-                            },
-                            {
-                              "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-                            }
-                          ],
-                          "schema_definition": "stringvalidator.RegexMatches(regexp.MustCompile(\"^[a-zA-Z0-9_-]+$\"), \"\")"
-                        }
-                      }
-                    ]
+                    "computed_optional_required": "optional"
                   }
                 },
                 {
@@ -1336,9 +1321,24 @@
                 },
                 {
                   "name": "config",
-                  "string": {
-                    "description": "The configuration of the interceptor in json format",
-                    "computed_optional_required": "required"
+                  "single_nested": {
+                    "computed_optional_required": "optional",
+                    "attributes": [
+                      {
+                        "name": "virtual_topic",
+                        "string": {
+                          "description": "Virtual Topic",
+                          "computed_optional_required": "optional"
+                        }
+                      },
+                      {
+                        "name": "statement",
+                        "string": {
+                          "description": "Statement",
+                          "computed_optional_required": "optional"
+                        }
+                      }
+                    ]
                   }
                 }
               ]

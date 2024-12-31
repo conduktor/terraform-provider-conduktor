@@ -77,18 +77,30 @@ func GatewayInterceptorV2ResourceSchema(ctx context.Context) schema.Schema {
 						Description:         "An optional comment for the interceptor.",
 						MarkdownDescription: "An optional comment for the interceptor.",
 					},
-					"config": schema.StringAttribute{
-						Required:            true,
-						Description:         "The configuration of the interceptor in json format",
-						MarkdownDescription: "The configuration of the interceptor in json format",
+					"config": schema.SingleNestedAttribute{
+						Attributes: map[string]schema.Attribute{
+							"statement": schema.StringAttribute{
+								Optional:            true,
+								Description:         "Statement",
+								MarkdownDescription: "Statement",
+							},
+							"virtual_topic": schema.StringAttribute{
+								Optional:            true,
+								Description:         "Virtual Topic",
+								MarkdownDescription: "Virtual Topic",
+							},
+						},
+						CustomType: ConfigType{
+							ObjectType: types.ObjectType{
+								AttrTypes: ConfigValue{}.AttributeTypes(ctx),
+							},
+						},
+						Optional: true,
 					},
 					"plugin_class": schema.StringAttribute{
 						Optional:            true,
 						Description:         "The class of the plugin",
 						MarkdownDescription: "The class of the plugin",
-						Validators: []validator.String{
-							stringvalidator.RegexMatches(regexp.MustCompile("^[a-zA-Z0-9_-]+$"), ""),
-						},
 					},
 					"priority": schema.Int64Attribute{
 						Optional:            true,
@@ -602,12 +614,12 @@ func (t SpecType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue)
 		return nil, diags
 	}
 
-	configVal, ok := configAttribute.(basetypes.StringValue)
+	configVal, ok := configAttribute.(basetypes.ObjectValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`config expected to be basetypes.StringValue, was: %T`, configAttribute))
+			fmt.Sprintf(`config expected to be basetypes.ObjectValue, was: %T`, configAttribute))
 	}
 
 	pluginClassAttribute, ok := attributes["plugin_class"]
@@ -750,12 +762,12 @@ func NewSpecValue(attributeTypes map[string]attr.Type, attributes map[string]att
 		return NewSpecValueUnknown(), diags
 	}
 
-	configVal, ok := configAttribute.(basetypes.StringValue)
+	configVal, ok := configAttribute.(basetypes.ObjectValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`config expected to be basetypes.StringValue, was: %T`, configAttribute))
+			fmt.Sprintf(`config expected to be basetypes.ObjectValue, was: %T`, configAttribute))
 	}
 
 	pluginClassAttribute, ok := attributes["plugin_class"]
@@ -876,7 +888,7 @@ var _ basetypes.ObjectValuable = SpecValue{}
 
 type SpecValue struct {
 	Comment     basetypes.StringValue `tfsdk:"comment"`
-	Config      basetypes.StringValue `tfsdk:"config"`
+	Config      basetypes.ObjectValue `tfsdk:"config"`
 	PluginClass basetypes.StringValue `tfsdk:"plugin_class"`
 	Priority    basetypes.Int64Value  `tfsdk:"priority"`
 	state       attr.ValueState
@@ -889,7 +901,9 @@ func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) 
 	var err error
 
 	attrTypes["comment"] = basetypes.StringType{}.TerraformType(ctx)
-	attrTypes["config"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["config"] = basetypes.ObjectType{
+		AttrTypes: ConfigValue{}.AttributeTypes(ctx),
+	}.TerraformType(ctx)
 	attrTypes["plugin_class"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["priority"] = basetypes.Int64Type{}.TerraformType(ctx)
 
@@ -960,9 +974,32 @@ func (v SpecValue) String() string {
 func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
+	var config basetypes.ObjectValue
+
+	if v.Config.IsNull() {
+		config = types.ObjectNull(
+			ConfigValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if v.Config.IsUnknown() {
+		config = types.ObjectUnknown(
+			ConfigValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if !v.Config.IsNull() && !v.Config.IsUnknown() {
+		config = types.ObjectValueMust(
+			ConfigValue{}.AttributeTypes(ctx),
+			v.Config.Attributes(),
+		)
+	}
+
 	attributeTypes := map[string]attr.Type{
-		"comment":      basetypes.StringType{},
-		"config":       basetypes.StringType{},
+		"comment": basetypes.StringType{},
+		"config": basetypes.ObjectType{
+			AttrTypes: ConfigValue{}.AttributeTypes(ctx),
+		},
 		"plugin_class": basetypes.StringType{},
 		"priority":     basetypes.Int64Type{},
 	}
@@ -979,7 +1016,7 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 		attributeTypes,
 		map[string]attr.Value{
 			"comment":      v.Comment,
-			"config":       v.Config,
+			"config":       config,
 			"plugin_class": v.PluginClass,
 			"priority":     v.Priority,
 		})
@@ -1031,9 +1068,390 @@ func (v SpecValue) Type(ctx context.Context) attr.Type {
 
 func (v SpecValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 	return map[string]attr.Type{
-		"comment":      basetypes.StringType{},
-		"config":       basetypes.StringType{},
+		"comment": basetypes.StringType{},
+		"config": basetypes.ObjectType{
+			AttrTypes: ConfigValue{}.AttributeTypes(ctx),
+		},
 		"plugin_class": basetypes.StringType{},
 		"priority":     basetypes.Int64Type{},
+	}
+}
+
+var _ basetypes.ObjectTypable = ConfigType{}
+
+type ConfigType struct {
+	basetypes.ObjectType
+}
+
+func (t ConfigType) Equal(o attr.Type) bool {
+	other, ok := o.(ConfigType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t ConfigType) String() string {
+	return "ConfigType"
+}
+
+func (t ConfigType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	statementAttribute, ok := attributes["statement"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`statement is missing from object`)
+
+		return nil, diags
+	}
+
+	statementVal, ok := statementAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`statement expected to be basetypes.StringValue, was: %T`, statementAttribute))
+	}
+
+	virtualTopicAttribute, ok := attributes["virtual_topic"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`virtual_topic is missing from object`)
+
+		return nil, diags
+	}
+
+	virtualTopicVal, ok := virtualTopicAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`virtual_topic expected to be basetypes.StringValue, was: %T`, virtualTopicAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return ConfigValue{
+		Statement:    statementVal,
+		VirtualTopic: virtualTopicVal,
+		state:        attr.ValueStateKnown,
+	}, diags
+}
+
+func NewConfigValueNull() ConfigValue {
+	return ConfigValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewConfigValueUnknown() ConfigValue {
+	return ConfigValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewConfigValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (ConfigValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing ConfigValue Attribute Value",
+				"While creating a ConfigValue value, a missing attribute value was detected. "+
+					"A ConfigValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("ConfigValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid ConfigValue Attribute Type",
+				"While creating a ConfigValue value, an invalid attribute value was detected. "+
+					"A ConfigValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("ConfigValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("ConfigValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra ConfigValue Attribute Value",
+				"While creating a ConfigValue value, an extra attribute value was detected. "+
+					"A ConfigValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra ConfigValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewConfigValueUnknown(), diags
+	}
+
+	statementAttribute, ok := attributes["statement"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`statement is missing from object`)
+
+		return NewConfigValueUnknown(), diags
+	}
+
+	statementVal, ok := statementAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`statement expected to be basetypes.StringValue, was: %T`, statementAttribute))
+	}
+
+	virtualTopicAttribute, ok := attributes["virtual_topic"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`virtual_topic is missing from object`)
+
+		return NewConfigValueUnknown(), diags
+	}
+
+	virtualTopicVal, ok := virtualTopicAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`virtual_topic expected to be basetypes.StringValue, was: %T`, virtualTopicAttribute))
+	}
+
+	if diags.HasError() {
+		return NewConfigValueUnknown(), diags
+	}
+
+	return ConfigValue{
+		Statement:    statementVal,
+		VirtualTopic: virtualTopicVal,
+		state:        attr.ValueStateKnown,
+	}, diags
+}
+
+func NewConfigValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) ConfigValue {
+	object, diags := NewConfigValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewConfigValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t ConfigType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewConfigValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewConfigValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewConfigValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewConfigValueMust(ConfigValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t ConfigType) ValueType(ctx context.Context) attr.Value {
+	return ConfigValue{}
+}
+
+var _ basetypes.ObjectValuable = ConfigValue{}
+
+type ConfigValue struct {
+	Statement    basetypes.StringValue `tfsdk:"statement"`
+	VirtualTopic basetypes.StringValue `tfsdk:"virtual_topic"`
+	state        attr.ValueState
+}
+
+func (v ConfigValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 2)
+
+	var val tftypes.Value
+	var err error
+
+	attrTypes["statement"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["virtual_topic"] = basetypes.StringType{}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 2)
+
+		val, err = v.Statement.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["statement"] = val
+
+		val, err = v.VirtualTopic.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["virtual_topic"] = val
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v ConfigValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v ConfigValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v ConfigValue) String() string {
+	return "ConfigValue"
+}
+
+func (v ConfigValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributeTypes := map[string]attr.Type{
+		"statement":     basetypes.StringType{},
+		"virtual_topic": basetypes.StringType{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{
+			"statement":     v.Statement,
+			"virtual_topic": v.VirtualTopic,
+		})
+
+	return objVal, diags
+}
+
+func (v ConfigValue) Equal(o attr.Value) bool {
+	other, ok := o.(ConfigValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	if !v.Statement.Equal(other.Statement) {
+		return false
+	}
+
+	if !v.VirtualTopic.Equal(other.VirtualTopic) {
+		return false
+	}
+
+	return true
+}
+
+func (v ConfigValue) Type(ctx context.Context) attr.Type {
+	return ConfigType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v ConfigValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"statement":     basetypes.StringType{},
+		"virtual_topic": basetypes.StringType{},
 	}
 }

@@ -37,12 +37,17 @@ Optional:
 <a id="nestedblock--spec"></a>
 ### Nested Schema for `spec`
 
-Required:
-
-- `config` (String) The configuration of the interceptor in json format
-
 Optional:
 
 - `comment` (String) An optional comment for the interceptor.
+- `config` (Attributes) (see [below for nested schema](#nestedatt--spec--config))
 - `plugin_class` (String) The class of the plugin
 - `priority` (Number) The priority of the interceptor. Must be bigger than 0
+
+<a id="nestedatt--spec--config"></a>
+### Nested Schema for `spec.config`
+
+Optional:
+
+- `statement` (String) Statement
+- `virtual_topic` (String) Virtual Topic

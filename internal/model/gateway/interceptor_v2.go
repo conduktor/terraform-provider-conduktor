@@ -31,11 +31,16 @@ func (r GatewayInterceptorMetadata) String() string {
 	return fmt.Sprintf(`name: %s, Scope: %s`, r.Name, r.Scope)
 }
 
+type GatewayInterceptorConfig struct {
+	VirtualTopic string `json:"virtualTopic,omitempty"`
+	Statement    string `json:"statement,omitempty"`
+}
+
 type GatewayInterceptorSpec struct {
-	Comment     string `json:"comment,omitempty"`
-	PluginClass string `json:"pluginClass"`
-	Priority    int64  `json:"priority"` // API accepts int32 but terraform doesn't support that.
-	Config      string `json:"config"`
+	Comment     string                    `json:"comment,omitempty"`
+	PluginClass string                    `json:"pluginClass"`
+	Priority    int64                     `json:"priority"` // API accepts int32 but terraform doesn't support that.
+	Config      *GatewayInterceptorConfig `json:"config"`
 }
 
 type GatewayInterceptorResource struct {
