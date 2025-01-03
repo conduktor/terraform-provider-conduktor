@@ -22,8 +22,7 @@ provider "conduktor" {
 }
 
 # And how to use them with example resources
-# NOTE: Console resources will be prefixed with console_ in the future to avoid confusion
-resource "conduktor_user_v2" "user" {
+resource "conduktor_console_user_v2" "user" {
   provider = conduktor.console
   # ...
 }
