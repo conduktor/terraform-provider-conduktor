@@ -69,6 +69,8 @@ func (r *GatewayServiceAccountV2Resource) Configure(ctx context.Context, req res
 
 func (r *GatewayServiceAccountV2Resource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data schema.GatewayServiceAccountV2Model
+	resourceMutex.Lock()
+	defer resourceMutex.Unlock()
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -161,6 +163,8 @@ func (r *GatewayServiceAccountV2Resource) Read(ctx context.Context, req resource
 
 func (r *GatewayServiceAccountV2Resource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data schema.GatewayServiceAccountV2Model
+	resourceMutex.Lock()
+	defer resourceMutex.Unlock()
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -206,6 +210,8 @@ func (r *GatewayServiceAccountV2Resource) Update(ctx context.Context, req resour
 
 func (r *GatewayServiceAccountV2Resource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data schema.GatewayServiceAccountV2Model
+	resourceMutex.Lock()
+	defer resourceMutex.Unlock()
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
