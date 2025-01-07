@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"strings"
+	"sync"
 
 	"github.com/conduktor/terraform-provider-conduktor/internal/client"
 	schemaUtils "github.com/conduktor/terraform-provider-conduktor/internal/schema"
@@ -19,6 +20,9 @@ import (
 // Ensure ConduktorProvider satisfies various provider interfaces.
 var _ provider.Provider = &ConduktorProvider{}
 var _ provider.ProviderWithFunctions = &ConduktorProvider{}
+
+// Mutex to make resource operations sequential.
+var resourceMutex sync.Mutex
 
 // ConduktorProvider defines the provider implementation.
 type ConduktorProvider struct {
