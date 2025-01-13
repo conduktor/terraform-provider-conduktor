@@ -44,7 +44,8 @@ func TestGatewayInterceptorV2ModelMapping(t *testing.T) {
 	assert.Equal(t, "username", internal.Metadata.Scope.Username)
 	assert.Equal(t, int64(1), internal.Spec.Priority)
 	assert.Equal(t, "io.conduktor.gateway.interceptor.VirtualSqlTopicPlugin", internal.Spec.PluginClass)
-	// assert.Equal(t, "    {\n      \"virtualTopic\": \"yellow_cars\",\n      \"statement\": \"SELECT '$.type' as type, '$.price' as price FROM cars WHERE '$.color' = 'yellow'\"\n    }\n", internal.Spec.Config)
+	assert.Equal(t, "SELECT '$.type' as type, '$.price' as price FROM cars WHERE '$.color' = 'yellow'", internal.Spec.Config.Statement)
+	assert.Equal(t, "yellow_cars", internal.Spec.Config.VirtualTopic)
 
 	// convert to terraform model
 	tfModel, err := InternalModelToTerraform(ctx, &internal)
@@ -58,7 +59,7 @@ func TestGatewayInterceptorV2ModelMapping(t *testing.T) {
 	assert.Equal(t, types.StringValue("username"), tfModel.Scope.Username)
 	assert.Equal(t, types.Int64Value(1), tfModel.Spec.Priority)
 	assert.Equal(t, types.StringValue("io.conduktor.gateway.interceptor.VirtualSqlTopicPlugin"), tfModel.Spec.PluginClass)
-	// assert.Equal(t, types.StringValue("    {\n      \"virtualTopic\": \"yellow_cars\",\n      \"statement\": \"SELECT '$.type' as type, '$.price' as price FROM cars WHERE '$.color' = 'yellow'\"\n    }\n"), tfModel.Spec.Config)
+	assert.Equal(t, false, tfModel.Spec.Config.IsNull())
 
 	// convert back to internal model
 	internal2, err := TFToInternalModel(ctx, &tfModel)
@@ -73,7 +74,8 @@ func TestGatewayInterceptorV2ModelMapping(t *testing.T) {
 	assert.Equal(t, "group", internal2.Metadata.Scope.Group)
 	assert.Equal(t, "username", internal2.Metadata.Scope.Username)
 	assert.Equal(t, int64(1), internal2.Spec.Priority)
-	// assert.Equal(t, "    {\n      \"virtualTopic\": \"yellow_cars\",\n      \"statement\": \"SELECT '$.type' as type, '$.price' as price FROM cars WHERE '$.color' = 'yellow'\"\n    }\n", internal2.Spec.Config)
+	assert.Equal(t, "yellow_cars", internal2.Spec.Config.VirtualTopic)
+	assert.Equal(t, "SELECT '$.type' as type, '$.price' as price FROM cars WHERE '$.color' = 'yellow'", internal2.Spec.Config.Statement)
 
 	// convert back to ctl model
 	ctlResource2, err := internal2.ToClientResource()

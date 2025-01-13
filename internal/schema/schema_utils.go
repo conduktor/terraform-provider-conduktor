@@ -7,8 +7,10 @@ import (
 
 	mapper "github.com/conduktor/terraform-provider-conduktor/internal/mapper"
 	"github.com/conduktor/terraform-provider-conduktor/internal/model"
+	gateway "github.com/conduktor/terraform-provider-conduktor/internal/model/gateway"
 	groups "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_console_group_v2"
 	users "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_console_user_v2"
+	gwinterceptor "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_gateway_interceptor_v2"
 	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -266,4 +268,28 @@ func JsonToNormalizedString(ctx context.Context, input basetypes.StringValue) (s
 	// jsontypes.NewNormalizedUnknown()
 	return jsontypes.NewExactValue(input.String()).String(), nil
 	// return "", nil
+}
+
+// Helper function used to parse Interceptor Config block into an Object Value.
+func InterceptorConfigToObjectValue(ctx context.Context, config gateway.GatewayInterceptorConfig) (basetypes.ObjectValue, error) {
+	configValue, diag := gwinterceptor.NewConfigValue(
+		map[string]attr.Type{
+			"statement":     basetypes.StringType{},
+			"virtual_topic": basetypes.StringType{},
+		},
+		map[string]attr.Value{
+			"statement":     NewStringValue(config.Statement),
+			"virtual_topic": NewStringValue(config.VirtualTopic),
+		},
+	)
+	if diag.HasError() {
+		return basetypes.ObjectValue{}, mapper.WrapDiagError(diag, "config", mapper.IntoTerraform)
+	}
+
+	objectValue, diag := configValue.ToObjectValue(ctx)
+	if diag.HasError() {
+		return basetypes.ObjectValue{}, mapper.WrapDiagError(diag, "config", mapper.IntoTerraform)
+	}
+
+	return objectValue, nil
 }
