@@ -16,13 +16,11 @@ All types of contributions are encouraged and valued. See the [Table of Contents
 
 - [I Have a Question](#i-have-a-question)
 - [I Want To Contribute](#i-want-to-contribute)
-- [Reporting Bugs](#reporting-bugs)
-- [Suggesting Enhancements](#suggesting-enhancements)
-- [Your First Code Contribution](#your-first-code-contribution)
-- [Improving The Documentation](#improving-the-documentation)
+  - [Reporting Bugs](#reporting-bugs)
+  - [Suggesting Enhancements](#suggesting-enhancements)
+  - [Your First Code Contribution](#your-first-code-contribution)
 - [Styleguides](#styleguides)
-- [Commit Messages](#commit-messages)
-- [Join The Project Team](#join-the-project-team)
+  - [Commit Messages](#commit-messages)
 
 
 
@@ -53,8 +51,8 @@ A good bug report shouldn't leave others needing to chase you up for more inform
 - Determine if your bug is really a bug and not an error on your side e.g. using incompatible environment components/versions (Make sure that you have read the [documentation](https://docs.conduktor.io/). If you are looking for support, you might want to check [this section](#i-have-a-question)).
 - To see if other users have experienced (and potentially already solved) the same issue you are having, check if there is not already a bug report existing for your bug or error in the [bug tracker](https://github.com/conduktor/terraform-provider-conduktor/issues?q=label%3Abug).
 - Collect information about the bug:
-  - Version of the conduktor-ctl you are using
-  - Version of Conduktor Console you are targeting
+  - Version of the terraform-provider-conduktor you are using
+  - Version of Conduktor Console or Gateway you are targeting
   - Stack trace (Traceback)
   - OS, Platform and Version (Windows, Linux, macOS, x86, ARM)
   - Version of the interpreter, compiler, SDK, runtime environment, package manager, depending on what seems relevant.
@@ -78,7 +76,7 @@ You can also contact us at [support@conduktor.io]() if you need help with the is
 
 ### Suggesting Enhancements
 
-This section guides you through submitting an enhancement suggestion for conduktor-ctl, **including completely new features and minor improvements to existing functionality**. Following these guidelines will help maintainers and the community to understand your suggestion and find related suggestions.
+This section guides you through submitting an enhancement suggestion for Conduktor Terraform Provider, **including completely new features and minor improvements to existing functionality**. Following these guidelines will help maintainers and the community to understand your suggestion and find related suggestions.
 
 <!-- omit in toc -->
 #### Before Submitting an Enhancement
@@ -97,7 +95,7 @@ Enhancement suggestions are tracked as [GitHub issues](https://github.com/conduk
 - Use a **clear and descriptive title** for the issue to identify the suggestion.
 - Provide a **step-by-step description of the suggested enhancement** in as many details as possible.
 - **Describe the current behavior** and **explain which behavior you expected to see instead** and why. At this point you can also tell which alternatives do not work for you.
-- **Explain why this enhancement would be useful** to most conduktor-ctl users. You may also want to point out the other projects that solved it better and which could serve as inspiration.
+- **Explain why this enhancement would be useful** to most Conduktor Terraform Provider users. You may also want to point out the other projects that solved it better and which could serve as inspiration.
 
 ### Your First Code Contribution
 
