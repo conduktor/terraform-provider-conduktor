@@ -177,14 +177,14 @@ func (client *Client) ApplyGeneric(ctx context.Context, cliResource ctlresource.
 		return "", fmt.Errorf("Apply kind %s not found", cliResource.Kind)
 	}
 
-	applyPath, err := kind.ApplyPath(&cliResource)
+	applyQueryInfo, err := kind.ApplyPath(&cliResource)
 	if err != nil {
 		return "", err
 	}
 
-	url := client.baseUrl + applyPath
+	url := client.baseUrl + applyQueryInfo.Path
 
-	tflog.Trace(ctx, fmt.Sprintf("PUT on %s body : %s", applyPath, string(cliResource.Json)))
+	tflog.Trace(ctx, fmt.Sprintf("PUT on %s body : %s", applyQueryInfo.Path, string(cliResource.Json)))
 	builder := client.client.R().SetBody(cliResource.Json)
 	resp, err := builder.Put(url)
 	if err != nil {
