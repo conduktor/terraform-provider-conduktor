@@ -13,13 +13,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGatewayInterceptorV2ModelMapping(t *testing.T) {
+func TestGatewayInterceptorEncryptionV2ModelMapping(t *testing.T) {
 	ctx := context.Background()
 
-	jsonInterceptorV2Resource := []byte(test.TestAccTestdata(t, "gateway_interceptor_v2_api.json"))
+	jsonInterceptorEncryptionV2Resource := []byte(test.TestAccTestdata(t, "gateway_interceptor_v2_api.json"))
 
 	ctlResource := ctlresource.Resource{}
-	err := ctlResource.UnmarshalJSON(jsonInterceptorV2Resource)
+	err := ctlResource.UnmarshalJSON(jsonInterceptorEncryptionV2Resource)
 	if err != nil {
 		t.Fatal(err)
 		return
@@ -28,10 +28,10 @@ func TestGatewayInterceptorV2ModelMapping(t *testing.T) {
 	assert.Equal(t, "gateway/v2", ctlResource.Version)
 	assert.Equal(t, "interceptor", ctlResource.Name)
 	assert.Equal(t, map[string]interface{}{"name": "interceptor", "scope": map[string]interface{}{"vCluster": "vcluster", "group": "group", "username": "username"}}, ctlResource.Metadata)
-	assert.Equal(t, jsonInterceptorV2Resource, ctlResource.Json)
+	assert.Equal(t, jsonInterceptorEncryptionV2Resource, ctlResource.Json)
 
 	// convert into internal model
-	internal, err := gateway.NewGatewayInterceptorResourceFromClientResource(ctlResource)
+	internal, err := gateway.NewGatewayInterceptorEncryptionResourceFromClientResource(ctlResource)
 	if err != nil {
 		t.Fatal(err)
 		return

@@ -10,7 +10,7 @@ import (
 	gateway "github.com/conduktor/terraform-provider-conduktor/internal/model/gateway"
 	groups "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_console_group_v2"
 	users "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_console_user_v2"
-	gwinterceptor "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_gateway_interceptor_v2"
+	gwinterceptor "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_gateway_interceptor_encryption_v2"
 	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -271,7 +271,7 @@ func JsonToNormalizedString(ctx context.Context, input basetypes.StringValue) (s
 }
 
 // Helper function used to parse Interceptor Config block into an Object Value.
-func InterceptorConfigToObjectValue(ctx context.Context, config gateway.GatewayInterceptorConfig) (basetypes.ObjectValue, error) {
+func InterceptorConfigToObjectValue(ctx context.Context, config gateway.GatewayInterceptorEncryptionConfig) (basetypes.ObjectValue, error) {
 	configValue, diag := gwinterceptor.NewConfigValue(
 		map[string]attr.Type{
 			"statement":     basetypes.StringType{},

@@ -6,30 +6,30 @@ import (
 	mapper "github.com/conduktor/terraform-provider-conduktor/internal/mapper"
 	gateway "github.com/conduktor/terraform-provider-conduktor/internal/model/gateway"
 	schema "github.com/conduktor/terraform-provider-conduktor/internal/schema"
-	gwinterceptor "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_gateway_interceptor_v2"
+	gwinterceptor "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_gateway_interceptor_encryption_v2"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
-func TFToInternalModel(ctx context.Context, r *gwinterceptor.GatewayInterceptorV2Model) (gateway.GatewayInterceptorResource, error) {
-	scope := gateway.GatewayInterceptorScope{
+func TFToInternalModel(ctx context.Context, r *gwinterceptor.GatewayInterceptorEncryptionV2Model) (gateway.GatewayInterceptorEncryptionResource, error) {
+	scope := gateway.GatewayInterceptorEncryptionScope{
 		Group:    r.Scope.Group.ValueString(),
 		VCluster: r.Scope.Vcluster.ValueString(),
 		Username: r.Scope.Username.ValueString(),
 	}
 
-	config, err := ObjectValueToInterceptorConfig(ctx, &r.Spec.Config)
+	config, err := ObjectValueToInterceptorEncryptionConfig(ctx, &r.Spec.Config)
 	if err != nil {
-		return gateway.GatewayInterceptorResource{}, err
+		return gateway.GatewayInterceptorEncryptionResource{}, err
 	}
 
-	return gateway.NewGatewayInterceptorResource(
-		gateway.GatewayInterceptorMetadata{
+	return gateway.NewGatewayInterceptorEncryptionResource(
+		gateway.GatewayInterceptorEncryptionMetadata{
 			Name:  r.Name.ValueString(),
 			Scope: scope,
 		},
-		gateway.GatewayInterceptorSpec{
+		gateway.GatewayInterceptorEncryptionSpec{
 			Comment:     r.Spec.Comment.ValueString(),
 			PluginClass: r.Spec.PluginClass.ValueString(),
 			Priority:    r.Spec.Priority.ValueInt64(),
@@ -38,10 +38,10 @@ func TFToInternalModel(ctx context.Context, r *gwinterceptor.GatewayInterceptorV
 	), nil
 }
 
-func InternalModelToTerraform(ctx context.Context, r *gateway.GatewayInterceptorResource) (gwinterceptor.GatewayInterceptorV2Model, error) {
+func InternalModelToTerraform(ctx context.Context, r *gateway.GatewayInterceptorEncryptionResource) (gwinterceptor.GatewayInterceptorEncryptionV2Model, error) {
 	config, err := schema.InterceptorConfigToObjectValue(ctx, *r.Spec.Config)
 	if err != nil {
-		return gwinterceptor.GatewayInterceptorV2Model{}, err
+		return gwinterceptor.GatewayInterceptorEncryptionV2Model{}, err
 	}
 
 	specValue, diag := gwinterceptor.NewSpecValue(
@@ -59,10 +59,10 @@ func InternalModelToTerraform(ctx context.Context, r *gateway.GatewayInterceptor
 		},
 	)
 	if diag.HasError() {
-		return gwinterceptor.GatewayInterceptorV2Model{}, mapper.WrapDiagError(diag, "spec", mapper.IntoTerraform)
+		return gwinterceptor.GatewayInterceptorEncryptionV2Model{}, mapper.WrapDiagError(diag, "spec", mapper.IntoTerraform)
 	}
 
-	return gwinterceptor.GatewayInterceptorV2Model{
+	return gwinterceptor.GatewayInterceptorEncryptionV2Model{
 		Name: types.StringValue(r.Metadata.Name),
 		Scope: gwinterceptor.ScopeValue{
 			Group:    schema.NewStringValue(r.Metadata.Scope.Group),
@@ -73,7 +73,7 @@ func InternalModelToTerraform(ctx context.Context, r *gateway.GatewayInterceptor
 	}, nil
 }
 
-func ObjectValueToInterceptorConfig(ctx context.Context, r *basetypes.ObjectValue) (*gateway.GatewayInterceptorConfig, error) {
+func ObjectValueToInterceptorEncryptionConfig(ctx context.Context, r *basetypes.ObjectValue) (*gateway.GatewayInterceptorEncryptionConfig, error) {
 	if r.IsNull() {
 		return nil, nil
 	}
@@ -83,7 +83,7 @@ func ObjectValueToInterceptorConfig(ctx context.Context, r *basetypes.ObjectValu
 		return nil, mapper.WrapDiagError(diag, "config", mapper.FromTerraform)
 	}
 
-	return &gateway.GatewayInterceptorConfig{
+	return &gateway.GatewayInterceptorEncryptionConfig{
 		VirtualTopic: configValue.VirtualTopic.ValueString(),
 		Statement:    configValue.Statement.ValueString(),
 	}, nil

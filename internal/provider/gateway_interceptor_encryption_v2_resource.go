@@ -6,9 +6,9 @@ import (
 	"fmt"
 
 	"github.com/conduktor/terraform-provider-conduktor/internal/client"
-	mapper "github.com/conduktor/terraform-provider-conduktor/internal/mapper/gateway_interceptor_v2"
+	mapper "github.com/conduktor/terraform-provider-conduktor/internal/mapper/gateway_interceptor_encryption_v2"
 	gateway "github.com/conduktor/terraform-provider-conduktor/internal/model/gateway"
-	schema "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_gateway_interceptor_v2"
+	schema "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_gateway_interceptor_encryption_v2"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -17,27 +17,27 @@ import (
 const gatewayInterceptorV2ApiPath = "/gateway/v2/interceptor"
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ resource.Resource = &GatewayInterceptorV2Resource{}
-var _ resource.ResourceWithImportState = &GatewayInterceptorV2Resource{}
+var _ resource.Resource = &GatewayInterceptorEncryptionV2Resource{}
+var _ resource.ResourceWithImportState = &GatewayInterceptorEncryptionV2Resource{}
 
-func NewGatewayInterceptorV2Resource() resource.Resource {
-	return &GatewayInterceptorV2Resource{}
+func NewGatewayInterceptorEncryptionV2Resource() resource.Resource {
+	return &GatewayInterceptorEncryptionV2Resource{}
 }
 
-// GatewayInterceptorV2Resource defines the resource implementation.
-type GatewayInterceptorV2Resource struct {
+// GatewayInterceptorEncryptionV2Resource defines the resource implementation.
+type GatewayInterceptorEncryptionV2Resource struct {
 	apiClient *client.Client
 }
 
-func (r *GatewayInterceptorV2Resource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *GatewayInterceptorEncryptionV2Resource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_gateway_interceptor_v2"
 }
 
-func (r *GatewayInterceptorV2Resource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = schema.GatewayInterceptorV2ResourceSchema(ctx)
+func (r *GatewayInterceptorEncryptionV2Resource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = schema.GatewayInterceptorEncryptionV2ResourceSchema(ctx)
 }
 
-func (r *GatewayInterceptorV2Resource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *GatewayInterceptorEncryptionV2Resource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -67,8 +67,8 @@ func (r *GatewayInterceptorV2Resource) Configure(ctx context.Context, req resour
 	r.apiClient = data.Client
 }
 
-func (r *GatewayInterceptorV2Resource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data schema.GatewayInterceptorV2Model
+func (r *GatewayInterceptorEncryptionV2Resource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var data schema.GatewayInterceptorEncryptionV2Model
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -94,7 +94,7 @@ func (r *GatewayInterceptorV2Resource) Create(ctx context.Context, req resource.
 
 	tflog.Debug(ctx, fmt.Sprintf("Interceptor created with result: %s", apply))
 
-	var gatewayRes gateway.GatewayInterceptorResource
+	var gatewayRes gateway.GatewayInterceptorEncryptionResource
 	err = gatewayRes.FromRawJsonInterface(apply.Resource)
 	if err != nil {
 		resp.Diagnostics.AddError("Unmarshall Error", fmt.Sprintf("Response resource can't be cast as interceptor : %v, got error: %s", apply.Resource, err))
@@ -112,8 +112,8 @@ func (r *GatewayInterceptorV2Resource) Create(ctx context.Context, req resource.
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *GatewayInterceptorV2Resource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data schema.GatewayInterceptorV2Model
+func (r *GatewayInterceptorEncryptionV2Resource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var data schema.GatewayInterceptorEncryptionV2Model
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -142,7 +142,7 @@ func (r *GatewayInterceptorV2Resource) Read(ctx context.Context, req resource.Re
 		return
 	}
 
-	var gatewayRes = []gateway.GatewayInterceptorResource{}
+	var gatewayRes = []gateway.GatewayInterceptorEncryptionResource{}
 	err = json.Unmarshal(get, &gatewayRes)
 	if err != nil || len(gatewayRes) < 1 {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read interceptor, got error: %s", err))
@@ -160,8 +160,8 @@ func (r *GatewayInterceptorV2Resource) Read(ctx context.Context, req resource.Re
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *GatewayInterceptorV2Resource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data schema.GatewayInterceptorV2Model
+func (r *GatewayInterceptorEncryptionV2Resource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var data schema.GatewayInterceptorEncryptionV2Model
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -187,7 +187,7 @@ func (r *GatewayInterceptorV2Resource) Update(ctx context.Context, req resource.
 	}
 	tflog.Debug(ctx, fmt.Sprintf("Interceptor updated with result: %s", apply))
 
-	var gatewayRes gateway.GatewayInterceptorResource
+	var gatewayRes gateway.GatewayInterceptorEncryptionResource
 	err = gatewayRes.FromRawJsonInterface(apply.Resource)
 	if err != nil {
 		resp.Diagnostics.AddError("Unmarshall Error", fmt.Sprintf("Response resource can't be cast as interceptor : %v, got error: %s", apply.Resource, err))
@@ -205,8 +205,8 @@ func (r *GatewayInterceptorV2Resource) Update(ctx context.Context, req resource.
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *GatewayInterceptorV2Resource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data schema.GatewayInterceptorV2Model
+func (r *GatewayInterceptorEncryptionV2Resource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data schema.GatewayInterceptorEncryptionV2Model
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -217,9 +217,9 @@ func (r *GatewayInterceptorV2Resource) Delete(ctx context.Context, req resource.
 		return
 	}
 
-	deleteRes := gateway.GatewayInterceptorMetadata{
+	deleteRes := gateway.GatewayInterceptorEncryptionMetadata{
 		Name: data.Name.ValueString(),
-		Scope: gateway.GatewayInterceptorScope{
+		Scope: gateway.GatewayInterceptorEncryptionScope{
 			VCluster: data.Scope.Vcluster.ValueString(),
 		},
 	}
@@ -232,6 +232,6 @@ func (r *GatewayInterceptorV2Resource) Delete(ctx context.Context, req resource.
 	tflog.Debug(ctx, fmt.Sprintf("Interceptor %s deleted", data.Name.String()))
 }
 
-func (r *GatewayInterceptorV2Resource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *GatewayInterceptorEncryptionV2Resource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("name"), req, resp)
 }

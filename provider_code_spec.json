@@ -1167,7 +1167,7 @@
       }
     },
     {
-      "name": "gateway_interceptor_v2",
+      "name": "gateway_interceptor_encryption_v2",
       "schema": {
         "attributes": [
           {
