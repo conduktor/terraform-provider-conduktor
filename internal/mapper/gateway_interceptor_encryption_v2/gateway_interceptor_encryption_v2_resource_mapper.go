@@ -84,7 +84,15 @@ func ObjectValueToInterceptorEncryptionConfig(ctx context.Context, r *basetypes.
 	}
 
 	return &gateway.GatewayInterceptorEncryptionConfig{
-		VirtualTopic: configValue.VirtualTopic.ValueString(),
-		Statement:    configValue.Statement.ValueString(),
+		ExternalStorage:       configValue.ExternalStorage.ValueBool(),
+		Topic:                 configValue.Topic.ValueString(),
+		EnableAuditLogOnError: configValue.EnableAuditLogOnError.ValueBool(),
+		SchemaDataMode:        configValue.SchemaDataMode.ValueString(),
+		// TODO
+		SchemaRegistryConfig: &gateway.GatewayInterceptorEncryptionSchemaRegistryConfig{
+			Host:              "",
+			CacheSize:         100,
+			AdditionalConfigs: map[string]string{},
+		},
 	}, nil
 }

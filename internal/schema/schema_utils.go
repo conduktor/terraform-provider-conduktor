@@ -57,6 +57,14 @@ func GetBooleanConfig(configValue basetypes.BoolValue, envs []string, fallback b
 	return fallback
 }
 
+// NewBoolValue Convert a string to a basetypes.BoolValue, with default to false.
+func NewBoolValue(b bool) basetypes.BoolValue {
+	if &b == nil {
+		return basetypes.NewBoolValue(false)
+	}
+	return basetypes.NewBoolValue(b)
+}
+
 // NewStringValue Convert a string to a basetypes.StringValue.
 func NewStringValue(s string) basetypes.StringValue {
 	if s == "" {
@@ -270,16 +278,57 @@ func JsonToNormalizedString(ctx context.Context, input basetypes.StringValue) (s
 	// return "", nil
 }
 
-// Helper function used to parse Interceptor Config block into an Object Value.
-func InterceptorConfigToObjectValue(ctx context.Context, config gateway.GatewayInterceptorEncryptionConfig) (basetypes.ObjectValue, error) {
+func InterceptorSchemaRegistryConfigToObjectValue(ctx context.Context, config gateway.GatewayInterceptorEncryptionSchemaRegistryConfig) (basetypes.ObjectValue, error) {
+	additionalConfigs, diag := StringMapToMapValue(ctx, config.AdditionalConfigs)
+	if diag.HasError() {
+		return basetypes.ObjectValue{}, mapper.WrapDiagError(diag, "additional_configs", mapper.IntoTerraform)
+	}
+
 	configValue, diag := gwinterceptor.NewConfigValue(
 		map[string]attr.Type{
-			"statement":     basetypes.StringType{},
-			"virtual_topic": basetypes.StringType{},
+			"host":               basetypes.StringType{},
+			"cache_size":         basetypes.Int64Type{},
+			"additional_configs": additionalConfigs.Type(ctx),
 		},
 		map[string]attr.Value{
-			"statement":     NewStringValue(config.Statement),
-			"virtual_topic": NewStringValue(config.VirtualTopic),
+			"host":               NewStringValue(config.Host),
+			"cache_size":         NewInt64Value(config.CacheSize),
+			"additional_configs": additionalConfigs,
+		},
+	)
+	if diag.HasError() {
+		return basetypes.ObjectValue{}, mapper.WrapDiagError(diag, "config", mapper.IntoTerraform)
+	}
+
+	objectValue, diag := configValue.ToObjectValue(ctx)
+	if diag.HasError() {
+		return basetypes.ObjectValue{}, mapper.WrapDiagError(diag, "config", mapper.IntoTerraform)
+	}
+
+	return objectValue, nil
+}
+
+// Helper function used to parse Interceptor Config block into an Object Value.
+func InterceptorConfigToObjectValue(ctx context.Context, config gateway.GatewayInterceptorEncryptionConfig) (basetypes.ObjectValue, error) {
+	schemaRegistryConfig, err := InterceptorSchemaRegistryConfigToObjectValue(ctx, *config.SchemaRegistryConfig)
+	if err != nil {
+		return basetypes.ObjectValue{}, err
+	}
+
+	configValue, diag := gwinterceptor.NewConfigValue(
+		map[string]attr.Type{
+			"enable_auditlog_on_error": basetypes.BoolType{},
+			"schema_data_mode":         basetypes.StringType{},
+			"external_storage":         basetypes.BoolType{},
+			"topic":                    basetypes.StringType{},
+			"schema_registry_config":   schemaRegistryConfig.Type(ctx),
+		},
+		map[string]attr.Value{
+			"external_storage":         NewBoolValue(config.ExternalStorage),
+			"topic":                    NewStringValue(config.Topic),
+			"enable_auditlog_on_error": NewBoolValue(config.EnableAuditLogOnError),
+			"schema_data_mode":         NewStringValue(config.SchemaDataMode),
+			"schema_registry_config":   schemaRegistryConfig,
 		},
 	)
 	if diag.HasError() {

@@ -31,9 +31,18 @@ func (r GatewayInterceptorEncryptionMetadata) String() string {
 	return fmt.Sprintf(`name: %s, Scope: %s`, r.Name, r.Scope)
 }
 
+type GatewayInterceptorEncryptionSchemaRegistryConfig struct {
+	Host              string            `json:"host"`
+	CacheSize         int64             `json:"cacheSize"`
+	AdditionalConfigs map[string]string `json:"additionalConfigs"`
+}
+
 type GatewayInterceptorEncryptionConfig struct {
-	VirtualTopic string `json:"virtualTopic,omitempty"`
-	Statement    string `json:"statement,omitempty"`
+	EnableAuditLogOnError bool                                              `json:"enableAuditLogOnError"`
+	ExternalStorage       bool                                              `json:"externalStorage"`
+	SchemaDataMode        string                                            `json:"schemaDataMode"`
+	SchemaRegistryConfig  *GatewayInterceptorEncryptionSchemaRegistryConfig `json:"schemaRegistryConfig"`
+	Topic                 string                                            `json:"topic"`
 }
 
 type GatewayInterceptorEncryptionSpec struct {

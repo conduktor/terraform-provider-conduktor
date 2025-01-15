@@ -49,5 +49,20 @@ Optional:
 
 Optional:
 
-- `statement` (String) Statement
-- `virtual_topic` (String) Virtual Topic
+- `enable_audit_log_on_error` (Boolean) Flag to enable audit log when error happens.
+- `external_storage` (Boolean) Flag to store encryption settings externally in a topic.
+- `schema_data_mode` (String) Defines whether to preserve Avro schema format or convert to JSON.
+- `schema_registry_config` (Attributes Map) Configuration for Schema Registry to handle Avro, JSON, and Protobuf records. (see [below for nested schema](#nestedatt--spec--config--schema_registry_config))
+- `topic` (String) Topics that match this regex will have the interceptor applied. Defaults to all.
+
+<a id="nestedatt--spec--config--schema_registry_config"></a>
+### Nested Schema for `spec.config.schema_registry_config`
+
+Required:
+
+- `host` (String) URL of the schema registry.
+
+Optional:
+
+- `additional_configs` (Map of String) Additional properties mapped to specific security-related parameters. For enhanced security, use environment variable templates like ${MY_ENV_VAR}.
+- `cache_size` (Number) This interceptor caches schemas locally so that it doesn't have to query the schema registry.

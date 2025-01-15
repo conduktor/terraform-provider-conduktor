@@ -1325,16 +1325,95 @@
                     "computed_optional_required": "optional",
                     "attributes": [
                       {
-                        "name": "virtual_topic",
+                        "name": "topic",
                         "string": {
-                          "description": "Virtual Topic",
+                          "description": "Topics that match this regex will have the interceptor applied. Defaults to all.",
+                          "computed_optional_required": "computed_optional",
+                          "default": {
+                            "custom": {
+                              "imports": [
+                                {
+                                  "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+                                }
+                              ],
+                              "schema_definition": "stringdefault.StaticString(\".*\")"
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "name": "external_storage",
+                        "bool": {
+                          "description": "Flag to store encryption settings externally in a topic.",
                           "computed_optional_required": "optional"
                         }
                       },
                       {
-                        "name": "statement",
+                        "name": "schema_registry_config",
+                        "map_nested": {
+                          "description": "Configuration for Schema Registry to handle Avro, JSON, and Protobuf records.",
+                          "computed_optional_required": "optional",
+                          "nested_object": {
+                            "attributes": [
+                              {
+                                "name": "host",
+                                "string": {
+                                  "description": "URL of the schema registry.",
+                                  "computed_optional_required": "required"
+                                }
+                              },
+                              {
+                                "name": "cache_size",
+                                "int64": {
+                                  "description": "This interceptor caches schemas locally so that it doesn't have to query the schema registry.",
+                                  "computed_optional_required": "computed_optional",
+                                  "default": {
+                                    "custom": {
+                                      "imports": [
+                                        {
+                                          "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+                                        }
+                                      ],
+                                      "schema_definition": "int64default.StaticInt64(100)"
+                                    }
+                                  }
+                                }
+                              },
+                              {
+                                "name": "additional_configs",
+                                "map": {
+                                  "description": "Additional properties mapped to specific security-related parameters. For enhanced security, use environment variable templates like ${MY_ENV_VAR}.",
+                                  "computed_optional_required": "optional",
+                                  "element_type": {
+                                    "string": {}
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      {
+                        "name": "schema_data_mode",
                         "string": {
-                          "description": "Statement",
+                          "description": "Defines whether to preserve Avro schema format or convert to JSON.",
+                          "computed_optional_required": "computed_optional",
+                          "default": {
+                            "custom": {
+                              "imports": [
+                                {
+                                  "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+                                }
+                              ],
+                              "schema_definition": "stringdefault.StaticString(\"preserve_avro\")"
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "name": "enable_audit_log_on_error",
+                        "bool": {
+                          "description": "Flag to enable audit log when error happens.",
                           "computed_optional_required": "optional"
                         }
                       }

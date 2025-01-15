@@ -9,7 +9,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -79,15 +81,61 @@ func GatewayInterceptorEncryptionV2ResourceSchema(ctx context.Context) schema.Sc
 					},
 					"config": schema.SingleNestedAttribute{
 						Attributes: map[string]schema.Attribute{
-							"statement": schema.StringAttribute{
+							"enable_audit_log_on_error": schema.BoolAttribute{
 								Optional:            true,
-								Description:         "Statement",
-								MarkdownDescription: "Statement",
+								Description:         "Flag to enable audit log when error happens.",
+								MarkdownDescription: "Flag to enable audit log when error happens.",
 							},
-							"virtual_topic": schema.StringAttribute{
+							"external_storage": schema.BoolAttribute{
 								Optional:            true,
-								Description:         "Virtual Topic",
-								MarkdownDescription: "Virtual Topic",
+								Description:         "Flag to store encryption settings externally in a topic.",
+								MarkdownDescription: "Flag to store encryption settings externally in a topic.",
+							},
+							"schema_data_mode": schema.StringAttribute{
+								Optional:            true,
+								Computed:            true,
+								Description:         "Defines whether to preserve Avro schema format or convert to JSON.",
+								MarkdownDescription: "Defines whether to preserve Avro schema format or convert to JSON.",
+								Default:             stringdefault.StaticString("preserve_avro"),
+							},
+							"schema_registry_config": schema.MapNestedAttribute{
+								NestedObject: schema.NestedAttributeObject{
+									Attributes: map[string]schema.Attribute{
+										"additional_configs": schema.MapAttribute{
+											ElementType:         types.StringType,
+											Optional:            true,
+											Description:         "Additional properties mapped to specific security-related parameters. For enhanced security, use environment variable templates like ${MY_ENV_VAR}.",
+											MarkdownDescription: "Additional properties mapped to specific security-related parameters. For enhanced security, use environment variable templates like ${MY_ENV_VAR}.",
+										},
+										"cache_size": schema.Int64Attribute{
+											Optional:            true,
+											Computed:            true,
+											Description:         "This interceptor caches schemas locally so that it doesn't have to query the schema registry.",
+											MarkdownDescription: "This interceptor caches schemas locally so that it doesn't have to query the schema registry.",
+											Default:             int64default.StaticInt64(100),
+										},
+										"host": schema.StringAttribute{
+											Required:            true,
+											Description:         "URL of the schema registry.",
+											MarkdownDescription: "URL of the schema registry.",
+										},
+									},
+									CustomType: SchemaRegistryConfigType{
+										ObjectType: types.ObjectType{
+											AttrTypes: SchemaRegistryConfigValue{}.AttributeTypes(ctx),
+										},
+									},
+								},
+								Optional:            true,
+								Description:         "Configuration for Schema Registry to handle Avro, JSON, and Protobuf records.",
+								MarkdownDescription: "Configuration for Schema Registry to handle Avro, JSON, and Protobuf records.",
+							},
+							"topic": schema.StringAttribute{
+								Optional:            true,
+								Computed:            true,
+								Description:         "Topics that match this regex will have the interceptor applied. Defaults to all.",
+								MarkdownDescription: "Topics that match this regex will have the interceptor applied. Defaults to all.",
+								Default:             stringdefault.StaticString(".*"),
 							},
 						},
 						CustomType: ConfigType{
@@ -1102,40 +1150,94 @@ func (t ConfigType) ValueFromObject(ctx context.Context, in basetypes.ObjectValu
 
 	attributes := in.Attributes()
 
-	statementAttribute, ok := attributes["statement"]
+	enableAuditLogOnErrorAttribute, ok := attributes["enable_audit_log_on_error"]
 
 	if !ok {
 		diags.AddError(
 			"Attribute Missing",
-			`statement is missing from object`)
+			`enable_audit_log_on_error is missing from object`)
 
 		return nil, diags
 	}
 
-	statementVal, ok := statementAttribute.(basetypes.StringValue)
+	enableAuditLogOnErrorVal, ok := enableAuditLogOnErrorAttribute.(basetypes.BoolValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`statement expected to be basetypes.StringValue, was: %T`, statementAttribute))
+			fmt.Sprintf(`enable_audit_log_on_error expected to be basetypes.BoolValue, was: %T`, enableAuditLogOnErrorAttribute))
 	}
 
-	virtualTopicAttribute, ok := attributes["virtual_topic"]
+	externalStorageAttribute, ok := attributes["external_storage"]
 
 	if !ok {
 		diags.AddError(
 			"Attribute Missing",
-			`virtual_topic is missing from object`)
+			`external_storage is missing from object`)
 
 		return nil, diags
 	}
 
-	virtualTopicVal, ok := virtualTopicAttribute.(basetypes.StringValue)
+	externalStorageVal, ok := externalStorageAttribute.(basetypes.BoolValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`virtual_topic expected to be basetypes.StringValue, was: %T`, virtualTopicAttribute))
+			fmt.Sprintf(`external_storage expected to be basetypes.BoolValue, was: %T`, externalStorageAttribute))
+	}
+
+	schemaDataModeAttribute, ok := attributes["schema_data_mode"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`schema_data_mode is missing from object`)
+
+		return nil, diags
+	}
+
+	schemaDataModeVal, ok := schemaDataModeAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`schema_data_mode expected to be basetypes.StringValue, was: %T`, schemaDataModeAttribute))
+	}
+
+	schemaRegistryConfigAttribute, ok := attributes["schema_registry_config"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`schema_registry_config is missing from object`)
+
+		return nil, diags
+	}
+
+	schemaRegistryConfigVal, ok := schemaRegistryConfigAttribute.(basetypes.MapValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`schema_registry_config expected to be basetypes.MapValue, was: %T`, schemaRegistryConfigAttribute))
+	}
+
+	topicAttribute, ok := attributes["topic"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`topic is missing from object`)
+
+		return nil, diags
+	}
+
+	topicVal, ok := topicAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`topic expected to be basetypes.StringValue, was: %T`, topicAttribute))
 	}
 
 	if diags.HasError() {
@@ -1143,9 +1245,12 @@ func (t ConfigType) ValueFromObject(ctx context.Context, in basetypes.ObjectValu
 	}
 
 	return ConfigValue{
-		Statement:    statementVal,
-		VirtualTopic: virtualTopicVal,
-		state:        attr.ValueStateKnown,
+		EnableAuditLogOnError: enableAuditLogOnErrorVal,
+		ExternalStorage:       externalStorageVal,
+		SchemaDataMode:        schemaDataModeVal,
+		SchemaRegistryConfig:  schemaRegistryConfigVal,
+		Topic:                 topicVal,
+		state:                 attr.ValueStateKnown,
 	}, diags
 }
 
@@ -1212,40 +1317,94 @@ func NewConfigValue(attributeTypes map[string]attr.Type, attributes map[string]a
 		return NewConfigValueUnknown(), diags
 	}
 
-	statementAttribute, ok := attributes["statement"]
+	enableAuditLogOnErrorAttribute, ok := attributes["enable_audit_log_on_error"]
 
 	if !ok {
 		diags.AddError(
 			"Attribute Missing",
-			`statement is missing from object`)
+			`enable_audit_log_on_error is missing from object`)
 
 		return NewConfigValueUnknown(), diags
 	}
 
-	statementVal, ok := statementAttribute.(basetypes.StringValue)
+	enableAuditLogOnErrorVal, ok := enableAuditLogOnErrorAttribute.(basetypes.BoolValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`statement expected to be basetypes.StringValue, was: %T`, statementAttribute))
+			fmt.Sprintf(`enable_audit_log_on_error expected to be basetypes.BoolValue, was: %T`, enableAuditLogOnErrorAttribute))
 	}
 
-	virtualTopicAttribute, ok := attributes["virtual_topic"]
+	externalStorageAttribute, ok := attributes["external_storage"]
 
 	if !ok {
 		diags.AddError(
 			"Attribute Missing",
-			`virtual_topic is missing from object`)
+			`external_storage is missing from object`)
 
 		return NewConfigValueUnknown(), diags
 	}
 
-	virtualTopicVal, ok := virtualTopicAttribute.(basetypes.StringValue)
+	externalStorageVal, ok := externalStorageAttribute.(basetypes.BoolValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`virtual_topic expected to be basetypes.StringValue, was: %T`, virtualTopicAttribute))
+			fmt.Sprintf(`external_storage expected to be basetypes.BoolValue, was: %T`, externalStorageAttribute))
+	}
+
+	schemaDataModeAttribute, ok := attributes["schema_data_mode"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`schema_data_mode is missing from object`)
+
+		return NewConfigValueUnknown(), diags
+	}
+
+	schemaDataModeVal, ok := schemaDataModeAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`schema_data_mode expected to be basetypes.StringValue, was: %T`, schemaDataModeAttribute))
+	}
+
+	schemaRegistryConfigAttribute, ok := attributes["schema_registry_config"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`schema_registry_config is missing from object`)
+
+		return NewConfigValueUnknown(), diags
+	}
+
+	schemaRegistryConfigVal, ok := schemaRegistryConfigAttribute.(basetypes.MapValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`schema_registry_config expected to be basetypes.MapValue, was: %T`, schemaRegistryConfigAttribute))
+	}
+
+	topicAttribute, ok := attributes["topic"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`topic is missing from object`)
+
+		return NewConfigValueUnknown(), diags
+	}
+
+	topicVal, ok := topicAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`topic expected to be basetypes.StringValue, was: %T`, topicAttribute))
 	}
 
 	if diags.HasError() {
@@ -1253,9 +1412,12 @@ func NewConfigValue(attributeTypes map[string]attr.Type, attributes map[string]a
 	}
 
 	return ConfigValue{
-		Statement:    statementVal,
-		VirtualTopic: virtualTopicVal,
-		state:        attr.ValueStateKnown,
+		EnableAuditLogOnError: enableAuditLogOnErrorVal,
+		ExternalStorage:       externalStorageVal,
+		SchemaDataMode:        schemaDataModeVal,
+		SchemaRegistryConfig:  schemaRegistryConfigVal,
+		Topic:                 topicVal,
+		state:                 attr.ValueStateKnown,
 	}, diags
 }
 
@@ -1327,41 +1489,73 @@ func (t ConfigType) ValueType(ctx context.Context) attr.Value {
 var _ basetypes.ObjectValuable = ConfigValue{}
 
 type ConfigValue struct {
-	Statement    basetypes.StringValue `tfsdk:"statement"`
-	VirtualTopic basetypes.StringValue `tfsdk:"virtual_topic"`
-	state        attr.ValueState
+	EnableAuditLogOnError basetypes.BoolValue   `tfsdk:"enable_audit_log_on_error"`
+	ExternalStorage       basetypes.BoolValue   `tfsdk:"external_storage"`
+	SchemaDataMode        basetypes.StringValue `tfsdk:"schema_data_mode"`
+	SchemaRegistryConfig  basetypes.MapValue    `tfsdk:"schema_registry_config"`
+	Topic                 basetypes.StringValue `tfsdk:"topic"`
+	state                 attr.ValueState
 }
 
 func (v ConfigValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
-	attrTypes := make(map[string]tftypes.Type, 2)
+	attrTypes := make(map[string]tftypes.Type, 5)
 
 	var val tftypes.Value
 	var err error
 
-	attrTypes["statement"] = basetypes.StringType{}.TerraformType(ctx)
-	attrTypes["virtual_topic"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["enable_audit_log_on_error"] = basetypes.BoolType{}.TerraformType(ctx)
+	attrTypes["external_storage"] = basetypes.BoolType{}.TerraformType(ctx)
+	attrTypes["schema_data_mode"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["schema_registry_config"] = basetypes.MapType{
+		ElemType: SchemaRegistryConfigValue{}.Type(ctx),
+	}.TerraformType(ctx)
+	attrTypes["topic"] = basetypes.StringType{}.TerraformType(ctx)
 
 	objectType := tftypes.Object{AttributeTypes: attrTypes}
 
 	switch v.state {
 	case attr.ValueStateKnown:
-		vals := make(map[string]tftypes.Value, 2)
+		vals := make(map[string]tftypes.Value, 5)
 
-		val, err = v.Statement.ToTerraformValue(ctx)
-
-		if err != nil {
-			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
-		}
-
-		vals["statement"] = val
-
-		val, err = v.VirtualTopic.ToTerraformValue(ctx)
+		val, err = v.EnableAuditLogOnError.ToTerraformValue(ctx)
 
 		if err != nil {
 			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
 		}
 
-		vals["virtual_topic"] = val
+		vals["enable_audit_log_on_error"] = val
+
+		val, err = v.ExternalStorage.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["external_storage"] = val
+
+		val, err = v.SchemaDataMode.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["schema_data_mode"] = val
+
+		val, err = v.SchemaRegistryConfig.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["schema_registry_config"] = val
+
+		val, err = v.Topic.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["topic"] = val
 
 		if err := tftypes.ValidateValue(objectType, vals); err != nil {
 			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
@@ -1392,9 +1586,43 @@ func (v ConfigValue) String() string {
 func (v ConfigValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
+	schemaRegistryConfig := types.MapValueMust(
+		SchemaRegistryConfigType{
+			basetypes.ObjectType{
+				AttrTypes: SchemaRegistryConfigValue{}.AttributeTypes(ctx),
+			},
+		},
+		v.SchemaRegistryConfig.Elements(),
+	)
+
+	if v.SchemaRegistryConfig.IsNull() {
+		schemaRegistryConfig = types.MapNull(
+			SchemaRegistryConfigType{
+				basetypes.ObjectType{
+					AttrTypes: SchemaRegistryConfigValue{}.AttributeTypes(ctx),
+				},
+			},
+		)
+	}
+
+	if v.SchemaRegistryConfig.IsUnknown() {
+		schemaRegistryConfig = types.MapUnknown(
+			SchemaRegistryConfigType{
+				basetypes.ObjectType{
+					AttrTypes: SchemaRegistryConfigValue{}.AttributeTypes(ctx),
+				},
+			},
+		)
+	}
+
 	attributeTypes := map[string]attr.Type{
-		"statement":     basetypes.StringType{},
-		"virtual_topic": basetypes.StringType{},
+		"enable_audit_log_on_error": basetypes.BoolType{},
+		"external_storage":          basetypes.BoolType{},
+		"schema_data_mode":          basetypes.StringType{},
+		"schema_registry_config": basetypes.MapType{
+			ElemType: SchemaRegistryConfigValue{}.Type(ctx),
+		},
+		"topic": basetypes.StringType{},
 	}
 
 	if v.IsNull() {
@@ -1408,8 +1636,11 @@ func (v ConfigValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, 
 	objVal, diags := types.ObjectValue(
 		attributeTypes,
 		map[string]attr.Value{
-			"statement":     v.Statement,
-			"virtual_topic": v.VirtualTopic,
+			"enable_audit_log_on_error": v.EnableAuditLogOnError,
+			"external_storage":          v.ExternalStorage,
+			"schema_data_mode":          v.SchemaDataMode,
+			"schema_registry_config":    schemaRegistryConfig,
+			"topic":                     v.Topic,
 		})
 
 	return objVal, diags
@@ -1430,11 +1661,23 @@ func (v ConfigValue) Equal(o attr.Value) bool {
 		return true
 	}
 
-	if !v.Statement.Equal(other.Statement) {
+	if !v.EnableAuditLogOnError.Equal(other.EnableAuditLogOnError) {
 		return false
 	}
 
-	if !v.VirtualTopic.Equal(other.VirtualTopic) {
+	if !v.ExternalStorage.Equal(other.ExternalStorage) {
+		return false
+	}
+
+	if !v.SchemaDataMode.Equal(other.SchemaDataMode) {
+		return false
+	}
+
+	if !v.SchemaRegistryConfig.Equal(other.SchemaRegistryConfig) {
+		return false
+	}
+
+	if !v.Topic.Equal(other.Topic) {
 		return false
 	}
 
@@ -1451,7 +1694,474 @@ func (v ConfigValue) Type(ctx context.Context) attr.Type {
 
 func (v ConfigValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 	return map[string]attr.Type{
-		"statement":     basetypes.StringType{},
-		"virtual_topic": basetypes.StringType{},
+		"enable_audit_log_on_error": basetypes.BoolType{},
+		"external_storage":          basetypes.BoolType{},
+		"schema_data_mode":          basetypes.StringType{},
+		"schema_registry_config": basetypes.MapType{
+			ElemType: SchemaRegistryConfigValue{}.Type(ctx),
+		},
+		"topic": basetypes.StringType{},
+	}
+}
+
+var _ basetypes.ObjectTypable = SchemaRegistryConfigType{}
+
+type SchemaRegistryConfigType struct {
+	basetypes.ObjectType
+}
+
+func (t SchemaRegistryConfigType) Equal(o attr.Type) bool {
+	other, ok := o.(SchemaRegistryConfigType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t SchemaRegistryConfigType) String() string {
+	return "SchemaRegistryConfigType"
+}
+
+func (t SchemaRegistryConfigType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	additionalConfigsAttribute, ok := attributes["additional_configs"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`additional_configs is missing from object`)
+
+		return nil, diags
+	}
+
+	additionalConfigsVal, ok := additionalConfigsAttribute.(basetypes.MapValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`additional_configs expected to be basetypes.MapValue, was: %T`, additionalConfigsAttribute))
+	}
+
+	cacheSizeAttribute, ok := attributes["cache_size"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`cache_size is missing from object`)
+
+		return nil, diags
+	}
+
+	cacheSizeVal, ok := cacheSizeAttribute.(basetypes.Int64Value)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`cache_size expected to be basetypes.Int64Value, was: %T`, cacheSizeAttribute))
+	}
+
+	hostAttribute, ok := attributes["host"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`host is missing from object`)
+
+		return nil, diags
+	}
+
+	hostVal, ok := hostAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`host expected to be basetypes.StringValue, was: %T`, hostAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return SchemaRegistryConfigValue{
+		AdditionalConfigs: additionalConfigsVal,
+		CacheSize:         cacheSizeVal,
+		Host:              hostVal,
+		state:             attr.ValueStateKnown,
+	}, diags
+}
+
+func NewSchemaRegistryConfigValueNull() SchemaRegistryConfigValue {
+	return SchemaRegistryConfigValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewSchemaRegistryConfigValueUnknown() SchemaRegistryConfigValue {
+	return SchemaRegistryConfigValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewSchemaRegistryConfigValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (SchemaRegistryConfigValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing SchemaRegistryConfigValue Attribute Value",
+				"While creating a SchemaRegistryConfigValue value, a missing attribute value was detected. "+
+					"A SchemaRegistryConfigValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("SchemaRegistryConfigValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid SchemaRegistryConfigValue Attribute Type",
+				"While creating a SchemaRegistryConfigValue value, an invalid attribute value was detected. "+
+					"A SchemaRegistryConfigValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("SchemaRegistryConfigValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("SchemaRegistryConfigValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra SchemaRegistryConfigValue Attribute Value",
+				"While creating a SchemaRegistryConfigValue value, an extra attribute value was detected. "+
+					"A SchemaRegistryConfigValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra SchemaRegistryConfigValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewSchemaRegistryConfigValueUnknown(), diags
+	}
+
+	additionalConfigsAttribute, ok := attributes["additional_configs"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`additional_configs is missing from object`)
+
+		return NewSchemaRegistryConfigValueUnknown(), diags
+	}
+
+	additionalConfigsVal, ok := additionalConfigsAttribute.(basetypes.MapValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`additional_configs expected to be basetypes.MapValue, was: %T`, additionalConfigsAttribute))
+	}
+
+	cacheSizeAttribute, ok := attributes["cache_size"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`cache_size is missing from object`)
+
+		return NewSchemaRegistryConfigValueUnknown(), diags
+	}
+
+	cacheSizeVal, ok := cacheSizeAttribute.(basetypes.Int64Value)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`cache_size expected to be basetypes.Int64Value, was: %T`, cacheSizeAttribute))
+	}
+
+	hostAttribute, ok := attributes["host"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`host is missing from object`)
+
+		return NewSchemaRegistryConfigValueUnknown(), diags
+	}
+
+	hostVal, ok := hostAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`host expected to be basetypes.StringValue, was: %T`, hostAttribute))
+	}
+
+	if diags.HasError() {
+		return NewSchemaRegistryConfigValueUnknown(), diags
+	}
+
+	return SchemaRegistryConfigValue{
+		AdditionalConfigs: additionalConfigsVal,
+		CacheSize:         cacheSizeVal,
+		Host:              hostVal,
+		state:             attr.ValueStateKnown,
+	}, diags
+}
+
+func NewSchemaRegistryConfigValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) SchemaRegistryConfigValue {
+	object, diags := NewSchemaRegistryConfigValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewSchemaRegistryConfigValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t SchemaRegistryConfigType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewSchemaRegistryConfigValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewSchemaRegistryConfigValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewSchemaRegistryConfigValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewSchemaRegistryConfigValueMust(SchemaRegistryConfigValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t SchemaRegistryConfigType) ValueType(ctx context.Context) attr.Value {
+	return SchemaRegistryConfigValue{}
+}
+
+var _ basetypes.ObjectValuable = SchemaRegistryConfigValue{}
+
+type SchemaRegistryConfigValue struct {
+	AdditionalConfigs basetypes.MapValue    `tfsdk:"additional_configs"`
+	CacheSize         basetypes.Int64Value  `tfsdk:"cache_size"`
+	Host              basetypes.StringValue `tfsdk:"host"`
+	state             attr.ValueState
+}
+
+func (v SchemaRegistryConfigValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 3)
+
+	var val tftypes.Value
+	var err error
+
+	attrTypes["additional_configs"] = basetypes.MapType{
+		ElemType: types.StringType,
+	}.TerraformType(ctx)
+	attrTypes["cache_size"] = basetypes.Int64Type{}.TerraformType(ctx)
+	attrTypes["host"] = basetypes.StringType{}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 3)
+
+		val, err = v.AdditionalConfigs.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["additional_configs"] = val
+
+		val, err = v.CacheSize.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["cache_size"] = val
+
+		val, err = v.Host.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["host"] = val
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v SchemaRegistryConfigValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v SchemaRegistryConfigValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v SchemaRegistryConfigValue) String() string {
+	return "SchemaRegistryConfigValue"
+}
+
+func (v SchemaRegistryConfigValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	var additionalConfigsVal basetypes.MapValue
+	switch {
+	case v.AdditionalConfigs.IsUnknown():
+		additionalConfigsVal = types.MapUnknown(types.StringType)
+	case v.AdditionalConfigs.IsNull():
+		additionalConfigsVal = types.MapNull(types.StringType)
+	default:
+		var d diag.Diagnostics
+		additionalConfigsVal, d = types.MapValue(types.StringType, v.AdditionalConfigs.Elements())
+		diags.Append(d...)
+	}
+
+	if diags.HasError() {
+		return types.ObjectUnknown(map[string]attr.Type{
+			"additional_configs": basetypes.MapType{
+				ElemType: types.StringType,
+			},
+			"cache_size": basetypes.Int64Type{},
+			"host":       basetypes.StringType{},
+		}), diags
+	}
+
+	attributeTypes := map[string]attr.Type{
+		"additional_configs": basetypes.MapType{
+			ElemType: types.StringType,
+		},
+		"cache_size": basetypes.Int64Type{},
+		"host":       basetypes.StringType{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{
+			"additional_configs": additionalConfigsVal,
+			"cache_size":         v.CacheSize,
+			"host":               v.Host,
+		})
+
+	return objVal, diags
+}
+
+func (v SchemaRegistryConfigValue) Equal(o attr.Value) bool {
+	other, ok := o.(SchemaRegistryConfigValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	if !v.AdditionalConfigs.Equal(other.AdditionalConfigs) {
+		return false
+	}
+
+	if !v.CacheSize.Equal(other.CacheSize) {
+		return false
+	}
+
+	if !v.Host.Equal(other.Host) {
+		return false
+	}
+
+	return true
+}
+
+func (v SchemaRegistryConfigValue) Type(ctx context.Context) attr.Type {
+	return SchemaRegistryConfigType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v SchemaRegistryConfigValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"additional_configs": basetypes.MapType{
+			ElemType: types.StringType,
+		},
+		"cache_size": basetypes.Int64Type{},
+		"host":       basetypes.StringType{},
 	}
 }

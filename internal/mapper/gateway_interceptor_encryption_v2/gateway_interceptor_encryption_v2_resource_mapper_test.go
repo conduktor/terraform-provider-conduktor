@@ -44,8 +44,8 @@ func TestGatewayInterceptorEncryptionV2ModelMapping(t *testing.T) {
 	assert.Equal(t, "username", internal.Metadata.Scope.Username)
 	assert.Equal(t, int64(1), internal.Spec.Priority)
 	assert.Equal(t, "io.conduktor.gateway.interceptor.VirtualSqlTopicPlugin", internal.Spec.PluginClass)
-	assert.Equal(t, "SELECT '$.type' as type, '$.price' as price FROM cars WHERE '$.color' = 'yellow'", internal.Spec.Config.Statement)
-	assert.Equal(t, "yellow_cars", internal.Spec.Config.VirtualTopic)
+	assert.Equal(t, ".*", internal.Spec.Config.Topic)
+	assert.Equal(t, false, internal.Spec.Config.ExternalStorage)
 
 	// convert to terraform model
 	tfModel, err := InternalModelToTerraform(ctx, &internal)
@@ -74,8 +74,8 @@ func TestGatewayInterceptorEncryptionV2ModelMapping(t *testing.T) {
 	assert.Equal(t, "group", internal2.Metadata.Scope.Group)
 	assert.Equal(t, "username", internal2.Metadata.Scope.Username)
 	assert.Equal(t, int64(1), internal2.Spec.Priority)
-	assert.Equal(t, "yellow_cars", internal2.Spec.Config.VirtualTopic)
-	assert.Equal(t, "SELECT '$.type' as type, '$.price' as price FROM cars WHERE '$.color' = 'yellow'", internal2.Spec.Config.Statement)
+	assert.Equal(t, ".*", internal2.Spec.Config.Topic)
+	assert.Equal(t, false, internal2.Spec.Config.ExternalStorage)
 
 	// convert back to ctl model
 	ctlResource2, err := internal2.ToClientResource()
