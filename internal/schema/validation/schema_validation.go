@@ -98,3 +98,5 @@ var ValidServiceAccountTypes = []string{"LOCAL", "EXTERNAL"}
 
 // Gateway Interceptors.
 var ValidInterceptorEncryptionVaultTypes = []string{"APP_ROLE", "LDAP", "AWS_EC2_PKCS7", "GCP", "GITHUB", "JWT", "AWS_IAM", "AWS_EC2", "TOKEN", "KUBERNETES", "USERNAME_PASSWORD"}
+
+var ValidInterceptorEncryptionAlgorithm = []string{"AES128_GCM", "AES256_GCM", "AES128_EAX", "AES256_EAX", "AES128_CTR_HMAC_SHA256", "AES256_CTR_HMAC_SHA256", "CHACHA20_POLY1305", "XCHACHA20_POLY1305"}

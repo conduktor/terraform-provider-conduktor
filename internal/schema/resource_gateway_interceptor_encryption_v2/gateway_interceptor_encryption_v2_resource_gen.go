@@ -440,6 +440,134 @@ func GatewayInterceptorEncryptionV2ResourceSchema(ctx context.Context) schema.Sc
 								Description:         "Configuration for using external Key Management Systems (KMS).",
 								MarkdownDescription: "Configuration for using external Key Management Systems (KMS).",
 							},
+							"record_key": schema.SingleNestedAttribute{
+								Attributes: map[string]schema.Attribute{
+									"algorithm": schema.StringAttribute{
+										Optional:            true,
+										Description:         "The encryption algorithm used for encrypting data. Defaults to AES128_GCM if not specified.",
+										MarkdownDescription: "The encryption algorithm used for encrypting data. Defaults to AES128_GCM if not specified.",
+										Validators: []validator.String{
+											stringvalidator.OneOf(validation.ValidInterceptorEncryptionAlgorithm...),
+										},
+									},
+									"fields": schema.SetNestedAttribute{
+										NestedObject: schema.NestedAttributeObject{
+											Attributes: map[string]schema.Attribute{
+												"algorithm": schema.StringAttribute{
+													Required:            true,
+													Description:         "The encryption algorithm used for encrypting data. Defaults to AES128_GCM if not specified.",
+													MarkdownDescription: "The encryption algorithm used for encrypting data. Defaults to AES128_GCM if not specified.",
+													Validators: []validator.String{
+														stringvalidator.OneOf(validation.ValidInterceptorEncryptionAlgorithm...),
+													},
+												},
+												"field_name": schema.StringAttribute{
+													Required:            true,
+													Description:         "The name of the field to be encrypted. It can be a nested structure using dot notation like 'education.account.username'.",
+													MarkdownDescription: "The name of the field to be encrypted. It can be a nested structure using dot notation like 'education.account.username'.",
+												},
+												"key_secret_id": schema.StringAttribute{
+													Required:            true,
+													Description:         "The unique identifier for the encryption key. This key can be stored in an external Key Management System (KMS) or in memory.",
+													MarkdownDescription: "The unique identifier for the encryption key. This key can be stored in an external Key Management System (KMS) or in memory.",
+												},
+											},
+											CustomType: FieldsType{
+												ObjectType: types.ObjectType{
+													AttrTypes: FieldsValue{}.AttributeTypes(ctx),
+												},
+											},
+										},
+										Optional:            true,
+										Computed:            true,
+										Description:         "Set of all the fields config entry",
+										MarkdownDescription: "Set of all the fields config entry",
+									},
+									"key_secret_id": schema.StringAttribute{
+										Required:            true,
+										Description:         "The unique identifier for the encryption key. This key can be stored in an external Key Management System (KMS) or in memory.",
+										MarkdownDescription: "The unique identifier for the encryption key. This key can be stored in an external Key Management System (KMS) or in memory.",
+									},
+									"type": schema.StringAttribute{
+										Optional:            true,
+										Computed:            true,
+										Description:         "URL of the schema registry.",
+										MarkdownDescription: "URL of the schema registry.",
+									},
+								},
+								CustomType: RecordKeyType{
+									ObjectType: types.ObjectType{
+										AttrTypes: RecordKeyValue{}.AttributeTypes(ctx),
+									},
+								},
+								Optional:            true,
+								Description:         "Configuration for encrypting the record key, you can either configure to encrypt the whole payload, or per field level.",
+								MarkdownDescription: "Configuration for encrypting the record key, you can either configure to encrypt the whole payload, or per field level.",
+							},
+							"record_value": schema.SingleNestedAttribute{
+								Attributes: map[string]schema.Attribute{
+									"algorithm": schema.StringAttribute{
+										Optional:            true,
+										Description:         "The encryption algorithm used for encrypting data. Defaults to AES128_GCM if not specified.",
+										MarkdownDescription: "The encryption algorithm used for encrypting data. Defaults to AES128_GCM if not specified.",
+										Validators: []validator.String{
+											stringvalidator.OneOf(validation.ValidInterceptorEncryptionAlgorithm...),
+										},
+									},
+									"fields": schema.SetNestedAttribute{
+										NestedObject: schema.NestedAttributeObject{
+											Attributes: map[string]schema.Attribute{
+												"algorithm": schema.StringAttribute{
+													Required:            true,
+													Description:         "The encryption algorithm used for encrypting data. Defaults to AES128_GCM if not specified.",
+													MarkdownDescription: "The encryption algorithm used for encrypting data. Defaults to AES128_GCM if not specified.",
+													Validators: []validator.String{
+														stringvalidator.OneOf(validation.ValidInterceptorEncryptionAlgorithm...),
+													},
+												},
+												"field_name": schema.StringAttribute{
+													Required:            true,
+													Description:         "The name of the field to be encrypted. It can be a nested structure using dot notation like 'education.account.username'.",
+													MarkdownDescription: "The name of the field to be encrypted. It can be a nested structure using dot notation like 'education.account.username'.",
+												},
+												"key_secret_id": schema.StringAttribute{
+													Required:            true,
+													Description:         "The unique identifier for the encryption key. This key can be stored in an external Key Management System (KMS) or in memory.",
+													MarkdownDescription: "The unique identifier for the encryption key. This key can be stored in an external Key Management System (KMS) or in memory.",
+												},
+											},
+											CustomType: FieldsType{
+												ObjectType: types.ObjectType{
+													AttrTypes: FieldsValue{}.AttributeTypes(ctx),
+												},
+											},
+										},
+										Optional:            true,
+										Computed:            true,
+										Description:         "Set of all the fields config entry",
+										MarkdownDescription: "Set of all the fields config entry",
+									},
+									"key_secret_id": schema.StringAttribute{
+										Required:            true,
+										Description:         "The unique identifier for the encryption key. This key can be stored in an external Key Management System (KMS) or in memory.",
+										MarkdownDescription: "The unique identifier for the encryption key. This key can be stored in an external Key Management System (KMS) or in memory.",
+									},
+									"type": schema.StringAttribute{
+										Optional:            true,
+										Computed:            true,
+										Description:         "URL of the schema registry.",
+										MarkdownDescription: "URL of the schema registry.",
+									},
+								},
+								CustomType: RecordValueType{
+									ObjectType: types.ObjectType{
+										AttrTypes: RecordValueValue{}.AttributeTypes(ctx),
+									},
+								},
+								Optional:            true,
+								Description:         "Configuration for encrypting the record value, you can either configure to encrypt the whole payload, or per field level.",
+								MarkdownDescription: "Configuration for encrypting the record value, you can either configure to encrypt the whole payload, or per field level.",
+							},
 							"schema_data_mode": schema.StringAttribute{
 								Optional:            true,
 								Computed:            true,
@@ -1551,6 +1679,42 @@ func (t ConfigType) ValueFromObject(ctx context.Context, in basetypes.ObjectValu
 			fmt.Sprintf(`kms_config expected to be basetypes.ObjectValue, was: %T`, kmsConfigAttribute))
 	}
 
+	recordKeyAttribute, ok := attributes["record_key"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`record_key is missing from object`)
+
+		return nil, diags
+	}
+
+	recordKeyVal, ok := recordKeyAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`record_key expected to be basetypes.ObjectValue, was: %T`, recordKeyAttribute))
+	}
+
+	recordValueAttribute, ok := attributes["record_value"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`record_value is missing from object`)
+
+		return nil, diags
+	}
+
+	recordValueVal, ok := recordValueAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`record_value expected to be basetypes.ObjectValue, was: %T`, recordValueAttribute))
+	}
+
 	schemaDataModeAttribute, ok := attributes["schema_data_mode"]
 
 	if !ok {
@@ -1613,6 +1777,8 @@ func (t ConfigType) ValueFromObject(ctx context.Context, in basetypes.ObjectValu
 		EnableAuditLogOnError: enableAuditLogOnErrorVal,
 		ExternalStorage:       externalStorageVal,
 		KmsConfig:             kmsConfigVal,
+		RecordKey:             recordKeyVal,
+		RecordValue:           recordValueVal,
 		SchemaDataMode:        schemaDataModeVal,
 		SchemaRegistryConfig:  schemaRegistryConfigVal,
 		Topic:                 topicVal,
@@ -1737,6 +1903,42 @@ func NewConfigValue(attributeTypes map[string]attr.Type, attributes map[string]a
 			fmt.Sprintf(`kms_config expected to be basetypes.ObjectValue, was: %T`, kmsConfigAttribute))
 	}
 
+	recordKeyAttribute, ok := attributes["record_key"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`record_key is missing from object`)
+
+		return NewConfigValueUnknown(), diags
+	}
+
+	recordKeyVal, ok := recordKeyAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`record_key expected to be basetypes.ObjectValue, was: %T`, recordKeyAttribute))
+	}
+
+	recordValueAttribute, ok := attributes["record_value"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`record_value is missing from object`)
+
+		return NewConfigValueUnknown(), diags
+	}
+
+	recordValueVal, ok := recordValueAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`record_value expected to be basetypes.ObjectValue, was: %T`, recordValueAttribute))
+	}
+
 	schemaDataModeAttribute, ok := attributes["schema_data_mode"]
 
 	if !ok {
@@ -1799,6 +2001,8 @@ func NewConfigValue(attributeTypes map[string]attr.Type, attributes map[string]a
 		EnableAuditLogOnError: enableAuditLogOnErrorVal,
 		ExternalStorage:       externalStorageVal,
 		KmsConfig:             kmsConfigVal,
+		RecordKey:             recordKeyVal,
+		RecordValue:           recordValueVal,
 		SchemaDataMode:        schemaDataModeVal,
 		SchemaRegistryConfig:  schemaRegistryConfigVal,
 		Topic:                 topicVal,
@@ -1877,6 +2081,8 @@ type ConfigValue struct {
 	EnableAuditLogOnError basetypes.BoolValue   `tfsdk:"enable_audit_log_on_error"`
 	ExternalStorage       basetypes.BoolValue   `tfsdk:"external_storage"`
 	KmsConfig             basetypes.ObjectValue `tfsdk:"kms_config"`
+	RecordKey             basetypes.ObjectValue `tfsdk:"record_key"`
+	RecordValue           basetypes.ObjectValue `tfsdk:"record_value"`
 	SchemaDataMode        basetypes.StringValue `tfsdk:"schema_data_mode"`
 	SchemaRegistryConfig  basetypes.ObjectValue `tfsdk:"schema_registry_config"`
 	Topic                 basetypes.StringValue `tfsdk:"topic"`
@@ -1884,7 +2090,7 @@ type ConfigValue struct {
 }
 
 func (v ConfigValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
-	attrTypes := make(map[string]tftypes.Type, 6)
+	attrTypes := make(map[string]tftypes.Type, 8)
 
 	var val tftypes.Value
 	var err error
@@ -1893,6 +2099,12 @@ func (v ConfigValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error
 	attrTypes["external_storage"] = basetypes.BoolType{}.TerraformType(ctx)
 	attrTypes["kms_config"] = basetypes.ObjectType{
 		AttrTypes: KmsConfigValue{}.AttributeTypes(ctx),
+	}.TerraformType(ctx)
+	attrTypes["record_key"] = basetypes.ObjectType{
+		AttrTypes: RecordKeyValue{}.AttributeTypes(ctx),
+	}.TerraformType(ctx)
+	attrTypes["record_value"] = basetypes.ObjectType{
+		AttrTypes: RecordValueValue{}.AttributeTypes(ctx),
 	}.TerraformType(ctx)
 	attrTypes["schema_data_mode"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["schema_registry_config"] = basetypes.ObjectType{
@@ -1904,7 +2116,7 @@ func (v ConfigValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error
 
 	switch v.state {
 	case attr.ValueStateKnown:
-		vals := make(map[string]tftypes.Value, 6)
+		vals := make(map[string]tftypes.Value, 8)
 
 		val, err = v.EnableAuditLogOnError.ToTerraformValue(ctx)
 
@@ -1929,6 +2141,22 @@ func (v ConfigValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error
 		}
 
 		vals["kms_config"] = val
+
+		val, err = v.RecordKey.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["record_key"] = val
+
+		val, err = v.RecordValue.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["record_value"] = val
 
 		val, err = v.SchemaDataMode.ToTerraformValue(ctx)
 
@@ -2004,6 +2232,48 @@ func (v ConfigValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, 
 		)
 	}
 
+	var recordKey basetypes.ObjectValue
+
+	if v.RecordKey.IsNull() {
+		recordKey = types.ObjectNull(
+			RecordKeyValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if v.RecordKey.IsUnknown() {
+		recordKey = types.ObjectUnknown(
+			RecordKeyValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if !v.RecordKey.IsNull() && !v.RecordKey.IsUnknown() {
+		recordKey = types.ObjectValueMust(
+			RecordKeyValue{}.AttributeTypes(ctx),
+			v.RecordKey.Attributes(),
+		)
+	}
+
+	var recordValue basetypes.ObjectValue
+
+	if v.RecordValue.IsNull() {
+		recordValue = types.ObjectNull(
+			RecordValueValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if v.RecordValue.IsUnknown() {
+		recordValue = types.ObjectUnknown(
+			RecordValueValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if !v.RecordValue.IsNull() && !v.RecordValue.IsUnknown() {
+		recordValue = types.ObjectValueMust(
+			RecordValueValue{}.AttributeTypes(ctx),
+			v.RecordValue.Attributes(),
+		)
+	}
+
 	var schemaRegistryConfig basetypes.ObjectValue
 
 	if v.SchemaRegistryConfig.IsNull() {
@@ -2031,6 +2301,12 @@ func (v ConfigValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, 
 		"kms_config": basetypes.ObjectType{
 			AttrTypes: KmsConfigValue{}.AttributeTypes(ctx),
 		},
+		"record_key": basetypes.ObjectType{
+			AttrTypes: RecordKeyValue{}.AttributeTypes(ctx),
+		},
+		"record_value": basetypes.ObjectType{
+			AttrTypes: RecordValueValue{}.AttributeTypes(ctx),
+		},
 		"schema_data_mode": basetypes.StringType{},
 		"schema_registry_config": basetypes.ObjectType{
 			AttrTypes: SchemaRegistryConfigValue{}.AttributeTypes(ctx),
@@ -2052,6 +2328,8 @@ func (v ConfigValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, 
 			"enable_audit_log_on_error": v.EnableAuditLogOnError,
 			"external_storage":          v.ExternalStorage,
 			"kms_config":                kmsConfig,
+			"record_key":                recordKey,
+			"record_value":              recordValue,
 			"schema_data_mode":          v.SchemaDataMode,
 			"schema_registry_config":    schemaRegistryConfig,
 			"topic":                     v.Topic,
@@ -2087,6 +2365,14 @@ func (v ConfigValue) Equal(o attr.Value) bool {
 		return false
 	}
 
+	if !v.RecordKey.Equal(other.RecordKey) {
+		return false
+	}
+
+	if !v.RecordValue.Equal(other.RecordValue) {
+		return false
+	}
+
 	if !v.SchemaDataMode.Equal(other.SchemaDataMode) {
 		return false
 	}
@@ -2116,6 +2402,12 @@ func (v ConfigValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 		"external_storage":          basetypes.BoolType{},
 		"kms_config": basetypes.ObjectType{
 			AttrTypes: KmsConfigValue{}.AttributeTypes(ctx),
+		},
+		"record_key": basetypes.ObjectType{
+			AttrTypes: RecordKeyValue{}.AttributeTypes(ctx),
+		},
+		"record_value": basetypes.ObjectType{
+			AttrTypes: RecordValueValue{}.AttributeTypes(ctx),
 		},
 		"schema_data_mode": basetypes.StringType{},
 		"schema_registry_config": basetypes.ObjectType{
@@ -7805,6 +8097,1922 @@ func (v VaultValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 		"username":            basetypes.StringType{},
 		"userpass_auth_mount": basetypes.StringType{},
 		"version":             basetypes.Int64Type{},
+	}
+}
+
+var _ basetypes.ObjectTypable = RecordKeyType{}
+
+type RecordKeyType struct {
+	basetypes.ObjectType
+}
+
+func (t RecordKeyType) Equal(o attr.Type) bool {
+	other, ok := o.(RecordKeyType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t RecordKeyType) String() string {
+	return "RecordKeyType"
+}
+
+func (t RecordKeyType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	algorithmAttribute, ok := attributes["algorithm"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`algorithm is missing from object`)
+
+		return nil, diags
+	}
+
+	algorithmVal, ok := algorithmAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`algorithm expected to be basetypes.StringValue, was: %T`, algorithmAttribute))
+	}
+
+	fieldsAttribute, ok := attributes["fields"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`fields is missing from object`)
+
+		return nil, diags
+	}
+
+	fieldsVal, ok := fieldsAttribute.(basetypes.SetValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`fields expected to be basetypes.SetValue, was: %T`, fieldsAttribute))
+	}
+
+	keySecretIdAttribute, ok := attributes["key_secret_id"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`key_secret_id is missing from object`)
+
+		return nil, diags
+	}
+
+	keySecretIdVal, ok := keySecretIdAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`key_secret_id expected to be basetypes.StringValue, was: %T`, keySecretIdAttribute))
+	}
+
+	typeAttribute, ok := attributes["type"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`type is missing from object`)
+
+		return nil, diags
+	}
+
+	typeVal, ok := typeAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`type expected to be basetypes.StringValue, was: %T`, typeAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return RecordKeyValue{
+		Algorithm:     algorithmVal,
+		Fields:        fieldsVal,
+		KeySecretId:   keySecretIdVal,
+		RecordKeyType: typeVal,
+		state:         attr.ValueStateKnown,
+	}, diags
+}
+
+func NewRecordKeyValueNull() RecordKeyValue {
+	return RecordKeyValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewRecordKeyValueUnknown() RecordKeyValue {
+	return RecordKeyValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewRecordKeyValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (RecordKeyValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing RecordKeyValue Attribute Value",
+				"While creating a RecordKeyValue value, a missing attribute value was detected. "+
+					"A RecordKeyValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("RecordKeyValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid RecordKeyValue Attribute Type",
+				"While creating a RecordKeyValue value, an invalid attribute value was detected. "+
+					"A RecordKeyValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("RecordKeyValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("RecordKeyValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra RecordKeyValue Attribute Value",
+				"While creating a RecordKeyValue value, an extra attribute value was detected. "+
+					"A RecordKeyValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra RecordKeyValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewRecordKeyValueUnknown(), diags
+	}
+
+	algorithmAttribute, ok := attributes["algorithm"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`algorithm is missing from object`)
+
+		return NewRecordKeyValueUnknown(), diags
+	}
+
+	algorithmVal, ok := algorithmAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`algorithm expected to be basetypes.StringValue, was: %T`, algorithmAttribute))
+	}
+
+	fieldsAttribute, ok := attributes["fields"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`fields is missing from object`)
+
+		return NewRecordKeyValueUnknown(), diags
+	}
+
+	fieldsVal, ok := fieldsAttribute.(basetypes.SetValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`fields expected to be basetypes.SetValue, was: %T`, fieldsAttribute))
+	}
+
+	keySecretIdAttribute, ok := attributes["key_secret_id"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`key_secret_id is missing from object`)
+
+		return NewRecordKeyValueUnknown(), diags
+	}
+
+	keySecretIdVal, ok := keySecretIdAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`key_secret_id expected to be basetypes.StringValue, was: %T`, keySecretIdAttribute))
+	}
+
+	typeAttribute, ok := attributes["type"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`type is missing from object`)
+
+		return NewRecordKeyValueUnknown(), diags
+	}
+
+	typeVal, ok := typeAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`type expected to be basetypes.StringValue, was: %T`, typeAttribute))
+	}
+
+	if diags.HasError() {
+		return NewRecordKeyValueUnknown(), diags
+	}
+
+	return RecordKeyValue{
+		Algorithm:     algorithmVal,
+		Fields:        fieldsVal,
+		KeySecretId:   keySecretIdVal,
+		RecordKeyType: typeVal,
+		state:         attr.ValueStateKnown,
+	}, diags
+}
+
+func NewRecordKeyValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) RecordKeyValue {
+	object, diags := NewRecordKeyValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewRecordKeyValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t RecordKeyType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewRecordKeyValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewRecordKeyValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewRecordKeyValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewRecordKeyValueMust(RecordKeyValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t RecordKeyType) ValueType(ctx context.Context) attr.Value {
+	return RecordKeyValue{}
+}
+
+var _ basetypes.ObjectValuable = RecordKeyValue{}
+
+type RecordKeyValue struct {
+	Algorithm     basetypes.StringValue `tfsdk:"algorithm"`
+	Fields        basetypes.SetValue    `tfsdk:"fields"`
+	KeySecretId   basetypes.StringValue `tfsdk:"key_secret_id"`
+	RecordKeyType basetypes.StringValue `tfsdk:"type"`
+	state         attr.ValueState
+}
+
+func (v RecordKeyValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 4)
+
+	var val tftypes.Value
+	var err error
+
+	attrTypes["algorithm"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["fields"] = basetypes.SetType{
+		ElemType: FieldsValue{}.Type(ctx),
+	}.TerraformType(ctx)
+	attrTypes["key_secret_id"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["type"] = basetypes.StringType{}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 4)
+
+		val, err = v.Algorithm.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["algorithm"] = val
+
+		val, err = v.Fields.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["fields"] = val
+
+		val, err = v.KeySecretId.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["key_secret_id"] = val
+
+		val, err = v.RecordKeyType.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["type"] = val
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v RecordKeyValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v RecordKeyValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v RecordKeyValue) String() string {
+	return "RecordKeyValue"
+}
+
+func (v RecordKeyValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	fields := types.SetValueMust(
+		FieldsType{
+			basetypes.ObjectType{
+				AttrTypes: FieldsValue{}.AttributeTypes(ctx),
+			},
+		},
+		v.Fields.Elements(),
+	)
+
+	if v.Fields.IsNull() {
+		fields = types.SetNull(
+			FieldsType{
+				basetypes.ObjectType{
+					AttrTypes: FieldsValue{}.AttributeTypes(ctx),
+				},
+			},
+		)
+	}
+
+	if v.Fields.IsUnknown() {
+		fields = types.SetUnknown(
+			FieldsType{
+				basetypes.ObjectType{
+					AttrTypes: FieldsValue{}.AttributeTypes(ctx),
+				},
+			},
+		)
+	}
+
+	attributeTypes := map[string]attr.Type{
+		"algorithm": basetypes.StringType{},
+		"fields": basetypes.SetType{
+			ElemType: FieldsValue{}.Type(ctx),
+		},
+		"key_secret_id": basetypes.StringType{},
+		"type":          basetypes.StringType{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{
+			"algorithm":     v.Algorithm,
+			"fields":        fields,
+			"key_secret_id": v.KeySecretId,
+			"type":          v.RecordKeyType,
+		})
+
+	return objVal, diags
+}
+
+func (v RecordKeyValue) Equal(o attr.Value) bool {
+	other, ok := o.(RecordKeyValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	if !v.Algorithm.Equal(other.Algorithm) {
+		return false
+	}
+
+	if !v.Fields.Equal(other.Fields) {
+		return false
+	}
+
+	if !v.KeySecretId.Equal(other.KeySecretId) {
+		return false
+	}
+
+	if !v.RecordKeyType.Equal(other.RecordKeyType) {
+		return false
+	}
+
+	return true
+}
+
+func (v RecordKeyValue) Type(ctx context.Context) attr.Type {
+	return RecordKeyType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v RecordKeyValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"algorithm": basetypes.StringType{},
+		"fields": basetypes.SetType{
+			ElemType: FieldsValue{}.Type(ctx),
+		},
+		"key_secret_id": basetypes.StringType{},
+		"type":          basetypes.StringType{},
+	}
+}
+
+var _ basetypes.ObjectTypable = FieldsType{}
+
+type FieldsType struct {
+	basetypes.ObjectType
+}
+
+func (t FieldsType) Equal(o attr.Type) bool {
+	other, ok := o.(FieldsType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t FieldsType) String() string {
+	return "FieldsType"
+}
+
+func (t FieldsType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	algorithmAttribute, ok := attributes["algorithm"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`algorithm is missing from object`)
+
+		return nil, diags
+	}
+
+	algorithmVal, ok := algorithmAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`algorithm expected to be basetypes.StringValue, was: %T`, algorithmAttribute))
+	}
+
+	fieldNameAttribute, ok := attributes["field_name"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`field_name is missing from object`)
+
+		return nil, diags
+	}
+
+	fieldNameVal, ok := fieldNameAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`field_name expected to be basetypes.StringValue, was: %T`, fieldNameAttribute))
+	}
+
+	keySecretIdAttribute, ok := attributes["key_secret_id"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`key_secret_id is missing from object`)
+
+		return nil, diags
+	}
+
+	keySecretIdVal, ok := keySecretIdAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`key_secret_id expected to be basetypes.StringValue, was: %T`, keySecretIdAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return FieldsValue{
+		Algorithm:   algorithmVal,
+		FieldName:   fieldNameVal,
+		KeySecretId: keySecretIdVal,
+		state:       attr.ValueStateKnown,
+	}, diags
+}
+
+func NewFieldsValueNull() FieldsValue {
+	return FieldsValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewFieldsValueUnknown() FieldsValue {
+	return FieldsValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewFieldsValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (FieldsValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing FieldsValue Attribute Value",
+				"While creating a FieldsValue value, a missing attribute value was detected. "+
+					"A FieldsValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("FieldsValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid FieldsValue Attribute Type",
+				"While creating a FieldsValue value, an invalid attribute value was detected. "+
+					"A FieldsValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("FieldsValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("FieldsValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra FieldsValue Attribute Value",
+				"While creating a FieldsValue value, an extra attribute value was detected. "+
+					"A FieldsValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra FieldsValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewFieldsValueUnknown(), diags
+	}
+
+	algorithmAttribute, ok := attributes["algorithm"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`algorithm is missing from object`)
+
+		return NewFieldsValueUnknown(), diags
+	}
+
+	algorithmVal, ok := algorithmAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`algorithm expected to be basetypes.StringValue, was: %T`, algorithmAttribute))
+	}
+
+	fieldNameAttribute, ok := attributes["field_name"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`field_name is missing from object`)
+
+		return NewFieldsValueUnknown(), diags
+	}
+
+	fieldNameVal, ok := fieldNameAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`field_name expected to be basetypes.StringValue, was: %T`, fieldNameAttribute))
+	}
+
+	keySecretIdAttribute, ok := attributes["key_secret_id"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`key_secret_id is missing from object`)
+
+		return NewFieldsValueUnknown(), diags
+	}
+
+	keySecretIdVal, ok := keySecretIdAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`key_secret_id expected to be basetypes.StringValue, was: %T`, keySecretIdAttribute))
+	}
+
+	if diags.HasError() {
+		return NewFieldsValueUnknown(), diags
+	}
+
+	return FieldsValue{
+		Algorithm:   algorithmVal,
+		FieldName:   fieldNameVal,
+		KeySecretId: keySecretIdVal,
+		state:       attr.ValueStateKnown,
+	}, diags
+}
+
+func NewFieldsValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) FieldsValue {
+	object, diags := NewFieldsValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewFieldsValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t FieldsType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewFieldsValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewFieldsValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewFieldsValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewFieldsValueMust(FieldsValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t FieldsType) ValueType(ctx context.Context) attr.Value {
+	return FieldsValue{}
+}
+
+var _ basetypes.ObjectValuable = FieldsValue{}
+
+type FieldsValue struct {
+	Algorithm   basetypes.StringValue `tfsdk:"algorithm"`
+	FieldName   basetypes.StringValue `tfsdk:"field_name"`
+	KeySecretId basetypes.StringValue `tfsdk:"key_secret_id"`
+	state       attr.ValueState
+}
+
+func (v FieldsValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 3)
+
+	var val tftypes.Value
+	var err error
+
+	attrTypes["algorithm"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["field_name"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["key_secret_id"] = basetypes.StringType{}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 3)
+
+		val, err = v.Algorithm.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["algorithm"] = val
+
+		val, err = v.FieldName.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["field_name"] = val
+
+		val, err = v.KeySecretId.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["key_secret_id"] = val
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v FieldsValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v FieldsValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v FieldsValue) String() string {
+	return "FieldsValue"
+}
+
+func (v FieldsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributeTypes := map[string]attr.Type{
+		"algorithm":     basetypes.StringType{},
+		"field_name":    basetypes.StringType{},
+		"key_secret_id": basetypes.StringType{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{
+			"algorithm":     v.Algorithm,
+			"field_name":    v.FieldName,
+			"key_secret_id": v.KeySecretId,
+		})
+
+	return objVal, diags
+}
+
+func (v FieldsValue) Equal(o attr.Value) bool {
+	other, ok := o.(FieldsValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	if !v.Algorithm.Equal(other.Algorithm) {
+		return false
+	}
+
+	if !v.FieldName.Equal(other.FieldName) {
+		return false
+	}
+
+	if !v.KeySecretId.Equal(other.KeySecretId) {
+		return false
+	}
+
+	return true
+}
+
+func (v FieldsValue) Type(ctx context.Context) attr.Type {
+	return FieldsType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v FieldsValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"algorithm":     basetypes.StringType{},
+		"field_name":    basetypes.StringType{},
+		"key_secret_id": basetypes.StringType{},
+	}
+}
+
+var _ basetypes.ObjectTypable = RecordValueType{}
+
+type RecordValueType struct {
+	basetypes.ObjectType
+}
+
+func (t RecordValueType) Equal(o attr.Type) bool {
+	other, ok := o.(RecordValueType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t RecordValueType) String() string {
+	return "RecordValueType"
+}
+
+func (t RecordValueType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	algorithmAttribute, ok := attributes["algorithm"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`algorithm is missing from object`)
+
+		return nil, diags
+	}
+
+	algorithmVal, ok := algorithmAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`algorithm expected to be basetypes.StringValue, was: %T`, algorithmAttribute))
+	}
+
+	fieldsAttribute, ok := attributes["fields"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`fields is missing from object`)
+
+		return nil, diags
+	}
+
+	fieldsVal, ok := fieldsAttribute.(basetypes.SetValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`fields expected to be basetypes.SetValue, was: %T`, fieldsAttribute))
+	}
+
+	keySecretIdAttribute, ok := attributes["key_secret_id"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`key_secret_id is missing from object`)
+
+		return nil, diags
+	}
+
+	keySecretIdVal, ok := keySecretIdAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`key_secret_id expected to be basetypes.StringValue, was: %T`, keySecretIdAttribute))
+	}
+
+	typeAttribute, ok := attributes["type"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`type is missing from object`)
+
+		return nil, diags
+	}
+
+	typeVal, ok := typeAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`type expected to be basetypes.StringValue, was: %T`, typeAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return RecordValueValue{
+		Algorithm:       algorithmVal,
+		Fields:          fieldsVal,
+		KeySecretId:     keySecretIdVal,
+		RecordValueType: typeVal,
+		state:           attr.ValueStateKnown,
+	}, diags
+}
+
+func NewRecordValueValueNull() RecordValueValue {
+	return RecordValueValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewRecordValueValueUnknown() RecordValueValue {
+	return RecordValueValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewRecordValueValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (RecordValueValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing RecordValueValue Attribute Value",
+				"While creating a RecordValueValue value, a missing attribute value was detected. "+
+					"A RecordValueValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("RecordValueValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid RecordValueValue Attribute Type",
+				"While creating a RecordValueValue value, an invalid attribute value was detected. "+
+					"A RecordValueValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("RecordValueValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("RecordValueValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra RecordValueValue Attribute Value",
+				"While creating a RecordValueValue value, an extra attribute value was detected. "+
+					"A RecordValueValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra RecordValueValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewRecordValueValueUnknown(), diags
+	}
+
+	algorithmAttribute, ok := attributes["algorithm"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`algorithm is missing from object`)
+
+		return NewRecordValueValueUnknown(), diags
+	}
+
+	algorithmVal, ok := algorithmAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`algorithm expected to be basetypes.StringValue, was: %T`, algorithmAttribute))
+	}
+
+	fieldsAttribute, ok := attributes["fields"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`fields is missing from object`)
+
+		return NewRecordValueValueUnknown(), diags
+	}
+
+	fieldsVal, ok := fieldsAttribute.(basetypes.SetValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`fields expected to be basetypes.SetValue, was: %T`, fieldsAttribute))
+	}
+
+	keySecretIdAttribute, ok := attributes["key_secret_id"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`key_secret_id is missing from object`)
+
+		return NewRecordValueValueUnknown(), diags
+	}
+
+	keySecretIdVal, ok := keySecretIdAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`key_secret_id expected to be basetypes.StringValue, was: %T`, keySecretIdAttribute))
+	}
+
+	typeAttribute, ok := attributes["type"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`type is missing from object`)
+
+		return NewRecordValueValueUnknown(), diags
+	}
+
+	typeVal, ok := typeAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`type expected to be basetypes.StringValue, was: %T`, typeAttribute))
+	}
+
+	if diags.HasError() {
+		return NewRecordValueValueUnknown(), diags
+	}
+
+	return RecordValueValue{
+		Algorithm:       algorithmVal,
+		Fields:          fieldsVal,
+		KeySecretId:     keySecretIdVal,
+		RecordValueType: typeVal,
+		state:           attr.ValueStateKnown,
+	}, diags
+}
+
+func NewRecordValueValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) RecordValueValue {
+	object, diags := NewRecordValueValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewRecordValueValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t RecordValueType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewRecordValueValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewRecordValueValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewRecordValueValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewRecordValueValueMust(RecordValueValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t RecordValueType) ValueType(ctx context.Context) attr.Value {
+	return RecordValueValue{}
+}
+
+var _ basetypes.ObjectValuable = RecordValueValue{}
+
+type RecordValueValue struct {
+	Algorithm       basetypes.StringValue `tfsdk:"algorithm"`
+	Fields          basetypes.SetValue    `tfsdk:"fields"`
+	KeySecretId     basetypes.StringValue `tfsdk:"key_secret_id"`
+	RecordValueType basetypes.StringValue `tfsdk:"type"`
+	state           attr.ValueState
+}
+
+func (v RecordValueValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 4)
+
+	var val tftypes.Value
+	var err error
+
+	attrTypes["algorithm"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["fields"] = basetypes.SetType{
+		ElemType: FieldsValue{}.Type(ctx),
+	}.TerraformType(ctx)
+	attrTypes["key_secret_id"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["type"] = basetypes.StringType{}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 4)
+
+		val, err = v.Algorithm.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["algorithm"] = val
+
+		val, err = v.Fields.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["fields"] = val
+
+		val, err = v.KeySecretId.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["key_secret_id"] = val
+
+		val, err = v.RecordValueType.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["type"] = val
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v RecordValueValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v RecordValueValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v RecordValueValue) String() string {
+	return "RecordValueValue"
+}
+
+func (v RecordValueValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	fields := types.SetValueMust(
+		FieldsType{
+			basetypes.ObjectType{
+				AttrTypes: FieldsValue{}.AttributeTypes(ctx),
+			},
+		},
+		v.Fields.Elements(),
+	)
+
+	if v.Fields.IsNull() {
+		fields = types.SetNull(
+			FieldsType{
+				basetypes.ObjectType{
+					AttrTypes: FieldsValue{}.AttributeTypes(ctx),
+				},
+			},
+		)
+	}
+
+	if v.Fields.IsUnknown() {
+		fields = types.SetUnknown(
+			FieldsType{
+				basetypes.ObjectType{
+					AttrTypes: FieldsValue{}.AttributeTypes(ctx),
+				},
+			},
+		)
+	}
+
+	attributeTypes := map[string]attr.Type{
+		"algorithm": basetypes.StringType{},
+		"fields": basetypes.SetType{
+			ElemType: FieldsValue{}.Type(ctx),
+		},
+		"key_secret_id": basetypes.StringType{},
+		"type":          basetypes.StringType{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{
+			"algorithm":     v.Algorithm,
+			"fields":        fields,
+			"key_secret_id": v.KeySecretId,
+			"type":          v.RecordValueType,
+		})
+
+	return objVal, diags
+}
+
+func (v RecordValueValue) Equal(o attr.Value) bool {
+	other, ok := o.(RecordValueValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	if !v.Algorithm.Equal(other.Algorithm) {
+		return false
+	}
+
+	if !v.Fields.Equal(other.Fields) {
+		return false
+	}
+
+	if !v.KeySecretId.Equal(other.KeySecretId) {
+		return false
+	}
+
+	if !v.RecordValueType.Equal(other.RecordValueType) {
+		return false
+	}
+
+	return true
+}
+
+func (v RecordValueValue) Type(ctx context.Context) attr.Type {
+	return RecordValueType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v RecordValueValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"algorithm": basetypes.StringType{},
+		"fields": basetypes.SetType{
+			ElemType: FieldsValue{}.Type(ctx),
+		},
+		"key_secret_id": basetypes.StringType{},
+		"type":          basetypes.StringType{},
+	}
+}
+
+var _ basetypes.ObjectTypable = FieldsType{}
+
+type FieldsType struct {
+	basetypes.ObjectType
+}
+
+func (t FieldsType) Equal(o attr.Type) bool {
+	other, ok := o.(FieldsType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t FieldsType) String() string {
+	return "FieldsType"
+}
+
+func (t FieldsType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	algorithmAttribute, ok := attributes["algorithm"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`algorithm is missing from object`)
+
+		return nil, diags
+	}
+
+	algorithmVal, ok := algorithmAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`algorithm expected to be basetypes.StringValue, was: %T`, algorithmAttribute))
+	}
+
+	fieldNameAttribute, ok := attributes["field_name"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`field_name is missing from object`)
+
+		return nil, diags
+	}
+
+	fieldNameVal, ok := fieldNameAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`field_name expected to be basetypes.StringValue, was: %T`, fieldNameAttribute))
+	}
+
+	keySecretIdAttribute, ok := attributes["key_secret_id"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`key_secret_id is missing from object`)
+
+		return nil, diags
+	}
+
+	keySecretIdVal, ok := keySecretIdAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`key_secret_id expected to be basetypes.StringValue, was: %T`, keySecretIdAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return FieldsValue{
+		Algorithm:   algorithmVal,
+		FieldName:   fieldNameVal,
+		KeySecretId: keySecretIdVal,
+		state:       attr.ValueStateKnown,
+	}, diags
+}
+
+func NewFieldsValueNull() FieldsValue {
+	return FieldsValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewFieldsValueUnknown() FieldsValue {
+	return FieldsValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewFieldsValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (FieldsValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing FieldsValue Attribute Value",
+				"While creating a FieldsValue value, a missing attribute value was detected. "+
+					"A FieldsValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("FieldsValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid FieldsValue Attribute Type",
+				"While creating a FieldsValue value, an invalid attribute value was detected. "+
+					"A FieldsValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("FieldsValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("FieldsValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra FieldsValue Attribute Value",
+				"While creating a FieldsValue value, an extra attribute value was detected. "+
+					"A FieldsValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra FieldsValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewFieldsValueUnknown(), diags
+	}
+
+	algorithmAttribute, ok := attributes["algorithm"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`algorithm is missing from object`)
+
+		return NewFieldsValueUnknown(), diags
+	}
+
+	algorithmVal, ok := algorithmAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`algorithm expected to be basetypes.StringValue, was: %T`, algorithmAttribute))
+	}
+
+	fieldNameAttribute, ok := attributes["field_name"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`field_name is missing from object`)
+
+		return NewFieldsValueUnknown(), diags
+	}
+
+	fieldNameVal, ok := fieldNameAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`field_name expected to be basetypes.StringValue, was: %T`, fieldNameAttribute))
+	}
+
+	keySecretIdAttribute, ok := attributes["key_secret_id"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`key_secret_id is missing from object`)
+
+		return NewFieldsValueUnknown(), diags
+	}
+
+	keySecretIdVal, ok := keySecretIdAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`key_secret_id expected to be basetypes.StringValue, was: %T`, keySecretIdAttribute))
+	}
+
+	if diags.HasError() {
+		return NewFieldsValueUnknown(), diags
+	}
+
+	return FieldsValue{
+		Algorithm:   algorithmVal,
+		FieldName:   fieldNameVal,
+		KeySecretId: keySecretIdVal,
+		state:       attr.ValueStateKnown,
+	}, diags
+}
+
+func NewFieldsValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) FieldsValue {
+	object, diags := NewFieldsValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewFieldsValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t FieldsType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewFieldsValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewFieldsValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewFieldsValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewFieldsValueMust(FieldsValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t FieldsType) ValueType(ctx context.Context) attr.Value {
+	return FieldsValue{}
+}
+
+var _ basetypes.ObjectValuable = FieldsValue{}
+
+type FieldsValue struct {
+	Algorithm   basetypes.StringValue `tfsdk:"algorithm"`
+	FieldName   basetypes.StringValue `tfsdk:"field_name"`
+	KeySecretId basetypes.StringValue `tfsdk:"key_secret_id"`
+	state       attr.ValueState
+}
+
+func (v FieldsValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 3)
+
+	var val tftypes.Value
+	var err error
+
+	attrTypes["algorithm"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["field_name"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["key_secret_id"] = basetypes.StringType{}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 3)
+
+		val, err = v.Algorithm.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["algorithm"] = val
+
+		val, err = v.FieldName.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["field_name"] = val
+
+		val, err = v.KeySecretId.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["key_secret_id"] = val
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v FieldsValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v FieldsValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v FieldsValue) String() string {
+	return "FieldsValue"
+}
+
+func (v FieldsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributeTypes := map[string]attr.Type{
+		"algorithm":     basetypes.StringType{},
+		"field_name":    basetypes.StringType{},
+		"key_secret_id": basetypes.StringType{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{
+			"algorithm":     v.Algorithm,
+			"field_name":    v.FieldName,
+			"key_secret_id": v.KeySecretId,
+		})
+
+	return objVal, diags
+}
+
+func (v FieldsValue) Equal(o attr.Value) bool {
+	other, ok := o.(FieldsValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	if !v.Algorithm.Equal(other.Algorithm) {
+		return false
+	}
+
+	if !v.FieldName.Equal(other.FieldName) {
+		return false
+	}
+
+	if !v.KeySecretId.Equal(other.KeySecretId) {
+		return false
+	}
+
+	return true
+}
+
+func (v FieldsValue) Type(ctx context.Context) attr.Type {
+	return FieldsType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v FieldsValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"algorithm":     basetypes.StringType{},
+		"field_name":    basetypes.StringType{},
+		"key_secret_id": basetypes.StringType{},
 	}
 }
 

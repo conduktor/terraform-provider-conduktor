@@ -52,6 +52,7 @@ Optional:
 - `enable_audit_log_on_error` (Boolean) Flag to enable audit log when error happens.
 - `external_storage` (Boolean) Flag to store encryption settings externally in a topic.
 - `kms_config` (Attributes) Configuration for using external Key Management Systems (KMS). (see [below for nested schema](#nestedatt--spec--config--kms_config))
+- `record_value` (Attributes) Configuration for encrypting the record value, you can either configure to encrypt the whole payload, or per field level. (see [below for nested schema](#nestedatt--spec--config--record_value))
 - `schema_data_mode` (String) Defines whether to preserve Avro schema format or convert to JSON.
 - `schema_registry_config` (Attributes) Configuration for Schema Registry to handle Avro, JSON, and Protobuf records. (see [below for nested schema](#nestedatt--spec--config--schema_registry_config))
 - `topic` (String) Topics that match this regex will have the interceptor applied. Defaults to all.
@@ -176,6 +177,30 @@ Optional:
 - `username` (String) Username for LDAP Vault authentication.
 - `userpass_auth_mount` (String) Custom authentication mount point for username/password authentication.
 - `version` (Number) The version of the Vault engine.
+
+
+
+<a id="nestedatt--spec--config--record_value"></a>
+### Nested Schema for `spec.config.record_value`
+
+Required:
+
+- `key_secret_id` (String) The unique identifier for the encryption key. This key can be stored in an external Key Management System (KMS) or in memory.
+
+Optional:
+
+- `algorithm` (String) The encryption algorithm used for encrypting data. Defaults to AES128_GCM if not specified.
+- `fields` (Attributes Set) Set of all the fields config entry (see [below for nested schema](#nestedatt--spec--config--record_value--fields))
+- `type` (String) URL of the schema registry.
+
+<a id="nestedatt--spec--config--record_value--fields"></a>
+### Nested Schema for `spec.config.record_value.fields`
+
+Required:
+
+- `algorithm` (String) The encryption algorithm used for encrypting data. Defaults to AES128_GCM if not specified.
+- `field_name` (String) The name of the field to be encrypted. It can be a nested structure using dot notation like 'education.account.username'.
+- `key_secret_id` (String) The unique identifier for the encryption key. This key can be stored in an external Key Management System (KMS) or in memory.
 
 
 

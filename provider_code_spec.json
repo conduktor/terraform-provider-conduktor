@@ -1349,6 +1349,298 @@
                         }
                       },
                       {
+                        "name": "record_value",
+                        "single_nested": {
+                          "description": "Configuration for encrypting the record value, you can either configure to encrypt the whole payload, or per field level.",
+                          "computed_optional_required": "optional",
+                          "attributes": [
+                            {
+                              "name": "type",
+                              "string": {
+                                "description": "URL of the schema registry.",
+                                "computed_optional_required": "computed_optional"
+                              }
+                            },
+                            {
+                              "name": "key_secret_id",
+                              "string": {
+                                "description": "The unique identifier for the encryption key. This key can be stored in an external Key Management System (KMS) or in memory.",
+                                "computed_optional_required": "required"
+                              }
+                            },
+                            {
+                              "name": "algorithm",
+                              "string": {
+                                "description": "The encryption algorithm used for encrypting data. Defaults to AES128_GCM if not specified.",
+                                "computed_optional_required": "optional",
+                                "validators": [
+                                  {
+                                    "custom": {
+                                      "imports": [
+                                        {
+                                          "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                        },
+                                        {
+                                          "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
+                                        }
+                                      ],
+                                      "schema_definition": "stringvalidator.OneOf(validation.ValidInterceptorEncryptionAlgorithm...)"
+                                    }
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "name": "fields",
+                              "set_nested": {
+                                "description": "Set of all the fields config entry",
+                                "computed_optional_required": "computed_optional",
+                                "nested_object": {
+                                  "attributes": [
+                                    {
+                                      "name": "field_name",
+                                      "string": {
+                                        "description": "The name of the field to be encrypted. It can be a nested structure using dot notation like 'education.account.username'.",
+                                        "computed_optional_required": "required"
+                                      }
+                                    },
+                                    {
+                                      "name": "key_secret_id",
+                                      "string": {
+                                        "description": "The unique identifier for the encryption key. This key can be stored in an external Key Management System (KMS) or in memory.",
+                                        "computed_optional_required": "required"
+                                      }
+                                    },
+                                    {
+                                      "name": "algorithm",
+                                      "string": {
+                                        "description": "The encryption algorithm used for encrypting data. Defaults to AES128_GCM if not specified.",
+                                        "computed_optional_required": "required",
+                                        "validators": [
+                                          {
+                                            "custom": {
+                                              "imports": [
+                                                {
+                                                  "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                                },
+                                                {
+                                                  "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
+                                                }
+                                              ],
+                                              "schema_definition": "stringvalidator.OneOf(validation.ValidInterceptorEncryptionAlgorithm...)"
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "name": "record_key",
+                        "single_nested": {
+                          "description": "Configuration for encrypting the record key, you can either configure to encrypt the whole payload, or per field level.",
+                          "computed_optional_required": "optional",
+                          "attributes": [
+                            {
+                              "name": "type",
+                              "string": {
+                                "description": "URL of the schema registry.",
+                                "computed_optional_required": "computed_optional"
+                              }
+                            },
+                            {
+                              "name": "key_secret_id",
+                              "string": {
+                                "description": "The unique identifier for the encryption key. This key can be stored in an external Key Management System (KMS) or in memory.",
+                                "computed_optional_required": "required"
+                              }
+                            },
+                            {
+                              "name": "algorithm",
+                              "string": {
+                                "description": "The encryption algorithm used for encrypting data. Defaults to AES128_GCM if not specified.",
+                                "computed_optional_required": "optional",
+                                "validators": [
+                                  {
+                                    "custom": {
+                                      "imports": [
+                                        {
+                                          "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                        },
+                                        {
+                                          "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
+                                        }
+                                      ],
+                                      "schema_definition": "stringvalidator.OneOf(validation.ValidInterceptorEncryptionAlgorithm...)"
+                                    }
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "name": "fields",
+                              "set_nested": {
+                                "description": "Set of all the fields config entry",
+                                "computed_optional_required": "computed_optional",
+                                "nested_object": {
+                                  "attributes": [
+                                    {
+                                      "name": "field_name",
+                                      "string": {
+                                        "description": "The name of the field to be encrypted. It can be a nested structure using dot notation like 'education.account.username'.",
+                                        "computed_optional_required": "required"
+                                      }
+                                    },
+                                    {
+                                      "name": "key_secret_id",
+                                      "string": {
+                                        "description": "The unique identifier for the encryption key. This key can be stored in an external Key Management System (KMS) or in memory.",
+                                        "computed_optional_required": "required"
+                                      }
+                                    },
+                                    {
+                                      "name": "algorithm",
+                                      "string": {
+                                        "description": "The encryption algorithm used for encrypting data. Defaults to AES128_GCM if not specified.",
+                                        "computed_optional_required": "required",
+                                        "validators": [
+                                          {
+                                            "custom": {
+                                              "imports": [
+                                                {
+                                                  "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                                },
+                                                {
+                                                  "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
+                                                }
+                                              ],
+                                              "schema_definition": "stringvalidator.OneOf(validation.ValidInterceptorEncryptionAlgorithm...)"
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "name": "record_header",
+                        "single_nested": {
+                          "description": "Configuration for encrypting the record headers.",
+                          "computed_optional_required": "optional",
+                          "attributes": [
+                            {
+                              "name": "header",
+                              "string": {
+                                "description": "Pattern to match headers that need encryption",
+                                "computed_optional_required": "optional"
+                              }
+                            },
+                            {
+                              "name": "config",
+                              "single_nested": {
+                                "description": "The encryption configuration for the matching headers",
+                                "computed_optional_required": "optional",
+                                "attributes": [
+                                  {
+                                    "name": "type",
+                                    "string": {
+                                      "description": "URL of the schema registry.",
+                                      "computed_optional_required": "computed_optional"
+                                    }
+                                  },
+                                  {
+                                    "name": "key_secret_id",
+                                    "string": {
+                                      "description": "The unique identifier for the encryption key. This key can be stored in an external Key Management System (KMS) or in memory.",
+                                      "computed_optional_required": "required"
+                                    }
+                                  },
+                                  {
+                                    "name": "algorithm",
+                                    "string": {
+                                      "description": "The encryption algorithm used for encrypting data. Defaults to AES128_GCM if not specified.",
+                                      "computed_optional_required": "optional",
+                                      "validators": [
+                                        {
+                                          "custom": {
+                                            "imports": [
+                                              {
+                                                "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                              },
+                                              {
+                                                "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
+                                              }
+                                            ],
+                                            "schema_definition": "stringvalidator.OneOf(validation.ValidInterceptorEncryptionAlgorithm...)"
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "name": "fields",
+                                    "set_nested": {
+                                      "description": "Set of all the fields config entry",
+                                      "computed_optional_required": "computed_optional",
+                                      "nested_object": {
+                                        "attributes": [
+                                          {
+                                            "name": "field_name",
+                                            "string": {
+                                              "description": "The name of the field to be encrypted. It can be a nested structure using dot notation like 'education.account.username'.",
+                                              "computed_optional_required": "required"
+                                            }
+                                          },
+                                          {
+                                            "name": "key_secret_id",
+                                            "string": {
+                                              "description": "The unique identifier for the encryption key. This key can be stored in an external Key Management System (KMS) or in memory.",
+                                              "computed_optional_required": "required"
+                                            }
+                                          },
+                                          {
+                                            "name": "algorithm",
+                                            "string": {
+                                              "description": "The encryption algorithm used for encrypting data. Defaults to AES128_GCM if not specified.",
+                                              "computed_optional_required": "required",
+                                              "validators": [
+                                                {
+                                                  "custom": {
+                                                    "imports": [
+                                                      {
+                                                        "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                                      },
+                                                      {
+                                                        "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
+                                                      }
+                                                    ],
+                                                    "schema_definition": "stringvalidator.OneOf(validation.ValidInterceptorEncryptionAlgorithm...)"
+                                                  }
+                                                }
+                                              ]
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
                         "name": "kms_config",
                         "single_nested": {
                           "description": "Configuration for using external Key Management Systems (KMS).",
