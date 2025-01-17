@@ -5,6 +5,7 @@ package resource_gateway_interceptor_encryption_v2
 import (
 	"context"
 	"fmt"
+	"github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -91,6 +92,354 @@ func GatewayInterceptorEncryptionV2ResourceSchema(ctx context.Context) schema.Sc
 								Description:         "Flag to store encryption settings externally in a topic.",
 								MarkdownDescription: "Flag to store encryption settings externally in a topic.",
 							},
+							"kms_config": schema.SingleNestedAttribute{
+								Attributes: map[string]schema.Attribute{
+									"aws": schema.SingleNestedAttribute{
+										Attributes: map[string]schema.Attribute{
+											"basic_credentials": schema.SingleNestedAttribute{
+												Attributes: map[string]schema.Attribute{
+													"access_key": schema.StringAttribute{
+														Required:            true,
+														Sensitive:           true,
+														Description:         "The AWS access key",
+														MarkdownDescription: "The AWS access key",
+													},
+													"secret_key": schema.StringAttribute{
+														Required:            true,
+														Sensitive:           true,
+														Description:         "The AWS secret key",
+														MarkdownDescription: "The AWS secret key",
+													},
+												},
+												CustomType: BasicCredentialsType{
+													ObjectType: types.ObjectType{
+														AttrTypes: BasicCredentialsValue{}.AttributeTypes(ctx),
+													},
+												},
+												Optional:            true,
+												Description:         "AWS basic access credentials",
+												MarkdownDescription: "AWS basic access credentials",
+											},
+											"session_credentials": schema.SingleNestedAttribute{
+												Attributes: map[string]schema.Attribute{
+													"access_key": schema.StringAttribute{
+														Optional:            true,
+														Sensitive:           true,
+														Description:         "The AWS access key for the session",
+														MarkdownDescription: "The AWS access key for the session",
+													},
+													"secret_key": schema.StringAttribute{
+														Optional:            true,
+														Sensitive:           true,
+														Description:         "The AWS secret key for the session",
+														MarkdownDescription: "The AWS secret key for the session",
+													},
+													"session_token": schema.StringAttribute{
+														Optional:            true,
+														Sensitive:           true,
+														Description:         "The AWS session token",
+														MarkdownDescription: "The AWS session token",
+													},
+												},
+												CustomType: SessionCredentialsType{
+													ObjectType: types.ObjectType{
+														AttrTypes: SessionCredentialsValue{}.AttributeTypes(ctx),
+													},
+												},
+												Optional:            true,
+												Description:         "AWS session-based credentials",
+												MarkdownDescription: "AWS session-based credentials",
+											},
+										},
+										CustomType: AwsType{
+											ObjectType: types.ObjectType{
+												AttrTypes: AwsValue{}.AttributeTypes(ctx),
+											},
+										},
+										Optional:            true,
+										Description:         "Configuration for using AWS Key Management System.",
+										MarkdownDescription: "Configuration for using AWS Key Management System.",
+									},
+									"azure": schema.SingleNestedAttribute{
+										Attributes: map[string]schema.Attribute{
+											"retry_policy": schema.SingleNestedAttribute{
+												Attributes: map[string]schema.Attribute{
+													"delay_ms": schema.Int64Attribute{
+														Optional:            true,
+														Computed:            true,
+														Description:         "Initial delay between retries in milliseconds",
+														MarkdownDescription: "Initial delay between retries in milliseconds",
+														Default:             int64default.StaticInt64(1000),
+													},
+													"max_delay_ms": schema.Int64Attribute{
+														Optional:            true,
+														Computed:            true,
+														Description:         "Maximum delay between retries in milliseconds",
+														MarkdownDescription: "Maximum delay between retries in milliseconds",
+														Default:             int64default.StaticInt64(10000),
+													},
+													"max_retries": schema.Int64Attribute{
+														Optional:            true,
+														Computed:            true,
+														Description:         "Maximum number of retry attempts for failed operations",
+														MarkdownDescription: "Maximum number of retry attempts for failed operations",
+														Default:             int64default.StaticInt64(5),
+													},
+												},
+												CustomType: RetryPolicyType{
+													ObjectType: types.ObjectType{
+														AttrTypes: RetryPolicyValue{}.AttributeTypes(ctx),
+													},
+												},
+												Optional:            true,
+												Description:         "Azure retry policy for failed key management operations",
+												MarkdownDescription: "Azure retry policy for failed key management operations",
+											},
+											"token_credential": schema.SingleNestedAttribute{
+												Attributes: map[string]schema.Attribute{
+													"client_id": schema.StringAttribute{
+														Required:            true,
+														Description:         "Azure Client ID for authentication",
+														MarkdownDescription: "Azure Client ID for authentication",
+													},
+													"client_secret": schema.StringAttribute{
+														Required:            true,
+														Sensitive:           true,
+														Description:         "Azure Client Secret for authentication",
+														MarkdownDescription: "Azure Client Secret for authentication",
+													},
+													"tenant_id": schema.StringAttribute{
+														Required:            true,
+														Description:         "Azure Tenant ID for authentication",
+														MarkdownDescription: "Azure Tenant ID for authentication",
+													},
+												},
+												CustomType: TokenCredentialType{
+													ObjectType: types.ObjectType{
+														AttrTypes: TokenCredentialValue{}.AttributeTypes(ctx),
+													},
+												},
+												Optional:            true,
+												Description:         "Azure token-based authentication credentials",
+												MarkdownDescription: "Azure token-based authentication credentials",
+											},
+											"username_password_credential": schema.SingleNestedAttribute{
+												Attributes: map[string]schema.Attribute{
+													"client_id": schema.StringAttribute{
+														Required:            true,
+														Description:         "Azure Client ID for authenticationg",
+														MarkdownDescription: "Azure Client ID for authenticationg",
+													},
+													"password": schema.StringAttribute{
+														Required:            true,
+														Sensitive:           true,
+														Description:         "Azure password for authentication",
+														MarkdownDescription: "Azure password for authentication",
+													},
+													"tenant_id": schema.StringAttribute{
+														Required:            true,
+														Description:         "Azure Tenant ID for authentication",
+														MarkdownDescription: "Azure Tenant ID for authentication",
+													},
+													"username": schema.StringAttribute{
+														Required:            true,
+														Description:         "Azure username for authentication",
+														MarkdownDescription: "Azure username for authentication",
+													},
+												},
+												CustomType: UsernamePasswordCredentialType{
+													ObjectType: types.ObjectType{
+														AttrTypes: UsernamePasswordCredentialValue{}.AttributeTypes(ctx),
+													},
+												},
+												Optional:            true,
+												Description:         "Azure username/password-based authentication credentials",
+												MarkdownDescription: "Azure username/password-based authentication credentials",
+											},
+										},
+										CustomType: AzureType{
+											ObjectType: types.ObjectType{
+												AttrTypes: AzureValue{}.AttributeTypes(ctx),
+											},
+										},
+										Optional:            true,
+										Description:         "Configuration for using Azure Key Vault as a Key Management System.",
+										MarkdownDescription: "Configuration for using Azure Key Vault as a Key Management System.",
+									},
+									"gcp": schema.SingleNestedAttribute{
+										Attributes: map[string]schema.Attribute{
+											"service_account_credentials_file_path": schema.StringAttribute{
+												Optional:            true,
+												Description:         "File path to the GCP service account credentials JSON file.",
+												MarkdownDescription: "File path to the GCP service account credentials JSON file.",
+											},
+										},
+										CustomType: GcpType{
+											ObjectType: types.ObjectType{
+												AttrTypes: GcpValue{}.AttributeTypes(ctx),
+											},
+										},
+										Optional:            true,
+										Description:         "Configuration for using Google Cloud Platform Key Management System.",
+										MarkdownDescription: "Configuration for using Google Cloud Platform Key Management System.",
+									},
+									"key_ttl_ms": schema.Int64Attribute{
+										Optional:            true,
+										Computed:            true,
+										Description:         "The time-to-live for encryption keys in milliseconds. Set to 0 to disable caching.",
+										MarkdownDescription: "The time-to-live for encryption keys in milliseconds. Set to 0 to disable caching.",
+										Default:             int64default.StaticInt64(3600000),
+									},
+									"vault": schema.SingleNestedAttribute{
+										Attributes: map[string]schema.Attribute{
+											"aws_auth_mount": schema.StringAttribute{
+												Optional:            true,
+												Description:         "Custom authentication mount point for AWS EC2.",
+												MarkdownDescription: "Custom authentication mount point for AWS EC2.",
+											},
+											"github_auth_mount": schema.StringAttribute{
+												Optional:            true,
+												Description:         "Custom authentication mount point for GitHub authentication.",
+												MarkdownDescription: "Custom authentication mount point for GitHub authentication.",
+											},
+											"iam_request_body": schema.StringAttribute{
+												Optional:            true,
+												Description:         "AWS IAM request body for authentication.",
+												MarkdownDescription: "AWS IAM request body for authentication.",
+											},
+											"iam_request_headers": schema.StringAttribute{
+												Optional:            true,
+												Description:         "AWS IAM request headers for authentication.",
+												MarkdownDescription: "AWS IAM request headers for authentication.",
+											},
+											"iam_request_url": schema.StringAttribute{
+												Optional:            true,
+												Description:         "AWS IAM request URL for authentication.",
+												MarkdownDescription: "AWS IAM request URL for authentication.",
+											},
+											"identity": schema.StringAttribute{
+												Optional:            true,
+												Description:         "AWS EC2 identity document for authentication.",
+												MarkdownDescription: "AWS EC2 identity document for authentication.",
+											},
+											"jwt": schema.StringAttribute{
+												Optional:            true,
+												Sensitive:           true,
+												Description:         "JWT token for GCP and JWT authentication.",
+												MarkdownDescription: "JWT token for GCP and JWT authentication.",
+											},
+											"ldap_auth_mount": schema.StringAttribute{
+												Optional:            true,
+												Description:         "Custom authentication mount point for LDAP authentication.",
+												MarkdownDescription: "Custom authentication mount point for LDAP authentication.",
+											},
+											"namespace": schema.StringAttribute{
+												Optional:            true,
+												Description:         "Namespace for Vault",
+												MarkdownDescription: "Namespace for Vault",
+											},
+											"nonce": schema.StringAttribute{
+												Optional:            true,
+												Description:         "nonce for aws ec2 authentication.",
+												MarkdownDescription: "nonce for aws ec2 authentication.",
+											},
+											"password": schema.StringAttribute{
+												Optional:            true,
+												Sensitive:           true,
+												Description:         "Password for LDAP Vault authentication.",
+												MarkdownDescription: "Password for LDAP Vault authentication.",
+											},
+											"path": schema.StringAttribute{
+												Optional:            true,
+												Description:         "Custom path for AppRole authentication.",
+												MarkdownDescription: "Custom path for AppRole authentication.",
+											},
+											"pkcs7": schema.StringAttribute{
+												Optional:            true,
+												Sensitive:           true,
+												Description:         "PKCS7 signature for AWS EC2 authentication.",
+												MarkdownDescription: "PKCS7 signature for AWS EC2 authentication.",
+											},
+											"provider": schema.StringAttribute{
+												Optional:            true,
+												Description:         "JWT provider for Vault authentication.",
+												MarkdownDescription: "JWT provider for Vault authentication.",
+											},
+											"role": schema.StringAttribute{
+												Optional:            true,
+												Description:         "Role for AWS, GCP and JWT Vault authentication.",
+												MarkdownDescription: "Role for AWS, GCP and JWT Vault authentication.",
+											},
+											"role_id": schema.StringAttribute{
+												Optional:            true,
+												Description:         "AppRole Role ID for Vault authentication.",
+												MarkdownDescription: "AppRole Role ID for Vault authentication.",
+											},
+											"secret_id": schema.StringAttribute{
+												Optional:            true,
+												Sensitive:           true,
+												Description:         "AppRole Secret ID for Vault authentication.",
+												MarkdownDescription: "AppRole Secret ID for Vault authentication.",
+											},
+											"signature": schema.StringAttribute{
+												Optional:            true,
+												Description:         "AWS EC2 identity signature for authentication.",
+												MarkdownDescription: "AWS EC2 identity signature for authentication.",
+											},
+											"token": schema.StringAttribute{
+												Optional:            true,
+												Sensitive:           true,
+												Description:         "GitHub personal access token for Vault authentication.",
+												MarkdownDescription: "GitHub personal access token for Vault authentication.",
+											},
+											"type": schema.StringAttribute{
+												Required:            true,
+												Description:         "Type of the authentication for hashicorp vault, valid values are: APP_ROLE, LDAP, AWS_EC2_PKCS7, GCP, GITHUB, JWT, AWS_IAM, AWS_EC2, TOKEN, KUBERNETES, USERNAME_PASSWORD",
+												MarkdownDescription: "Type of the authentication for hashicorp vault, valid values are: APP_ROLE, LDAP, AWS_EC2_PKCS7, GCP, GITHUB, JWT, AWS_IAM, AWS_EC2, TOKEN, KUBERNETES, USERNAME_PASSWORD",
+												Validators: []validator.String{
+													stringvalidator.OneOf(validation.ValidInterceptorEncryptionVaultTypes...),
+												},
+											},
+											"uri": schema.StringAttribute{
+												Optional:            true,
+												Description:         "The URI of the Vault server.",
+												MarkdownDescription: "The URI of the Vault server.",
+											},
+											"username": schema.StringAttribute{
+												Optional:            true,
+												Description:         "Username for LDAP Vault authentication.",
+												MarkdownDescription: "Username for LDAP Vault authentication.",
+											},
+											"userpass_auth_mount": schema.StringAttribute{
+												Optional:            true,
+												Description:         "Custom authentication mount point for username/password authentication.",
+												MarkdownDescription: "Custom authentication mount point for username/password authentication.",
+											},
+											"version": schema.Int64Attribute{
+												Optional:            true,
+												Description:         "The version of the Vault engine.",
+												MarkdownDescription: "The version of the Vault engine.",
+											},
+										},
+										CustomType: VaultType{
+											ObjectType: types.ObjectType{
+												AttrTypes: VaultValue{}.AttributeTypes(ctx),
+											},
+										},
+										Optional:            true,
+										Description:         "Configuration for using HashiCorp Vault as a Key Management System.",
+										MarkdownDescription: "Configuration for using HashiCorp Vault as a Key Management System.",
+									},
+								},
+								CustomType: KmsConfigType{
+									ObjectType: types.ObjectType{
+										AttrTypes: KmsConfigValue{}.AttributeTypes(ctx),
+									},
+								},
+								Optional:            true,
+								Description:         "Configuration for using external Key Management Systems (KMS).",
+								MarkdownDescription: "Configuration for using external Key Management Systems (KMS).",
+							},
 							"schema_data_mode": schema.StringAttribute{
 								Optional:            true,
 								Computed:            true,
@@ -98,32 +447,30 @@ func GatewayInterceptorEncryptionV2ResourceSchema(ctx context.Context) schema.Sc
 								MarkdownDescription: "Defines whether to preserve Avro schema format or convert to JSON.",
 								Default:             stringdefault.StaticString("preserve_avro"),
 							},
-							"schema_registry_config": schema.MapNestedAttribute{
-								NestedObject: schema.NestedAttributeObject{
-									Attributes: map[string]schema.Attribute{
-										"additional_configs": schema.MapAttribute{
-											ElementType:         types.StringType,
-											Optional:            true,
-											Description:         "Additional properties mapped to specific security-related parameters. For enhanced security, use environment variable templates like ${MY_ENV_VAR}.",
-											MarkdownDescription: "Additional properties mapped to specific security-related parameters. For enhanced security, use environment variable templates like ${MY_ENV_VAR}.",
-										},
-										"cache_size": schema.Int64Attribute{
-											Optional:            true,
-											Computed:            true,
-											Description:         "This interceptor caches schemas locally so that it doesn't have to query the schema registry.",
-											MarkdownDescription: "This interceptor caches schemas locally so that it doesn't have to query the schema registry.",
-											Default:             int64default.StaticInt64(100),
-										},
-										"host": schema.StringAttribute{
-											Required:            true,
-											Description:         "URL of the schema registry.",
-											MarkdownDescription: "URL of the schema registry.",
-										},
+							"schema_registry_config": schema.SingleNestedAttribute{
+								Attributes: map[string]schema.Attribute{
+									"additional_configs": schema.MapAttribute{
+										ElementType:         types.StringType,
+										Optional:            true,
+										Description:         "Additional properties mapped to specific security-related parameters. For enhanced security, use environment variable templates like ${MY_ENV_VAR}.",
+										MarkdownDescription: "Additional properties mapped to specific security-related parameters. For enhanced security, use environment variable templates like ${MY_ENV_VAR}.",
 									},
-									CustomType: SchemaRegistryConfigType{
-										ObjectType: types.ObjectType{
-											AttrTypes: SchemaRegistryConfigValue{}.AttributeTypes(ctx),
-										},
+									"cache_size": schema.Int64Attribute{
+										Optional:            true,
+										Computed:            true,
+										Description:         "This interceptor caches schemas locally so that it doesn't have to query the schema registry.",
+										MarkdownDescription: "This interceptor caches schemas locally so that it doesn't have to query the schema registry.",
+										Default:             int64default.StaticInt64(100),
+									},
+									"host": schema.StringAttribute{
+										Required:            true,
+										Description:         "URL of the schema registry.",
+										MarkdownDescription: "URL of the schema registry.",
+									},
+								},
+								CustomType: SchemaRegistryConfigType{
+									ObjectType: types.ObjectType{
+										AttrTypes: SchemaRegistryConfigValue{}.AttributeTypes(ctx),
 									},
 								},
 								Optional:            true,
@@ -1186,6 +1533,24 @@ func (t ConfigType) ValueFromObject(ctx context.Context, in basetypes.ObjectValu
 			fmt.Sprintf(`external_storage expected to be basetypes.BoolValue, was: %T`, externalStorageAttribute))
 	}
 
+	kmsConfigAttribute, ok := attributes["kms_config"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`kms_config is missing from object`)
+
+		return nil, diags
+	}
+
+	kmsConfigVal, ok := kmsConfigAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`kms_config expected to be basetypes.ObjectValue, was: %T`, kmsConfigAttribute))
+	}
+
 	schemaDataModeAttribute, ok := attributes["schema_data_mode"]
 
 	if !ok {
@@ -1214,12 +1579,12 @@ func (t ConfigType) ValueFromObject(ctx context.Context, in basetypes.ObjectValu
 		return nil, diags
 	}
 
-	schemaRegistryConfigVal, ok := schemaRegistryConfigAttribute.(basetypes.MapValue)
+	schemaRegistryConfigVal, ok := schemaRegistryConfigAttribute.(basetypes.ObjectValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`schema_registry_config expected to be basetypes.MapValue, was: %T`, schemaRegistryConfigAttribute))
+			fmt.Sprintf(`schema_registry_config expected to be basetypes.ObjectValue, was: %T`, schemaRegistryConfigAttribute))
 	}
 
 	topicAttribute, ok := attributes["topic"]
@@ -1247,6 +1612,7 @@ func (t ConfigType) ValueFromObject(ctx context.Context, in basetypes.ObjectValu
 	return ConfigValue{
 		EnableAuditLogOnError: enableAuditLogOnErrorVal,
 		ExternalStorage:       externalStorageVal,
+		KmsConfig:             kmsConfigVal,
 		SchemaDataMode:        schemaDataModeVal,
 		SchemaRegistryConfig:  schemaRegistryConfigVal,
 		Topic:                 topicVal,
@@ -1353,6 +1719,24 @@ func NewConfigValue(attributeTypes map[string]attr.Type, attributes map[string]a
 			fmt.Sprintf(`external_storage expected to be basetypes.BoolValue, was: %T`, externalStorageAttribute))
 	}
 
+	kmsConfigAttribute, ok := attributes["kms_config"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`kms_config is missing from object`)
+
+		return NewConfigValueUnknown(), diags
+	}
+
+	kmsConfigVal, ok := kmsConfigAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`kms_config expected to be basetypes.ObjectValue, was: %T`, kmsConfigAttribute))
+	}
+
 	schemaDataModeAttribute, ok := attributes["schema_data_mode"]
 
 	if !ok {
@@ -1381,12 +1765,12 @@ func NewConfigValue(attributeTypes map[string]attr.Type, attributes map[string]a
 		return NewConfigValueUnknown(), diags
 	}
 
-	schemaRegistryConfigVal, ok := schemaRegistryConfigAttribute.(basetypes.MapValue)
+	schemaRegistryConfigVal, ok := schemaRegistryConfigAttribute.(basetypes.ObjectValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`schema_registry_config expected to be basetypes.MapValue, was: %T`, schemaRegistryConfigAttribute))
+			fmt.Sprintf(`schema_registry_config expected to be basetypes.ObjectValue, was: %T`, schemaRegistryConfigAttribute))
 	}
 
 	topicAttribute, ok := attributes["topic"]
@@ -1414,6 +1798,7 @@ func NewConfigValue(attributeTypes map[string]attr.Type, attributes map[string]a
 	return ConfigValue{
 		EnableAuditLogOnError: enableAuditLogOnErrorVal,
 		ExternalStorage:       externalStorageVal,
+		KmsConfig:             kmsConfigVal,
 		SchemaDataMode:        schemaDataModeVal,
 		SchemaRegistryConfig:  schemaRegistryConfigVal,
 		Topic:                 topicVal,
@@ -1491,23 +1876,27 @@ var _ basetypes.ObjectValuable = ConfigValue{}
 type ConfigValue struct {
 	EnableAuditLogOnError basetypes.BoolValue   `tfsdk:"enable_audit_log_on_error"`
 	ExternalStorage       basetypes.BoolValue   `tfsdk:"external_storage"`
+	KmsConfig             basetypes.ObjectValue `tfsdk:"kms_config"`
 	SchemaDataMode        basetypes.StringValue `tfsdk:"schema_data_mode"`
-	SchemaRegistryConfig  basetypes.MapValue    `tfsdk:"schema_registry_config"`
+	SchemaRegistryConfig  basetypes.ObjectValue `tfsdk:"schema_registry_config"`
 	Topic                 basetypes.StringValue `tfsdk:"topic"`
 	state                 attr.ValueState
 }
 
 func (v ConfigValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
-	attrTypes := make(map[string]tftypes.Type, 5)
+	attrTypes := make(map[string]tftypes.Type, 6)
 
 	var val tftypes.Value
 	var err error
 
 	attrTypes["enable_audit_log_on_error"] = basetypes.BoolType{}.TerraformType(ctx)
 	attrTypes["external_storage"] = basetypes.BoolType{}.TerraformType(ctx)
+	attrTypes["kms_config"] = basetypes.ObjectType{
+		AttrTypes: KmsConfigValue{}.AttributeTypes(ctx),
+	}.TerraformType(ctx)
 	attrTypes["schema_data_mode"] = basetypes.StringType{}.TerraformType(ctx)
-	attrTypes["schema_registry_config"] = basetypes.MapType{
-		ElemType: SchemaRegistryConfigValue{}.Type(ctx),
+	attrTypes["schema_registry_config"] = basetypes.ObjectType{
+		AttrTypes: SchemaRegistryConfigValue{}.AttributeTypes(ctx),
 	}.TerraformType(ctx)
 	attrTypes["topic"] = basetypes.StringType{}.TerraformType(ctx)
 
@@ -1515,7 +1904,7 @@ func (v ConfigValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error
 
 	switch v.state {
 	case attr.ValueStateKnown:
-		vals := make(map[string]tftypes.Value, 5)
+		vals := make(map[string]tftypes.Value, 6)
 
 		val, err = v.EnableAuditLogOnError.ToTerraformValue(ctx)
 
@@ -1532,6 +1921,14 @@ func (v ConfigValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error
 		}
 
 		vals["external_storage"] = val
+
+		val, err = v.KmsConfig.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["kms_config"] = val
 
 		val, err = v.SchemaDataMode.ToTerraformValue(ctx)
 
@@ -1586,41 +1983,57 @@ func (v ConfigValue) String() string {
 func (v ConfigValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	schemaRegistryConfig := types.MapValueMust(
-		SchemaRegistryConfigType{
-			basetypes.ObjectType{
-				AttrTypes: SchemaRegistryConfigValue{}.AttributeTypes(ctx),
-			},
-		},
-		v.SchemaRegistryConfig.Elements(),
-	)
+	var kmsConfig basetypes.ObjectValue
+
+	if v.KmsConfig.IsNull() {
+		kmsConfig = types.ObjectNull(
+			KmsConfigValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if v.KmsConfig.IsUnknown() {
+		kmsConfig = types.ObjectUnknown(
+			KmsConfigValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if !v.KmsConfig.IsNull() && !v.KmsConfig.IsUnknown() {
+		kmsConfig = types.ObjectValueMust(
+			KmsConfigValue{}.AttributeTypes(ctx),
+			v.KmsConfig.Attributes(),
+		)
+	}
+
+	var schemaRegistryConfig basetypes.ObjectValue
 
 	if v.SchemaRegistryConfig.IsNull() {
-		schemaRegistryConfig = types.MapNull(
-			SchemaRegistryConfigType{
-				basetypes.ObjectType{
-					AttrTypes: SchemaRegistryConfigValue{}.AttributeTypes(ctx),
-				},
-			},
+		schemaRegistryConfig = types.ObjectNull(
+			SchemaRegistryConfigValue{}.AttributeTypes(ctx),
 		)
 	}
 
 	if v.SchemaRegistryConfig.IsUnknown() {
-		schemaRegistryConfig = types.MapUnknown(
-			SchemaRegistryConfigType{
-				basetypes.ObjectType{
-					AttrTypes: SchemaRegistryConfigValue{}.AttributeTypes(ctx),
-				},
-			},
+		schemaRegistryConfig = types.ObjectUnknown(
+			SchemaRegistryConfigValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if !v.SchemaRegistryConfig.IsNull() && !v.SchemaRegistryConfig.IsUnknown() {
+		schemaRegistryConfig = types.ObjectValueMust(
+			SchemaRegistryConfigValue{}.AttributeTypes(ctx),
+			v.SchemaRegistryConfig.Attributes(),
 		)
 	}
 
 	attributeTypes := map[string]attr.Type{
 		"enable_audit_log_on_error": basetypes.BoolType{},
 		"external_storage":          basetypes.BoolType{},
-		"schema_data_mode":          basetypes.StringType{},
-		"schema_registry_config": basetypes.MapType{
-			ElemType: SchemaRegistryConfigValue{}.Type(ctx),
+		"kms_config": basetypes.ObjectType{
+			AttrTypes: KmsConfigValue{}.AttributeTypes(ctx),
+		},
+		"schema_data_mode": basetypes.StringType{},
+		"schema_registry_config": basetypes.ObjectType{
+			AttrTypes: SchemaRegistryConfigValue{}.AttributeTypes(ctx),
 		},
 		"topic": basetypes.StringType{},
 	}
@@ -1638,6 +2051,7 @@ func (v ConfigValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, 
 		map[string]attr.Value{
 			"enable_audit_log_on_error": v.EnableAuditLogOnError,
 			"external_storage":          v.ExternalStorage,
+			"kms_config":                kmsConfig,
 			"schema_data_mode":          v.SchemaDataMode,
 			"schema_registry_config":    schemaRegistryConfig,
 			"topic":                     v.Topic,
@@ -1669,6 +2083,10 @@ func (v ConfigValue) Equal(o attr.Value) bool {
 		return false
 	}
 
+	if !v.KmsConfig.Equal(other.KmsConfig) {
+		return false
+	}
+
 	if !v.SchemaDataMode.Equal(other.SchemaDataMode) {
 		return false
 	}
@@ -1696,11 +2114,5697 @@ func (v ConfigValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 	return map[string]attr.Type{
 		"enable_audit_log_on_error": basetypes.BoolType{},
 		"external_storage":          basetypes.BoolType{},
-		"schema_data_mode":          basetypes.StringType{},
-		"schema_registry_config": basetypes.MapType{
-			ElemType: SchemaRegistryConfigValue{}.Type(ctx),
+		"kms_config": basetypes.ObjectType{
+			AttrTypes: KmsConfigValue{}.AttributeTypes(ctx),
+		},
+		"schema_data_mode": basetypes.StringType{},
+		"schema_registry_config": basetypes.ObjectType{
+			AttrTypes: SchemaRegistryConfigValue{}.AttributeTypes(ctx),
 		},
 		"topic": basetypes.StringType{},
+	}
+}
+
+var _ basetypes.ObjectTypable = KmsConfigType{}
+
+type KmsConfigType struct {
+	basetypes.ObjectType
+}
+
+func (t KmsConfigType) Equal(o attr.Type) bool {
+	other, ok := o.(KmsConfigType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t KmsConfigType) String() string {
+	return "KmsConfigType"
+}
+
+func (t KmsConfigType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	awsAttribute, ok := attributes["aws"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`aws is missing from object`)
+
+		return nil, diags
+	}
+
+	awsVal, ok := awsAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`aws expected to be basetypes.ObjectValue, was: %T`, awsAttribute))
+	}
+
+	azureAttribute, ok := attributes["azure"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`azure is missing from object`)
+
+		return nil, diags
+	}
+
+	azureVal, ok := azureAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`azure expected to be basetypes.ObjectValue, was: %T`, azureAttribute))
+	}
+
+	gcpAttribute, ok := attributes["gcp"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`gcp is missing from object`)
+
+		return nil, diags
+	}
+
+	gcpVal, ok := gcpAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`gcp expected to be basetypes.ObjectValue, was: %T`, gcpAttribute))
+	}
+
+	keyTtlMsAttribute, ok := attributes["key_ttl_ms"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`key_ttl_ms is missing from object`)
+
+		return nil, diags
+	}
+
+	keyTtlMsVal, ok := keyTtlMsAttribute.(basetypes.Int64Value)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`key_ttl_ms expected to be basetypes.Int64Value, was: %T`, keyTtlMsAttribute))
+	}
+
+	vaultAttribute, ok := attributes["vault"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`vault is missing from object`)
+
+		return nil, diags
+	}
+
+	vaultVal, ok := vaultAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`vault expected to be basetypes.ObjectValue, was: %T`, vaultAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return KmsConfigValue{
+		Aws:      awsVal,
+		Azure:    azureVal,
+		Gcp:      gcpVal,
+		KeyTtlMs: keyTtlMsVal,
+		Vault:    vaultVal,
+		state:    attr.ValueStateKnown,
+	}, diags
+}
+
+func NewKmsConfigValueNull() KmsConfigValue {
+	return KmsConfigValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewKmsConfigValueUnknown() KmsConfigValue {
+	return KmsConfigValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewKmsConfigValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (KmsConfigValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing KmsConfigValue Attribute Value",
+				"While creating a KmsConfigValue value, a missing attribute value was detected. "+
+					"A KmsConfigValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("KmsConfigValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid KmsConfigValue Attribute Type",
+				"While creating a KmsConfigValue value, an invalid attribute value was detected. "+
+					"A KmsConfigValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("KmsConfigValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("KmsConfigValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra KmsConfigValue Attribute Value",
+				"While creating a KmsConfigValue value, an extra attribute value was detected. "+
+					"A KmsConfigValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra KmsConfigValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewKmsConfigValueUnknown(), diags
+	}
+
+	awsAttribute, ok := attributes["aws"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`aws is missing from object`)
+
+		return NewKmsConfigValueUnknown(), diags
+	}
+
+	awsVal, ok := awsAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`aws expected to be basetypes.ObjectValue, was: %T`, awsAttribute))
+	}
+
+	azureAttribute, ok := attributes["azure"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`azure is missing from object`)
+
+		return NewKmsConfigValueUnknown(), diags
+	}
+
+	azureVal, ok := azureAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`azure expected to be basetypes.ObjectValue, was: %T`, azureAttribute))
+	}
+
+	gcpAttribute, ok := attributes["gcp"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`gcp is missing from object`)
+
+		return NewKmsConfigValueUnknown(), diags
+	}
+
+	gcpVal, ok := gcpAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`gcp expected to be basetypes.ObjectValue, was: %T`, gcpAttribute))
+	}
+
+	keyTtlMsAttribute, ok := attributes["key_ttl_ms"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`key_ttl_ms is missing from object`)
+
+		return NewKmsConfigValueUnknown(), diags
+	}
+
+	keyTtlMsVal, ok := keyTtlMsAttribute.(basetypes.Int64Value)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`key_ttl_ms expected to be basetypes.Int64Value, was: %T`, keyTtlMsAttribute))
+	}
+
+	vaultAttribute, ok := attributes["vault"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`vault is missing from object`)
+
+		return NewKmsConfigValueUnknown(), diags
+	}
+
+	vaultVal, ok := vaultAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`vault expected to be basetypes.ObjectValue, was: %T`, vaultAttribute))
+	}
+
+	if diags.HasError() {
+		return NewKmsConfigValueUnknown(), diags
+	}
+
+	return KmsConfigValue{
+		Aws:      awsVal,
+		Azure:    azureVal,
+		Gcp:      gcpVal,
+		KeyTtlMs: keyTtlMsVal,
+		Vault:    vaultVal,
+		state:    attr.ValueStateKnown,
+	}, diags
+}
+
+func NewKmsConfigValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) KmsConfigValue {
+	object, diags := NewKmsConfigValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewKmsConfigValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t KmsConfigType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewKmsConfigValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewKmsConfigValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewKmsConfigValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewKmsConfigValueMust(KmsConfigValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t KmsConfigType) ValueType(ctx context.Context) attr.Value {
+	return KmsConfigValue{}
+}
+
+var _ basetypes.ObjectValuable = KmsConfigValue{}
+
+type KmsConfigValue struct {
+	Aws      basetypes.ObjectValue `tfsdk:"aws"`
+	Azure    basetypes.ObjectValue `tfsdk:"azure"`
+	Gcp      basetypes.ObjectValue `tfsdk:"gcp"`
+	KeyTtlMs basetypes.Int64Value  `tfsdk:"key_ttl_ms"`
+	Vault    basetypes.ObjectValue `tfsdk:"vault"`
+	state    attr.ValueState
+}
+
+func (v KmsConfigValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 5)
+
+	var val tftypes.Value
+	var err error
+
+	attrTypes["aws"] = basetypes.ObjectType{
+		AttrTypes: AwsValue{}.AttributeTypes(ctx),
+	}.TerraformType(ctx)
+	attrTypes["azure"] = basetypes.ObjectType{
+		AttrTypes: AzureValue{}.AttributeTypes(ctx),
+	}.TerraformType(ctx)
+	attrTypes["gcp"] = basetypes.ObjectType{
+		AttrTypes: GcpValue{}.AttributeTypes(ctx),
+	}.TerraformType(ctx)
+	attrTypes["key_ttl_ms"] = basetypes.Int64Type{}.TerraformType(ctx)
+	attrTypes["vault"] = basetypes.ObjectType{
+		AttrTypes: VaultValue{}.AttributeTypes(ctx),
+	}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 5)
+
+		val, err = v.Aws.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["aws"] = val
+
+		val, err = v.Azure.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["azure"] = val
+
+		val, err = v.Gcp.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["gcp"] = val
+
+		val, err = v.KeyTtlMs.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["key_ttl_ms"] = val
+
+		val, err = v.Vault.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["vault"] = val
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v KmsConfigValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v KmsConfigValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v KmsConfigValue) String() string {
+	return "KmsConfigValue"
+}
+
+func (v KmsConfigValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	var aws basetypes.ObjectValue
+
+	if v.Aws.IsNull() {
+		aws = types.ObjectNull(
+			AwsValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if v.Aws.IsUnknown() {
+		aws = types.ObjectUnknown(
+			AwsValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if !v.Aws.IsNull() && !v.Aws.IsUnknown() {
+		aws = types.ObjectValueMust(
+			AwsValue{}.AttributeTypes(ctx),
+			v.Aws.Attributes(),
+		)
+	}
+
+	var azure basetypes.ObjectValue
+
+	if v.Azure.IsNull() {
+		azure = types.ObjectNull(
+			AzureValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if v.Azure.IsUnknown() {
+		azure = types.ObjectUnknown(
+			AzureValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if !v.Azure.IsNull() && !v.Azure.IsUnknown() {
+		azure = types.ObjectValueMust(
+			AzureValue{}.AttributeTypes(ctx),
+			v.Azure.Attributes(),
+		)
+	}
+
+	var gcp basetypes.ObjectValue
+
+	if v.Gcp.IsNull() {
+		gcp = types.ObjectNull(
+			GcpValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if v.Gcp.IsUnknown() {
+		gcp = types.ObjectUnknown(
+			GcpValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if !v.Gcp.IsNull() && !v.Gcp.IsUnknown() {
+		gcp = types.ObjectValueMust(
+			GcpValue{}.AttributeTypes(ctx),
+			v.Gcp.Attributes(),
+		)
+	}
+
+	var vault basetypes.ObjectValue
+
+	if v.Vault.IsNull() {
+		vault = types.ObjectNull(
+			VaultValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if v.Vault.IsUnknown() {
+		vault = types.ObjectUnknown(
+			VaultValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if !v.Vault.IsNull() && !v.Vault.IsUnknown() {
+		vault = types.ObjectValueMust(
+			VaultValue{}.AttributeTypes(ctx),
+			v.Vault.Attributes(),
+		)
+	}
+
+	attributeTypes := map[string]attr.Type{
+		"aws": basetypes.ObjectType{
+			AttrTypes: AwsValue{}.AttributeTypes(ctx),
+		},
+		"azure": basetypes.ObjectType{
+			AttrTypes: AzureValue{}.AttributeTypes(ctx),
+		},
+		"gcp": basetypes.ObjectType{
+			AttrTypes: GcpValue{}.AttributeTypes(ctx),
+		},
+		"key_ttl_ms": basetypes.Int64Type{},
+		"vault": basetypes.ObjectType{
+			AttrTypes: VaultValue{}.AttributeTypes(ctx),
+		},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{
+			"aws":        aws,
+			"azure":      azure,
+			"gcp":        gcp,
+			"key_ttl_ms": v.KeyTtlMs,
+			"vault":      vault,
+		})
+
+	return objVal, diags
+}
+
+func (v KmsConfigValue) Equal(o attr.Value) bool {
+	other, ok := o.(KmsConfigValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	if !v.Aws.Equal(other.Aws) {
+		return false
+	}
+
+	if !v.Azure.Equal(other.Azure) {
+		return false
+	}
+
+	if !v.Gcp.Equal(other.Gcp) {
+		return false
+	}
+
+	if !v.KeyTtlMs.Equal(other.KeyTtlMs) {
+		return false
+	}
+
+	if !v.Vault.Equal(other.Vault) {
+		return false
+	}
+
+	return true
+}
+
+func (v KmsConfigValue) Type(ctx context.Context) attr.Type {
+	return KmsConfigType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v KmsConfigValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"aws": basetypes.ObjectType{
+			AttrTypes: AwsValue{}.AttributeTypes(ctx),
+		},
+		"azure": basetypes.ObjectType{
+			AttrTypes: AzureValue{}.AttributeTypes(ctx),
+		},
+		"gcp": basetypes.ObjectType{
+			AttrTypes: GcpValue{}.AttributeTypes(ctx),
+		},
+		"key_ttl_ms": basetypes.Int64Type{},
+		"vault": basetypes.ObjectType{
+			AttrTypes: VaultValue{}.AttributeTypes(ctx),
+		},
+	}
+}
+
+var _ basetypes.ObjectTypable = AwsType{}
+
+type AwsType struct {
+	basetypes.ObjectType
+}
+
+func (t AwsType) Equal(o attr.Type) bool {
+	other, ok := o.(AwsType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t AwsType) String() string {
+	return "AwsType"
+}
+
+func (t AwsType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	basicCredentialsAttribute, ok := attributes["basic_credentials"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`basic_credentials is missing from object`)
+
+		return nil, diags
+	}
+
+	basicCredentialsVal, ok := basicCredentialsAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`basic_credentials expected to be basetypes.ObjectValue, was: %T`, basicCredentialsAttribute))
+	}
+
+	sessionCredentialsAttribute, ok := attributes["session_credentials"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`session_credentials is missing from object`)
+
+		return nil, diags
+	}
+
+	sessionCredentialsVal, ok := sessionCredentialsAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`session_credentials expected to be basetypes.ObjectValue, was: %T`, sessionCredentialsAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return AwsValue{
+		BasicCredentials:   basicCredentialsVal,
+		SessionCredentials: sessionCredentialsVal,
+		state:              attr.ValueStateKnown,
+	}, diags
+}
+
+func NewAwsValueNull() AwsValue {
+	return AwsValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewAwsValueUnknown() AwsValue {
+	return AwsValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewAwsValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (AwsValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing AwsValue Attribute Value",
+				"While creating a AwsValue value, a missing attribute value was detected. "+
+					"A AwsValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("AwsValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid AwsValue Attribute Type",
+				"While creating a AwsValue value, an invalid attribute value was detected. "+
+					"A AwsValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("AwsValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("AwsValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra AwsValue Attribute Value",
+				"While creating a AwsValue value, an extra attribute value was detected. "+
+					"A AwsValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra AwsValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewAwsValueUnknown(), diags
+	}
+
+	basicCredentialsAttribute, ok := attributes["basic_credentials"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`basic_credentials is missing from object`)
+
+		return NewAwsValueUnknown(), diags
+	}
+
+	basicCredentialsVal, ok := basicCredentialsAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`basic_credentials expected to be basetypes.ObjectValue, was: %T`, basicCredentialsAttribute))
+	}
+
+	sessionCredentialsAttribute, ok := attributes["session_credentials"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`session_credentials is missing from object`)
+
+		return NewAwsValueUnknown(), diags
+	}
+
+	sessionCredentialsVal, ok := sessionCredentialsAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`session_credentials expected to be basetypes.ObjectValue, was: %T`, sessionCredentialsAttribute))
+	}
+
+	if diags.HasError() {
+		return NewAwsValueUnknown(), diags
+	}
+
+	return AwsValue{
+		BasicCredentials:   basicCredentialsVal,
+		SessionCredentials: sessionCredentialsVal,
+		state:              attr.ValueStateKnown,
+	}, diags
+}
+
+func NewAwsValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) AwsValue {
+	object, diags := NewAwsValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewAwsValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t AwsType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewAwsValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewAwsValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewAwsValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewAwsValueMust(AwsValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t AwsType) ValueType(ctx context.Context) attr.Value {
+	return AwsValue{}
+}
+
+var _ basetypes.ObjectValuable = AwsValue{}
+
+type AwsValue struct {
+	BasicCredentials   basetypes.ObjectValue `tfsdk:"basic_credentials"`
+	SessionCredentials basetypes.ObjectValue `tfsdk:"session_credentials"`
+	state              attr.ValueState
+}
+
+func (v AwsValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 2)
+
+	var val tftypes.Value
+	var err error
+
+	attrTypes["basic_credentials"] = basetypes.ObjectType{
+		AttrTypes: BasicCredentialsValue{}.AttributeTypes(ctx),
+	}.TerraformType(ctx)
+	attrTypes["session_credentials"] = basetypes.ObjectType{
+		AttrTypes: SessionCredentialsValue{}.AttributeTypes(ctx),
+	}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 2)
+
+		val, err = v.BasicCredentials.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["basic_credentials"] = val
+
+		val, err = v.SessionCredentials.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["session_credentials"] = val
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v AwsValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v AwsValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v AwsValue) String() string {
+	return "AwsValue"
+}
+
+func (v AwsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	var basicCredentials basetypes.ObjectValue
+
+	if v.BasicCredentials.IsNull() {
+		basicCredentials = types.ObjectNull(
+			BasicCredentialsValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if v.BasicCredentials.IsUnknown() {
+		basicCredentials = types.ObjectUnknown(
+			BasicCredentialsValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if !v.BasicCredentials.IsNull() && !v.BasicCredentials.IsUnknown() {
+		basicCredentials = types.ObjectValueMust(
+			BasicCredentialsValue{}.AttributeTypes(ctx),
+			v.BasicCredentials.Attributes(),
+		)
+	}
+
+	var sessionCredentials basetypes.ObjectValue
+
+	if v.SessionCredentials.IsNull() {
+		sessionCredentials = types.ObjectNull(
+			SessionCredentialsValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if v.SessionCredentials.IsUnknown() {
+		sessionCredentials = types.ObjectUnknown(
+			SessionCredentialsValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if !v.SessionCredentials.IsNull() && !v.SessionCredentials.IsUnknown() {
+		sessionCredentials = types.ObjectValueMust(
+			SessionCredentialsValue{}.AttributeTypes(ctx),
+			v.SessionCredentials.Attributes(),
+		)
+	}
+
+	attributeTypes := map[string]attr.Type{
+		"basic_credentials": basetypes.ObjectType{
+			AttrTypes: BasicCredentialsValue{}.AttributeTypes(ctx),
+		},
+		"session_credentials": basetypes.ObjectType{
+			AttrTypes: SessionCredentialsValue{}.AttributeTypes(ctx),
+		},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{
+			"basic_credentials":   basicCredentials,
+			"session_credentials": sessionCredentials,
+		})
+
+	return objVal, diags
+}
+
+func (v AwsValue) Equal(o attr.Value) bool {
+	other, ok := o.(AwsValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	if !v.BasicCredentials.Equal(other.BasicCredentials) {
+		return false
+	}
+
+	if !v.SessionCredentials.Equal(other.SessionCredentials) {
+		return false
+	}
+
+	return true
+}
+
+func (v AwsValue) Type(ctx context.Context) attr.Type {
+	return AwsType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v AwsValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"basic_credentials": basetypes.ObjectType{
+			AttrTypes: BasicCredentialsValue{}.AttributeTypes(ctx),
+		},
+		"session_credentials": basetypes.ObjectType{
+			AttrTypes: SessionCredentialsValue{}.AttributeTypes(ctx),
+		},
+	}
+}
+
+var _ basetypes.ObjectTypable = BasicCredentialsType{}
+
+type BasicCredentialsType struct {
+	basetypes.ObjectType
+}
+
+func (t BasicCredentialsType) Equal(o attr.Type) bool {
+	other, ok := o.(BasicCredentialsType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t BasicCredentialsType) String() string {
+	return "BasicCredentialsType"
+}
+
+func (t BasicCredentialsType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	accessKeyAttribute, ok := attributes["access_key"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`access_key is missing from object`)
+
+		return nil, diags
+	}
+
+	accessKeyVal, ok := accessKeyAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`access_key expected to be basetypes.StringValue, was: %T`, accessKeyAttribute))
+	}
+
+	secretKeyAttribute, ok := attributes["secret_key"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`secret_key is missing from object`)
+
+		return nil, diags
+	}
+
+	secretKeyVal, ok := secretKeyAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`secret_key expected to be basetypes.StringValue, was: %T`, secretKeyAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return BasicCredentialsValue{
+		AccessKey: accessKeyVal,
+		SecretKey: secretKeyVal,
+		state:     attr.ValueStateKnown,
+	}, diags
+}
+
+func NewBasicCredentialsValueNull() BasicCredentialsValue {
+	return BasicCredentialsValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewBasicCredentialsValueUnknown() BasicCredentialsValue {
+	return BasicCredentialsValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewBasicCredentialsValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (BasicCredentialsValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing BasicCredentialsValue Attribute Value",
+				"While creating a BasicCredentialsValue value, a missing attribute value was detected. "+
+					"A BasicCredentialsValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("BasicCredentialsValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid BasicCredentialsValue Attribute Type",
+				"While creating a BasicCredentialsValue value, an invalid attribute value was detected. "+
+					"A BasicCredentialsValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("BasicCredentialsValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("BasicCredentialsValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra BasicCredentialsValue Attribute Value",
+				"While creating a BasicCredentialsValue value, an extra attribute value was detected. "+
+					"A BasicCredentialsValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra BasicCredentialsValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewBasicCredentialsValueUnknown(), diags
+	}
+
+	accessKeyAttribute, ok := attributes["access_key"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`access_key is missing from object`)
+
+		return NewBasicCredentialsValueUnknown(), diags
+	}
+
+	accessKeyVal, ok := accessKeyAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`access_key expected to be basetypes.StringValue, was: %T`, accessKeyAttribute))
+	}
+
+	secretKeyAttribute, ok := attributes["secret_key"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`secret_key is missing from object`)
+
+		return NewBasicCredentialsValueUnknown(), diags
+	}
+
+	secretKeyVal, ok := secretKeyAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`secret_key expected to be basetypes.StringValue, was: %T`, secretKeyAttribute))
+	}
+
+	if diags.HasError() {
+		return NewBasicCredentialsValueUnknown(), diags
+	}
+
+	return BasicCredentialsValue{
+		AccessKey: accessKeyVal,
+		SecretKey: secretKeyVal,
+		state:     attr.ValueStateKnown,
+	}, diags
+}
+
+func NewBasicCredentialsValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) BasicCredentialsValue {
+	object, diags := NewBasicCredentialsValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewBasicCredentialsValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t BasicCredentialsType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewBasicCredentialsValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewBasicCredentialsValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewBasicCredentialsValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewBasicCredentialsValueMust(BasicCredentialsValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t BasicCredentialsType) ValueType(ctx context.Context) attr.Value {
+	return BasicCredentialsValue{}
+}
+
+var _ basetypes.ObjectValuable = BasicCredentialsValue{}
+
+type BasicCredentialsValue struct {
+	AccessKey basetypes.StringValue `tfsdk:"access_key"`
+	SecretKey basetypes.StringValue `tfsdk:"secret_key"`
+	state     attr.ValueState
+}
+
+func (v BasicCredentialsValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 2)
+
+	var val tftypes.Value
+	var err error
+
+	attrTypes["access_key"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["secret_key"] = basetypes.StringType{}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 2)
+
+		val, err = v.AccessKey.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["access_key"] = val
+
+		val, err = v.SecretKey.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["secret_key"] = val
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v BasicCredentialsValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v BasicCredentialsValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v BasicCredentialsValue) String() string {
+	return "BasicCredentialsValue"
+}
+
+func (v BasicCredentialsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributeTypes := map[string]attr.Type{
+		"access_key": basetypes.StringType{},
+		"secret_key": basetypes.StringType{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{
+			"access_key": v.AccessKey,
+			"secret_key": v.SecretKey,
+		})
+
+	return objVal, diags
+}
+
+func (v BasicCredentialsValue) Equal(o attr.Value) bool {
+	other, ok := o.(BasicCredentialsValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	if !v.AccessKey.Equal(other.AccessKey) {
+		return false
+	}
+
+	if !v.SecretKey.Equal(other.SecretKey) {
+		return false
+	}
+
+	return true
+}
+
+func (v BasicCredentialsValue) Type(ctx context.Context) attr.Type {
+	return BasicCredentialsType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v BasicCredentialsValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"access_key": basetypes.StringType{},
+		"secret_key": basetypes.StringType{},
+	}
+}
+
+var _ basetypes.ObjectTypable = SessionCredentialsType{}
+
+type SessionCredentialsType struct {
+	basetypes.ObjectType
+}
+
+func (t SessionCredentialsType) Equal(o attr.Type) bool {
+	other, ok := o.(SessionCredentialsType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t SessionCredentialsType) String() string {
+	return "SessionCredentialsType"
+}
+
+func (t SessionCredentialsType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	accessKeyAttribute, ok := attributes["access_key"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`access_key is missing from object`)
+
+		return nil, diags
+	}
+
+	accessKeyVal, ok := accessKeyAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`access_key expected to be basetypes.StringValue, was: %T`, accessKeyAttribute))
+	}
+
+	secretKeyAttribute, ok := attributes["secret_key"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`secret_key is missing from object`)
+
+		return nil, diags
+	}
+
+	secretKeyVal, ok := secretKeyAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`secret_key expected to be basetypes.StringValue, was: %T`, secretKeyAttribute))
+	}
+
+	sessionTokenAttribute, ok := attributes["session_token"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`session_token is missing from object`)
+
+		return nil, diags
+	}
+
+	sessionTokenVal, ok := sessionTokenAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`session_token expected to be basetypes.StringValue, was: %T`, sessionTokenAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return SessionCredentialsValue{
+		AccessKey:    accessKeyVal,
+		SecretKey:    secretKeyVal,
+		SessionToken: sessionTokenVal,
+		state:        attr.ValueStateKnown,
+	}, diags
+}
+
+func NewSessionCredentialsValueNull() SessionCredentialsValue {
+	return SessionCredentialsValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewSessionCredentialsValueUnknown() SessionCredentialsValue {
+	return SessionCredentialsValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewSessionCredentialsValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (SessionCredentialsValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing SessionCredentialsValue Attribute Value",
+				"While creating a SessionCredentialsValue value, a missing attribute value was detected. "+
+					"A SessionCredentialsValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("SessionCredentialsValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid SessionCredentialsValue Attribute Type",
+				"While creating a SessionCredentialsValue value, an invalid attribute value was detected. "+
+					"A SessionCredentialsValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("SessionCredentialsValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("SessionCredentialsValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra SessionCredentialsValue Attribute Value",
+				"While creating a SessionCredentialsValue value, an extra attribute value was detected. "+
+					"A SessionCredentialsValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra SessionCredentialsValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewSessionCredentialsValueUnknown(), diags
+	}
+
+	accessKeyAttribute, ok := attributes["access_key"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`access_key is missing from object`)
+
+		return NewSessionCredentialsValueUnknown(), diags
+	}
+
+	accessKeyVal, ok := accessKeyAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`access_key expected to be basetypes.StringValue, was: %T`, accessKeyAttribute))
+	}
+
+	secretKeyAttribute, ok := attributes["secret_key"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`secret_key is missing from object`)
+
+		return NewSessionCredentialsValueUnknown(), diags
+	}
+
+	secretKeyVal, ok := secretKeyAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`secret_key expected to be basetypes.StringValue, was: %T`, secretKeyAttribute))
+	}
+
+	sessionTokenAttribute, ok := attributes["session_token"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`session_token is missing from object`)
+
+		return NewSessionCredentialsValueUnknown(), diags
+	}
+
+	sessionTokenVal, ok := sessionTokenAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`session_token expected to be basetypes.StringValue, was: %T`, sessionTokenAttribute))
+	}
+
+	if diags.HasError() {
+		return NewSessionCredentialsValueUnknown(), diags
+	}
+
+	return SessionCredentialsValue{
+		AccessKey:    accessKeyVal,
+		SecretKey:    secretKeyVal,
+		SessionToken: sessionTokenVal,
+		state:        attr.ValueStateKnown,
+	}, diags
+}
+
+func NewSessionCredentialsValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) SessionCredentialsValue {
+	object, diags := NewSessionCredentialsValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewSessionCredentialsValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t SessionCredentialsType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewSessionCredentialsValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewSessionCredentialsValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewSessionCredentialsValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewSessionCredentialsValueMust(SessionCredentialsValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t SessionCredentialsType) ValueType(ctx context.Context) attr.Value {
+	return SessionCredentialsValue{}
+}
+
+var _ basetypes.ObjectValuable = SessionCredentialsValue{}
+
+type SessionCredentialsValue struct {
+	AccessKey    basetypes.StringValue `tfsdk:"access_key"`
+	SecretKey    basetypes.StringValue `tfsdk:"secret_key"`
+	SessionToken basetypes.StringValue `tfsdk:"session_token"`
+	state        attr.ValueState
+}
+
+func (v SessionCredentialsValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 3)
+
+	var val tftypes.Value
+	var err error
+
+	attrTypes["access_key"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["secret_key"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["session_token"] = basetypes.StringType{}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 3)
+
+		val, err = v.AccessKey.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["access_key"] = val
+
+		val, err = v.SecretKey.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["secret_key"] = val
+
+		val, err = v.SessionToken.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["session_token"] = val
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v SessionCredentialsValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v SessionCredentialsValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v SessionCredentialsValue) String() string {
+	return "SessionCredentialsValue"
+}
+
+func (v SessionCredentialsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributeTypes := map[string]attr.Type{
+		"access_key":    basetypes.StringType{},
+		"secret_key":    basetypes.StringType{},
+		"session_token": basetypes.StringType{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{
+			"access_key":    v.AccessKey,
+			"secret_key":    v.SecretKey,
+			"session_token": v.SessionToken,
+		})
+
+	return objVal, diags
+}
+
+func (v SessionCredentialsValue) Equal(o attr.Value) bool {
+	other, ok := o.(SessionCredentialsValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	if !v.AccessKey.Equal(other.AccessKey) {
+		return false
+	}
+
+	if !v.SecretKey.Equal(other.SecretKey) {
+		return false
+	}
+
+	if !v.SessionToken.Equal(other.SessionToken) {
+		return false
+	}
+
+	return true
+}
+
+func (v SessionCredentialsValue) Type(ctx context.Context) attr.Type {
+	return SessionCredentialsType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v SessionCredentialsValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"access_key":    basetypes.StringType{},
+		"secret_key":    basetypes.StringType{},
+		"session_token": basetypes.StringType{},
+	}
+}
+
+var _ basetypes.ObjectTypable = AzureType{}
+
+type AzureType struct {
+	basetypes.ObjectType
+}
+
+func (t AzureType) Equal(o attr.Type) bool {
+	other, ok := o.(AzureType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t AzureType) String() string {
+	return "AzureType"
+}
+
+func (t AzureType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	retryPolicyAttribute, ok := attributes["retry_policy"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`retry_policy is missing from object`)
+
+		return nil, diags
+	}
+
+	retryPolicyVal, ok := retryPolicyAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`retry_policy expected to be basetypes.ObjectValue, was: %T`, retryPolicyAttribute))
+	}
+
+	tokenCredentialAttribute, ok := attributes["token_credential"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`token_credential is missing from object`)
+
+		return nil, diags
+	}
+
+	tokenCredentialVal, ok := tokenCredentialAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`token_credential expected to be basetypes.ObjectValue, was: %T`, tokenCredentialAttribute))
+	}
+
+	usernamePasswordCredentialAttribute, ok := attributes["username_password_credential"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`username_password_credential is missing from object`)
+
+		return nil, diags
+	}
+
+	usernamePasswordCredentialVal, ok := usernamePasswordCredentialAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`username_password_credential expected to be basetypes.ObjectValue, was: %T`, usernamePasswordCredentialAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return AzureValue{
+		RetryPolicy:                retryPolicyVal,
+		TokenCredential:            tokenCredentialVal,
+		UsernamePasswordCredential: usernamePasswordCredentialVal,
+		state:                      attr.ValueStateKnown,
+	}, diags
+}
+
+func NewAzureValueNull() AzureValue {
+	return AzureValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewAzureValueUnknown() AzureValue {
+	return AzureValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewAzureValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (AzureValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing AzureValue Attribute Value",
+				"While creating a AzureValue value, a missing attribute value was detected. "+
+					"A AzureValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("AzureValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid AzureValue Attribute Type",
+				"While creating a AzureValue value, an invalid attribute value was detected. "+
+					"A AzureValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("AzureValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("AzureValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra AzureValue Attribute Value",
+				"While creating a AzureValue value, an extra attribute value was detected. "+
+					"A AzureValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra AzureValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewAzureValueUnknown(), diags
+	}
+
+	retryPolicyAttribute, ok := attributes["retry_policy"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`retry_policy is missing from object`)
+
+		return NewAzureValueUnknown(), diags
+	}
+
+	retryPolicyVal, ok := retryPolicyAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`retry_policy expected to be basetypes.ObjectValue, was: %T`, retryPolicyAttribute))
+	}
+
+	tokenCredentialAttribute, ok := attributes["token_credential"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`token_credential is missing from object`)
+
+		return NewAzureValueUnknown(), diags
+	}
+
+	tokenCredentialVal, ok := tokenCredentialAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`token_credential expected to be basetypes.ObjectValue, was: %T`, tokenCredentialAttribute))
+	}
+
+	usernamePasswordCredentialAttribute, ok := attributes["username_password_credential"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`username_password_credential is missing from object`)
+
+		return NewAzureValueUnknown(), diags
+	}
+
+	usernamePasswordCredentialVal, ok := usernamePasswordCredentialAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`username_password_credential expected to be basetypes.ObjectValue, was: %T`, usernamePasswordCredentialAttribute))
+	}
+
+	if diags.HasError() {
+		return NewAzureValueUnknown(), diags
+	}
+
+	return AzureValue{
+		RetryPolicy:                retryPolicyVal,
+		TokenCredential:            tokenCredentialVal,
+		UsernamePasswordCredential: usernamePasswordCredentialVal,
+		state:                      attr.ValueStateKnown,
+	}, diags
+}
+
+func NewAzureValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) AzureValue {
+	object, diags := NewAzureValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewAzureValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t AzureType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewAzureValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewAzureValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewAzureValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewAzureValueMust(AzureValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t AzureType) ValueType(ctx context.Context) attr.Value {
+	return AzureValue{}
+}
+
+var _ basetypes.ObjectValuable = AzureValue{}
+
+type AzureValue struct {
+	RetryPolicy                basetypes.ObjectValue `tfsdk:"retry_policy"`
+	TokenCredential            basetypes.ObjectValue `tfsdk:"token_credential"`
+	UsernamePasswordCredential basetypes.ObjectValue `tfsdk:"username_password_credential"`
+	state                      attr.ValueState
+}
+
+func (v AzureValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 3)
+
+	var val tftypes.Value
+	var err error
+
+	attrTypes["retry_policy"] = basetypes.ObjectType{
+		AttrTypes: RetryPolicyValue{}.AttributeTypes(ctx),
+	}.TerraformType(ctx)
+	attrTypes["token_credential"] = basetypes.ObjectType{
+		AttrTypes: TokenCredentialValue{}.AttributeTypes(ctx),
+	}.TerraformType(ctx)
+	attrTypes["username_password_credential"] = basetypes.ObjectType{
+		AttrTypes: UsernamePasswordCredentialValue{}.AttributeTypes(ctx),
+	}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 3)
+
+		val, err = v.RetryPolicy.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["retry_policy"] = val
+
+		val, err = v.TokenCredential.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["token_credential"] = val
+
+		val, err = v.UsernamePasswordCredential.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["username_password_credential"] = val
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v AzureValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v AzureValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v AzureValue) String() string {
+	return "AzureValue"
+}
+
+func (v AzureValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	var retryPolicy basetypes.ObjectValue
+
+	if v.RetryPolicy.IsNull() {
+		retryPolicy = types.ObjectNull(
+			RetryPolicyValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if v.RetryPolicy.IsUnknown() {
+		retryPolicy = types.ObjectUnknown(
+			RetryPolicyValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if !v.RetryPolicy.IsNull() && !v.RetryPolicy.IsUnknown() {
+		retryPolicy = types.ObjectValueMust(
+			RetryPolicyValue{}.AttributeTypes(ctx),
+			v.RetryPolicy.Attributes(),
+		)
+	}
+
+	var tokenCredential basetypes.ObjectValue
+
+	if v.TokenCredential.IsNull() {
+		tokenCredential = types.ObjectNull(
+			TokenCredentialValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if v.TokenCredential.IsUnknown() {
+		tokenCredential = types.ObjectUnknown(
+			TokenCredentialValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if !v.TokenCredential.IsNull() && !v.TokenCredential.IsUnknown() {
+		tokenCredential = types.ObjectValueMust(
+			TokenCredentialValue{}.AttributeTypes(ctx),
+			v.TokenCredential.Attributes(),
+		)
+	}
+
+	var usernamePasswordCredential basetypes.ObjectValue
+
+	if v.UsernamePasswordCredential.IsNull() {
+		usernamePasswordCredential = types.ObjectNull(
+			UsernamePasswordCredentialValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if v.UsernamePasswordCredential.IsUnknown() {
+		usernamePasswordCredential = types.ObjectUnknown(
+			UsernamePasswordCredentialValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if !v.UsernamePasswordCredential.IsNull() && !v.UsernamePasswordCredential.IsUnknown() {
+		usernamePasswordCredential = types.ObjectValueMust(
+			UsernamePasswordCredentialValue{}.AttributeTypes(ctx),
+			v.UsernamePasswordCredential.Attributes(),
+		)
+	}
+
+	attributeTypes := map[string]attr.Type{
+		"retry_policy": basetypes.ObjectType{
+			AttrTypes: RetryPolicyValue{}.AttributeTypes(ctx),
+		},
+		"token_credential": basetypes.ObjectType{
+			AttrTypes: TokenCredentialValue{}.AttributeTypes(ctx),
+		},
+		"username_password_credential": basetypes.ObjectType{
+			AttrTypes: UsernamePasswordCredentialValue{}.AttributeTypes(ctx),
+		},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{
+			"retry_policy":                 retryPolicy,
+			"token_credential":             tokenCredential,
+			"username_password_credential": usernamePasswordCredential,
+		})
+
+	return objVal, diags
+}
+
+func (v AzureValue) Equal(o attr.Value) bool {
+	other, ok := o.(AzureValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	if !v.RetryPolicy.Equal(other.RetryPolicy) {
+		return false
+	}
+
+	if !v.TokenCredential.Equal(other.TokenCredential) {
+		return false
+	}
+
+	if !v.UsernamePasswordCredential.Equal(other.UsernamePasswordCredential) {
+		return false
+	}
+
+	return true
+}
+
+func (v AzureValue) Type(ctx context.Context) attr.Type {
+	return AzureType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v AzureValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"retry_policy": basetypes.ObjectType{
+			AttrTypes: RetryPolicyValue{}.AttributeTypes(ctx),
+		},
+		"token_credential": basetypes.ObjectType{
+			AttrTypes: TokenCredentialValue{}.AttributeTypes(ctx),
+		},
+		"username_password_credential": basetypes.ObjectType{
+			AttrTypes: UsernamePasswordCredentialValue{}.AttributeTypes(ctx),
+		},
+	}
+}
+
+var _ basetypes.ObjectTypable = RetryPolicyType{}
+
+type RetryPolicyType struct {
+	basetypes.ObjectType
+}
+
+func (t RetryPolicyType) Equal(o attr.Type) bool {
+	other, ok := o.(RetryPolicyType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t RetryPolicyType) String() string {
+	return "RetryPolicyType"
+}
+
+func (t RetryPolicyType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	delayMsAttribute, ok := attributes["delay_ms"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`delay_ms is missing from object`)
+
+		return nil, diags
+	}
+
+	delayMsVal, ok := delayMsAttribute.(basetypes.Int64Value)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`delay_ms expected to be basetypes.Int64Value, was: %T`, delayMsAttribute))
+	}
+
+	maxDelayMsAttribute, ok := attributes["max_delay_ms"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`max_delay_ms is missing from object`)
+
+		return nil, diags
+	}
+
+	maxDelayMsVal, ok := maxDelayMsAttribute.(basetypes.Int64Value)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`max_delay_ms expected to be basetypes.Int64Value, was: %T`, maxDelayMsAttribute))
+	}
+
+	maxRetriesAttribute, ok := attributes["max_retries"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`max_retries is missing from object`)
+
+		return nil, diags
+	}
+
+	maxRetriesVal, ok := maxRetriesAttribute.(basetypes.Int64Value)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`max_retries expected to be basetypes.Int64Value, was: %T`, maxRetriesAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return RetryPolicyValue{
+		DelayMs:    delayMsVal,
+		MaxDelayMs: maxDelayMsVal,
+		MaxRetries: maxRetriesVal,
+		state:      attr.ValueStateKnown,
+	}, diags
+}
+
+func NewRetryPolicyValueNull() RetryPolicyValue {
+	return RetryPolicyValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewRetryPolicyValueUnknown() RetryPolicyValue {
+	return RetryPolicyValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewRetryPolicyValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (RetryPolicyValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing RetryPolicyValue Attribute Value",
+				"While creating a RetryPolicyValue value, a missing attribute value was detected. "+
+					"A RetryPolicyValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("RetryPolicyValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid RetryPolicyValue Attribute Type",
+				"While creating a RetryPolicyValue value, an invalid attribute value was detected. "+
+					"A RetryPolicyValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("RetryPolicyValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("RetryPolicyValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra RetryPolicyValue Attribute Value",
+				"While creating a RetryPolicyValue value, an extra attribute value was detected. "+
+					"A RetryPolicyValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra RetryPolicyValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewRetryPolicyValueUnknown(), diags
+	}
+
+	delayMsAttribute, ok := attributes["delay_ms"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`delay_ms is missing from object`)
+
+		return NewRetryPolicyValueUnknown(), diags
+	}
+
+	delayMsVal, ok := delayMsAttribute.(basetypes.Int64Value)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`delay_ms expected to be basetypes.Int64Value, was: %T`, delayMsAttribute))
+	}
+
+	maxDelayMsAttribute, ok := attributes["max_delay_ms"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`max_delay_ms is missing from object`)
+
+		return NewRetryPolicyValueUnknown(), diags
+	}
+
+	maxDelayMsVal, ok := maxDelayMsAttribute.(basetypes.Int64Value)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`max_delay_ms expected to be basetypes.Int64Value, was: %T`, maxDelayMsAttribute))
+	}
+
+	maxRetriesAttribute, ok := attributes["max_retries"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`max_retries is missing from object`)
+
+		return NewRetryPolicyValueUnknown(), diags
+	}
+
+	maxRetriesVal, ok := maxRetriesAttribute.(basetypes.Int64Value)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`max_retries expected to be basetypes.Int64Value, was: %T`, maxRetriesAttribute))
+	}
+
+	if diags.HasError() {
+		return NewRetryPolicyValueUnknown(), diags
+	}
+
+	return RetryPolicyValue{
+		DelayMs:    delayMsVal,
+		MaxDelayMs: maxDelayMsVal,
+		MaxRetries: maxRetriesVal,
+		state:      attr.ValueStateKnown,
+	}, diags
+}
+
+func NewRetryPolicyValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) RetryPolicyValue {
+	object, diags := NewRetryPolicyValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewRetryPolicyValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t RetryPolicyType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewRetryPolicyValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewRetryPolicyValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewRetryPolicyValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewRetryPolicyValueMust(RetryPolicyValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t RetryPolicyType) ValueType(ctx context.Context) attr.Value {
+	return RetryPolicyValue{}
+}
+
+var _ basetypes.ObjectValuable = RetryPolicyValue{}
+
+type RetryPolicyValue struct {
+	DelayMs    basetypes.Int64Value `tfsdk:"delay_ms"`
+	MaxDelayMs basetypes.Int64Value `tfsdk:"max_delay_ms"`
+	MaxRetries basetypes.Int64Value `tfsdk:"max_retries"`
+	state      attr.ValueState
+}
+
+func (v RetryPolicyValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 3)
+
+	var val tftypes.Value
+	var err error
+
+	attrTypes["delay_ms"] = basetypes.Int64Type{}.TerraformType(ctx)
+	attrTypes["max_delay_ms"] = basetypes.Int64Type{}.TerraformType(ctx)
+	attrTypes["max_retries"] = basetypes.Int64Type{}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 3)
+
+		val, err = v.DelayMs.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["delay_ms"] = val
+
+		val, err = v.MaxDelayMs.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["max_delay_ms"] = val
+
+		val, err = v.MaxRetries.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["max_retries"] = val
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v RetryPolicyValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v RetryPolicyValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v RetryPolicyValue) String() string {
+	return "RetryPolicyValue"
+}
+
+func (v RetryPolicyValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributeTypes := map[string]attr.Type{
+		"delay_ms":     basetypes.Int64Type{},
+		"max_delay_ms": basetypes.Int64Type{},
+		"max_retries":  basetypes.Int64Type{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{
+			"delay_ms":     v.DelayMs,
+			"max_delay_ms": v.MaxDelayMs,
+			"max_retries":  v.MaxRetries,
+		})
+
+	return objVal, diags
+}
+
+func (v RetryPolicyValue) Equal(o attr.Value) bool {
+	other, ok := o.(RetryPolicyValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	if !v.DelayMs.Equal(other.DelayMs) {
+		return false
+	}
+
+	if !v.MaxDelayMs.Equal(other.MaxDelayMs) {
+		return false
+	}
+
+	if !v.MaxRetries.Equal(other.MaxRetries) {
+		return false
+	}
+
+	return true
+}
+
+func (v RetryPolicyValue) Type(ctx context.Context) attr.Type {
+	return RetryPolicyType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v RetryPolicyValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"delay_ms":     basetypes.Int64Type{},
+		"max_delay_ms": basetypes.Int64Type{},
+		"max_retries":  basetypes.Int64Type{},
+	}
+}
+
+var _ basetypes.ObjectTypable = TokenCredentialType{}
+
+type TokenCredentialType struct {
+	basetypes.ObjectType
+}
+
+func (t TokenCredentialType) Equal(o attr.Type) bool {
+	other, ok := o.(TokenCredentialType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t TokenCredentialType) String() string {
+	return "TokenCredentialType"
+}
+
+func (t TokenCredentialType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	clientIdAttribute, ok := attributes["client_id"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`client_id is missing from object`)
+
+		return nil, diags
+	}
+
+	clientIdVal, ok := clientIdAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`client_id expected to be basetypes.StringValue, was: %T`, clientIdAttribute))
+	}
+
+	clientSecretAttribute, ok := attributes["client_secret"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`client_secret is missing from object`)
+
+		return nil, diags
+	}
+
+	clientSecretVal, ok := clientSecretAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`client_secret expected to be basetypes.StringValue, was: %T`, clientSecretAttribute))
+	}
+
+	tenantIdAttribute, ok := attributes["tenant_id"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`tenant_id is missing from object`)
+
+		return nil, diags
+	}
+
+	tenantIdVal, ok := tenantIdAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`tenant_id expected to be basetypes.StringValue, was: %T`, tenantIdAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return TokenCredentialValue{
+		ClientId:     clientIdVal,
+		ClientSecret: clientSecretVal,
+		TenantId:     tenantIdVal,
+		state:        attr.ValueStateKnown,
+	}, diags
+}
+
+func NewTokenCredentialValueNull() TokenCredentialValue {
+	return TokenCredentialValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewTokenCredentialValueUnknown() TokenCredentialValue {
+	return TokenCredentialValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewTokenCredentialValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (TokenCredentialValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing TokenCredentialValue Attribute Value",
+				"While creating a TokenCredentialValue value, a missing attribute value was detected. "+
+					"A TokenCredentialValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("TokenCredentialValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid TokenCredentialValue Attribute Type",
+				"While creating a TokenCredentialValue value, an invalid attribute value was detected. "+
+					"A TokenCredentialValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("TokenCredentialValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("TokenCredentialValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra TokenCredentialValue Attribute Value",
+				"While creating a TokenCredentialValue value, an extra attribute value was detected. "+
+					"A TokenCredentialValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra TokenCredentialValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewTokenCredentialValueUnknown(), diags
+	}
+
+	clientIdAttribute, ok := attributes["client_id"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`client_id is missing from object`)
+
+		return NewTokenCredentialValueUnknown(), diags
+	}
+
+	clientIdVal, ok := clientIdAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`client_id expected to be basetypes.StringValue, was: %T`, clientIdAttribute))
+	}
+
+	clientSecretAttribute, ok := attributes["client_secret"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`client_secret is missing from object`)
+
+		return NewTokenCredentialValueUnknown(), diags
+	}
+
+	clientSecretVal, ok := clientSecretAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`client_secret expected to be basetypes.StringValue, was: %T`, clientSecretAttribute))
+	}
+
+	tenantIdAttribute, ok := attributes["tenant_id"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`tenant_id is missing from object`)
+
+		return NewTokenCredentialValueUnknown(), diags
+	}
+
+	tenantIdVal, ok := tenantIdAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`tenant_id expected to be basetypes.StringValue, was: %T`, tenantIdAttribute))
+	}
+
+	if diags.HasError() {
+		return NewTokenCredentialValueUnknown(), diags
+	}
+
+	return TokenCredentialValue{
+		ClientId:     clientIdVal,
+		ClientSecret: clientSecretVal,
+		TenantId:     tenantIdVal,
+		state:        attr.ValueStateKnown,
+	}, diags
+}
+
+func NewTokenCredentialValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) TokenCredentialValue {
+	object, diags := NewTokenCredentialValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewTokenCredentialValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t TokenCredentialType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewTokenCredentialValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewTokenCredentialValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewTokenCredentialValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewTokenCredentialValueMust(TokenCredentialValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t TokenCredentialType) ValueType(ctx context.Context) attr.Value {
+	return TokenCredentialValue{}
+}
+
+var _ basetypes.ObjectValuable = TokenCredentialValue{}
+
+type TokenCredentialValue struct {
+	ClientId     basetypes.StringValue `tfsdk:"client_id"`
+	ClientSecret basetypes.StringValue `tfsdk:"client_secret"`
+	TenantId     basetypes.StringValue `tfsdk:"tenant_id"`
+	state        attr.ValueState
+}
+
+func (v TokenCredentialValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 3)
+
+	var val tftypes.Value
+	var err error
+
+	attrTypes["client_id"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["client_secret"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["tenant_id"] = basetypes.StringType{}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 3)
+
+		val, err = v.ClientId.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["client_id"] = val
+
+		val, err = v.ClientSecret.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["client_secret"] = val
+
+		val, err = v.TenantId.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["tenant_id"] = val
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v TokenCredentialValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v TokenCredentialValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v TokenCredentialValue) String() string {
+	return "TokenCredentialValue"
+}
+
+func (v TokenCredentialValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributeTypes := map[string]attr.Type{
+		"client_id":     basetypes.StringType{},
+		"client_secret": basetypes.StringType{},
+		"tenant_id":     basetypes.StringType{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{
+			"client_id":     v.ClientId,
+			"client_secret": v.ClientSecret,
+			"tenant_id":     v.TenantId,
+		})
+
+	return objVal, diags
+}
+
+func (v TokenCredentialValue) Equal(o attr.Value) bool {
+	other, ok := o.(TokenCredentialValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	if !v.ClientId.Equal(other.ClientId) {
+		return false
+	}
+
+	if !v.ClientSecret.Equal(other.ClientSecret) {
+		return false
+	}
+
+	if !v.TenantId.Equal(other.TenantId) {
+		return false
+	}
+
+	return true
+}
+
+func (v TokenCredentialValue) Type(ctx context.Context) attr.Type {
+	return TokenCredentialType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v TokenCredentialValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"client_id":     basetypes.StringType{},
+		"client_secret": basetypes.StringType{},
+		"tenant_id":     basetypes.StringType{},
+	}
+}
+
+var _ basetypes.ObjectTypable = UsernamePasswordCredentialType{}
+
+type UsernamePasswordCredentialType struct {
+	basetypes.ObjectType
+}
+
+func (t UsernamePasswordCredentialType) Equal(o attr.Type) bool {
+	other, ok := o.(UsernamePasswordCredentialType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t UsernamePasswordCredentialType) String() string {
+	return "UsernamePasswordCredentialType"
+}
+
+func (t UsernamePasswordCredentialType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	clientIdAttribute, ok := attributes["client_id"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`client_id is missing from object`)
+
+		return nil, diags
+	}
+
+	clientIdVal, ok := clientIdAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`client_id expected to be basetypes.StringValue, was: %T`, clientIdAttribute))
+	}
+
+	passwordAttribute, ok := attributes["password"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`password is missing from object`)
+
+		return nil, diags
+	}
+
+	passwordVal, ok := passwordAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`password expected to be basetypes.StringValue, was: %T`, passwordAttribute))
+	}
+
+	tenantIdAttribute, ok := attributes["tenant_id"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`tenant_id is missing from object`)
+
+		return nil, diags
+	}
+
+	tenantIdVal, ok := tenantIdAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`tenant_id expected to be basetypes.StringValue, was: %T`, tenantIdAttribute))
+	}
+
+	usernameAttribute, ok := attributes["username"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`username is missing from object`)
+
+		return nil, diags
+	}
+
+	usernameVal, ok := usernameAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`username expected to be basetypes.StringValue, was: %T`, usernameAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return UsernamePasswordCredentialValue{
+		ClientId: clientIdVal,
+		Password: passwordVal,
+		TenantId: tenantIdVal,
+		Username: usernameVal,
+		state:    attr.ValueStateKnown,
+	}, diags
+}
+
+func NewUsernamePasswordCredentialValueNull() UsernamePasswordCredentialValue {
+	return UsernamePasswordCredentialValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewUsernamePasswordCredentialValueUnknown() UsernamePasswordCredentialValue {
+	return UsernamePasswordCredentialValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewUsernamePasswordCredentialValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (UsernamePasswordCredentialValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing UsernamePasswordCredentialValue Attribute Value",
+				"While creating a UsernamePasswordCredentialValue value, a missing attribute value was detected. "+
+					"A UsernamePasswordCredentialValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("UsernamePasswordCredentialValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid UsernamePasswordCredentialValue Attribute Type",
+				"While creating a UsernamePasswordCredentialValue value, an invalid attribute value was detected. "+
+					"A UsernamePasswordCredentialValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("UsernamePasswordCredentialValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("UsernamePasswordCredentialValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra UsernamePasswordCredentialValue Attribute Value",
+				"While creating a UsernamePasswordCredentialValue value, an extra attribute value was detected. "+
+					"A UsernamePasswordCredentialValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra UsernamePasswordCredentialValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewUsernamePasswordCredentialValueUnknown(), diags
+	}
+
+	clientIdAttribute, ok := attributes["client_id"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`client_id is missing from object`)
+
+		return NewUsernamePasswordCredentialValueUnknown(), diags
+	}
+
+	clientIdVal, ok := clientIdAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`client_id expected to be basetypes.StringValue, was: %T`, clientIdAttribute))
+	}
+
+	passwordAttribute, ok := attributes["password"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`password is missing from object`)
+
+		return NewUsernamePasswordCredentialValueUnknown(), diags
+	}
+
+	passwordVal, ok := passwordAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`password expected to be basetypes.StringValue, was: %T`, passwordAttribute))
+	}
+
+	tenantIdAttribute, ok := attributes["tenant_id"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`tenant_id is missing from object`)
+
+		return NewUsernamePasswordCredentialValueUnknown(), diags
+	}
+
+	tenantIdVal, ok := tenantIdAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`tenant_id expected to be basetypes.StringValue, was: %T`, tenantIdAttribute))
+	}
+
+	usernameAttribute, ok := attributes["username"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`username is missing from object`)
+
+		return NewUsernamePasswordCredentialValueUnknown(), diags
+	}
+
+	usernameVal, ok := usernameAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`username expected to be basetypes.StringValue, was: %T`, usernameAttribute))
+	}
+
+	if diags.HasError() {
+		return NewUsernamePasswordCredentialValueUnknown(), diags
+	}
+
+	return UsernamePasswordCredentialValue{
+		ClientId: clientIdVal,
+		Password: passwordVal,
+		TenantId: tenantIdVal,
+		Username: usernameVal,
+		state:    attr.ValueStateKnown,
+	}, diags
+}
+
+func NewUsernamePasswordCredentialValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) UsernamePasswordCredentialValue {
+	object, diags := NewUsernamePasswordCredentialValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewUsernamePasswordCredentialValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t UsernamePasswordCredentialType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewUsernamePasswordCredentialValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewUsernamePasswordCredentialValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewUsernamePasswordCredentialValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewUsernamePasswordCredentialValueMust(UsernamePasswordCredentialValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t UsernamePasswordCredentialType) ValueType(ctx context.Context) attr.Value {
+	return UsernamePasswordCredentialValue{}
+}
+
+var _ basetypes.ObjectValuable = UsernamePasswordCredentialValue{}
+
+type UsernamePasswordCredentialValue struct {
+	ClientId basetypes.StringValue `tfsdk:"client_id"`
+	Password basetypes.StringValue `tfsdk:"password"`
+	TenantId basetypes.StringValue `tfsdk:"tenant_id"`
+	Username basetypes.StringValue `tfsdk:"username"`
+	state    attr.ValueState
+}
+
+func (v UsernamePasswordCredentialValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 4)
+
+	var val tftypes.Value
+	var err error
+
+	attrTypes["client_id"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["password"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["tenant_id"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["username"] = basetypes.StringType{}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 4)
+
+		val, err = v.ClientId.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["client_id"] = val
+
+		val, err = v.Password.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["password"] = val
+
+		val, err = v.TenantId.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["tenant_id"] = val
+
+		val, err = v.Username.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["username"] = val
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v UsernamePasswordCredentialValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v UsernamePasswordCredentialValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v UsernamePasswordCredentialValue) String() string {
+	return "UsernamePasswordCredentialValue"
+}
+
+func (v UsernamePasswordCredentialValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributeTypes := map[string]attr.Type{
+		"client_id": basetypes.StringType{},
+		"password":  basetypes.StringType{},
+		"tenant_id": basetypes.StringType{},
+		"username":  basetypes.StringType{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{
+			"client_id": v.ClientId,
+			"password":  v.Password,
+			"tenant_id": v.TenantId,
+			"username":  v.Username,
+		})
+
+	return objVal, diags
+}
+
+func (v UsernamePasswordCredentialValue) Equal(o attr.Value) bool {
+	other, ok := o.(UsernamePasswordCredentialValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	if !v.ClientId.Equal(other.ClientId) {
+		return false
+	}
+
+	if !v.Password.Equal(other.Password) {
+		return false
+	}
+
+	if !v.TenantId.Equal(other.TenantId) {
+		return false
+	}
+
+	if !v.Username.Equal(other.Username) {
+		return false
+	}
+
+	return true
+}
+
+func (v UsernamePasswordCredentialValue) Type(ctx context.Context) attr.Type {
+	return UsernamePasswordCredentialType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v UsernamePasswordCredentialValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"client_id": basetypes.StringType{},
+		"password":  basetypes.StringType{},
+		"tenant_id": basetypes.StringType{},
+		"username":  basetypes.StringType{},
+	}
+}
+
+var _ basetypes.ObjectTypable = GcpType{}
+
+type GcpType struct {
+	basetypes.ObjectType
+}
+
+func (t GcpType) Equal(o attr.Type) bool {
+	other, ok := o.(GcpType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t GcpType) String() string {
+	return "GcpType"
+}
+
+func (t GcpType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	serviceAccountCredentialsFilePathAttribute, ok := attributes["service_account_credentials_file_path"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`service_account_credentials_file_path is missing from object`)
+
+		return nil, diags
+	}
+
+	serviceAccountCredentialsFilePathVal, ok := serviceAccountCredentialsFilePathAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`service_account_credentials_file_path expected to be basetypes.StringValue, was: %T`, serviceAccountCredentialsFilePathAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return GcpValue{
+		ServiceAccountCredentialsFilePath: serviceAccountCredentialsFilePathVal,
+		state:                             attr.ValueStateKnown,
+	}, diags
+}
+
+func NewGcpValueNull() GcpValue {
+	return GcpValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewGcpValueUnknown() GcpValue {
+	return GcpValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewGcpValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (GcpValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing GcpValue Attribute Value",
+				"While creating a GcpValue value, a missing attribute value was detected. "+
+					"A GcpValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("GcpValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid GcpValue Attribute Type",
+				"While creating a GcpValue value, an invalid attribute value was detected. "+
+					"A GcpValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("GcpValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("GcpValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra GcpValue Attribute Value",
+				"While creating a GcpValue value, an extra attribute value was detected. "+
+					"A GcpValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra GcpValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewGcpValueUnknown(), diags
+	}
+
+	serviceAccountCredentialsFilePathAttribute, ok := attributes["service_account_credentials_file_path"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`service_account_credentials_file_path is missing from object`)
+
+		return NewGcpValueUnknown(), diags
+	}
+
+	serviceAccountCredentialsFilePathVal, ok := serviceAccountCredentialsFilePathAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`service_account_credentials_file_path expected to be basetypes.StringValue, was: %T`, serviceAccountCredentialsFilePathAttribute))
+	}
+
+	if diags.HasError() {
+		return NewGcpValueUnknown(), diags
+	}
+
+	return GcpValue{
+		ServiceAccountCredentialsFilePath: serviceAccountCredentialsFilePathVal,
+		state:                             attr.ValueStateKnown,
+	}, diags
+}
+
+func NewGcpValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) GcpValue {
+	object, diags := NewGcpValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewGcpValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t GcpType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewGcpValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewGcpValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewGcpValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewGcpValueMust(GcpValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t GcpType) ValueType(ctx context.Context) attr.Value {
+	return GcpValue{}
+}
+
+var _ basetypes.ObjectValuable = GcpValue{}
+
+type GcpValue struct {
+	ServiceAccountCredentialsFilePath basetypes.StringValue `tfsdk:"service_account_credentials_file_path"`
+	state                             attr.ValueState
+}
+
+func (v GcpValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 1)
+
+	var val tftypes.Value
+	var err error
+
+	attrTypes["service_account_credentials_file_path"] = basetypes.StringType{}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 1)
+
+		val, err = v.ServiceAccountCredentialsFilePath.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["service_account_credentials_file_path"] = val
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v GcpValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v GcpValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v GcpValue) String() string {
+	return "GcpValue"
+}
+
+func (v GcpValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributeTypes := map[string]attr.Type{
+		"service_account_credentials_file_path": basetypes.StringType{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{
+			"service_account_credentials_file_path": v.ServiceAccountCredentialsFilePath,
+		})
+
+	return objVal, diags
+}
+
+func (v GcpValue) Equal(o attr.Value) bool {
+	other, ok := o.(GcpValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	if !v.ServiceAccountCredentialsFilePath.Equal(other.ServiceAccountCredentialsFilePath) {
+		return false
+	}
+
+	return true
+}
+
+func (v GcpValue) Type(ctx context.Context) attr.Type {
+	return GcpType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v GcpValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"service_account_credentials_file_path": basetypes.StringType{},
+	}
+}
+
+var _ basetypes.ObjectTypable = VaultType{}
+
+type VaultType struct {
+	basetypes.ObjectType
+}
+
+func (t VaultType) Equal(o attr.Type) bool {
+	other, ok := o.(VaultType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t VaultType) String() string {
+	return "VaultType"
+}
+
+func (t VaultType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	awsAuthMountAttribute, ok := attributes["aws_auth_mount"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`aws_auth_mount is missing from object`)
+
+		return nil, diags
+	}
+
+	awsAuthMountVal, ok := awsAuthMountAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`aws_auth_mount expected to be basetypes.StringValue, was: %T`, awsAuthMountAttribute))
+	}
+
+	githubAuthMountAttribute, ok := attributes["github_auth_mount"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`github_auth_mount is missing from object`)
+
+		return nil, diags
+	}
+
+	githubAuthMountVal, ok := githubAuthMountAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`github_auth_mount expected to be basetypes.StringValue, was: %T`, githubAuthMountAttribute))
+	}
+
+	iamRequestBodyAttribute, ok := attributes["iam_request_body"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`iam_request_body is missing from object`)
+
+		return nil, diags
+	}
+
+	iamRequestBodyVal, ok := iamRequestBodyAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`iam_request_body expected to be basetypes.StringValue, was: %T`, iamRequestBodyAttribute))
+	}
+
+	iamRequestHeadersAttribute, ok := attributes["iam_request_headers"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`iam_request_headers is missing from object`)
+
+		return nil, diags
+	}
+
+	iamRequestHeadersVal, ok := iamRequestHeadersAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`iam_request_headers expected to be basetypes.StringValue, was: %T`, iamRequestHeadersAttribute))
+	}
+
+	iamRequestUrlAttribute, ok := attributes["iam_request_url"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`iam_request_url is missing from object`)
+
+		return nil, diags
+	}
+
+	iamRequestUrlVal, ok := iamRequestUrlAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`iam_request_url expected to be basetypes.StringValue, was: %T`, iamRequestUrlAttribute))
+	}
+
+	identityAttribute, ok := attributes["identity"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`identity is missing from object`)
+
+		return nil, diags
+	}
+
+	identityVal, ok := identityAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`identity expected to be basetypes.StringValue, was: %T`, identityAttribute))
+	}
+
+	jwtAttribute, ok := attributes["jwt"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`jwt is missing from object`)
+
+		return nil, diags
+	}
+
+	jwtVal, ok := jwtAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`jwt expected to be basetypes.StringValue, was: %T`, jwtAttribute))
+	}
+
+	ldapAuthMountAttribute, ok := attributes["ldap_auth_mount"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`ldap_auth_mount is missing from object`)
+
+		return nil, diags
+	}
+
+	ldapAuthMountVal, ok := ldapAuthMountAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`ldap_auth_mount expected to be basetypes.StringValue, was: %T`, ldapAuthMountAttribute))
+	}
+
+	namespaceAttribute, ok := attributes["namespace"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`namespace is missing from object`)
+
+		return nil, diags
+	}
+
+	namespaceVal, ok := namespaceAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`namespace expected to be basetypes.StringValue, was: %T`, namespaceAttribute))
+	}
+
+	nonceAttribute, ok := attributes["nonce"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`nonce is missing from object`)
+
+		return nil, diags
+	}
+
+	nonceVal, ok := nonceAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`nonce expected to be basetypes.StringValue, was: %T`, nonceAttribute))
+	}
+
+	passwordAttribute, ok := attributes["password"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`password is missing from object`)
+
+		return nil, diags
+	}
+
+	passwordVal, ok := passwordAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`password expected to be basetypes.StringValue, was: %T`, passwordAttribute))
+	}
+
+	pathAttribute, ok := attributes["path"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`path is missing from object`)
+
+		return nil, diags
+	}
+
+	pathVal, ok := pathAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`path expected to be basetypes.StringValue, was: %T`, pathAttribute))
+	}
+
+	pkcs7Attribute, ok := attributes["pkcs7"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`pkcs7 is missing from object`)
+
+		return nil, diags
+	}
+
+	pkcs7Val, ok := pkcs7Attribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`pkcs7 expected to be basetypes.StringValue, was: %T`, pkcs7Attribute))
+	}
+
+	providerAttribute, ok := attributes["provider"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`provider is missing from object`)
+
+		return nil, diags
+	}
+
+	providerVal, ok := providerAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`provider expected to be basetypes.StringValue, was: %T`, providerAttribute))
+	}
+
+	roleAttribute, ok := attributes["role"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`role is missing from object`)
+
+		return nil, diags
+	}
+
+	roleVal, ok := roleAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`role expected to be basetypes.StringValue, was: %T`, roleAttribute))
+	}
+
+	roleIdAttribute, ok := attributes["role_id"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`role_id is missing from object`)
+
+		return nil, diags
+	}
+
+	roleIdVal, ok := roleIdAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`role_id expected to be basetypes.StringValue, was: %T`, roleIdAttribute))
+	}
+
+	secretIdAttribute, ok := attributes["secret_id"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`secret_id is missing from object`)
+
+		return nil, diags
+	}
+
+	secretIdVal, ok := secretIdAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`secret_id expected to be basetypes.StringValue, was: %T`, secretIdAttribute))
+	}
+
+	signatureAttribute, ok := attributes["signature"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`signature is missing from object`)
+
+		return nil, diags
+	}
+
+	signatureVal, ok := signatureAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`signature expected to be basetypes.StringValue, was: %T`, signatureAttribute))
+	}
+
+	tokenAttribute, ok := attributes["token"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`token is missing from object`)
+
+		return nil, diags
+	}
+
+	tokenVal, ok := tokenAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`token expected to be basetypes.StringValue, was: %T`, tokenAttribute))
+	}
+
+	typeAttribute, ok := attributes["type"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`type is missing from object`)
+
+		return nil, diags
+	}
+
+	typeVal, ok := typeAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`type expected to be basetypes.StringValue, was: %T`, typeAttribute))
+	}
+
+	uriAttribute, ok := attributes["uri"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`uri is missing from object`)
+
+		return nil, diags
+	}
+
+	uriVal, ok := uriAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`uri expected to be basetypes.StringValue, was: %T`, uriAttribute))
+	}
+
+	usernameAttribute, ok := attributes["username"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`username is missing from object`)
+
+		return nil, diags
+	}
+
+	usernameVal, ok := usernameAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`username expected to be basetypes.StringValue, was: %T`, usernameAttribute))
+	}
+
+	userpassAuthMountAttribute, ok := attributes["userpass_auth_mount"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`userpass_auth_mount is missing from object`)
+
+		return nil, diags
+	}
+
+	userpassAuthMountVal, ok := userpassAuthMountAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`userpass_auth_mount expected to be basetypes.StringValue, was: %T`, userpassAuthMountAttribute))
+	}
+
+	versionAttribute, ok := attributes["version"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`version is missing from object`)
+
+		return nil, diags
+	}
+
+	versionVal, ok := versionAttribute.(basetypes.Int64Value)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`version expected to be basetypes.Int64Value, was: %T`, versionAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return VaultValue{
+		AwsAuthMount:      awsAuthMountVal,
+		GithubAuthMount:   githubAuthMountVal,
+		IamRequestBody:    iamRequestBodyVal,
+		IamRequestHeaders: iamRequestHeadersVal,
+		IamRequestUrl:     iamRequestUrlVal,
+		Identity:          identityVal,
+		Jwt:               jwtVal,
+		LdapAuthMount:     ldapAuthMountVal,
+		Namespace:         namespaceVal,
+		Nonce:             nonceVal,
+		Password:          passwordVal,
+		Path:              pathVal,
+		Pkcs7:             pkcs7Val,
+		Provider:          providerVal,
+		Role:              roleVal,
+		RoleId:            roleIdVal,
+		SecretId:          secretIdVal,
+		Signature:         signatureVal,
+		Token:             tokenVal,
+		VaultType:         typeVal,
+		Uri:               uriVal,
+		Username:          usernameVal,
+		UserpassAuthMount: userpassAuthMountVal,
+		Version:           versionVal,
+		state:             attr.ValueStateKnown,
+	}, diags
+}
+
+func NewVaultValueNull() VaultValue {
+	return VaultValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewVaultValueUnknown() VaultValue {
+	return VaultValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewVaultValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (VaultValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing VaultValue Attribute Value",
+				"While creating a VaultValue value, a missing attribute value was detected. "+
+					"A VaultValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("VaultValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid VaultValue Attribute Type",
+				"While creating a VaultValue value, an invalid attribute value was detected. "+
+					"A VaultValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("VaultValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("VaultValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra VaultValue Attribute Value",
+				"While creating a VaultValue value, an extra attribute value was detected. "+
+					"A VaultValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra VaultValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewVaultValueUnknown(), diags
+	}
+
+	awsAuthMountAttribute, ok := attributes["aws_auth_mount"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`aws_auth_mount is missing from object`)
+
+		return NewVaultValueUnknown(), diags
+	}
+
+	awsAuthMountVal, ok := awsAuthMountAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`aws_auth_mount expected to be basetypes.StringValue, was: %T`, awsAuthMountAttribute))
+	}
+
+	githubAuthMountAttribute, ok := attributes["github_auth_mount"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`github_auth_mount is missing from object`)
+
+		return NewVaultValueUnknown(), diags
+	}
+
+	githubAuthMountVal, ok := githubAuthMountAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`github_auth_mount expected to be basetypes.StringValue, was: %T`, githubAuthMountAttribute))
+	}
+
+	iamRequestBodyAttribute, ok := attributes["iam_request_body"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`iam_request_body is missing from object`)
+
+		return NewVaultValueUnknown(), diags
+	}
+
+	iamRequestBodyVal, ok := iamRequestBodyAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`iam_request_body expected to be basetypes.StringValue, was: %T`, iamRequestBodyAttribute))
+	}
+
+	iamRequestHeadersAttribute, ok := attributes["iam_request_headers"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`iam_request_headers is missing from object`)
+
+		return NewVaultValueUnknown(), diags
+	}
+
+	iamRequestHeadersVal, ok := iamRequestHeadersAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`iam_request_headers expected to be basetypes.StringValue, was: %T`, iamRequestHeadersAttribute))
+	}
+
+	iamRequestUrlAttribute, ok := attributes["iam_request_url"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`iam_request_url is missing from object`)
+
+		return NewVaultValueUnknown(), diags
+	}
+
+	iamRequestUrlVal, ok := iamRequestUrlAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`iam_request_url expected to be basetypes.StringValue, was: %T`, iamRequestUrlAttribute))
+	}
+
+	identityAttribute, ok := attributes["identity"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`identity is missing from object`)
+
+		return NewVaultValueUnknown(), diags
+	}
+
+	identityVal, ok := identityAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`identity expected to be basetypes.StringValue, was: %T`, identityAttribute))
+	}
+
+	jwtAttribute, ok := attributes["jwt"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`jwt is missing from object`)
+
+		return NewVaultValueUnknown(), diags
+	}
+
+	jwtVal, ok := jwtAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`jwt expected to be basetypes.StringValue, was: %T`, jwtAttribute))
+	}
+
+	ldapAuthMountAttribute, ok := attributes["ldap_auth_mount"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`ldap_auth_mount is missing from object`)
+
+		return NewVaultValueUnknown(), diags
+	}
+
+	ldapAuthMountVal, ok := ldapAuthMountAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`ldap_auth_mount expected to be basetypes.StringValue, was: %T`, ldapAuthMountAttribute))
+	}
+
+	namespaceAttribute, ok := attributes["namespace"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`namespace is missing from object`)
+
+		return NewVaultValueUnknown(), diags
+	}
+
+	namespaceVal, ok := namespaceAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`namespace expected to be basetypes.StringValue, was: %T`, namespaceAttribute))
+	}
+
+	nonceAttribute, ok := attributes["nonce"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`nonce is missing from object`)
+
+		return NewVaultValueUnknown(), diags
+	}
+
+	nonceVal, ok := nonceAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`nonce expected to be basetypes.StringValue, was: %T`, nonceAttribute))
+	}
+
+	passwordAttribute, ok := attributes["password"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`password is missing from object`)
+
+		return NewVaultValueUnknown(), diags
+	}
+
+	passwordVal, ok := passwordAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`password expected to be basetypes.StringValue, was: %T`, passwordAttribute))
+	}
+
+	pathAttribute, ok := attributes["path"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`path is missing from object`)
+
+		return NewVaultValueUnknown(), diags
+	}
+
+	pathVal, ok := pathAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`path expected to be basetypes.StringValue, was: %T`, pathAttribute))
+	}
+
+	pkcs7Attribute, ok := attributes["pkcs7"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`pkcs7 is missing from object`)
+
+		return NewVaultValueUnknown(), diags
+	}
+
+	pkcs7Val, ok := pkcs7Attribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`pkcs7 expected to be basetypes.StringValue, was: %T`, pkcs7Attribute))
+	}
+
+	providerAttribute, ok := attributes["provider"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`provider is missing from object`)
+
+		return NewVaultValueUnknown(), diags
+	}
+
+	providerVal, ok := providerAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`provider expected to be basetypes.StringValue, was: %T`, providerAttribute))
+	}
+
+	roleAttribute, ok := attributes["role"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`role is missing from object`)
+
+		return NewVaultValueUnknown(), diags
+	}
+
+	roleVal, ok := roleAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`role expected to be basetypes.StringValue, was: %T`, roleAttribute))
+	}
+
+	roleIdAttribute, ok := attributes["role_id"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`role_id is missing from object`)
+
+		return NewVaultValueUnknown(), diags
+	}
+
+	roleIdVal, ok := roleIdAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`role_id expected to be basetypes.StringValue, was: %T`, roleIdAttribute))
+	}
+
+	secretIdAttribute, ok := attributes["secret_id"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`secret_id is missing from object`)
+
+		return NewVaultValueUnknown(), diags
+	}
+
+	secretIdVal, ok := secretIdAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`secret_id expected to be basetypes.StringValue, was: %T`, secretIdAttribute))
+	}
+
+	signatureAttribute, ok := attributes["signature"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`signature is missing from object`)
+
+		return NewVaultValueUnknown(), diags
+	}
+
+	signatureVal, ok := signatureAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`signature expected to be basetypes.StringValue, was: %T`, signatureAttribute))
+	}
+
+	tokenAttribute, ok := attributes["token"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`token is missing from object`)
+
+		return NewVaultValueUnknown(), diags
+	}
+
+	tokenVal, ok := tokenAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`token expected to be basetypes.StringValue, was: %T`, tokenAttribute))
+	}
+
+	typeAttribute, ok := attributes["type"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`type is missing from object`)
+
+		return NewVaultValueUnknown(), diags
+	}
+
+	typeVal, ok := typeAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`type expected to be basetypes.StringValue, was: %T`, typeAttribute))
+	}
+
+	uriAttribute, ok := attributes["uri"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`uri is missing from object`)
+
+		return NewVaultValueUnknown(), diags
+	}
+
+	uriVal, ok := uriAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`uri expected to be basetypes.StringValue, was: %T`, uriAttribute))
+	}
+
+	usernameAttribute, ok := attributes["username"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`username is missing from object`)
+
+		return NewVaultValueUnknown(), diags
+	}
+
+	usernameVal, ok := usernameAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`username expected to be basetypes.StringValue, was: %T`, usernameAttribute))
+	}
+
+	userpassAuthMountAttribute, ok := attributes["userpass_auth_mount"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`userpass_auth_mount is missing from object`)
+
+		return NewVaultValueUnknown(), diags
+	}
+
+	userpassAuthMountVal, ok := userpassAuthMountAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`userpass_auth_mount expected to be basetypes.StringValue, was: %T`, userpassAuthMountAttribute))
+	}
+
+	versionAttribute, ok := attributes["version"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`version is missing from object`)
+
+		return NewVaultValueUnknown(), diags
+	}
+
+	versionVal, ok := versionAttribute.(basetypes.Int64Value)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`version expected to be basetypes.Int64Value, was: %T`, versionAttribute))
+	}
+
+	if diags.HasError() {
+		return NewVaultValueUnknown(), diags
+	}
+
+	return VaultValue{
+		AwsAuthMount:      awsAuthMountVal,
+		GithubAuthMount:   githubAuthMountVal,
+		IamRequestBody:    iamRequestBodyVal,
+		IamRequestHeaders: iamRequestHeadersVal,
+		IamRequestUrl:     iamRequestUrlVal,
+		Identity:          identityVal,
+		Jwt:               jwtVal,
+		LdapAuthMount:     ldapAuthMountVal,
+		Namespace:         namespaceVal,
+		Nonce:             nonceVal,
+		Password:          passwordVal,
+		Path:              pathVal,
+		Pkcs7:             pkcs7Val,
+		Provider:          providerVal,
+		Role:              roleVal,
+		RoleId:            roleIdVal,
+		SecretId:          secretIdVal,
+		Signature:         signatureVal,
+		Token:             tokenVal,
+		VaultType:         typeVal,
+		Uri:               uriVal,
+		Username:          usernameVal,
+		UserpassAuthMount: userpassAuthMountVal,
+		Version:           versionVal,
+		state:             attr.ValueStateKnown,
+	}, diags
+}
+
+func NewVaultValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) VaultValue {
+	object, diags := NewVaultValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewVaultValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t VaultType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewVaultValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewVaultValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewVaultValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewVaultValueMust(VaultValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t VaultType) ValueType(ctx context.Context) attr.Value {
+	return VaultValue{}
+}
+
+var _ basetypes.ObjectValuable = VaultValue{}
+
+type VaultValue struct {
+	AwsAuthMount      basetypes.StringValue `tfsdk:"aws_auth_mount"`
+	GithubAuthMount   basetypes.StringValue `tfsdk:"github_auth_mount"`
+	IamRequestBody    basetypes.StringValue `tfsdk:"iam_request_body"`
+	IamRequestHeaders basetypes.StringValue `tfsdk:"iam_request_headers"`
+	IamRequestUrl     basetypes.StringValue `tfsdk:"iam_request_url"`
+	Identity          basetypes.StringValue `tfsdk:"identity"`
+	Jwt               basetypes.StringValue `tfsdk:"jwt"`
+	LdapAuthMount     basetypes.StringValue `tfsdk:"ldap_auth_mount"`
+	Namespace         basetypes.StringValue `tfsdk:"namespace"`
+	Nonce             basetypes.StringValue `tfsdk:"nonce"`
+	Password          basetypes.StringValue `tfsdk:"password"`
+	Path              basetypes.StringValue `tfsdk:"path"`
+	Pkcs7             basetypes.StringValue `tfsdk:"pkcs7"`
+	Provider          basetypes.StringValue `tfsdk:"provider"`
+	Role              basetypes.StringValue `tfsdk:"role"`
+	RoleId            basetypes.StringValue `tfsdk:"role_id"`
+	SecretId          basetypes.StringValue `tfsdk:"secret_id"`
+	Signature         basetypes.StringValue `tfsdk:"signature"`
+	Token             basetypes.StringValue `tfsdk:"token"`
+	VaultType         basetypes.StringValue `tfsdk:"type"`
+	Uri               basetypes.StringValue `tfsdk:"uri"`
+	Username          basetypes.StringValue `tfsdk:"username"`
+	UserpassAuthMount basetypes.StringValue `tfsdk:"userpass_auth_mount"`
+	Version           basetypes.Int64Value  `tfsdk:"version"`
+	state             attr.ValueState
+}
+
+func (v VaultValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 24)
+
+	var val tftypes.Value
+	var err error
+
+	attrTypes["aws_auth_mount"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["github_auth_mount"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["iam_request_body"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["iam_request_headers"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["iam_request_url"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["identity"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["jwt"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["ldap_auth_mount"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["namespace"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["nonce"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["password"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["path"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["pkcs7"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["provider"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["role"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["role_id"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["secret_id"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["signature"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["token"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["type"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["uri"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["username"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["userpass_auth_mount"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["version"] = basetypes.Int64Type{}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 24)
+
+		val, err = v.AwsAuthMount.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["aws_auth_mount"] = val
+
+		val, err = v.GithubAuthMount.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["github_auth_mount"] = val
+
+		val, err = v.IamRequestBody.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["iam_request_body"] = val
+
+		val, err = v.IamRequestHeaders.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["iam_request_headers"] = val
+
+		val, err = v.IamRequestUrl.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["iam_request_url"] = val
+
+		val, err = v.Identity.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["identity"] = val
+
+		val, err = v.Jwt.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["jwt"] = val
+
+		val, err = v.LdapAuthMount.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["ldap_auth_mount"] = val
+
+		val, err = v.Namespace.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["namespace"] = val
+
+		val, err = v.Nonce.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["nonce"] = val
+
+		val, err = v.Password.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["password"] = val
+
+		val, err = v.Path.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["path"] = val
+
+		val, err = v.Pkcs7.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["pkcs7"] = val
+
+		val, err = v.Provider.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["provider"] = val
+
+		val, err = v.Role.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["role"] = val
+
+		val, err = v.RoleId.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["role_id"] = val
+
+		val, err = v.SecretId.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["secret_id"] = val
+
+		val, err = v.Signature.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["signature"] = val
+
+		val, err = v.Token.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["token"] = val
+
+		val, err = v.VaultType.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["type"] = val
+
+		val, err = v.Uri.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["uri"] = val
+
+		val, err = v.Username.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["username"] = val
+
+		val, err = v.UserpassAuthMount.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["userpass_auth_mount"] = val
+
+		val, err = v.Version.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["version"] = val
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v VaultValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v VaultValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v VaultValue) String() string {
+	return "VaultValue"
+}
+
+func (v VaultValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributeTypes := map[string]attr.Type{
+		"aws_auth_mount":      basetypes.StringType{},
+		"github_auth_mount":   basetypes.StringType{},
+		"iam_request_body":    basetypes.StringType{},
+		"iam_request_headers": basetypes.StringType{},
+		"iam_request_url":     basetypes.StringType{},
+		"identity":            basetypes.StringType{},
+		"jwt":                 basetypes.StringType{},
+		"ldap_auth_mount":     basetypes.StringType{},
+		"namespace":           basetypes.StringType{},
+		"nonce":               basetypes.StringType{},
+		"password":            basetypes.StringType{},
+		"path":                basetypes.StringType{},
+		"pkcs7":               basetypes.StringType{},
+		"provider":            basetypes.StringType{},
+		"role":                basetypes.StringType{},
+		"role_id":             basetypes.StringType{},
+		"secret_id":           basetypes.StringType{},
+		"signature":           basetypes.StringType{},
+		"token":               basetypes.StringType{},
+		"type":                basetypes.StringType{},
+		"uri":                 basetypes.StringType{},
+		"username":            basetypes.StringType{},
+		"userpass_auth_mount": basetypes.StringType{},
+		"version":             basetypes.Int64Type{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{
+			"aws_auth_mount":      v.AwsAuthMount,
+			"github_auth_mount":   v.GithubAuthMount,
+			"iam_request_body":    v.IamRequestBody,
+			"iam_request_headers": v.IamRequestHeaders,
+			"iam_request_url":     v.IamRequestUrl,
+			"identity":            v.Identity,
+			"jwt":                 v.Jwt,
+			"ldap_auth_mount":     v.LdapAuthMount,
+			"namespace":           v.Namespace,
+			"nonce":               v.Nonce,
+			"password":            v.Password,
+			"path":                v.Path,
+			"pkcs7":               v.Pkcs7,
+			"provider":            v.Provider,
+			"role":                v.Role,
+			"role_id":             v.RoleId,
+			"secret_id":           v.SecretId,
+			"signature":           v.Signature,
+			"token":               v.Token,
+			"type":                v.VaultType,
+			"uri":                 v.Uri,
+			"username":            v.Username,
+			"userpass_auth_mount": v.UserpassAuthMount,
+			"version":             v.Version,
+		})
+
+	return objVal, diags
+}
+
+func (v VaultValue) Equal(o attr.Value) bool {
+	other, ok := o.(VaultValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	if !v.AwsAuthMount.Equal(other.AwsAuthMount) {
+		return false
+	}
+
+	if !v.GithubAuthMount.Equal(other.GithubAuthMount) {
+		return false
+	}
+
+	if !v.IamRequestBody.Equal(other.IamRequestBody) {
+		return false
+	}
+
+	if !v.IamRequestHeaders.Equal(other.IamRequestHeaders) {
+		return false
+	}
+
+	if !v.IamRequestUrl.Equal(other.IamRequestUrl) {
+		return false
+	}
+
+	if !v.Identity.Equal(other.Identity) {
+		return false
+	}
+
+	if !v.Jwt.Equal(other.Jwt) {
+		return false
+	}
+
+	if !v.LdapAuthMount.Equal(other.LdapAuthMount) {
+		return false
+	}
+
+	if !v.Namespace.Equal(other.Namespace) {
+		return false
+	}
+
+	if !v.Nonce.Equal(other.Nonce) {
+		return false
+	}
+
+	if !v.Password.Equal(other.Password) {
+		return false
+	}
+
+	if !v.Path.Equal(other.Path) {
+		return false
+	}
+
+	if !v.Pkcs7.Equal(other.Pkcs7) {
+		return false
+	}
+
+	if !v.Provider.Equal(other.Provider) {
+		return false
+	}
+
+	if !v.Role.Equal(other.Role) {
+		return false
+	}
+
+	if !v.RoleId.Equal(other.RoleId) {
+		return false
+	}
+
+	if !v.SecretId.Equal(other.SecretId) {
+		return false
+	}
+
+	if !v.Signature.Equal(other.Signature) {
+		return false
+	}
+
+	if !v.Token.Equal(other.Token) {
+		return false
+	}
+
+	if !v.VaultType.Equal(other.VaultType) {
+		return false
+	}
+
+	if !v.Uri.Equal(other.Uri) {
+		return false
+	}
+
+	if !v.Username.Equal(other.Username) {
+		return false
+	}
+
+	if !v.UserpassAuthMount.Equal(other.UserpassAuthMount) {
+		return false
+	}
+
+	if !v.Version.Equal(other.Version) {
+		return false
+	}
+
+	return true
+}
+
+func (v VaultValue) Type(ctx context.Context) attr.Type {
+	return VaultType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v VaultValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"aws_auth_mount":      basetypes.StringType{},
+		"github_auth_mount":   basetypes.StringType{},
+		"iam_request_body":    basetypes.StringType{},
+		"iam_request_headers": basetypes.StringType{},
+		"iam_request_url":     basetypes.StringType{},
+		"identity":            basetypes.StringType{},
+		"jwt":                 basetypes.StringType{},
+		"ldap_auth_mount":     basetypes.StringType{},
+		"namespace":           basetypes.StringType{},
+		"nonce":               basetypes.StringType{},
+		"password":            basetypes.StringType{},
+		"path":                basetypes.StringType{},
+		"pkcs7":               basetypes.StringType{},
+		"provider":            basetypes.StringType{},
+		"role":                basetypes.StringType{},
+		"role_id":             basetypes.StringType{},
+		"secret_id":           basetypes.StringType{},
+		"signature":           basetypes.StringType{},
+		"token":               basetypes.StringType{},
+		"type":                basetypes.StringType{},
+		"uri":                 basetypes.StringType{},
+		"username":            basetypes.StringType{},
+		"userpass_auth_mount": basetypes.StringType{},
+		"version":             basetypes.Int64Type{},
 	}
 }
 

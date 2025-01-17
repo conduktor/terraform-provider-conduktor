@@ -51,9 +51,133 @@ Optional:
 
 - `enable_audit_log_on_error` (Boolean) Flag to enable audit log when error happens.
 - `external_storage` (Boolean) Flag to store encryption settings externally in a topic.
+- `kms_config` (Attributes) Configuration for using external Key Management Systems (KMS). (see [below for nested schema](#nestedatt--spec--config--kms_config))
 - `schema_data_mode` (String) Defines whether to preserve Avro schema format or convert to JSON.
-- `schema_registry_config` (Attributes Map) Configuration for Schema Registry to handle Avro, JSON, and Protobuf records. (see [below for nested schema](#nestedatt--spec--config--schema_registry_config))
+- `schema_registry_config` (Attributes) Configuration for Schema Registry to handle Avro, JSON, and Protobuf records. (see [below for nested schema](#nestedatt--spec--config--schema_registry_config))
 - `topic` (String) Topics that match this regex will have the interceptor applied. Defaults to all.
+
+<a id="nestedatt--spec--config--kms_config"></a>
+### Nested Schema for `spec.config.kms_config`
+
+Optional:
+
+- `aws` (Attributes) Configuration for using AWS Key Management System. (see [below for nested schema](#nestedatt--spec--config--kms_config--aws))
+- `azure` (Attributes) Configuration for using Azure Key Vault as a Key Management System. (see [below for nested schema](#nestedatt--spec--config--kms_config--azure))
+- `gcp` (Attributes) Configuration for using Google Cloud Platform Key Management System. (see [below for nested schema](#nestedatt--spec--config--kms_config--gcp))
+- `key_ttl_ms` (Number) The time-to-live for encryption keys in milliseconds. Set to 0 to disable caching.
+- `vault` (Attributes) Configuration for using HashiCorp Vault as a Key Management System. (see [below for nested schema](#nestedatt--spec--config--kms_config--vault))
+
+<a id="nestedatt--spec--config--kms_config--aws"></a>
+### Nested Schema for `spec.config.kms_config.aws`
+
+Optional:
+
+- `basic_credentials` (Attributes) AWS basic access credentials (see [below for nested schema](#nestedatt--spec--config--kms_config--aws--basic_credentials))
+- `session_credentials` (Attributes) AWS session-based credentials (see [below for nested schema](#nestedatt--spec--config--kms_config--aws--session_credentials))
+
+<a id="nestedatt--spec--config--kms_config--aws--basic_credentials"></a>
+### Nested Schema for `spec.config.kms_config.aws.basic_credentials`
+
+Required:
+
+- `access_key` (String, Sensitive) The AWS access key
+- `secret_key` (String, Sensitive) The AWS secret key
+
+
+<a id="nestedatt--spec--config--kms_config--aws--session_credentials"></a>
+### Nested Schema for `spec.config.kms_config.aws.session_credentials`
+
+Optional:
+
+- `access_key` (String, Sensitive) The AWS access key for the session
+- `secret_key` (String, Sensitive) The AWS secret key for the session
+- `session_token` (String, Sensitive) The AWS session token
+
+
+
+<a id="nestedatt--spec--config--kms_config--azure"></a>
+### Nested Schema for `spec.config.kms_config.azure`
+
+Optional:
+
+- `retry_policy` (Attributes) Azure retry policy for failed key management operations (see [below for nested schema](#nestedatt--spec--config--kms_config--azure--retry_policy))
+- `token_credential` (Attributes) Azure token-based authentication credentials (see [below for nested schema](#nestedatt--spec--config--kms_config--azure--token_credential))
+- `username_password_credential` (Attributes) Azure username/password-based authentication credentials (see [below for nested schema](#nestedatt--spec--config--kms_config--azure--username_password_credential))
+
+<a id="nestedatt--spec--config--kms_config--azure--retry_policy"></a>
+### Nested Schema for `spec.config.kms_config.azure.retry_policy`
+
+Optional:
+
+- `delay_ms` (Number) Initial delay between retries in milliseconds
+- `max_delay_ms` (Number) Maximum delay between retries in milliseconds
+- `max_retries` (Number) Maximum number of retry attempts for failed operations
+
+
+<a id="nestedatt--spec--config--kms_config--azure--token_credential"></a>
+### Nested Schema for `spec.config.kms_config.azure.token_credential`
+
+Required:
+
+- `client_id` (String) Azure Client ID for authentication
+- `client_secret` (String, Sensitive) Azure Client Secret for authentication
+- `tenant_id` (String) Azure Tenant ID for authentication
+
+
+<a id="nestedatt--spec--config--kms_config--azure--username_password_credential"></a>
+### Nested Schema for `spec.config.kms_config.azure.username_password_credential`
+
+Required:
+
+- `client_id` (String) Azure Client ID for authenticationg
+- `password` (String, Sensitive) Azure password for authentication
+- `tenant_id` (String) Azure Tenant ID for authentication
+- `username` (String) Azure username for authentication
+
+
+
+<a id="nestedatt--spec--config--kms_config--gcp"></a>
+### Nested Schema for `spec.config.kms_config.gcp`
+
+Optional:
+
+- `service_account_credentials_file_path` (String) File path to the GCP service account credentials JSON file.
+
+
+<a id="nestedatt--spec--config--kms_config--vault"></a>
+### Nested Schema for `spec.config.kms_config.vault`
+
+Required:
+
+- `type` (String) Type of the authentication for hashicorp vault, valid values are: APP_ROLE, LDAP, AWS_EC2_PKCS7, GCP, GITHUB, JWT, AWS_IAM, AWS_EC2, TOKEN, KUBERNETES, USERNAME_PASSWORD
+
+Optional:
+
+- `aws_auth_mount` (String) Custom authentication mount point for AWS EC2.
+- `github_auth_mount` (String) Custom authentication mount point for GitHub authentication.
+- `iam_request_body` (String) AWS IAM request body for authentication.
+- `iam_request_headers` (String) AWS IAM request headers for authentication.
+- `iam_request_url` (String) AWS IAM request URL for authentication.
+- `identity` (String) AWS EC2 identity document for authentication.
+- `jwt` (String, Sensitive) JWT token for GCP and JWT authentication.
+- `ldap_auth_mount` (String) Custom authentication mount point for LDAP authentication.
+- `namespace` (String) Namespace for Vault
+- `nonce` (String) nonce for aws ec2 authentication.
+- `password` (String, Sensitive) Password for LDAP Vault authentication.
+- `path` (String) Custom path for AppRole authentication.
+- `pkcs7` (String, Sensitive) PKCS7 signature for AWS EC2 authentication.
+- `provider` (String) JWT provider for Vault authentication.
+- `role` (String) Role for AWS, GCP and JWT Vault authentication.
+- `role_id` (String) AppRole Role ID for Vault authentication.
+- `secret_id` (String, Sensitive) AppRole Secret ID for Vault authentication.
+- `signature` (String) AWS EC2 identity signature for authentication.
+- `token` (String, Sensitive) GitHub personal access token for Vault authentication.
+- `uri` (String) The URI of the Vault server.
+- `username` (String) Username for LDAP Vault authentication.
+- `userpass_auth_mount` (String) Custom authentication mount point for username/password authentication.
+- `version` (Number) The version of the Vault engine.
+
+
 
 <a id="nestedatt--spec--config--schema_registry_config"></a>
 ### Nested Schema for `spec.config.schema_registry_config`

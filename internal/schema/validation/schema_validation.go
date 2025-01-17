@@ -95,3 +95,6 @@ var ValidKafkaConnectSecurityTypes = []string{
 
 // Gateway Service Accounts.
 var ValidServiceAccountTypes = []string{"LOCAL", "EXTERNAL"}
+
+// Gateway Interceptors.
+var ValidInterceptorEncryptionVaultTypes = []string{"APP_ROLE", "LDAP", "AWS_EC2_PKCS7", "GCP", "GITHUB", "JWT", "AWS_IAM", "AWS_EC2", "TOKEN", "KUBERNETES", "USERNAME_PASSWORD"}

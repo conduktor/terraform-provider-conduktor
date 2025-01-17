@@ -83,16 +83,25 @@ func ObjectValueToInterceptorEncryptionConfig(ctx context.Context, r *basetypes.
 		return nil, mapper.WrapDiagError(diag, "config", mapper.FromTerraform)
 	}
 
+	schemaRegistryValue, diag := gwinterceptor.NewSchemaRegistryConfigValue(configValue.SchemaRegistryConfig.AttributeTypes(ctx), configValue.SchemaRegistryConfig.Attributes())
+	if diag.HasError() {
+		return nil, mapper.WrapDiagError(diag, "config", mapper.FromTerraform)
+	}
+
+	additionalConfigs, diag := schema.MapValueToStringMap(ctx, schemaRegistryValue.AdditionalConfigs)
+	if diag.HasError() {
+		return nil, mapper.WrapDiagError(diag, "config", mapper.FromTerraform)
+	}
+
 	return &gateway.GatewayInterceptorEncryptionConfig{
 		ExternalStorage:       configValue.ExternalStorage.ValueBool(),
 		Topic:                 configValue.Topic.ValueString(),
 		EnableAuditLogOnError: configValue.EnableAuditLogOnError.ValueBool(),
 		SchemaDataMode:        configValue.SchemaDataMode.ValueString(),
-		// TODO
 		SchemaRegistryConfig: &gateway.GatewayInterceptorEncryptionSchemaRegistryConfig{
-			Host:              "",
-			CacheSize:         100,
-			AdditionalConfigs: map[string]string{},
+			Host:              schemaRegistryValue.Host.ValueString(),
+			CacheSize:         schemaRegistryValue.CacheSize.ValueInt64(),
+			AdditionalConfigs: additionalConfigs,
 		},
 	}, nil
 }
