@@ -440,6 +440,87 @@ func GatewayInterceptorEncryptionV2ResourceSchema(ctx context.Context) schema.Sc
 								Description:         "Configuration for using external Key Management Systems (KMS).",
 								MarkdownDescription: "Configuration for using external Key Management Systems (KMS).",
 							},
+							"record_header": schema.SingleNestedAttribute{
+								Attributes: map[string]schema.Attribute{
+									"header": schema.StringAttribute{
+										Optional:            true,
+										Description:         "Pattern to match headers that need encryption",
+										MarkdownDescription: "Pattern to match headers that need encryption",
+									},
+									"header_config": schema.SingleNestedAttribute{
+										Attributes: map[string]schema.Attribute{
+											"algorithm": schema.StringAttribute{
+												Optional:            true,
+												Description:         "The encryption algorithm used for encrypting data. Defaults to AES128_GCM if not specified.",
+												MarkdownDescription: "The encryption algorithm used for encrypting data. Defaults to AES128_GCM if not specified.",
+												Validators: []validator.String{
+													stringvalidator.OneOf(validation.ValidInterceptorEncryptionAlgorithm...),
+												},
+											},
+											"header_fields": schema.SetNestedAttribute{
+												NestedObject: schema.NestedAttributeObject{
+													Attributes: map[string]schema.Attribute{
+														"algorithm": schema.StringAttribute{
+															Required:            true,
+															Description:         "The encryption algorithm used for encrypting data. Defaults to AES128_GCM if not specified.",
+															MarkdownDescription: "The encryption algorithm used for encrypting data. Defaults to AES128_GCM if not specified.",
+															Validators: []validator.String{
+																stringvalidator.OneOf(validation.ValidInterceptorEncryptionAlgorithm...),
+															},
+														},
+														"field_name": schema.StringAttribute{
+															Required:            true,
+															Description:         "The name of the field to be encrypted. It can be a nested structure using dot notation like 'education.account.username'.",
+															MarkdownDescription: "The name of the field to be encrypted. It can be a nested structure using dot notation like 'education.account.username'.",
+														},
+														"key_secret_id": schema.StringAttribute{
+															Required:            true,
+															Description:         "The unique identifier for the encryption key. This key can be stored in an external Key Management System (KMS) or in memory.",
+															MarkdownDescription: "The unique identifier for the encryption key. This key can be stored in an external Key Management System (KMS) or in memory.",
+														},
+													},
+													CustomType: HeaderFieldsType{
+														ObjectType: types.ObjectType{
+															AttrTypes: HeaderFieldsValue{}.AttributeTypes(ctx),
+														},
+													},
+												},
+												Optional:            true,
+												Computed:            true,
+												Description:         "Set of all the fields config entry",
+												MarkdownDescription: "Set of all the fields config entry",
+											},
+											"key_secret_id": schema.StringAttribute{
+												Required:            true,
+												Description:         "The unique identifier for the encryption key. This key can be stored in an external Key Management System (KMS) or in memory.",
+												MarkdownDescription: "The unique identifier for the encryption key. This key can be stored in an external Key Management System (KMS) or in memory.",
+											},
+											"type": schema.StringAttribute{
+												Optional:            true,
+												Computed:            true,
+												Description:         "URL of the schema registry.",
+												MarkdownDescription: "URL of the schema registry.",
+											},
+										},
+										CustomType: HeaderConfigType{
+											ObjectType: types.ObjectType{
+												AttrTypes: HeaderConfigValue{}.AttributeTypes(ctx),
+											},
+										},
+										Optional:            true,
+										Description:         "The encryption configuration for the matching headers",
+										MarkdownDescription: "The encryption configuration for the matching headers",
+									},
+								},
+								CustomType: RecordHeaderType{
+									ObjectType: types.ObjectType{
+										AttrTypes: RecordHeaderValue{}.AttributeTypes(ctx),
+									},
+								},
+								Optional:            true,
+								Description:         "Configuration for encrypting the record headers.",
+								MarkdownDescription: "Configuration for encrypting the record headers.",
+							},
 							"record_key": schema.SingleNestedAttribute{
 								Attributes: map[string]schema.Attribute{
 									"algorithm": schema.StringAttribute{
@@ -450,7 +531,7 @@ func GatewayInterceptorEncryptionV2ResourceSchema(ctx context.Context) schema.Sc
 											stringvalidator.OneOf(validation.ValidInterceptorEncryptionAlgorithm...),
 										},
 									},
-									"fields": schema.SetNestedAttribute{
+									"key_fields": schema.SetNestedAttribute{
 										NestedObject: schema.NestedAttributeObject{
 											Attributes: map[string]schema.Attribute{
 												"algorithm": schema.StringAttribute{
@@ -472,9 +553,9 @@ func GatewayInterceptorEncryptionV2ResourceSchema(ctx context.Context) schema.Sc
 													MarkdownDescription: "The unique identifier for the encryption key. This key can be stored in an external Key Management System (KMS) or in memory.",
 												},
 											},
-											CustomType: FieldsType{
+											CustomType: KeyFieldsType{
 												ObjectType: types.ObjectType{
-													AttrTypes: FieldsValue{}.AttributeTypes(ctx),
+													AttrTypes: KeyFieldsValue{}.AttributeTypes(ctx),
 												},
 											},
 										},
@@ -514,7 +595,18 @@ func GatewayInterceptorEncryptionV2ResourceSchema(ctx context.Context) schema.Sc
 											stringvalidator.OneOf(validation.ValidInterceptorEncryptionAlgorithm...),
 										},
 									},
-									"fields": schema.SetNestedAttribute{
+									"key_secret_id": schema.StringAttribute{
+										Required:            true,
+										Description:         "The unique identifier for the encryption key. This key can be stored in an external Key Management System (KMS) or in memory.",
+										MarkdownDescription: "The unique identifier for the encryption key. This key can be stored in an external Key Management System (KMS) or in memory.",
+									},
+									"type": schema.StringAttribute{
+										Optional:            true,
+										Computed:            true,
+										Description:         "URL of the schema registry.",
+										MarkdownDescription: "URL of the schema registry.",
+									},
+									"value_fields": schema.SetNestedAttribute{
 										NestedObject: schema.NestedAttributeObject{
 											Attributes: map[string]schema.Attribute{
 												"algorithm": schema.StringAttribute{
@@ -536,9 +628,9 @@ func GatewayInterceptorEncryptionV2ResourceSchema(ctx context.Context) schema.Sc
 													MarkdownDescription: "The unique identifier for the encryption key. This key can be stored in an external Key Management System (KMS) or in memory.",
 												},
 											},
-											CustomType: FieldsType{
+											CustomType: ValueFieldsType{
 												ObjectType: types.ObjectType{
-													AttrTypes: FieldsValue{}.AttributeTypes(ctx),
+													AttrTypes: ValueFieldsValue{}.AttributeTypes(ctx),
 												},
 											},
 										},
@@ -546,17 +638,6 @@ func GatewayInterceptorEncryptionV2ResourceSchema(ctx context.Context) schema.Sc
 										Computed:            true,
 										Description:         "Set of all the fields config entry",
 										MarkdownDescription: "Set of all the fields config entry",
-									},
-									"key_secret_id": schema.StringAttribute{
-										Required:            true,
-										Description:         "The unique identifier for the encryption key. This key can be stored in an external Key Management System (KMS) or in memory.",
-										MarkdownDescription: "The unique identifier for the encryption key. This key can be stored in an external Key Management System (KMS) or in memory.",
-									},
-									"type": schema.StringAttribute{
-										Optional:            true,
-										Computed:            true,
-										Description:         "URL of the schema registry.",
-										MarkdownDescription: "URL of the schema registry.",
 									},
 								},
 								CustomType: RecordValueType{
@@ -1679,6 +1760,24 @@ func (t ConfigType) ValueFromObject(ctx context.Context, in basetypes.ObjectValu
 			fmt.Sprintf(`kms_config expected to be basetypes.ObjectValue, was: %T`, kmsConfigAttribute))
 	}
 
+	recordHeaderAttribute, ok := attributes["record_header"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`record_header is missing from object`)
+
+		return nil, diags
+	}
+
+	recordHeaderVal, ok := recordHeaderAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`record_header expected to be basetypes.ObjectValue, was: %T`, recordHeaderAttribute))
+	}
+
 	recordKeyAttribute, ok := attributes["record_key"]
 
 	if !ok {
@@ -1777,6 +1876,7 @@ func (t ConfigType) ValueFromObject(ctx context.Context, in basetypes.ObjectValu
 		EnableAuditLogOnError: enableAuditLogOnErrorVal,
 		ExternalStorage:       externalStorageVal,
 		KmsConfig:             kmsConfigVal,
+		RecordHeader:          recordHeaderVal,
 		RecordKey:             recordKeyVal,
 		RecordValue:           recordValueVal,
 		SchemaDataMode:        schemaDataModeVal,
@@ -1903,6 +2003,24 @@ func NewConfigValue(attributeTypes map[string]attr.Type, attributes map[string]a
 			fmt.Sprintf(`kms_config expected to be basetypes.ObjectValue, was: %T`, kmsConfigAttribute))
 	}
 
+	recordHeaderAttribute, ok := attributes["record_header"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`record_header is missing from object`)
+
+		return NewConfigValueUnknown(), diags
+	}
+
+	recordHeaderVal, ok := recordHeaderAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`record_header expected to be basetypes.ObjectValue, was: %T`, recordHeaderAttribute))
+	}
+
 	recordKeyAttribute, ok := attributes["record_key"]
 
 	if !ok {
@@ -2001,6 +2119,7 @@ func NewConfigValue(attributeTypes map[string]attr.Type, attributes map[string]a
 		EnableAuditLogOnError: enableAuditLogOnErrorVal,
 		ExternalStorage:       externalStorageVal,
 		KmsConfig:             kmsConfigVal,
+		RecordHeader:          recordHeaderVal,
 		RecordKey:             recordKeyVal,
 		RecordValue:           recordValueVal,
 		SchemaDataMode:        schemaDataModeVal,
@@ -2081,6 +2200,7 @@ type ConfigValue struct {
 	EnableAuditLogOnError basetypes.BoolValue   `tfsdk:"enable_audit_log_on_error"`
 	ExternalStorage       basetypes.BoolValue   `tfsdk:"external_storage"`
 	KmsConfig             basetypes.ObjectValue `tfsdk:"kms_config"`
+	RecordHeader          basetypes.ObjectValue `tfsdk:"record_header"`
 	RecordKey             basetypes.ObjectValue `tfsdk:"record_key"`
 	RecordValue           basetypes.ObjectValue `tfsdk:"record_value"`
 	SchemaDataMode        basetypes.StringValue `tfsdk:"schema_data_mode"`
@@ -2090,7 +2210,7 @@ type ConfigValue struct {
 }
 
 func (v ConfigValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
-	attrTypes := make(map[string]tftypes.Type, 8)
+	attrTypes := make(map[string]tftypes.Type, 9)
 
 	var val tftypes.Value
 	var err error
@@ -2099,6 +2219,9 @@ func (v ConfigValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error
 	attrTypes["external_storage"] = basetypes.BoolType{}.TerraformType(ctx)
 	attrTypes["kms_config"] = basetypes.ObjectType{
 		AttrTypes: KmsConfigValue{}.AttributeTypes(ctx),
+	}.TerraformType(ctx)
+	attrTypes["record_header"] = basetypes.ObjectType{
+		AttrTypes: RecordHeaderValue{}.AttributeTypes(ctx),
 	}.TerraformType(ctx)
 	attrTypes["record_key"] = basetypes.ObjectType{
 		AttrTypes: RecordKeyValue{}.AttributeTypes(ctx),
@@ -2116,7 +2239,7 @@ func (v ConfigValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error
 
 	switch v.state {
 	case attr.ValueStateKnown:
-		vals := make(map[string]tftypes.Value, 8)
+		vals := make(map[string]tftypes.Value, 9)
 
 		val, err = v.EnableAuditLogOnError.ToTerraformValue(ctx)
 
@@ -2141,6 +2264,14 @@ func (v ConfigValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error
 		}
 
 		vals["kms_config"] = val
+
+		val, err = v.RecordHeader.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["record_header"] = val
 
 		val, err = v.RecordKey.ToTerraformValue(ctx)
 
@@ -2232,6 +2363,27 @@ func (v ConfigValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, 
 		)
 	}
 
+	var recordHeader basetypes.ObjectValue
+
+	if v.RecordHeader.IsNull() {
+		recordHeader = types.ObjectNull(
+			RecordHeaderValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if v.RecordHeader.IsUnknown() {
+		recordHeader = types.ObjectUnknown(
+			RecordHeaderValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if !v.RecordHeader.IsNull() && !v.RecordHeader.IsUnknown() {
+		recordHeader = types.ObjectValueMust(
+			RecordHeaderValue{}.AttributeTypes(ctx),
+			v.RecordHeader.Attributes(),
+		)
+	}
+
 	var recordKey basetypes.ObjectValue
 
 	if v.RecordKey.IsNull() {
@@ -2301,6 +2453,9 @@ func (v ConfigValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, 
 		"kms_config": basetypes.ObjectType{
 			AttrTypes: KmsConfigValue{}.AttributeTypes(ctx),
 		},
+		"record_header": basetypes.ObjectType{
+			AttrTypes: RecordHeaderValue{}.AttributeTypes(ctx),
+		},
 		"record_key": basetypes.ObjectType{
 			AttrTypes: RecordKeyValue{}.AttributeTypes(ctx),
 		},
@@ -2328,6 +2483,7 @@ func (v ConfigValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, 
 			"enable_audit_log_on_error": v.EnableAuditLogOnError,
 			"external_storage":          v.ExternalStorage,
 			"kms_config":                kmsConfig,
+			"record_header":             recordHeader,
 			"record_key":                recordKey,
 			"record_value":              recordValue,
 			"schema_data_mode":          v.SchemaDataMode,
@@ -2362,6 +2518,10 @@ func (v ConfigValue) Equal(o attr.Value) bool {
 	}
 
 	if !v.KmsConfig.Equal(other.KmsConfig) {
+		return false
+	}
+
+	if !v.RecordHeader.Equal(other.RecordHeader) {
 		return false
 	}
 
@@ -2402,6 +2562,9 @@ func (v ConfigValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 		"external_storage":          basetypes.BoolType{},
 		"kms_config": basetypes.ObjectType{
 			AttrTypes: KmsConfigValue{}.AttributeTypes(ctx),
+		},
+		"record_header": basetypes.ObjectType{
+			AttrTypes: RecordHeaderValue{}.AttributeTypes(ctx),
 		},
 		"record_key": basetypes.ObjectType{
 			AttrTypes: RecordKeyValue{}.AttributeTypes(ctx),
@@ -8100,6 +8263,1370 @@ func (v VaultValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 	}
 }
 
+var _ basetypes.ObjectTypable = RecordHeaderType{}
+
+type RecordHeaderType struct {
+	basetypes.ObjectType
+}
+
+func (t RecordHeaderType) Equal(o attr.Type) bool {
+	other, ok := o.(RecordHeaderType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t RecordHeaderType) String() string {
+	return "RecordHeaderType"
+}
+
+func (t RecordHeaderType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	headerAttribute, ok := attributes["header"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`header is missing from object`)
+
+		return nil, diags
+	}
+
+	headerVal, ok := headerAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`header expected to be basetypes.StringValue, was: %T`, headerAttribute))
+	}
+
+	headerConfigAttribute, ok := attributes["header_config"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`header_config is missing from object`)
+
+		return nil, diags
+	}
+
+	headerConfigVal, ok := headerConfigAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`header_config expected to be basetypes.ObjectValue, was: %T`, headerConfigAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return RecordHeaderValue{
+		Header:       headerVal,
+		HeaderConfig: headerConfigVal,
+		state:        attr.ValueStateKnown,
+	}, diags
+}
+
+func NewRecordHeaderValueNull() RecordHeaderValue {
+	return RecordHeaderValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewRecordHeaderValueUnknown() RecordHeaderValue {
+	return RecordHeaderValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewRecordHeaderValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (RecordHeaderValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing RecordHeaderValue Attribute Value",
+				"While creating a RecordHeaderValue value, a missing attribute value was detected. "+
+					"A RecordHeaderValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("RecordHeaderValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid RecordHeaderValue Attribute Type",
+				"While creating a RecordHeaderValue value, an invalid attribute value was detected. "+
+					"A RecordHeaderValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("RecordHeaderValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("RecordHeaderValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra RecordHeaderValue Attribute Value",
+				"While creating a RecordHeaderValue value, an extra attribute value was detected. "+
+					"A RecordHeaderValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra RecordHeaderValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewRecordHeaderValueUnknown(), diags
+	}
+
+	headerAttribute, ok := attributes["header"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`header is missing from object`)
+
+		return NewRecordHeaderValueUnknown(), diags
+	}
+
+	headerVal, ok := headerAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`header expected to be basetypes.StringValue, was: %T`, headerAttribute))
+	}
+
+	headerConfigAttribute, ok := attributes["header_config"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`header_config is missing from object`)
+
+		return NewRecordHeaderValueUnknown(), diags
+	}
+
+	headerConfigVal, ok := headerConfigAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`header_config expected to be basetypes.ObjectValue, was: %T`, headerConfigAttribute))
+	}
+
+	if diags.HasError() {
+		return NewRecordHeaderValueUnknown(), diags
+	}
+
+	return RecordHeaderValue{
+		Header:       headerVal,
+		HeaderConfig: headerConfigVal,
+		state:        attr.ValueStateKnown,
+	}, diags
+}
+
+func NewRecordHeaderValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) RecordHeaderValue {
+	object, diags := NewRecordHeaderValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewRecordHeaderValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t RecordHeaderType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewRecordHeaderValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewRecordHeaderValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewRecordHeaderValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewRecordHeaderValueMust(RecordHeaderValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t RecordHeaderType) ValueType(ctx context.Context) attr.Value {
+	return RecordHeaderValue{}
+}
+
+var _ basetypes.ObjectValuable = RecordHeaderValue{}
+
+type RecordHeaderValue struct {
+	Header       basetypes.StringValue `tfsdk:"header"`
+	HeaderConfig basetypes.ObjectValue `tfsdk:"header_config"`
+	state        attr.ValueState
+}
+
+func (v RecordHeaderValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 2)
+
+	var val tftypes.Value
+	var err error
+
+	attrTypes["header"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["header_config"] = basetypes.ObjectType{
+		AttrTypes: HeaderConfigValue{}.AttributeTypes(ctx),
+	}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 2)
+
+		val, err = v.Header.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["header"] = val
+
+		val, err = v.HeaderConfig.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["header_config"] = val
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v RecordHeaderValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v RecordHeaderValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v RecordHeaderValue) String() string {
+	return "RecordHeaderValue"
+}
+
+func (v RecordHeaderValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	var headerConfig basetypes.ObjectValue
+
+	if v.HeaderConfig.IsNull() {
+		headerConfig = types.ObjectNull(
+			HeaderConfigValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if v.HeaderConfig.IsUnknown() {
+		headerConfig = types.ObjectUnknown(
+			HeaderConfigValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if !v.HeaderConfig.IsNull() && !v.HeaderConfig.IsUnknown() {
+		headerConfig = types.ObjectValueMust(
+			HeaderConfigValue{}.AttributeTypes(ctx),
+			v.HeaderConfig.Attributes(),
+		)
+	}
+
+	attributeTypes := map[string]attr.Type{
+		"header": basetypes.StringType{},
+		"header_config": basetypes.ObjectType{
+			AttrTypes: HeaderConfigValue{}.AttributeTypes(ctx),
+		},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{
+			"header":        v.Header,
+			"header_config": headerConfig,
+		})
+
+	return objVal, diags
+}
+
+func (v RecordHeaderValue) Equal(o attr.Value) bool {
+	other, ok := o.(RecordHeaderValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	if !v.Header.Equal(other.Header) {
+		return false
+	}
+
+	if !v.HeaderConfig.Equal(other.HeaderConfig) {
+		return false
+	}
+
+	return true
+}
+
+func (v RecordHeaderValue) Type(ctx context.Context) attr.Type {
+	return RecordHeaderType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v RecordHeaderValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"header": basetypes.StringType{},
+		"header_config": basetypes.ObjectType{
+			AttrTypes: HeaderConfigValue{}.AttributeTypes(ctx),
+		},
+	}
+}
+
+var _ basetypes.ObjectTypable = HeaderConfigType{}
+
+type HeaderConfigType struct {
+	basetypes.ObjectType
+}
+
+func (t HeaderConfigType) Equal(o attr.Type) bool {
+	other, ok := o.(HeaderConfigType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t HeaderConfigType) String() string {
+	return "HeaderConfigType"
+}
+
+func (t HeaderConfigType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	algorithmAttribute, ok := attributes["algorithm"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`algorithm is missing from object`)
+
+		return nil, diags
+	}
+
+	algorithmVal, ok := algorithmAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`algorithm expected to be basetypes.StringValue, was: %T`, algorithmAttribute))
+	}
+
+	headerFieldsAttribute, ok := attributes["header_fields"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`header_fields is missing from object`)
+
+		return nil, diags
+	}
+
+	headerFieldsVal, ok := headerFieldsAttribute.(basetypes.SetValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`header_fields expected to be basetypes.SetValue, was: %T`, headerFieldsAttribute))
+	}
+
+	keySecretIdAttribute, ok := attributes["key_secret_id"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`key_secret_id is missing from object`)
+
+		return nil, diags
+	}
+
+	keySecretIdVal, ok := keySecretIdAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`key_secret_id expected to be basetypes.StringValue, was: %T`, keySecretIdAttribute))
+	}
+
+	typeAttribute, ok := attributes["type"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`type is missing from object`)
+
+		return nil, diags
+	}
+
+	typeVal, ok := typeAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`type expected to be basetypes.StringValue, was: %T`, typeAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return HeaderConfigValue{
+		Algorithm:        algorithmVal,
+		HeaderFields:     headerFieldsVal,
+		KeySecretId:      keySecretIdVal,
+		HeaderConfigType: typeVal,
+		state:            attr.ValueStateKnown,
+	}, diags
+}
+
+func NewHeaderConfigValueNull() HeaderConfigValue {
+	return HeaderConfigValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewHeaderConfigValueUnknown() HeaderConfigValue {
+	return HeaderConfigValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewHeaderConfigValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (HeaderConfigValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing HeaderConfigValue Attribute Value",
+				"While creating a HeaderConfigValue value, a missing attribute value was detected. "+
+					"A HeaderConfigValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("HeaderConfigValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid HeaderConfigValue Attribute Type",
+				"While creating a HeaderConfigValue value, an invalid attribute value was detected. "+
+					"A HeaderConfigValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("HeaderConfigValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("HeaderConfigValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra HeaderConfigValue Attribute Value",
+				"While creating a HeaderConfigValue value, an extra attribute value was detected. "+
+					"A HeaderConfigValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra HeaderConfigValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewHeaderConfigValueUnknown(), diags
+	}
+
+	algorithmAttribute, ok := attributes["algorithm"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`algorithm is missing from object`)
+
+		return NewHeaderConfigValueUnknown(), diags
+	}
+
+	algorithmVal, ok := algorithmAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`algorithm expected to be basetypes.StringValue, was: %T`, algorithmAttribute))
+	}
+
+	headerFieldsAttribute, ok := attributes["header_fields"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`header_fields is missing from object`)
+
+		return NewHeaderConfigValueUnknown(), diags
+	}
+
+	headerFieldsVal, ok := headerFieldsAttribute.(basetypes.SetValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`header_fields expected to be basetypes.SetValue, was: %T`, headerFieldsAttribute))
+	}
+
+	keySecretIdAttribute, ok := attributes["key_secret_id"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`key_secret_id is missing from object`)
+
+		return NewHeaderConfigValueUnknown(), diags
+	}
+
+	keySecretIdVal, ok := keySecretIdAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`key_secret_id expected to be basetypes.StringValue, was: %T`, keySecretIdAttribute))
+	}
+
+	typeAttribute, ok := attributes["type"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`type is missing from object`)
+
+		return NewHeaderConfigValueUnknown(), diags
+	}
+
+	typeVal, ok := typeAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`type expected to be basetypes.StringValue, was: %T`, typeAttribute))
+	}
+
+	if diags.HasError() {
+		return NewHeaderConfigValueUnknown(), diags
+	}
+
+	return HeaderConfigValue{
+		Algorithm:        algorithmVal,
+		HeaderFields:     headerFieldsVal,
+		KeySecretId:      keySecretIdVal,
+		HeaderConfigType: typeVal,
+		state:            attr.ValueStateKnown,
+	}, diags
+}
+
+func NewHeaderConfigValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) HeaderConfigValue {
+	object, diags := NewHeaderConfigValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewHeaderConfigValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t HeaderConfigType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewHeaderConfigValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewHeaderConfigValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewHeaderConfigValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewHeaderConfigValueMust(HeaderConfigValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t HeaderConfigType) ValueType(ctx context.Context) attr.Value {
+	return HeaderConfigValue{}
+}
+
+var _ basetypes.ObjectValuable = HeaderConfigValue{}
+
+type HeaderConfigValue struct {
+	Algorithm        basetypes.StringValue `tfsdk:"algorithm"`
+	HeaderFields     basetypes.SetValue    `tfsdk:"header_fields"`
+	KeySecretId      basetypes.StringValue `tfsdk:"key_secret_id"`
+	HeaderConfigType basetypes.StringValue `tfsdk:"type"`
+	state            attr.ValueState
+}
+
+func (v HeaderConfigValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 4)
+
+	var val tftypes.Value
+	var err error
+
+	attrTypes["algorithm"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["header_fields"] = basetypes.SetType{
+		ElemType: HeaderFieldsValue{}.Type(ctx),
+	}.TerraformType(ctx)
+	attrTypes["key_secret_id"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["type"] = basetypes.StringType{}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 4)
+
+		val, err = v.Algorithm.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["algorithm"] = val
+
+		val, err = v.HeaderFields.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["header_fields"] = val
+
+		val, err = v.KeySecretId.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["key_secret_id"] = val
+
+		val, err = v.HeaderConfigType.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["type"] = val
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v HeaderConfigValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v HeaderConfigValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v HeaderConfigValue) String() string {
+	return "HeaderConfigValue"
+}
+
+func (v HeaderConfigValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	headerFields := types.SetValueMust(
+		HeaderFieldsType{
+			basetypes.ObjectType{
+				AttrTypes: HeaderFieldsValue{}.AttributeTypes(ctx),
+			},
+		},
+		v.HeaderFields.Elements(),
+	)
+
+	if v.HeaderFields.IsNull() {
+		headerFields = types.SetNull(
+			HeaderFieldsType{
+				basetypes.ObjectType{
+					AttrTypes: HeaderFieldsValue{}.AttributeTypes(ctx),
+				},
+			},
+		)
+	}
+
+	if v.HeaderFields.IsUnknown() {
+		headerFields = types.SetUnknown(
+			HeaderFieldsType{
+				basetypes.ObjectType{
+					AttrTypes: HeaderFieldsValue{}.AttributeTypes(ctx),
+				},
+			},
+		)
+	}
+
+	attributeTypes := map[string]attr.Type{
+		"algorithm": basetypes.StringType{},
+		"header_fields": basetypes.SetType{
+			ElemType: HeaderFieldsValue{}.Type(ctx),
+		},
+		"key_secret_id": basetypes.StringType{},
+		"type":          basetypes.StringType{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{
+			"algorithm":     v.Algorithm,
+			"header_fields": headerFields,
+			"key_secret_id": v.KeySecretId,
+			"type":          v.HeaderConfigType,
+		})
+
+	return objVal, diags
+}
+
+func (v HeaderConfigValue) Equal(o attr.Value) bool {
+	other, ok := o.(HeaderConfigValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	if !v.Algorithm.Equal(other.Algorithm) {
+		return false
+	}
+
+	if !v.HeaderFields.Equal(other.HeaderFields) {
+		return false
+	}
+
+	if !v.KeySecretId.Equal(other.KeySecretId) {
+		return false
+	}
+
+	if !v.HeaderConfigType.Equal(other.HeaderConfigType) {
+		return false
+	}
+
+	return true
+}
+
+func (v HeaderConfigValue) Type(ctx context.Context) attr.Type {
+	return HeaderConfigType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v HeaderConfigValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"algorithm": basetypes.StringType{},
+		"header_fields": basetypes.SetType{
+			ElemType: HeaderFieldsValue{}.Type(ctx),
+		},
+		"key_secret_id": basetypes.StringType{},
+		"type":          basetypes.StringType{},
+	}
+}
+
+var _ basetypes.ObjectTypable = HeaderFieldsType{}
+
+type HeaderFieldsType struct {
+	basetypes.ObjectType
+}
+
+func (t HeaderFieldsType) Equal(o attr.Type) bool {
+	other, ok := o.(HeaderFieldsType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t HeaderFieldsType) String() string {
+	return "HeaderFieldsType"
+}
+
+func (t HeaderFieldsType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	algorithmAttribute, ok := attributes["algorithm"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`algorithm is missing from object`)
+
+		return nil, diags
+	}
+
+	algorithmVal, ok := algorithmAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`algorithm expected to be basetypes.StringValue, was: %T`, algorithmAttribute))
+	}
+
+	fieldNameAttribute, ok := attributes["field_name"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`field_name is missing from object`)
+
+		return nil, diags
+	}
+
+	fieldNameVal, ok := fieldNameAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`field_name expected to be basetypes.StringValue, was: %T`, fieldNameAttribute))
+	}
+
+	keySecretIdAttribute, ok := attributes["key_secret_id"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`key_secret_id is missing from object`)
+
+		return nil, diags
+	}
+
+	keySecretIdVal, ok := keySecretIdAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`key_secret_id expected to be basetypes.StringValue, was: %T`, keySecretIdAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return HeaderFieldsValue{
+		Algorithm:   algorithmVal,
+		FieldName:   fieldNameVal,
+		KeySecretId: keySecretIdVal,
+		state:       attr.ValueStateKnown,
+	}, diags
+}
+
+func NewHeaderFieldsValueNull() HeaderFieldsValue {
+	return HeaderFieldsValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewHeaderFieldsValueUnknown() HeaderFieldsValue {
+	return HeaderFieldsValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewHeaderFieldsValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (HeaderFieldsValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing HeaderFieldsValue Attribute Value",
+				"While creating a HeaderFieldsValue value, a missing attribute value was detected. "+
+					"A HeaderFieldsValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("HeaderFieldsValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid HeaderFieldsValue Attribute Type",
+				"While creating a HeaderFieldsValue value, an invalid attribute value was detected. "+
+					"A HeaderFieldsValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("HeaderFieldsValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("HeaderFieldsValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra HeaderFieldsValue Attribute Value",
+				"While creating a HeaderFieldsValue value, an extra attribute value was detected. "+
+					"A HeaderFieldsValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra HeaderFieldsValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewHeaderFieldsValueUnknown(), diags
+	}
+
+	algorithmAttribute, ok := attributes["algorithm"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`algorithm is missing from object`)
+
+		return NewHeaderFieldsValueUnknown(), diags
+	}
+
+	algorithmVal, ok := algorithmAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`algorithm expected to be basetypes.StringValue, was: %T`, algorithmAttribute))
+	}
+
+	fieldNameAttribute, ok := attributes["field_name"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`field_name is missing from object`)
+
+		return NewHeaderFieldsValueUnknown(), diags
+	}
+
+	fieldNameVal, ok := fieldNameAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`field_name expected to be basetypes.StringValue, was: %T`, fieldNameAttribute))
+	}
+
+	keySecretIdAttribute, ok := attributes["key_secret_id"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`key_secret_id is missing from object`)
+
+		return NewHeaderFieldsValueUnknown(), diags
+	}
+
+	keySecretIdVal, ok := keySecretIdAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`key_secret_id expected to be basetypes.StringValue, was: %T`, keySecretIdAttribute))
+	}
+
+	if diags.HasError() {
+		return NewHeaderFieldsValueUnknown(), diags
+	}
+
+	return HeaderFieldsValue{
+		Algorithm:   algorithmVal,
+		FieldName:   fieldNameVal,
+		KeySecretId: keySecretIdVal,
+		state:       attr.ValueStateKnown,
+	}, diags
+}
+
+func NewHeaderFieldsValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) HeaderFieldsValue {
+	object, diags := NewHeaderFieldsValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewHeaderFieldsValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t HeaderFieldsType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewHeaderFieldsValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewHeaderFieldsValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewHeaderFieldsValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewHeaderFieldsValueMust(HeaderFieldsValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t HeaderFieldsType) ValueType(ctx context.Context) attr.Value {
+	return HeaderFieldsValue{}
+}
+
+var _ basetypes.ObjectValuable = HeaderFieldsValue{}
+
+type HeaderFieldsValue struct {
+	Algorithm   basetypes.StringValue `tfsdk:"algorithm"`
+	FieldName   basetypes.StringValue `tfsdk:"field_name"`
+	KeySecretId basetypes.StringValue `tfsdk:"key_secret_id"`
+	state       attr.ValueState
+}
+
+func (v HeaderFieldsValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 3)
+
+	var val tftypes.Value
+	var err error
+
+	attrTypes["algorithm"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["field_name"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["key_secret_id"] = basetypes.StringType{}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 3)
+
+		val, err = v.Algorithm.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["algorithm"] = val
+
+		val, err = v.FieldName.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["field_name"] = val
+
+		val, err = v.KeySecretId.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["key_secret_id"] = val
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v HeaderFieldsValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v HeaderFieldsValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v HeaderFieldsValue) String() string {
+	return "HeaderFieldsValue"
+}
+
+func (v HeaderFieldsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributeTypes := map[string]attr.Type{
+		"algorithm":     basetypes.StringType{},
+		"field_name":    basetypes.StringType{},
+		"key_secret_id": basetypes.StringType{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{
+			"algorithm":     v.Algorithm,
+			"field_name":    v.FieldName,
+			"key_secret_id": v.KeySecretId,
+		})
+
+	return objVal, diags
+}
+
+func (v HeaderFieldsValue) Equal(o attr.Value) bool {
+	other, ok := o.(HeaderFieldsValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	if !v.Algorithm.Equal(other.Algorithm) {
+		return false
+	}
+
+	if !v.FieldName.Equal(other.FieldName) {
+		return false
+	}
+
+	if !v.KeySecretId.Equal(other.KeySecretId) {
+		return false
+	}
+
+	return true
+}
+
+func (v HeaderFieldsValue) Type(ctx context.Context) attr.Type {
+	return HeaderFieldsType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v HeaderFieldsValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"algorithm":     basetypes.StringType{},
+		"field_name":    basetypes.StringType{},
+		"key_secret_id": basetypes.StringType{},
+	}
+}
+
 var _ basetypes.ObjectTypable = RecordKeyType{}
 
 type RecordKeyType struct {
@@ -8143,22 +9670,22 @@ func (t RecordKeyType) ValueFromObject(ctx context.Context, in basetypes.ObjectV
 			fmt.Sprintf(`algorithm expected to be basetypes.StringValue, was: %T`, algorithmAttribute))
 	}
 
-	fieldsAttribute, ok := attributes["fields"]
+	keyFieldsAttribute, ok := attributes["key_fields"]
 
 	if !ok {
 		diags.AddError(
 			"Attribute Missing",
-			`fields is missing from object`)
+			`key_fields is missing from object`)
 
 		return nil, diags
 	}
 
-	fieldsVal, ok := fieldsAttribute.(basetypes.SetValue)
+	keyFieldsVal, ok := keyFieldsAttribute.(basetypes.SetValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`fields expected to be basetypes.SetValue, was: %T`, fieldsAttribute))
+			fmt.Sprintf(`key_fields expected to be basetypes.SetValue, was: %T`, keyFieldsAttribute))
 	}
 
 	keySecretIdAttribute, ok := attributes["key_secret_id"]
@@ -8203,7 +9730,7 @@ func (t RecordKeyType) ValueFromObject(ctx context.Context, in basetypes.ObjectV
 
 	return RecordKeyValue{
 		Algorithm:     algorithmVal,
-		Fields:        fieldsVal,
+		KeyFields:     keyFieldsVal,
 		KeySecretId:   keySecretIdVal,
 		RecordKeyType: typeVal,
 		state:         attr.ValueStateKnown,
@@ -8291,22 +9818,22 @@ func NewRecordKeyValue(attributeTypes map[string]attr.Type, attributes map[strin
 			fmt.Sprintf(`algorithm expected to be basetypes.StringValue, was: %T`, algorithmAttribute))
 	}
 
-	fieldsAttribute, ok := attributes["fields"]
+	keyFieldsAttribute, ok := attributes["key_fields"]
 
 	if !ok {
 		diags.AddError(
 			"Attribute Missing",
-			`fields is missing from object`)
+			`key_fields is missing from object`)
 
 		return NewRecordKeyValueUnknown(), diags
 	}
 
-	fieldsVal, ok := fieldsAttribute.(basetypes.SetValue)
+	keyFieldsVal, ok := keyFieldsAttribute.(basetypes.SetValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`fields expected to be basetypes.SetValue, was: %T`, fieldsAttribute))
+			fmt.Sprintf(`key_fields expected to be basetypes.SetValue, was: %T`, keyFieldsAttribute))
 	}
 
 	keySecretIdAttribute, ok := attributes["key_secret_id"]
@@ -8351,7 +9878,7 @@ func NewRecordKeyValue(attributeTypes map[string]attr.Type, attributes map[strin
 
 	return RecordKeyValue{
 		Algorithm:     algorithmVal,
-		Fields:        fieldsVal,
+		KeyFields:     keyFieldsVal,
 		KeySecretId:   keySecretIdVal,
 		RecordKeyType: typeVal,
 		state:         attr.ValueStateKnown,
@@ -8427,7 +9954,7 @@ var _ basetypes.ObjectValuable = RecordKeyValue{}
 
 type RecordKeyValue struct {
 	Algorithm     basetypes.StringValue `tfsdk:"algorithm"`
-	Fields        basetypes.SetValue    `tfsdk:"fields"`
+	KeyFields     basetypes.SetValue    `tfsdk:"key_fields"`
 	KeySecretId   basetypes.StringValue `tfsdk:"key_secret_id"`
 	RecordKeyType basetypes.StringValue `tfsdk:"type"`
 	state         attr.ValueState
@@ -8440,8 +9967,8 @@ func (v RecordKeyValue) ToTerraformValue(ctx context.Context) (tftypes.Value, er
 	var err error
 
 	attrTypes["algorithm"] = basetypes.StringType{}.TerraformType(ctx)
-	attrTypes["fields"] = basetypes.SetType{
-		ElemType: FieldsValue{}.Type(ctx),
+	attrTypes["key_fields"] = basetypes.SetType{
+		ElemType: KeyFieldsValue{}.Type(ctx),
 	}.TerraformType(ctx)
 	attrTypes["key_secret_id"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["type"] = basetypes.StringType{}.TerraformType(ctx)
@@ -8460,13 +9987,13 @@ func (v RecordKeyValue) ToTerraformValue(ctx context.Context) (tftypes.Value, er
 
 		vals["algorithm"] = val
 
-		val, err = v.Fields.ToTerraformValue(ctx)
+		val, err = v.KeyFields.ToTerraformValue(ctx)
 
 		if err != nil {
 			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
 		}
 
-		vals["fields"] = val
+		vals["key_fields"] = val
 
 		val, err = v.KeySecretId.ToTerraformValue(ctx)
 
@@ -8513,30 +10040,30 @@ func (v RecordKeyValue) String() string {
 func (v RecordKeyValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	fields := types.SetValueMust(
-		FieldsType{
+	keyFields := types.SetValueMust(
+		KeyFieldsType{
 			basetypes.ObjectType{
-				AttrTypes: FieldsValue{}.AttributeTypes(ctx),
+				AttrTypes: KeyFieldsValue{}.AttributeTypes(ctx),
 			},
 		},
-		v.Fields.Elements(),
+		v.KeyFields.Elements(),
 	)
 
-	if v.Fields.IsNull() {
-		fields = types.SetNull(
-			FieldsType{
+	if v.KeyFields.IsNull() {
+		keyFields = types.SetNull(
+			KeyFieldsType{
 				basetypes.ObjectType{
-					AttrTypes: FieldsValue{}.AttributeTypes(ctx),
+					AttrTypes: KeyFieldsValue{}.AttributeTypes(ctx),
 				},
 			},
 		)
 	}
 
-	if v.Fields.IsUnknown() {
-		fields = types.SetUnknown(
-			FieldsType{
+	if v.KeyFields.IsUnknown() {
+		keyFields = types.SetUnknown(
+			KeyFieldsType{
 				basetypes.ObjectType{
-					AttrTypes: FieldsValue{}.AttributeTypes(ctx),
+					AttrTypes: KeyFieldsValue{}.AttributeTypes(ctx),
 				},
 			},
 		)
@@ -8544,8 +10071,8 @@ func (v RecordKeyValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValu
 
 	attributeTypes := map[string]attr.Type{
 		"algorithm": basetypes.StringType{},
-		"fields": basetypes.SetType{
-			ElemType: FieldsValue{}.Type(ctx),
+		"key_fields": basetypes.SetType{
+			ElemType: KeyFieldsValue{}.Type(ctx),
 		},
 		"key_secret_id": basetypes.StringType{},
 		"type":          basetypes.StringType{},
@@ -8563,7 +10090,7 @@ func (v RecordKeyValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValu
 		attributeTypes,
 		map[string]attr.Value{
 			"algorithm":     v.Algorithm,
-			"fields":        fields,
+			"key_fields":    keyFields,
 			"key_secret_id": v.KeySecretId,
 			"type":          v.RecordKeyType,
 		})
@@ -8590,7 +10117,7 @@ func (v RecordKeyValue) Equal(o attr.Value) bool {
 		return false
 	}
 
-	if !v.Fields.Equal(other.Fields) {
+	if !v.KeyFields.Equal(other.KeyFields) {
 		return false
 	}
 
@@ -8616,22 +10143,22 @@ func (v RecordKeyValue) Type(ctx context.Context) attr.Type {
 func (v RecordKeyValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 	return map[string]attr.Type{
 		"algorithm": basetypes.StringType{},
-		"fields": basetypes.SetType{
-			ElemType: FieldsValue{}.Type(ctx),
+		"key_fields": basetypes.SetType{
+			ElemType: KeyFieldsValue{}.Type(ctx),
 		},
 		"key_secret_id": basetypes.StringType{},
 		"type":          basetypes.StringType{},
 	}
 }
 
-var _ basetypes.ObjectTypable = FieldsType{}
+var _ basetypes.ObjectTypable = KeyFieldsType{}
 
-type FieldsType struct {
+type KeyFieldsType struct {
 	basetypes.ObjectType
 }
 
-func (t FieldsType) Equal(o attr.Type) bool {
-	other, ok := o.(FieldsType)
+func (t KeyFieldsType) Equal(o attr.Type) bool {
+	other, ok := o.(KeyFieldsType)
 
 	if !ok {
 		return false
@@ -8640,11 +10167,11 @@ func (t FieldsType) Equal(o attr.Type) bool {
 	return t.ObjectType.Equal(other.ObjectType)
 }
 
-func (t FieldsType) String() string {
-	return "FieldsType"
+func (t KeyFieldsType) String() string {
+	return "KeyFieldsType"
 }
 
-func (t FieldsType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+func (t KeyFieldsType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	attributes := in.Attributes()
@@ -8707,7 +10234,7 @@ func (t FieldsType) ValueFromObject(ctx context.Context, in basetypes.ObjectValu
 		return nil, diags
 	}
 
-	return FieldsValue{
+	return KeyFieldsValue{
 		Algorithm:   algorithmVal,
 		FieldName:   fieldNameVal,
 		KeySecretId: keySecretIdVal,
@@ -8715,19 +10242,19 @@ func (t FieldsType) ValueFromObject(ctx context.Context, in basetypes.ObjectValu
 	}, diags
 }
 
-func NewFieldsValueNull() FieldsValue {
-	return FieldsValue{
+func NewKeyFieldsValueNull() KeyFieldsValue {
+	return KeyFieldsValue{
 		state: attr.ValueStateNull,
 	}
 }
 
-func NewFieldsValueUnknown() FieldsValue {
-	return FieldsValue{
+func NewKeyFieldsValueUnknown() KeyFieldsValue {
+	return KeyFieldsValue{
 		state: attr.ValueStateUnknown,
 	}
 }
 
-func NewFieldsValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (FieldsValue, diag.Diagnostics) {
+func NewKeyFieldsValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (KeyFieldsValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
@@ -8738,11 +10265,11 @@ func NewFieldsValue(attributeTypes map[string]attr.Type, attributes map[string]a
 
 		if !ok {
 			diags.AddError(
-				"Missing FieldsValue Attribute Value",
-				"While creating a FieldsValue value, a missing attribute value was detected. "+
-					"A FieldsValue must contain values for all attributes, even if null or unknown. "+
+				"Missing KeyFieldsValue Attribute Value",
+				"While creating a KeyFieldsValue value, a missing attribute value was detected. "+
+					"A KeyFieldsValue must contain values for all attributes, even if null or unknown. "+
 					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
-					fmt.Sprintf("FieldsValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+					fmt.Sprintf("KeyFieldsValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
 			)
 
 			continue
@@ -8750,12 +10277,12 @@ func NewFieldsValue(attributeTypes map[string]attr.Type, attributes map[string]a
 
 		if !attributeType.Equal(attribute.Type(ctx)) {
 			diags.AddError(
-				"Invalid FieldsValue Attribute Type",
-				"While creating a FieldsValue value, an invalid attribute value was detected. "+
-					"A FieldsValue must use a matching attribute type for the value. "+
+				"Invalid KeyFieldsValue Attribute Type",
+				"While creating a KeyFieldsValue value, an invalid attribute value was detected. "+
+					"A KeyFieldsValue must use a matching attribute type for the value. "+
 					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
-					fmt.Sprintf("FieldsValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
-					fmt.Sprintf("FieldsValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+					fmt.Sprintf("KeyFieldsValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("KeyFieldsValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
 			)
 		}
 	}
@@ -8765,17 +10292,17 @@ func NewFieldsValue(attributeTypes map[string]attr.Type, attributes map[string]a
 
 		if !ok {
 			diags.AddError(
-				"Extra FieldsValue Attribute Value",
-				"While creating a FieldsValue value, an extra attribute value was detected. "+
-					"A FieldsValue must not contain values beyond the expected attribute types. "+
+				"Extra KeyFieldsValue Attribute Value",
+				"While creating a KeyFieldsValue value, an extra attribute value was detected. "+
+					"A KeyFieldsValue must not contain values beyond the expected attribute types. "+
 					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
-					fmt.Sprintf("Extra FieldsValue Attribute Name: %s", name),
+					fmt.Sprintf("Extra KeyFieldsValue Attribute Name: %s", name),
 			)
 		}
 	}
 
 	if diags.HasError() {
-		return NewFieldsValueUnknown(), diags
+		return NewKeyFieldsValueUnknown(), diags
 	}
 
 	algorithmAttribute, ok := attributes["algorithm"]
@@ -8785,7 +10312,7 @@ func NewFieldsValue(attributeTypes map[string]attr.Type, attributes map[string]a
 			"Attribute Missing",
 			`algorithm is missing from object`)
 
-		return NewFieldsValueUnknown(), diags
+		return NewKeyFieldsValueUnknown(), diags
 	}
 
 	algorithmVal, ok := algorithmAttribute.(basetypes.StringValue)
@@ -8803,7 +10330,7 @@ func NewFieldsValue(attributeTypes map[string]attr.Type, attributes map[string]a
 			"Attribute Missing",
 			`field_name is missing from object`)
 
-		return NewFieldsValueUnknown(), diags
+		return NewKeyFieldsValueUnknown(), diags
 	}
 
 	fieldNameVal, ok := fieldNameAttribute.(basetypes.StringValue)
@@ -8821,7 +10348,7 @@ func NewFieldsValue(attributeTypes map[string]attr.Type, attributes map[string]a
 			"Attribute Missing",
 			`key_secret_id is missing from object`)
 
-		return NewFieldsValueUnknown(), diags
+		return NewKeyFieldsValueUnknown(), diags
 	}
 
 	keySecretIdVal, ok := keySecretIdAttribute.(basetypes.StringValue)
@@ -8833,10 +10360,10 @@ func NewFieldsValue(attributeTypes map[string]attr.Type, attributes map[string]a
 	}
 
 	if diags.HasError() {
-		return NewFieldsValueUnknown(), diags
+		return NewKeyFieldsValueUnknown(), diags
 	}
 
-	return FieldsValue{
+	return KeyFieldsValue{
 		Algorithm:   algorithmVal,
 		FieldName:   fieldNameVal,
 		KeySecretId: keySecretIdVal,
@@ -8844,8 +10371,8 @@ func NewFieldsValue(attributeTypes map[string]attr.Type, attributes map[string]a
 	}, diags
 }
 
-func NewFieldsValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) FieldsValue {
-	object, diags := NewFieldsValue(attributeTypes, attributes)
+func NewKeyFieldsValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) KeyFieldsValue {
+	object, diags := NewKeyFieldsValue(attributeTypes, attributes)
 
 	if diags.HasError() {
 		// This could potentially be added to the diag package.
@@ -8859,15 +10386,15 @@ func NewFieldsValueMust(attributeTypes map[string]attr.Type, attributes map[stri
 				diagnostic.Detail()))
 		}
 
-		panic("NewFieldsValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+		panic("NewKeyFieldsValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
 	}
 
 	return object
 }
 
-func (t FieldsType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+func (t KeyFieldsType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
 	if in.Type() == nil {
-		return NewFieldsValueNull(), nil
+		return NewKeyFieldsValueNull(), nil
 	}
 
 	if !in.Type().Equal(t.TerraformType(ctx)) {
@@ -8875,11 +10402,11 @@ func (t FieldsType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (a
 	}
 
 	if !in.IsKnown() {
-		return NewFieldsValueUnknown(), nil
+		return NewKeyFieldsValueUnknown(), nil
 	}
 
 	if in.IsNull() {
-		return NewFieldsValueNull(), nil
+		return NewKeyFieldsValueNull(), nil
 	}
 
 	attributes := map[string]attr.Value{}
@@ -8902,23 +10429,23 @@ func (t FieldsType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (a
 		attributes[k] = a
 	}
 
-	return NewFieldsValueMust(FieldsValue{}.AttributeTypes(ctx), attributes), nil
+	return NewKeyFieldsValueMust(KeyFieldsValue{}.AttributeTypes(ctx), attributes), nil
 }
 
-func (t FieldsType) ValueType(ctx context.Context) attr.Value {
-	return FieldsValue{}
+func (t KeyFieldsType) ValueType(ctx context.Context) attr.Value {
+	return KeyFieldsValue{}
 }
 
-var _ basetypes.ObjectValuable = FieldsValue{}
+var _ basetypes.ObjectValuable = KeyFieldsValue{}
 
-type FieldsValue struct {
+type KeyFieldsValue struct {
 	Algorithm   basetypes.StringValue `tfsdk:"algorithm"`
 	FieldName   basetypes.StringValue `tfsdk:"field_name"`
 	KeySecretId basetypes.StringValue `tfsdk:"key_secret_id"`
 	state       attr.ValueState
 }
 
-func (v FieldsValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+func (v KeyFieldsValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
 	attrTypes := make(map[string]tftypes.Type, 3)
 
 	var val tftypes.Value
@@ -8972,19 +10499,19 @@ func (v FieldsValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error
 	}
 }
 
-func (v FieldsValue) IsNull() bool {
+func (v KeyFieldsValue) IsNull() bool {
 	return v.state == attr.ValueStateNull
 }
 
-func (v FieldsValue) IsUnknown() bool {
+func (v KeyFieldsValue) IsUnknown() bool {
 	return v.state == attr.ValueStateUnknown
 }
 
-func (v FieldsValue) String() string {
-	return "FieldsValue"
+func (v KeyFieldsValue) String() string {
+	return "KeyFieldsValue"
 }
 
-func (v FieldsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+func (v KeyFieldsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	attributeTypes := map[string]attr.Type{
@@ -9012,8 +10539,8 @@ func (v FieldsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, 
 	return objVal, diags
 }
 
-func (v FieldsValue) Equal(o attr.Value) bool {
-	other, ok := o.(FieldsValue)
+func (v KeyFieldsValue) Equal(o attr.Value) bool {
+	other, ok := o.(KeyFieldsValue)
 
 	if !ok {
 		return false
@@ -9042,15 +10569,15 @@ func (v FieldsValue) Equal(o attr.Value) bool {
 	return true
 }
 
-func (v FieldsValue) Type(ctx context.Context) attr.Type {
-	return FieldsType{
+func (v KeyFieldsValue) Type(ctx context.Context) attr.Type {
+	return KeyFieldsType{
 		basetypes.ObjectType{
 			AttrTypes: v.AttributeTypes(ctx),
 		},
 	}
 }
 
-func (v FieldsValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+func (v KeyFieldsValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 	return map[string]attr.Type{
 		"algorithm":     basetypes.StringType{},
 		"field_name":    basetypes.StringType{},
@@ -9101,24 +10628,6 @@ func (t RecordValueType) ValueFromObject(ctx context.Context, in basetypes.Objec
 			fmt.Sprintf(`algorithm expected to be basetypes.StringValue, was: %T`, algorithmAttribute))
 	}
 
-	fieldsAttribute, ok := attributes["fields"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`fields is missing from object`)
-
-		return nil, diags
-	}
-
-	fieldsVal, ok := fieldsAttribute.(basetypes.SetValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`fields expected to be basetypes.SetValue, was: %T`, fieldsAttribute))
-	}
-
 	keySecretIdAttribute, ok := attributes["key_secret_id"]
 
 	if !ok {
@@ -9155,15 +10664,33 @@ func (t RecordValueType) ValueFromObject(ctx context.Context, in basetypes.Objec
 			fmt.Sprintf(`type expected to be basetypes.StringValue, was: %T`, typeAttribute))
 	}
 
+	valueFieldsAttribute, ok := attributes["value_fields"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`value_fields is missing from object`)
+
+		return nil, diags
+	}
+
+	valueFieldsVal, ok := valueFieldsAttribute.(basetypes.SetValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`value_fields expected to be basetypes.SetValue, was: %T`, valueFieldsAttribute))
+	}
+
 	if diags.HasError() {
 		return nil, diags
 	}
 
 	return RecordValueValue{
 		Algorithm:       algorithmVal,
-		Fields:          fieldsVal,
 		KeySecretId:     keySecretIdVal,
 		RecordValueType: typeVal,
+		ValueFields:     valueFieldsVal,
 		state:           attr.ValueStateKnown,
 	}, diags
 }
@@ -9249,24 +10776,6 @@ func NewRecordValueValue(attributeTypes map[string]attr.Type, attributes map[str
 			fmt.Sprintf(`algorithm expected to be basetypes.StringValue, was: %T`, algorithmAttribute))
 	}
 
-	fieldsAttribute, ok := attributes["fields"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`fields is missing from object`)
-
-		return NewRecordValueValueUnknown(), diags
-	}
-
-	fieldsVal, ok := fieldsAttribute.(basetypes.SetValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`fields expected to be basetypes.SetValue, was: %T`, fieldsAttribute))
-	}
-
 	keySecretIdAttribute, ok := attributes["key_secret_id"]
 
 	if !ok {
@@ -9303,15 +10812,33 @@ func NewRecordValueValue(attributeTypes map[string]attr.Type, attributes map[str
 			fmt.Sprintf(`type expected to be basetypes.StringValue, was: %T`, typeAttribute))
 	}
 
+	valueFieldsAttribute, ok := attributes["value_fields"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`value_fields is missing from object`)
+
+		return NewRecordValueValueUnknown(), diags
+	}
+
+	valueFieldsVal, ok := valueFieldsAttribute.(basetypes.SetValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`value_fields expected to be basetypes.SetValue, was: %T`, valueFieldsAttribute))
+	}
+
 	if diags.HasError() {
 		return NewRecordValueValueUnknown(), diags
 	}
 
 	return RecordValueValue{
 		Algorithm:       algorithmVal,
-		Fields:          fieldsVal,
 		KeySecretId:     keySecretIdVal,
 		RecordValueType: typeVal,
+		ValueFields:     valueFieldsVal,
 		state:           attr.ValueStateKnown,
 	}, diags
 }
@@ -9385,9 +10912,9 @@ var _ basetypes.ObjectValuable = RecordValueValue{}
 
 type RecordValueValue struct {
 	Algorithm       basetypes.StringValue `tfsdk:"algorithm"`
-	Fields          basetypes.SetValue    `tfsdk:"fields"`
 	KeySecretId     basetypes.StringValue `tfsdk:"key_secret_id"`
 	RecordValueType basetypes.StringValue `tfsdk:"type"`
+	ValueFields     basetypes.SetValue    `tfsdk:"value_fields"`
 	state           attr.ValueState
 }
 
@@ -9398,11 +10925,11 @@ func (v RecordValueValue) ToTerraformValue(ctx context.Context) (tftypes.Value, 
 	var err error
 
 	attrTypes["algorithm"] = basetypes.StringType{}.TerraformType(ctx)
-	attrTypes["fields"] = basetypes.SetType{
-		ElemType: FieldsValue{}.Type(ctx),
-	}.TerraformType(ctx)
 	attrTypes["key_secret_id"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["type"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["value_fields"] = basetypes.SetType{
+		ElemType: ValueFieldsValue{}.Type(ctx),
+	}.TerraformType(ctx)
 
 	objectType := tftypes.Object{AttributeTypes: attrTypes}
 
@@ -9417,14 +10944,6 @@ func (v RecordValueValue) ToTerraformValue(ctx context.Context) (tftypes.Value, 
 		}
 
 		vals["algorithm"] = val
-
-		val, err = v.Fields.ToTerraformValue(ctx)
-
-		if err != nil {
-			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
-		}
-
-		vals["fields"] = val
 
 		val, err = v.KeySecretId.ToTerraformValue(ctx)
 
@@ -9441,6 +10960,14 @@ func (v RecordValueValue) ToTerraformValue(ctx context.Context) (tftypes.Value, 
 		}
 
 		vals["type"] = val
+
+		val, err = v.ValueFields.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["value_fields"] = val
 
 		if err := tftypes.ValidateValue(objectType, vals); err != nil {
 			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
@@ -9471,42 +10998,42 @@ func (v RecordValueValue) String() string {
 func (v RecordValueValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	fields := types.SetValueMust(
-		FieldsType{
+	valueFields := types.SetValueMust(
+		ValueFieldsType{
 			basetypes.ObjectType{
-				AttrTypes: FieldsValue{}.AttributeTypes(ctx),
+				AttrTypes: ValueFieldsValue{}.AttributeTypes(ctx),
 			},
 		},
-		v.Fields.Elements(),
+		v.ValueFields.Elements(),
 	)
 
-	if v.Fields.IsNull() {
-		fields = types.SetNull(
-			FieldsType{
+	if v.ValueFields.IsNull() {
+		valueFields = types.SetNull(
+			ValueFieldsType{
 				basetypes.ObjectType{
-					AttrTypes: FieldsValue{}.AttributeTypes(ctx),
+					AttrTypes: ValueFieldsValue{}.AttributeTypes(ctx),
 				},
 			},
 		)
 	}
 
-	if v.Fields.IsUnknown() {
-		fields = types.SetUnknown(
-			FieldsType{
+	if v.ValueFields.IsUnknown() {
+		valueFields = types.SetUnknown(
+			ValueFieldsType{
 				basetypes.ObjectType{
-					AttrTypes: FieldsValue{}.AttributeTypes(ctx),
+					AttrTypes: ValueFieldsValue{}.AttributeTypes(ctx),
 				},
 			},
 		)
 	}
 
 	attributeTypes := map[string]attr.Type{
-		"algorithm": basetypes.StringType{},
-		"fields": basetypes.SetType{
-			ElemType: FieldsValue{}.Type(ctx),
-		},
+		"algorithm":     basetypes.StringType{},
 		"key_secret_id": basetypes.StringType{},
 		"type":          basetypes.StringType{},
+		"value_fields": basetypes.SetType{
+			ElemType: ValueFieldsValue{}.Type(ctx),
+		},
 	}
 
 	if v.IsNull() {
@@ -9521,9 +11048,9 @@ func (v RecordValueValue) ToObjectValue(ctx context.Context) (basetypes.ObjectVa
 		attributeTypes,
 		map[string]attr.Value{
 			"algorithm":     v.Algorithm,
-			"fields":        fields,
 			"key_secret_id": v.KeySecretId,
 			"type":          v.RecordValueType,
+			"value_fields":  valueFields,
 		})
 
 	return objVal, diags
@@ -9548,15 +11075,15 @@ func (v RecordValueValue) Equal(o attr.Value) bool {
 		return false
 	}
 
-	if !v.Fields.Equal(other.Fields) {
-		return false
-	}
-
 	if !v.KeySecretId.Equal(other.KeySecretId) {
 		return false
 	}
 
 	if !v.RecordValueType.Equal(other.RecordValueType) {
+		return false
+	}
+
+	if !v.ValueFields.Equal(other.ValueFields) {
 		return false
 	}
 
@@ -9573,23 +11100,23 @@ func (v RecordValueValue) Type(ctx context.Context) attr.Type {
 
 func (v RecordValueValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 	return map[string]attr.Type{
-		"algorithm": basetypes.StringType{},
-		"fields": basetypes.SetType{
-			ElemType: FieldsValue{}.Type(ctx),
-		},
+		"algorithm":     basetypes.StringType{},
 		"key_secret_id": basetypes.StringType{},
 		"type":          basetypes.StringType{},
+		"value_fields": basetypes.SetType{
+			ElemType: ValueFieldsValue{}.Type(ctx),
+		},
 	}
 }
 
-var _ basetypes.ObjectTypable = FieldsType{}
+var _ basetypes.ObjectTypable = ValueFieldsType{}
 
-type FieldsType struct {
+type ValueFieldsType struct {
 	basetypes.ObjectType
 }
 
-func (t FieldsType) Equal(o attr.Type) bool {
-	other, ok := o.(FieldsType)
+func (t ValueFieldsType) Equal(o attr.Type) bool {
+	other, ok := o.(ValueFieldsType)
 
 	if !ok {
 		return false
@@ -9598,11 +11125,11 @@ func (t FieldsType) Equal(o attr.Type) bool {
 	return t.ObjectType.Equal(other.ObjectType)
 }
 
-func (t FieldsType) String() string {
-	return "FieldsType"
+func (t ValueFieldsType) String() string {
+	return "ValueFieldsType"
 }
 
-func (t FieldsType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+func (t ValueFieldsType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	attributes := in.Attributes()
@@ -9665,7 +11192,7 @@ func (t FieldsType) ValueFromObject(ctx context.Context, in basetypes.ObjectValu
 		return nil, diags
 	}
 
-	return FieldsValue{
+	return ValueFieldsValue{
 		Algorithm:   algorithmVal,
 		FieldName:   fieldNameVal,
 		KeySecretId: keySecretIdVal,
@@ -9673,19 +11200,19 @@ func (t FieldsType) ValueFromObject(ctx context.Context, in basetypes.ObjectValu
 	}, diags
 }
 
-func NewFieldsValueNull() FieldsValue {
-	return FieldsValue{
+func NewValueFieldsValueNull() ValueFieldsValue {
+	return ValueFieldsValue{
 		state: attr.ValueStateNull,
 	}
 }
 
-func NewFieldsValueUnknown() FieldsValue {
-	return FieldsValue{
+func NewValueFieldsValueUnknown() ValueFieldsValue {
+	return ValueFieldsValue{
 		state: attr.ValueStateUnknown,
 	}
 }
 
-func NewFieldsValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (FieldsValue, diag.Diagnostics) {
+func NewValueFieldsValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (ValueFieldsValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
@@ -9696,11 +11223,11 @@ func NewFieldsValue(attributeTypes map[string]attr.Type, attributes map[string]a
 
 		if !ok {
 			diags.AddError(
-				"Missing FieldsValue Attribute Value",
-				"While creating a FieldsValue value, a missing attribute value was detected. "+
-					"A FieldsValue must contain values for all attributes, even if null or unknown. "+
+				"Missing ValueFieldsValue Attribute Value",
+				"While creating a ValueFieldsValue value, a missing attribute value was detected. "+
+					"A ValueFieldsValue must contain values for all attributes, even if null or unknown. "+
 					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
-					fmt.Sprintf("FieldsValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+					fmt.Sprintf("ValueFieldsValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
 			)
 
 			continue
@@ -9708,12 +11235,12 @@ func NewFieldsValue(attributeTypes map[string]attr.Type, attributes map[string]a
 
 		if !attributeType.Equal(attribute.Type(ctx)) {
 			diags.AddError(
-				"Invalid FieldsValue Attribute Type",
-				"While creating a FieldsValue value, an invalid attribute value was detected. "+
-					"A FieldsValue must use a matching attribute type for the value. "+
+				"Invalid ValueFieldsValue Attribute Type",
+				"While creating a ValueFieldsValue value, an invalid attribute value was detected. "+
+					"A ValueFieldsValue must use a matching attribute type for the value. "+
 					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
-					fmt.Sprintf("FieldsValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
-					fmt.Sprintf("FieldsValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+					fmt.Sprintf("ValueFieldsValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("ValueFieldsValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
 			)
 		}
 	}
@@ -9723,17 +11250,17 @@ func NewFieldsValue(attributeTypes map[string]attr.Type, attributes map[string]a
 
 		if !ok {
 			diags.AddError(
-				"Extra FieldsValue Attribute Value",
-				"While creating a FieldsValue value, an extra attribute value was detected. "+
-					"A FieldsValue must not contain values beyond the expected attribute types. "+
+				"Extra ValueFieldsValue Attribute Value",
+				"While creating a ValueFieldsValue value, an extra attribute value was detected. "+
+					"A ValueFieldsValue must not contain values beyond the expected attribute types. "+
 					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
-					fmt.Sprintf("Extra FieldsValue Attribute Name: %s", name),
+					fmt.Sprintf("Extra ValueFieldsValue Attribute Name: %s", name),
 			)
 		}
 	}
 
 	if diags.HasError() {
-		return NewFieldsValueUnknown(), diags
+		return NewValueFieldsValueUnknown(), diags
 	}
 
 	algorithmAttribute, ok := attributes["algorithm"]
@@ -9743,7 +11270,7 @@ func NewFieldsValue(attributeTypes map[string]attr.Type, attributes map[string]a
 			"Attribute Missing",
 			`algorithm is missing from object`)
 
-		return NewFieldsValueUnknown(), diags
+		return NewValueFieldsValueUnknown(), diags
 	}
 
 	algorithmVal, ok := algorithmAttribute.(basetypes.StringValue)
@@ -9761,7 +11288,7 @@ func NewFieldsValue(attributeTypes map[string]attr.Type, attributes map[string]a
 			"Attribute Missing",
 			`field_name is missing from object`)
 
-		return NewFieldsValueUnknown(), diags
+		return NewValueFieldsValueUnknown(), diags
 	}
 
 	fieldNameVal, ok := fieldNameAttribute.(basetypes.StringValue)
@@ -9779,7 +11306,7 @@ func NewFieldsValue(attributeTypes map[string]attr.Type, attributes map[string]a
 			"Attribute Missing",
 			`key_secret_id is missing from object`)
 
-		return NewFieldsValueUnknown(), diags
+		return NewValueFieldsValueUnknown(), diags
 	}
 
 	keySecretIdVal, ok := keySecretIdAttribute.(basetypes.StringValue)
@@ -9791,10 +11318,10 @@ func NewFieldsValue(attributeTypes map[string]attr.Type, attributes map[string]a
 	}
 
 	if diags.HasError() {
-		return NewFieldsValueUnknown(), diags
+		return NewValueFieldsValueUnknown(), diags
 	}
 
-	return FieldsValue{
+	return ValueFieldsValue{
 		Algorithm:   algorithmVal,
 		FieldName:   fieldNameVal,
 		KeySecretId: keySecretIdVal,
@@ -9802,8 +11329,8 @@ func NewFieldsValue(attributeTypes map[string]attr.Type, attributes map[string]a
 	}, diags
 }
 
-func NewFieldsValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) FieldsValue {
-	object, diags := NewFieldsValue(attributeTypes, attributes)
+func NewValueFieldsValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) ValueFieldsValue {
+	object, diags := NewValueFieldsValue(attributeTypes, attributes)
 
 	if diags.HasError() {
 		// This could potentially be added to the diag package.
@@ -9817,15 +11344,15 @@ func NewFieldsValueMust(attributeTypes map[string]attr.Type, attributes map[stri
 				diagnostic.Detail()))
 		}
 
-		panic("NewFieldsValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+		panic("NewValueFieldsValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
 	}
 
 	return object
 }
 
-func (t FieldsType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+func (t ValueFieldsType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
 	if in.Type() == nil {
-		return NewFieldsValueNull(), nil
+		return NewValueFieldsValueNull(), nil
 	}
 
 	if !in.Type().Equal(t.TerraformType(ctx)) {
@@ -9833,11 +11360,11 @@ func (t FieldsType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (a
 	}
 
 	if !in.IsKnown() {
-		return NewFieldsValueUnknown(), nil
+		return NewValueFieldsValueUnknown(), nil
 	}
 
 	if in.IsNull() {
-		return NewFieldsValueNull(), nil
+		return NewValueFieldsValueNull(), nil
 	}
 
 	attributes := map[string]attr.Value{}
@@ -9860,23 +11387,23 @@ func (t FieldsType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (a
 		attributes[k] = a
 	}
 
-	return NewFieldsValueMust(FieldsValue{}.AttributeTypes(ctx), attributes), nil
+	return NewValueFieldsValueMust(ValueFieldsValue{}.AttributeTypes(ctx), attributes), nil
 }
 
-func (t FieldsType) ValueType(ctx context.Context) attr.Value {
-	return FieldsValue{}
+func (t ValueFieldsType) ValueType(ctx context.Context) attr.Value {
+	return ValueFieldsValue{}
 }
 
-var _ basetypes.ObjectValuable = FieldsValue{}
+var _ basetypes.ObjectValuable = ValueFieldsValue{}
 
-type FieldsValue struct {
+type ValueFieldsValue struct {
 	Algorithm   basetypes.StringValue `tfsdk:"algorithm"`
 	FieldName   basetypes.StringValue `tfsdk:"field_name"`
 	KeySecretId basetypes.StringValue `tfsdk:"key_secret_id"`
 	state       attr.ValueState
 }
 
-func (v FieldsValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+func (v ValueFieldsValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
 	attrTypes := make(map[string]tftypes.Type, 3)
 
 	var val tftypes.Value
@@ -9930,19 +11457,19 @@ func (v FieldsValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error
 	}
 }
 
-func (v FieldsValue) IsNull() bool {
+func (v ValueFieldsValue) IsNull() bool {
 	return v.state == attr.ValueStateNull
 }
 
-func (v FieldsValue) IsUnknown() bool {
+func (v ValueFieldsValue) IsUnknown() bool {
 	return v.state == attr.ValueStateUnknown
 }
 
-func (v FieldsValue) String() string {
-	return "FieldsValue"
+func (v ValueFieldsValue) String() string {
+	return "ValueFieldsValue"
 }
 
-func (v FieldsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+func (v ValueFieldsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	attributeTypes := map[string]attr.Type{
@@ -9970,8 +11497,8 @@ func (v FieldsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, 
 	return objVal, diags
 }
 
-func (v FieldsValue) Equal(o attr.Value) bool {
-	other, ok := o.(FieldsValue)
+func (v ValueFieldsValue) Equal(o attr.Value) bool {
+	other, ok := o.(ValueFieldsValue)
 
 	if !ok {
 		return false
@@ -10000,15 +11527,15 @@ func (v FieldsValue) Equal(o attr.Value) bool {
 	return true
 }
 
-func (v FieldsValue) Type(ctx context.Context) attr.Type {
-	return FieldsType{
+func (v ValueFieldsValue) Type(ctx context.Context) attr.Type {
+	return ValueFieldsType{
 		basetypes.ObjectType{
 			AttrTypes: v.AttributeTypes(ctx),
 		},
 	}
 }
 
-func (v FieldsValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+func (v ValueFieldsValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 	return map[string]attr.Type{
 		"algorithm":     basetypes.StringType{},
 		"field_name":    basetypes.StringType{},

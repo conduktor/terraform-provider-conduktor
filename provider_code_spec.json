@@ -1391,7 +1391,7 @@
                               }
                             },
                             {
-                              "name": "fields",
+                              "name": "value_fields",
                               "set_nested": {
                                 "description": "Set of all the fields config entry",
                                 "computed_optional_required": "computed_optional",
@@ -1483,7 +1483,7 @@
                               }
                             },
                             {
-                              "name": "fields",
+                              "name": "key_fields",
                               "set_nested": {
                                 "description": "Set of all the fields config entry",
                                 "computed_optional_required": "computed_optional",
@@ -1546,7 +1546,7 @@
                               }
                             },
                             {
-                              "name": "config",
+                              "name": "header_config",
                               "single_nested": {
                                 "description": "The encryption configuration for the matching headers",
                                 "computed_optional_required": "optional",
@@ -1588,7 +1588,7 @@
                                     }
                                   },
                                   {
-                                    "name": "fields",
+                                    "name": "header_fields",
                                     "set_nested": {
                                       "description": "Set of all the fields config entry",
                                       "computed_optional_required": "computed_optional",

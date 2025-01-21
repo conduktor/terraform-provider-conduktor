@@ -279,26 +279,109 @@ func JsonToNormalizedString(ctx context.Context, input basetypes.StringValue) (s
 }
 
 func InterceptorSchemaRegistryConfigToObjectValue(ctx context.Context, config gateway.GatewayInterceptorEncryptionSchemaRegistryConfig) (basetypes.ObjectValue, error) {
-	additionalConfigs, diag := StringMapToMapValue(ctx, config.AdditionalConfigs)
-	if diag.HasError() {
-		return basetypes.ObjectValue{}, mapper.WrapDiagError(diag, "additional_configs", mapper.IntoTerraform)
+
+	// unknownSpecObjectValue, diag := gwinterceptor.NewSpecValueUnknown().ToObjectValue(ctx)
+	// if diag.HasError() {
+	// 	return basetypes.ObjectValue{}, mapper.WrapDiagError(diag, "schema_registry_config", mapper.IntoTerraform)
+	// }
+	// var typesMap = unknownSpecObjectValue.AttributeTypes(ctx)
+	// var valuesMap = ValueMapFromTypes(ctx, typesMap)
+	//
+	// valuesMap["host"] = NewStringValue(config.Host)
+	// valuesMap["cache_size"] = NewInt64Value(config.CacheSize)
+	//
+	// additionalConfigs, diag := StringMapToMapValue(ctx, *config.AdditionalConfigs)
+	// if diag.HasError() {
+	// 	return basetypes.ObjectValue{}, mapper.WrapDiagError(diag, "additional_configs", mapper.IntoTerraform)
+	// }
+	// // valuesMap["additional_configs"] = additionalConfigs
+	//
+	// configValue, diag := gwinterceptor.NewSchemaRegistryConfigValue(
+	// 	map[string]attr.Type{
+	// 		"host":               basetypes.StringType{},
+	// 		"cache_size":         basetypes.Int64Type{},
+	// 		"additional_configs": additionalConfigs.Type(ctx),
+	// 	},
+	// 	map[string]attr.Value{
+	// 		"host":               NewStringValue(config.Host),
+	// 		"cache_size":         NewInt64Value(config.CacheSize),
+	// 		"additional_configs": additionalConfigs,
+	// 	},
+	// )
+	// if diag.HasError() {
+	// 	return basetypes.ObjectValue{}, mapper.WrapDiagError(diag, "config", mapper.IntoTerraform)
+	// }
+
+	configValue := gwinterceptor.SchemaRegistryConfigValue{
+		Host:              NewStringValue(config.Host),
+		CacheSize:         NewInt64Value(config.CacheSize),
+		AdditionalConfigs: basetypes.NewMapNull(basetypes.StringType{}),
 	}
 
-	configValue, diag := gwinterceptor.NewConfigValue(
+	objectValue, diag := configValue.ToObjectValue(ctx)
+	if diag.HasError() {
+		return basetypes.ObjectValue{}, mapper.WrapDiagError(diag, "config", mapper.IntoTerraform)
+	}
+
+	return objectValue, nil
+}
+
+func InterceptorAzureConfigToObjectValue(ctx context.Context, config gateway.GatewayInterceptorEncryptionAzureKMSConfig) (basetypes.ObjectValue, error) {
+
+	// configValue, diag := gwinterceptor.NewSchemaRegistryConfigValue(
+	// 	map[string]attr.Type{
+	// 		"host":       basetypes.StringType{},
+	// 		"cache_size": basetypes.Int64Type{},
+	// 	},
+	// 	map[string]attr.Value{
+	// 		"host":       NewStringValue(config.Host),
+	// 		"cache_size": NewInt64Value(config.CacheSize),
+	// 	},
+	// )
+	// if diag.HasError() {
+	// 	return basetypes.ObjectValue{}, mapper.WrapDiagError(diag, "config", mapper.IntoTerraform)
+	// }
+
+	configValue := gwinterceptor.AzureValue{
+		RetryPolicy:                basetypes.ObjectValue{},
+		TokenCredential:            basetypes.ObjectValue{},
+		UsernamePasswordCredential: basetypes.ObjectValue{},
+	}
+
+	objectValue, diag := configValue.ToObjectValue(ctx)
+	if diag.HasError() {
+		return basetypes.ObjectValue{}, mapper.WrapDiagError(diag, "config", mapper.IntoTerraform)
+	}
+
+	return objectValue, nil
+}
+
+func InterceptorKMSConfigToObjectValue(ctx context.Context, config gateway.GatewayInterceptorEncryptionKMSConfig) (basetypes.ObjectValue, error) {
+
+	configValue, diag := gwinterceptor.NewSchemaRegistryConfigValue(
 		map[string]attr.Type{
-			"host":               basetypes.StringType{},
-			"cache_size":         basetypes.Int64Type{},
-			"additional_configs": additionalConfigs.Type(ctx),
+			"key_ttl_ms": basetypes.Int64Type{},
+			// "cache_size": basetypes.Int64Type{},
 		},
 		map[string]attr.Value{
-			"host":               NewStringValue(config.Host),
-			"cache_size":         NewInt64Value(config.CacheSize),
-			"additional_configs": additionalConfigs,
+			"key_ttl_ms": NewInt64Value(config.KeyTtlMs),
+			// "cache_size": NewInt64Value(config.CacheSize),
+			// KeyTtlMs: NewInt64Value(config.KeyTtlMs),
+			// Azure:    basetypes.ObjectValue{},
+			// Aws:      basetypes.ObjectValue{},
+			// Gcp:      basetypes.ObjectValue{},
 		},
 	)
 	if diag.HasError() {
 		return basetypes.ObjectValue{}, mapper.WrapDiagError(diag, "config", mapper.IntoTerraform)
 	}
+
+	// configValue := gwinterceptor.KmsConfigValue{
+	// 	KeyTtlMs: NewInt64Value(config.KeyTtlMs),
+	// 	Azure:    basetypes.ObjectValue{},
+	// 	Aws:      basetypes.ObjectValue{},
+	// 	Gcp:      basetypes.ObjectValue{},
+	// }
 
 	objectValue, diag := configValue.ToObjectValue(ctx)
 	if diag.HasError() {
@@ -314,26 +397,45 @@ func InterceptorConfigToObjectValue(ctx context.Context, config gateway.GatewayI
 	if err != nil {
 		return basetypes.ObjectValue{}, err
 	}
+	var KMSConfig basetypes.ObjectValue
+
+	if config.KmsConfig != nil {
+		KMSConfig, err = InterceptorKMSConfigToObjectValue(ctx, *config.KmsConfig)
+		if err != nil {
+			return basetypes.ObjectValue{}, err
+		}
+	}
 
 	configValue, diag := gwinterceptor.NewConfigValue(
 		map[string]attr.Type{
-			"enable_auditlog_on_error": basetypes.BoolType{},
-			"schema_data_mode":         basetypes.StringType{},
-			"external_storage":         basetypes.BoolType{},
-			"topic":                    basetypes.StringType{},
-			"schema_registry_config":   schemaRegistryConfig.Type(ctx),
+			"schema_data_mode":          basetypes.StringType{},
+			"external_storage":          basetypes.BoolType{},
+			"topic":                     basetypes.StringType{},
+			"schema_registry_config":    schemaRegistryConfig.Type(ctx),
+			"enable_audit_log_on_error": basetypes.BoolType{},
+			"kms":                       KMSConfig.Type(ctx),
 		},
 		map[string]attr.Value{
-			"external_storage":         NewBoolValue(config.ExternalStorage),
-			"topic":                    NewStringValue(config.Topic),
-			"enable_auditlog_on_error": NewBoolValue(config.EnableAuditLogOnError),
-			"schema_data_mode":         NewStringValue(config.SchemaDataMode),
-			"schema_registry_config":   schemaRegistryConfig,
+			"external_storage":          NewBoolValue(config.ExternalStorage),
+			"topic":                     NewStringValue(config.Topic),
+			"schema_data_mode":          NewStringValue(config.SchemaDataMode),
+			"schema_registry_config":    schemaRegistryConfig,
+			"kms":                       KMSConfig,
+			"enable_audit_log_on_error": NewBoolValue(config.EnableAuditLogOnError),
 		},
 	)
 	if diag.HasError() {
 		return basetypes.ObjectValue{}, mapper.WrapDiagError(diag, "config", mapper.IntoTerraform)
 	}
+
+	// configValue := gwinterceptor.ConfigValue{
+	// 	ExternalStorage:       NewBoolValue(config.ExternalStorage),
+	// 	Topic:                 NewStringValue(config.Topic),
+	// 	SchemaDataMode:        NewStringValue(config.SchemaDataMode),
+	// 	SchemaRegistryConfig:  schemaRegistryConfig,
+	// 	KmsConfig:             KMSConfig,
+	// 	EnableAuditLogOnError: NewBoolValue(config.EnableAuditLogOnError),
+	// }
 
 	objectValue, diag := configValue.ToObjectValue(ctx)
 	if diag.HasError() {

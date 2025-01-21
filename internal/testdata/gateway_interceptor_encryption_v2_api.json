@@ -1,0 +1,32 @@
+{
+	"kind": "GatewayInterceptor",
+	"apiVersion": "gateway/v2",
+	"metadata": {
+		"name": "interceptor",
+		"scope": {
+			"vCluster": "vcluster",
+			"group": "group",
+			"username": "username"
+		}
+	},
+	"spec": {
+		"pluginClass": "io.conduktor.gateway.interceptor.EncryptPlugin",
+		"priority": 1,
+		"config": {
+			"enableAuditLogOnError": false,
+			"externalStorage": false,
+			"schemaDataMode": "schema",
+			"topic": ".*",
+			"kmsConfig": {
+				"keyTtlMs": 100
+			},
+			"schemaRegistryConfig": {
+				"host": "hostname",
+				"cacheSize": 100,
+				"additionalConfigs": {
+					"test": "test"
+				}
+			}
+		}
+	}
+}

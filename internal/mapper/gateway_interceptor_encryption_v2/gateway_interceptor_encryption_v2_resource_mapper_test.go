@@ -1,4 +1,4 @@
-package gateway_interceptor_v2
+package gateway_interceptor_encryption_v2
 
 import (
 	"context"
@@ -7,6 +7,7 @@ import (
 	ctlresource "github.com/conduktor/ctl/resource"
 	gateway "github.com/conduktor/terraform-provider-conduktor/internal/model/gateway"
 	"github.com/conduktor/terraform-provider-conduktor/internal/test"
+
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -16,7 +17,7 @@ import (
 func TestGatewayInterceptorEncryptionV2ModelMapping(t *testing.T) {
 	ctx := context.Background()
 
-	jsonInterceptorEncryptionV2Resource := []byte(test.TestAccTestdata(t, "gateway_interceptor_v2_api.json"))
+	jsonInterceptorEncryptionV2Resource := []byte(test.TestAccTestdata(t, "gateway_interceptor_encryption_v2_api.json"))
 
 	ctlResource := ctlresource.Resource{}
 	err := ctlResource.UnmarshalJSON(jsonInterceptorEncryptionV2Resource)
@@ -43,9 +44,15 @@ func TestGatewayInterceptorEncryptionV2ModelMapping(t *testing.T) {
 	assert.Equal(t, "group", internal.Metadata.Scope.Group)
 	assert.Equal(t, "username", internal.Metadata.Scope.Username)
 	assert.Equal(t, int64(1), internal.Spec.Priority)
-	assert.Equal(t, "io.conduktor.gateway.interceptor.VirtualSqlTopicPlugin", internal.Spec.PluginClass)
-	assert.Equal(t, ".*", internal.Spec.Config.Topic)
+	assert.Equal(t, "io.conduktor.gateway.interceptor.EncryptPlugin", internal.Spec.PluginClass)
+	assert.Equal(t, "schema", internal.Spec.Config.SchemaDataMode)
+	assert.Equal(t, false, internal.Spec.Config.EnableAuditLogOnError)
 	assert.Equal(t, false, internal.Spec.Config.ExternalStorage)
+	assert.Equal(t, ".*", internal.Spec.Config.Topic)
+	assert.Equal(t, "hostname", internal.Spec.Config.SchemaRegistryConfig.Host)
+	assert.Equal(t, int64(100), internal.Spec.Config.SchemaRegistryConfig.CacheSize)
+	assert.Equal(t, map[string]string{"test": "test"}, internal.Spec.Config.SchemaRegistryConfig.AdditionalConfigs)
+	assert.Equal(t, int64(100), internal.Spec.Config.KmsConfig.KeyTtlMs)
 
 	// convert to terraform model
 	tfModel, err := InternalModelToTerraform(ctx, &internal)
@@ -58,8 +65,9 @@ func TestGatewayInterceptorEncryptionV2ModelMapping(t *testing.T) {
 	assert.Equal(t, types.StringValue("group"), tfModel.Scope.Group)
 	assert.Equal(t, types.StringValue("username"), tfModel.Scope.Username)
 	assert.Equal(t, types.Int64Value(1), tfModel.Spec.Priority)
-	assert.Equal(t, types.StringValue("io.conduktor.gateway.interceptor.VirtualSqlTopicPlugin"), tfModel.Spec.PluginClass)
+	assert.Equal(t, types.StringValue("io.conduktor.gateway.interceptor.EncryptPlugin"), tfModel.Spec.PluginClass)
 	assert.Equal(t, false, tfModel.Spec.Config.IsNull())
+	assert.Equal(t, false, tfModel.Spec.Config.IsUnknown())
 
 	// convert back to internal model
 	internal2, err := TFToInternalModel(ctx, &tfModel)
@@ -75,8 +83,15 @@ func TestGatewayInterceptorEncryptionV2ModelMapping(t *testing.T) {
 	assert.Equal(t, "username", internal2.Metadata.Scope.Username)
 	assert.Equal(t, int64(1), internal2.Spec.Priority)
 	assert.Equal(t, ".*", internal2.Spec.Config.Topic)
+	assert.Equal(t, false, internal2.Spec.Config.EnableAuditLogOnError)
 	assert.Equal(t, false, internal2.Spec.Config.ExternalStorage)
-
+	assert.Equal(t, ".*", internal2.Spec.Config.Topic)
+	assert.Equal(t, "hostname", internal2.Spec.Config.SchemaRegistryConfig.Host)
+	assert.Equal(t, int64(100), internal2.Spec.Config.SchemaRegistryConfig.CacheSize)
+	assert.Equal(t, map[string]string{"test": "test"}, internal2.Spec.Config.SchemaRegistryConfig.AdditionalConfigs)
+	// assert.Equal(t, int64(100), internal2.Spec.Config.KmsConfig.KeyTtlMs)
+	// // assert.Equal(t, false, internal2.Spec.Config.ExternalStorage)
+	//
 	// convert back to ctl model
 	ctlResource2, err := internal2.ToClientResource()
 	if err != nil {
