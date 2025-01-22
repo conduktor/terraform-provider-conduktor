@@ -54,6 +54,14 @@ func GetBooleanConfig(configValue basetypes.BoolValue, envs []string, fallback b
 	return fallback
 }
 
+// NewInt64Value Convert a int64 to a basetypes.Int64Value.
+func NewInt64Value(i int64) basetypes.Int64Value {
+	if i == 0 {
+		return basetypes.NewInt64Null()
+	}
+	return basetypes.NewInt64Value(i)
+}
+
 // NewStringValue Convert a string to a basetypes.StringValue.
 func NewStringValue(s string) basetypes.StringValue {
 	if s == "" {
