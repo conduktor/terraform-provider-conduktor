@@ -68,8 +68,8 @@ type GatewayInterceptorEncryptionAzureKMSConfig struct {
 }
 
 type GatewayInterceptorEncryptionAWSKMSConfig struct {
-	BasicCredentials   GatewayInterceptorEncryptionBasicAWSCredentialsConfig     `json:"basicCredentials"`
-	SessionCredentials GatewayInterceptorEncryptionBasicSessionCredentialsConfig `json:"sessionCredentials"`
+	BasicCredentials   *GatewayInterceptorEncryptionBasicAWSCredentialsConfig     `json:"basicCredentials"`
+	SessionCredentials *GatewayInterceptorEncryptionBasicSessionCredentialsConfig `json:"sessionCredentials"`
 }
 
 type GatewayInterceptorEncryptionGCPKMSConfig struct {
@@ -77,10 +77,10 @@ type GatewayInterceptorEncryptionGCPKMSConfig struct {
 }
 
 type GatewayInterceptorEncryptionKMSConfig struct {
-	KeyTtlMs int64                                      `json:"keyTtlMs"`
-	Azure    GatewayInterceptorEncryptionAzureKMSConfig `json:"azure"`
-	AWS      GatewayInterceptorEncryptionAWSKMSConfig   `json:"aws"`
-	GCP      GatewayInterceptorEncryptionGCPKMSConfig   `json:"gcp"`
+	KeyTtlMs int64                                       `json:"keyTtlMs"`
+	Azure    *GatewayInterceptorEncryptionAzureKMSConfig `json:"azure"`
+	AWS      *GatewayInterceptorEncryptionAWSKMSConfig   `json:"aws"`
+	GCP      *GatewayInterceptorEncryptionGCPKMSConfig   `json:"gcp"`
 }
 
 type GatewayInterceptorEncryptionSchemaRegistryConfig struct {
