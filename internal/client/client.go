@@ -62,9 +62,6 @@ func Make(ctx context.Context, mode Mode, apiParameter ApiParameter, providerVer
 	}
 	var err error
 
-	// Enable http client debug logs when provider log is set to TRACE
-	restyClient.SetDebug(TraceLogEnabled())
-
 	restyClient, err = ConfigureTLS(ctx, restyClient, apiParameter.TLSParameters)
 	if err != nil {
 		return nil, err
@@ -74,6 +71,9 @@ func Make(ctx context.Context, mode Mode, apiParameter ApiParameter, providerVer
 	if err != nil {
 		return nil, err
 	}
+
+	// Enable http client debug logs when provider log is set to TRACE
+	restyClient.SetDebug(TraceLogEnabled())
 
 	return &Client{
 		baseUrl: apiParameter.BaseUrl,
