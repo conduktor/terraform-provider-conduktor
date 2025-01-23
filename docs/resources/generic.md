@@ -20,32 +20,41 @@ This resource allows you to create, read, update and delete any resource support
 ### Using embedded YAML string
 ```terraform
 resource "conduktor_generic" "example" {
-  kind     = "User"
-  version  = "v2"
-  name     = "bob@company.io"
-  manifest = <<EOF
-apiVersion: v2
-kind: User
-metadata:
-  name: bob@company.io
-spec:
-  firstName: Bob
-  lastName: Smith
-  permissions:
-    - permissions:
-        - userView
-        - datamaskingView
-        - auditLogView
-      resourceType: PLATFORM
-    - permissions:
-        - topicViewConfig
-        - topicConsume
-        - topicProduce
-      resourceType: TOPIC
-      name: "test-topic"
-      cluster: "*"
-      patternType: LITERAL
-  EOF
+  kind    = "User"
+  version = "v2"
+  name    = "bob@company.io"
+  manifest = yamlencode({
+    apiVersion = "v2"
+    kind       = "User"
+    metadata = {
+      name = "bob@company.io"
+    }
+    spec = {
+      firstName = "Bob"
+      lastName  = "Smith"
+      permissions = [
+        {
+          permissions = [
+            "userView",
+            "datamaskingView",
+            "auditLogView"
+          ]
+          resourceType = "PLATFORM"
+        },
+        {
+          permissions = [
+            "topicViewConfig",
+            "topicConsume",
+            "topicProduce"
+          ]
+          resourceType = "TOPIC"
+          name         = "test-topic"
+          cluster      = "*"
+          patternType  = "LITERAL"
+        }
+      ]
+    }
+  })
 }
 ```
 
@@ -92,7 +101,6 @@ spec:
 Current limitation of this resource are :
 
 - `import` is not supported.
-- `plan` after `apply` show changes because of YAML automatic formatting and ordering.
 - only support Console resources for now
 
 ## Migrations notes

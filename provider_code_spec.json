@@ -1727,7 +1727,14 @@
             "name": "manifest",
             "string": {
               "description": "resource manifest in yaml format. See [reference documentation](https://docs.conduktor.io/platform/reference/resource-reference/console/#manifests) for more details",
-              "computed_optional_required": "required"
+              "computed_optional_required": "required",
+              "custom_type": {
+                "import": {
+                  "path": "github.com/conduktor/terraform-provider-conduktor/internal/customtypes"
+                },
+                "type": "customtypes.YAMLNormalizedType{}",
+                "value_type": "customtypes.YAMLNormalized"
+              }
             }
           }
         ]

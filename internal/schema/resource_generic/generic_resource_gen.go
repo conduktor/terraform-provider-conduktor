@@ -4,6 +4,7 @@ package resource_generic
 
 import (
 	"context"
+	"github.com/conduktor/terraform-provider-conduktor/internal/customtypes"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -31,6 +32,7 @@ func GenericResourceSchema(ctx context.Context) schema.Schema {
 				},
 			},
 			"manifest": schema.StringAttribute{
+				CustomType:          customtypes.YAMLNormalizedType{},
 				Required:            true,
 				Description:         "resource manifest in yaml format. See [reference documentation](https://docs.conduktor.io/platform/reference/resource-reference/console/#manifests) for more details",
 				MarkdownDescription: "resource manifest in yaml format. See [reference documentation](https://docs.conduktor.io/platform/reference/resource-reference/console/#manifests) for more details",
@@ -56,9 +58,9 @@ func GenericResourceSchema(ctx context.Context) schema.Schema {
 }
 
 type GenericModel struct {
-	Cluster  types.String `tfsdk:"cluster"`
-	Kind     types.String `tfsdk:"kind"`
-	Manifest types.String `tfsdk:"manifest"`
-	Name     types.String `tfsdk:"name"`
-	Version  types.String `tfsdk:"version"`
+	Cluster  types.String               `tfsdk:"cluster"`
+	Kind     types.String               `tfsdk:"kind"`
+	Manifest customtypes.YAMLNormalized `tfsdk:"manifest"`
+	Name     types.String               `tfsdk:"name"`
+	Version  types.String               `tfsdk:"version"`
 }

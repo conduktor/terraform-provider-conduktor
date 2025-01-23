@@ -171,7 +171,7 @@ func (client *Client) ApplyGeneric(ctx context.Context, cliResource ctlresource.
 		return "", err
 	}
 
-	url := client.BaseUrl + applyPath
+	url := client.BaseUrl + applyPath.Path
 
 	tflog.Trace(ctx, fmt.Sprintf("PUT on %s body : %s", applyPath, string(cliResource.Json)))
 	builder := client.Client.R().SetBody(cliResource.Json)

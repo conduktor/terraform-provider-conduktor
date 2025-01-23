@@ -21,7 +21,7 @@ func TestAccGenericResource(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceRef, "kind", "User"),
 					resource.TestCheckResourceAttr(resourceRef, "version", "v2"),
 					resource.TestCheckResourceAttrWith(resourceRef, "manifest",
-						test.TestCheckResourceAttrContainsStringsFunc("name: jim.halpert@dunder.mifflin.com", "firstName: Jim", "lastName: Halpert")),
+						test.TestCheckResourceAttrContainsStringsFunc("\"name\": \"jim.halpert@dunder.mifflin.com\"", "\"firstName\": \"Jim\"", "\"lastName\": \"Halpert\"")),
 				),
 			},
 			// Don't support import on generic resources yet
@@ -34,7 +34,7 @@ func TestAccGenericResource(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceRef, "kind", "User"),
 					resource.TestCheckResourceAttr(resourceRef, "version", "v2"),
 					resource.TestCheckResourceAttrWith(resourceRef, "manifest",
-						test.TestCheckResourceAttrContainsStringsFunc("name: jim.halpert@dunder.mifflin.com", "firstName: Tim", "lastName: Canterbury")),
+						test.TestCheckResourceAttrContainsStringsFunc("\"name\": \"jim.halpert@dunder.mifflin.com\"", "\"firstName\": \"Tim\"", "\"lastName\": \"Canterbury\"")),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -50,15 +50,14 @@ func TestAccGenericExample2Resource(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read from example
 			{
-				Config:             providerConfigConsole + test.TestAccExample(t, "resources", "conduktor_generic", "embedded.tf"),
-				ExpectNonEmptyPlan: true, // Example YAML are not properly formatted to prevent dirty plan on apply
+				Config: providerConfigConsole + test.TestAccExample(t, "resources", "conduktor_generic", "embedded.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("conduktor_generic.example", "name", "bob@company.io"),
 					resource.TestCheckResourceAttrWith("conduktor_generic.example", "manifest",
 						test.TestCheckResourceAttrContainsStringsFunc(
-							"name: bob@company.io",
-							"firstName: Bob",
-							"lastName: Smith",
+							"\"name\": \"bob@company.io\"",
+							"\"firstName\": \"Bob\"",
+							"\"lastName\": \"Smith\"",
 						)),
 				),
 			},

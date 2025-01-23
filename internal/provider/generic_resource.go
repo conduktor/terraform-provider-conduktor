@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"github.com/conduktor/terraform-provider-conduktor/internal/customtypes"
 
 	ctlresource "github.com/conduktor/ctl/resource"
 	ctlschema "github.com/conduktor/ctl/schema"
@@ -111,7 +112,7 @@ func (r *GenericResource) Read(ctx context.Context, req resource.ReadRequest, re
 	}
 
 	tflog.Info(ctx, fmt.Sprintf("Read %s kind named %s", data.Kind.String(), data.Name.String()))
-	resourcePath, err := resourcePath(data.Kind.ValueString(), data.Cluster.ValueString(), data.Name.ValueString())
+	resourcePath, err := resourcePath(ctx, data)
 	if err != nil {
 		resp.Diagnostics.AddError("Model Error", fmt.Sprintf("Unable to build Generic api path, got error: \"%s\" from kind:%s name:%s (cluster:%s)", err, data.Kind.ValueString(), data.Name.ValueString(), data.Cluster.ValueString()))
 		return
@@ -157,7 +158,7 @@ func (r *GenericResource) Read(ctx context.Context, req resource.ReadRequest, re
 	data.Kind = schemaUtils.NewStringValue(firstResource.Kind)
 	data.Name = schemaUtils.NewStringValue(firstResource.Name)
 	data.Version = schemaUtils.NewStringValue(firstResource.Version)
-	data.Manifest = schemaUtils.NewStringValue(yamlString)
+	data.Manifest = customtypes.NewNormalizedValue(yamlString)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -206,7 +207,7 @@ func (r *GenericResource) Delete(ctx context.Context, req resource.DeleteRequest
 	}
 
 	tflog.Info(ctx, fmt.Sprintf("Delete %s kind named %s", data.Kind.String(), data.Name.String()))
-	resourcePath, err := resourcePath(data.Kind.ValueString(), data.Cluster.ValueString(), data.Name.ValueString())
+	resourcePath, err := resourcePath(ctx, data)
 	if err != nil {
 		resp.Diagnostics.AddError("Model Error", fmt.Sprintf("Unable to read Generic, got error: %s", err))
 		return
@@ -236,15 +237,19 @@ func getKindFromName(kindName string) (ctlschema.Kind, error) {
 }
 
 // Generate the resource path for the given kind, cluster and resource name.
-func resourcePath(kindName, cluster, resourceName string) (string, error) {
-	kind, err := getKindFromName(kindName)
+func resourcePath(_ctx context.Context, data schema.GenericModel) (string, error) {
+	kind, err := getKindFromName(data.Kind.ValueString())
 	if err != nil {
 		return "", err
 	}
 
 	parentPath := []string{}
+	cluster := data.Cluster.ValueString()
 	if cluster != "" {
 		parentPath = append(parentPath, cluster)
 	}
-	return kind.DescribePath(parentPath, resourceName), nil
+	// TODO support console alerts v3 query params https://github.com/conduktor/ctl/pull/78
+	parentQueryValues := []string{}
+
+	return kind.DescribePath(parentPath, parentQueryValues, data.Name.ValueString()).Path, nil
 }

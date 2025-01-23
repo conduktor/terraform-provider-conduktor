@@ -5,7 +5,7 @@ go 1.23
 toolchain go1.23.0
 
 require (
-	github.com/conduktor/ctl v0.3.2
+	github.com/conduktor/ctl v0.3.4
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-resty/resty/v2 v2.16.5
