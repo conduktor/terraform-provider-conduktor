@@ -1,5 +1,5 @@
 
-resource "conduktor_gateway_interceptor_v2" "test" {
+resource "conduktor_gateway_interceptor_v2" "topic-policy" {
   name = "enforce-partition-limit"
   spec {
     plugin_class = "io.conduktor.gateway.interceptor.safeguard.CreateTopicPolicyPlugin"
