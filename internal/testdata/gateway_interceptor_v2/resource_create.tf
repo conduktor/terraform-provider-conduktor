@@ -87,5 +87,3 @@ resource "conduktor_gateway_interceptor_v2" "datamasking" {
   }
 }
 
-
-

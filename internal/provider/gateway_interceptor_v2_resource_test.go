@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"testing"
 
 	"github.com/conduktor/terraform-provider-conduktor/internal/test"
@@ -21,7 +22,12 @@ func TestAccGatewayInterceptorV2Resource(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read testing
 			{
-				Config: providerConfigGateway + test.TestAccTestdata(t, "gateway_interceptor_v2_resource_create.tf"),
+				Config: providerConfigGateway + test.TestAccTestdata(t, "gateway_interceptor_v2/resource_create.tf"),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PostApplyPostRefresh: []plancheck.PlanCheck{
+						plancheck.ExpectEmptyPlan(),
+					},
+				},
 				Check: resource.ComposeAggregateTestCheckFunc(
 					// check topic policy interceptor
 					resource.TestCheckResourceAttr(policyRef, "name", "enforce-partition-limit"),
@@ -55,7 +61,12 @@ func TestAccGatewayInterceptorV2Resource(t *testing.T) {
 			},
 			// Update and Read testing
 			{
-				Config: providerConfigGateway + test.TestAccTestdata(t, "gateway_interceptor_v2_resource_update.tf"),
+				Config: providerConfigGateway + test.TestAccTestdata(t, "gateway_interceptor_v2/resource_update.tf"),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PostApplyPostRefresh: []plancheck.PlanCheck{
+						plancheck.ExpectEmptyPlan(),
+					},
+				},
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(policyRef, "name", "enforce-partition-limit"),
 					resource.TestCheckResourceAttr(policyRef, "spec.plugin_class", "io.conduktor.gateway.interceptor.safeguard.CreateTopicPolicyPlugin"),
@@ -64,6 +75,65 @@ func TestAccGatewayInterceptorV2Resource(t *testing.T) {
 				),
 			},
 			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccGatewayInterceptorV2ExampleResource(t *testing.T) {
+	test.CheckEnterpriseEnabled(t)
+	fieldEncRef := "conduktor_gateway_interceptor_v2.field-encryption"
+	headerRemoveRef := "conduktor_gateway_interceptor_v2.header-removal"
+	policyRef := "conduktor_gateway_interceptor_v2.topic-policy"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { test.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			//// Create and Read from example field-encrypt.tf
+			{
+				Config: providerConfigGateway + test.TestAccExample(t, "resources", "conduktor_gateway_interceptor_v2", "field-encrypt.tf"),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PostApplyPostRefresh: []plancheck.PlanCheck{
+						plancheck.ExpectEmptyPlan(),
+					},
+				},
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(fieldEncRef, "name", "field-encryption"),
+					resource.TestCheckResourceAttr(fieldEncRef, "spec.plugin_class", "io.conduktor.gateway.interceptor.EncryptPlugin"),
+					resource.TestCheckResourceAttr(fieldEncRef, "spec.priority", "1"),
+					resource.TestCheckResourceAttr(fieldEncRef, "spec.config", `{"kmsConfig":{"vault":{"token":"test","uri":"http://vault:8200","version":1}},"recordValue":{"fields":[{"algorithm":"AES128_GCM","fieldName":"password","keySecretId":"vault-kms://vault:8200/transit/keys/password-secret"},{"algorithm":"AES128_GCM","fieldName":"visa","keySecretId":"vault-kms://vault:8200/transit/keys/{{record.header.test-header}}-visa-secret-{{record.key}}-{{record.value.username}}-{{record.value.education.account.accountId}}"},{"algorithm":"AES128_GCM","fieldName":"education.account.username","keySecretId":"in-memory-kms://myDefaultKeySecret"}]},"topic":"encrypt.*"}`),
+				),
+			},
+			// Create and Read from example header-removal.tf
+			{
+				Config: providerConfigGateway + test.TestAccExample(t, "resources", "conduktor_gateway_interceptor_v2", "header-removal.tf"),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PostApplyPostRefresh: []plancheck.PlanCheck{
+						plancheck.ExpectEmptyPlan(),
+					},
+				},
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(headerRemoveRef, "name", "remove-headers"),
+					resource.TestCheckResourceAttr(headerRemoveRef, "spec.plugin_class", "io.conduktor.gateway.interceptor.safeguard.MessageHeaderRemovalPlugin"),
+					resource.TestCheckResourceAttr(headerRemoveRef, "spec.priority", "100"),
+					resource.TestCheckResourceAttr(headerRemoveRef, "spec.config", `{"headerKeyRegex":"headerKey.*","topic":"topic-.*"}`),
+				),
+			},
+			// Create and Read from example topic-policy.tf
+			{
+				Config: providerConfigGateway + test.TestAccExample(t, "resources", "conduktor_gateway_interceptor_v2", "topic-policy.tf"),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PostApplyPostRefresh: []plancheck.PlanCheck{
+						plancheck.ExpectEmptyPlan(),
+					},
+				},
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(policyRef, "name", "enforce-partition-limit"),
+					resource.TestCheckResourceAttr(policyRef, "spec.plugin_class", "io.conduktor.gateway.interceptor.safeguard.CreateTopicPolicyPlugin"),
+					resource.TestCheckResourceAttr(policyRef, "spec.priority", "1"),
+					resource.TestCheckResourceAttr(policyRef, "spec.config", `{"numPartition":{"action":"INFO","max":5,"min":5},"topic":"myprefix-.*"}`),
+				),
+			},
 		},
 	})
 }

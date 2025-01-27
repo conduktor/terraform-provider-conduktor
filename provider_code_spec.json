@@ -1445,96 +1445,6 @@
       }
     },
     {
-      "name": "generic",
-      "schema": {
-        "attributes": [
-          {
-            "name": "kind",
-            "string": {
-              "description": "resource kind",
-              "computed_optional_required": "required",
-              "plan_modifiers": [
-                {
-                  "custom": {
-                    "imports": [
-                      {
-                        "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
-                      }
-                    ],
-                    "schema_definition": "stringplanmodifier.RequiresReplace()"
-                  }
-                }
-              ]
-            }
-          },
-          {
-            "name": "version",
-            "string": {
-              "description": "resource version",
-              "computed_optional_required": "required",
-              "plan_modifiers": [
-                {
-                  "custom": {
-                    "imports": [
-                      {
-                        "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
-                      }
-                    ],
-                    "schema_definition": "stringplanmodifier.RequiresReplace()"
-                  }
-                }
-              ]
-            }
-          },
-          {
-            "name": "name",
-            "string": {
-              "description": "resource name",
-              "computed_optional_required": "required",
-              "plan_modifiers": [
-                {
-                  "custom": {
-                    "imports": [
-                      {
-                        "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
-                      }
-                    ],
-                    "schema_definition": "stringplanmodifier.RequiresReplace()"
-                  }
-                }
-              ]
-            }
-          },
-          {
-            "name": "cluster",
-            "string": {
-              "description": "resource parent cluster (if any)",
-              "computed_optional_required": "optional",
-              "plan_modifiers": [
-                {
-                  "custom": {
-                    "imports": [
-                      {
-                        "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
-                      }
-                    ],
-                    "schema_definition": "stringplanmodifier.RequiresReplace()"
-                  }
-                }
-              ]
-            }
-          },
-          {
-            "name": "manifest",
-            "string": {
-              "description": "resource manifest in yaml format. See [reference documentation](https://docs.conduktor.io/platform/reference/resource-reference/console/#manifests) for more details",
-              "computed_optional_required": "required"
-            }
-          }
-        ]
-      }
-    },
-    {
       "name": "gateway_interceptor_v2",
       "schema": {
         "attributes": [
@@ -1638,7 +1548,7 @@
                               "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
                             }
                           ],
-                          "schema_definition": "stringvalidator.RegexMatches(regexp.MustCompile(\"^[a-zA-Z0-9_-]+$\"), \"\")"
+                          "schema_definition": "stringvalidator.RegexMatches(regexp.MustCompile(\"^[a-zA-Z0-9._-]+$\"), \"\")"
                         }
                       }
                     ]
@@ -1661,7 +1571,7 @@
                 {
                   "name": "plugin_class",
                   "string": {
-                    "description": "The class of the plugin",
+                    "description": "The class of the plugin. Check [interceptor catalog](https://docs.conduktor.io/gateway/category/interceptor-catalog/) for available plugins",
                     "computed_optional_required": "required"
                   }
                 },
@@ -1690,7 +1600,7 @@
                 {
                   "name": "config",
                   "string": {
-                    "description": "Plugin configuration",
+                    "description": "Plugin configuration in JSON format. Check [interceptor catalog](https://docs.conduktor.io/gateway/category/interceptor-catalog/) for details on the configuration",
                     "computed_optional_required": "required",
                     "custom_type": {
                       "import": {
@@ -1702,6 +1612,96 @@
                   }
                 }
               ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "generic",
+      "schema": {
+        "attributes": [
+          {
+            "name": "kind",
+            "string": {
+              "description": "resource kind",
+              "computed_optional_required": "required",
+              "plan_modifiers": [
+                {
+                  "custom": {
+                    "imports": [
+                      {
+                        "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+                      }
+                    ],
+                    "schema_definition": "stringplanmodifier.RequiresReplace()"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "version",
+            "string": {
+              "description": "resource version",
+              "computed_optional_required": "required",
+              "plan_modifiers": [
+                {
+                  "custom": {
+                    "imports": [
+                      {
+                        "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+                      }
+                    ],
+                    "schema_definition": "stringplanmodifier.RequiresReplace()"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "name",
+            "string": {
+              "description": "resource name",
+              "computed_optional_required": "required",
+              "plan_modifiers": [
+                {
+                  "custom": {
+                    "imports": [
+                      {
+                        "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+                      }
+                    ],
+                    "schema_definition": "stringplanmodifier.RequiresReplace()"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "cluster",
+            "string": {
+              "description": "resource parent cluster (if any)",
+              "computed_optional_required": "optional",
+              "plan_modifiers": [
+                {
+                  "custom": {
+                    "imports": [
+                      {
+                        "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+                      }
+                    ],
+                    "schema_definition": "stringplanmodifier.RequiresReplace()"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "manifest",
+            "string": {
+              "description": "resource manifest in yaml format. See [reference documentation](https://docs.conduktor.io/platform/reference/resource-reference/console/#manifests) for more details",
+              "computed_optional_required": "required"
             }
           }
         ]

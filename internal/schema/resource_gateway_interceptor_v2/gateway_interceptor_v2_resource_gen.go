@@ -53,7 +53,7 @@ func GatewayInterceptorV2ResourceSchema(ctx context.Context) schema.Schema {
 						Description:         "The username the interceptor will be applied to. Optional parameter to helps defining the scope",
 						MarkdownDescription: "The username the interceptor will be applied to. Optional parameter to helps defining the scope",
 						Validators: []validator.String{
-							stringvalidator.RegexMatches(regexp.MustCompile("^[a-zA-Z0-9_-]+$"), ""),
+							stringvalidator.RegexMatches(regexp.MustCompile("^[a-zA-Z0-9._-]+$"), ""),
 						},
 					},
 					"vcluster": schema.StringAttribute{
@@ -81,13 +81,13 @@ func GatewayInterceptorV2ResourceSchema(ctx context.Context) schema.Schema {
 					"config": schema.StringAttribute{
 						CustomType:          jsontypes.NormalizedType{},
 						Required:            true,
-						Description:         "Plugin configuration",
-						MarkdownDescription: "Plugin configuration",
+						Description:         "Plugin configuration in JSON format. Check [interceptor catalog](https://docs.conduktor.io/gateway/category/interceptor-catalog/) for details on the configuration",
+						MarkdownDescription: "Plugin configuration in JSON format. Check [interceptor catalog](https://docs.conduktor.io/gateway/category/interceptor-catalog/) for details on the configuration",
 					},
 					"plugin_class": schema.StringAttribute{
 						Required:            true,
-						Description:         "The class of the plugin",
-						MarkdownDescription: "The class of the plugin",
+						Description:         "The class of the plugin. Check [interceptor catalog](https://docs.conduktor.io/gateway/category/interceptor-catalog/) for available plugins",
+						MarkdownDescription: "The class of the plugin. Check [interceptor catalog](https://docs.conduktor.io/gateway/category/interceptor-catalog/) for available plugins",
 					},
 					"priority": schema.Int64Attribute{
 						Optional:            true,
