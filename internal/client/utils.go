@@ -45,3 +45,8 @@ func TraceLogEnabled() bool {
 
 	return terraformLevel == "TRACE" || providersLevel == "TRACE" || selfLevel == "TRACE"
 }
+
+func InitTraceEnabled() bool {
+	initLevel := strings.ToUpper(os.Getenv("TF_LOG_PROVIDER_CONDUKTOR_INIT"))
+	return initLevel == "TRACE"
+}

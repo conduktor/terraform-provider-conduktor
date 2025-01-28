@@ -62,6 +62,9 @@ func Make(ctx context.Context, mode Mode, apiParameter ApiParameter, providerVer
 	}
 	var err error
 
+	// Enable http client debug logs when TF_LOG_PROVIDER_CONDUKTOR_INIT is set to trace
+	restyClient.SetDebug(InitTraceEnabled())
+
 	restyClient, err = ConfigureTLS(ctx, restyClient, apiParameter.TLSParameters)
 	if err != nil {
 		return nil, err
