@@ -26,3 +26,17 @@ jsondecode and jsonencode to nornamize the JSON in terraform state.
 {{tffile "examples/resources/conduktor_gateway_interceptor_v2/header-removal.tf"}}
 
 {{ .SchemaMarkdown }}
+
+## Import
+
+In order to import an existing Conduktor Gateway interceptor, you need to know the interceptor unique name.
+
+The import ID is constructed as follows: `< interceptor_name >`.
+
+For example, using an [`import` block](https://developer.hashicorp.com/terraform/language/import) :
+{{tffile "examples/resources/conduktor_gateway_interceptor_v2/import.tf"}}
+
+Using the `terraform import` command:
+```shell
+terraform import conduktor_gateway_interceptor_v2.example interceptor-name
+```

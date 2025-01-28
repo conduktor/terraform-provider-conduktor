@@ -3,8 +3,6 @@ package gateway_interceptor_v2
 import (
 	"context"
 	"encoding/json"
-	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
-
 	mapper "github.com/conduktor/terraform-provider-conduktor/internal/mapper"
 	gateway "github.com/conduktor/terraform-provider-conduktor/internal/model/gateway"
 	schema "github.com/conduktor/terraform-provider-conduktor/internal/schema"
@@ -73,7 +71,9 @@ func specInternalModelToTerraform(ctx context.Context, r *gateway.GatewayInterce
 	if err != nil {
 		return gwinterceptor.SpecValue{}, mapper.WrapDiagError(diag, "spec.config", mapper.IntoTerraform)
 	}
-	valuesMap["config"] = jsontypes.NewNormalizedValue(string(config))
+	// need a patch in the generated code to use custom type instead of primitive string
+	// https://github.com/hashicorp/terraform-plugin-codegen-framework/issues/147
+	valuesMap["config"] = schema.NewStringValue(string(config))
 
 	value, diag := gwinterceptor.NewSpecValue(typesMap, valuesMap)
 	if diag.HasError() {
