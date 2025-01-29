@@ -7,10 +7,10 @@ resource "conduktor_console_kafka_cluster_v2" "test" {
   spec = {
     display_name      = "Test Cluster"
     bootstrap_servers = "localhost:9092"
-    properties         = {
-      "sasl.jaas.config" = "org.apache.kafka.common.security.plain.PlainLoginModule required username=admin password=admin-secret"
+    properties = {
+      "sasl.jaas.config"  = "org.apache.kafka.common.security.plain.PlainLoginModule required username=admin password=admin-secret"
       "security.protocol" = "SASL_SSL"
-      "sasl.mechanism" = "PLAIN"
+      "sasl.mechanism"    = "PLAIN"
     }
     icon                         = "kafka"
     color                        = "#FF0000"

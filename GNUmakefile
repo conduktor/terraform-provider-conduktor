@@ -39,6 +39,10 @@ generate: ## Run go generate
 go-fmt: ## Run go fmt
 	go fmt ./...
 
+.PHONY: tf-fmt
+tf-fmt: ## Run terraform fmt
+	terraform fmt -recursive
+
 tools:
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.60.2
 

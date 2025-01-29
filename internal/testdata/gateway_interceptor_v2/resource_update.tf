@@ -7,8 +7,8 @@ resource "conduktor_gateway_interceptor_v2" "topic-policy" {
     config = jsonencode({
       topic = "updatemyprefix-.*"
       numPartition = {
-        min = 5
-        max = 10
+        min    = 5
+        max    = 10
         action = "BLOCK"
       }
       retentionMs = {

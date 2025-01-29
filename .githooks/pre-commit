@@ -2,6 +2,7 @@
 
 echo "Run fmt"
 make go-fmt
+make tf-fmt
 
 echo
 echo "Run linters"

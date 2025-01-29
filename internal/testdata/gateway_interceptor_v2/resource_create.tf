@@ -7,8 +7,8 @@ resource "conduktor_gateway_interceptor_v2" "topic-policy" {
     config = jsonencode({
       topic = "myprefix-.*"
       numPartition = {
-        min = 5
-        max = 5
+        min    = 5
+        max    = 5
         action = "INFO"
       }
     })
@@ -24,10 +24,10 @@ resource "conduktor_gateway_interceptor_v2" "schema-encryption" {
       "schemaDataMode" = "convert_json"
       "kmsConfig" = {
       }
-      "tags" = ["PII", "ENCRYPTION"]
-      "defaultAlgorithm" = "AES128_EAX"
+      "tags"               = ["PII", "ENCRYPTION"]
+      "defaultAlgorithm"   = "AES128_EAX"
       "defaultKeySecretId" = "in-memory-kms://myDefaultKeySecret"
-      "namespace" = "conduktor."
+      "namespace"          = "conduktor."
     })
   }
 }
@@ -71,13 +71,13 @@ resource "conduktor_gateway_interceptor_v2" "datamasking" {
           "rule" = {
             "type" = "MASK_ALL"
           },
-          "fields" = [ "profile.creditCardNumber", "contact.email"]
+          "fields" = ["profile.creditCardNumber", "contact.email"]
         },
         {
           "name" = "Partial mask phone"
           "rule" = {
-            "type" = "MASK_FIRST_N"
-            "maskingChar" = "*"
+            "type"          = "MASK_FIRST_N"
+            "maskingChar"   = "*"
             "numberOfChars" = 9
           },
           "fields" = ["contact.phone"]
