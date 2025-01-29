@@ -1579,7 +1579,7 @@
                   "name": "priority",
                   "int64": {
                     "description": "The priority of the interceptor. Must be bigger than 0",
-                    "computed_optional_required": "optional",
+                    "computed_optional_required": "required",
                     "validators": [
                       {
                         "custom": {

@@ -122,11 +122,11 @@ Required:
 
 - `config` (String) Plugin configuration in JSON format. Check [interceptor catalog](https://docs.conduktor.io/gateway/category/interceptor-catalog/) for details on the configuration
 - `plugin_class` (String) The class of the plugin. Check [interceptor catalog](https://docs.conduktor.io/gateway/category/interceptor-catalog/) for available plugins
+- `priority` (Number) The priority of the interceptor. Must be bigger than 0
 
 Optional:
 
 - `comment` (String) An optional comment for the interceptor.
-- `priority` (Number) The priority of the interceptor. Must be bigger than 0
 
 
 

@@ -90,7 +90,7 @@ func GatewayInterceptorV2ResourceSchema(ctx context.Context) schema.Schema {
 						MarkdownDescription: "The class of the plugin. Check [interceptor catalog](https://docs.conduktor.io/gateway/category/interceptor-catalog/) for available plugins",
 					},
 					"priority": schema.Int64Attribute{
-						Optional:            true,
+						Required:            true,
 						Description:         "The priority of the interceptor. Must be bigger than 0",
 						MarkdownDescription: "The priority of the interceptor. Must be bigger than 0",
 						Validators: []validator.Int64{
