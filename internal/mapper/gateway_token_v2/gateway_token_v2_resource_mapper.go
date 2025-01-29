@@ -26,5 +26,6 @@ func InternalModelToTerraform(ctx context.Context, r *gateway.GatewayTokenResour
 		Vcluster:        types.StringValue(r.VCluster),
 		Username:        types.StringValue(r.Username),
 		LifetimeSeconds: types.Int64Value(r.LifetimeSeconds),
+		Token:           types.StringValue(r.Token),
 	}, nil
 }

@@ -1408,6 +1408,14 @@
                 }
               ]
             }
+          },
+          {
+            "name": "token",
+            "string": {
+              "description": "Response token.",
+              "computed_optional_required": "computed",
+              "sensitive": true
+            }
           }
         ]
       }

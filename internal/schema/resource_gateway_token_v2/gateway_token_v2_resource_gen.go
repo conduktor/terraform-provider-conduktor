@@ -27,6 +27,12 @@ func GatewayTokenV2ResourceSchema(ctx context.Context) schema.Schema {
 					int64validator.Between(1, 2147483647),
 				},
 			},
+			"token": schema.StringAttribute{
+				Computed:            true,
+				Sensitive:           true,
+				Description:         "Response token.",
+				MarkdownDescription: "Response token.",
+			},
 			"username": schema.StringAttribute{
 				Required:            true,
 				Description:         "The username of the local service account to create the token for.",
@@ -54,6 +60,7 @@ func GatewayTokenV2ResourceSchema(ctx context.Context) schema.Schema {
 
 type GatewayTokenV2Model struct {
 	LifetimeSeconds types.Int64  `tfsdk:"lifetime_seconds"`
+	Token           types.String `tfsdk:"token"`
 	Username        types.String `tfsdk:"username"`
 	Vcluster        types.String `tfsdk:"vcluster"`
 }

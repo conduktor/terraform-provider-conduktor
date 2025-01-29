@@ -13,6 +13,7 @@ type GatewayTokenResource struct {
 	VCluster        string `json:"vCluster"`
 	Username        string `json:"username"`
 	LifetimeSeconds int64  `json:"lifeTimeSeconds"`
+	Token           string `json:"token"`
 }
 
 func NewGatewayTokenResource(vCluster string, username string, lifetimeSeconds int64) GatewayTokenResource {

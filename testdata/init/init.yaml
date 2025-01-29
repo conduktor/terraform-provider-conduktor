@@ -6,3 +6,11 @@ metadata:
  name: "vcluster_sa"
 spec:
  aclEnabled: false # defaults to false
+---
+apiVersion: gateway/v2
+kind: GatewayServiceAccount
+metadata:
+ name: "user10"
+ vCluster: "vcluster_sa"
+spec:
+ type: "LOCAL"

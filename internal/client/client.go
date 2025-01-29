@@ -9,6 +9,7 @@ import (
 
 	ctlresource "github.com/conduktor/ctl/resource"
 	ctlschema "github.com/conduktor/ctl/schema"
+	gateway "github.com/conduktor/terraform-provider-conduktor/internal/model/gateway"
 	"github.com/go-resty/resty/v2"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	jsoniter "github.com/json-iterator/go"
@@ -209,15 +210,17 @@ func (client *Client) Apply(ctx context.Context, path string, resource interface
 	}
 
 	tflog.Trace(ctx, fmt.Sprintf("PUT %s request body : %s", path, string(jsonData)))
-	builder := client.client.R().SetBody(jsonData)
-	resp, err := builder.Put(url)
+
+	resp, err := client.client.R().SetBody(jsonData).Put(url)
 	if err != nil {
 		return ApplyResult{}, err
 	} else if resp.IsError() {
 		return ApplyResult{}, fmt.Errorf("%s", extractApiError(resp))
 	}
+
 	bodyBytes := resp.Body()
 	tflog.Trace(ctx, fmt.Sprintf("PUT %s response body : %s", path, string(bodyBytes)))
+
 	var upsertResponse ApplyResult
 	err = jsoniter.Unmarshal(bodyBytes, &upsertResponse)
 	if err != nil {
@@ -270,4 +273,31 @@ func (client *Client) Delete(ctx context.Context, mode Mode, path string, resour
 	}
 
 	return nil
+}
+
+func (client *Client) ApplyGatewayToken(ctx context.Context, path string, resource interface{}) (ApplyResult, error) {
+	url := client.baseUrl + path
+	jsonData, err := jsoniter.Marshal(resource)
+	if err != nil {
+		return ApplyResult{}, fmt.Errorf("Error marshalling resource: %s", err)
+	}
+
+	tflog.Trace(ctx, fmt.Sprintf("POST %s request body : %s", path, string(jsonData)))
+
+	resp, err := client.client.R().SetBody(jsonData).Post(url)
+	if err != nil {
+		return ApplyResult{}, err
+	} else if resp.IsError() {
+		return ApplyResult{}, fmt.Errorf("%s", extractApiError(resp))
+	}
+
+	bodyBytes := resp.Body()
+	tflog.Trace(ctx, fmt.Sprintf("POST %s response body : %s", path, string(bodyBytes)))
+
+	var upsertResponse gateway.GatewayTokenResource
+	err = jsoniter.Unmarshal(bodyBytes, &upsertResponse)
+	if err != nil {
+		return ApplyResult{}, fmt.Errorf("Error unmarshalling response: %s", err)
+	}
+	return ApplyResult{Resource: upsertResponse}, nil
 }
