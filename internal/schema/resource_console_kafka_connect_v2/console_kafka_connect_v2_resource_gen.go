@@ -45,8 +45,8 @@ func ConsoleKafkaConnectV2ResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"name": schema.StringAttribute{
 				Required:            true,
-				Description:         "Kafka connect server name, must be unique, act as ID for import",
-				MarkdownDescription: "Kafka connect server name, must be unique, act as ID for import",
+				Description:         "Kafka connect server name, must be unique, acts as an ID for import",
+				MarkdownDescription: "Kafka connect server name, must be unique, acts as an ID for import",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},

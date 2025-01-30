@@ -98,7 +98,7 @@ resource "conduktor_gateway_interceptor_v2" "header-removal" {
 
 ### Required
 
-- `name` (String) The name of the interceptor, must be unique, act as ID for import
+- `name` (String) The name of the interceptor, must be unique, acts as an ID for import
 
 ### Optional
 
@@ -110,9 +110,9 @@ resource "conduktor_gateway_interceptor_v2" "header-removal" {
 
 Optional:
 
-- `group` (String) The name of the group the interceptor will be applied to. Optional parameter to helps defining the scope
-- `username` (String) The username the interceptor will be applied to. Optional parameter to helps defining the scope
-- `vcluster` (String) The name of the virtual cluster the interceptor will be applied to. Optional parameter to help defining the scope
+- `group` (String) The name of the group the interceptor will be applied to. Optional parameter for defining the scope
+- `username` (String) The username the interceptor will be applied to. Optional parameter for defining the scope
+- `vcluster` (String) The name of the virtual cluster the interceptor will be applied to. Optional parameter for defining the scope
 
 
 <a id="nestedblock--spec"></a>
@@ -120,9 +120,9 @@ Optional:
 
 Required:
 
-- `config` (String) Plugin configuration in JSON format. Check [interceptor catalog](https://docs.conduktor.io/gateway/category/interceptor-catalog/) for details on the configuration
-- `plugin_class` (String) The class of the plugin. Check [interceptor catalog](https://docs.conduktor.io/gateway/category/interceptor-catalog/) for available plugins
-- `priority` (Number) The priority of the interceptor. Must be bigger than 0
+- `config` (String) Plugin configuration in JSON format. Check the [interceptor catalog](https://docs.conduktor.io/gateway/category/interceptor-catalog/) for details on the configuration
+- `plugin_class` (String) The class of the plugin. Check the [interceptor catalog](https://docs.conduktor.io/gateway/category/interceptor-catalog/) for available plugins
+- `priority` (Number) The priority of the interceptor. Must be greater than 0
 
 Optional:
 
@@ -133,7 +133,7 @@ Optional:
 
 ## Import
 
-In order to import an existing Conduktor Gateway interceptor, you need to know the interceptor unique name.
+In order to import an existing Conduktor Gateway interceptor, you need to know the interceptor's unique name.
 
 The import ID is constructed as follows: `< interceptor_name >`.
 

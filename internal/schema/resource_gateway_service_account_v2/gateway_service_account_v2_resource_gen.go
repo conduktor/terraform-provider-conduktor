@@ -29,8 +29,8 @@ func GatewayServiceAccountV2ResourceSchema(ctx context.Context) schema.Schema {
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
 				Required:            true,
-				Description:         "The name of the service account, must be unique, act as ID for import",
-				MarkdownDescription: "The name of the service account, must be unique, act as ID for import",
+				Description:         "The name of the service account, must be unique, acts as an ID for import",
+				MarkdownDescription: "The name of the service account, must be unique, acts as an ID for import",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},

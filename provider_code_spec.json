@@ -95,7 +95,7 @@
           {
             "name": "name",
             "string": {
-              "description": "Group name, must be unique, act as ID for import",
+              "description": "Group name, must be unique, acts as an ID for import",
               "computed_optional_required": "required",
               "plan_modifiers": [
                 {
@@ -801,7 +801,7 @@
           {
             "name": "name",
             "string": {
-              "description": "Kafka connect server name, must be unique, act as ID for import",
+              "description": "Kafka connect server name, must be unique, acts as an ID for import",
               "computed_optional_required": "required",
               "plan_modifiers": [
                 {
@@ -1005,7 +1005,7 @@
           {
             "name": "name",
             "string": {
-              "description": "User email, must be unique, act as ID for import",
+              "description": "User email, must be unique, acts as an ID for import",
               "computed_optional_required": "required",
               "plan_modifiers": [
                 {
@@ -1173,7 +1173,7 @@
           {
             "name": "name",
             "string": {
-              "description": "The name of the service account, must be unique, act as ID for import",
+              "description": "The name of the service account, must be unique, acts as an ID for import",
               "computed_optional_required": "required",
               "plan_modifiers": [
                 {
@@ -1451,7 +1451,7 @@
           {
             "name": "name",
             "string": {
-              "description": "The name of the interceptor, must be unique, act as ID for import",
+              "description": "The name of the interceptor, must be unique, acts as an ID for import",
               "computed_optional_required": "required",
               "plan_modifiers": [
                 {
@@ -1491,7 +1491,7 @@
                 {
                   "name": "vcluster",
                   "string": {
-                    "description": "The name of the virtual cluster the interceptor will be applied to. Optional parameter to help defining the scope",
+                    "description": "The name of the virtual cluster the interceptor will be applied to. Optional parameter for defining the scope",
                     "computed_optional_required": "optional",
                     "validators": [
                       {
@@ -1513,7 +1513,7 @@
                 {
                   "name": "group",
                   "string": {
-                    "description": "The name of the group the interceptor will be applied to. Optional parameter to helps defining the scope",
+                    "description": "The name of the group the interceptor will be applied to. Optional parameter for defining the scope",
                     "computed_optional_required": "optional",
                     "validators": [
                       {
@@ -1535,7 +1535,7 @@
                 {
                   "name": "username",
                   "string": {
-                    "description": "The username the interceptor will be applied to. Optional parameter to helps defining the scope",
+                    "description": "The username the interceptor will be applied to. Optional parameter for defining the scope",
                     "computed_optional_required": "optional",
                     "validators": [
                       {
@@ -1571,14 +1571,14 @@
                 {
                   "name": "plugin_class",
                   "string": {
-                    "description": "The class of the plugin. Check [interceptor catalog](https://docs.conduktor.io/gateway/category/interceptor-catalog/) for available plugins",
+                    "description": "The class of the plugin. Check the [interceptor catalog](https://docs.conduktor.io/gateway/category/interceptor-catalog/) for available plugins",
                     "computed_optional_required": "required"
                   }
                 },
                 {
                   "name": "priority",
                   "int64": {
-                    "description": "The priority of the interceptor. Must be bigger than 0",
+                    "description": "The priority of the interceptor. Must be greater than 0",
                     "computed_optional_required": "required",
                     "validators": [
                       {
@@ -1600,7 +1600,7 @@
                 {
                   "name": "config",
                   "string": {
-                    "description": "Plugin configuration in JSON format. Check [interceptor catalog](https://docs.conduktor.io/gateway/category/interceptor-catalog/) for details on the configuration",
+                    "description": "Plugin configuration in JSON format. Check the [interceptor catalog](https://docs.conduktor.io/gateway/category/interceptor-catalog/) for details on the configuration",
                     "computed_optional_required": "required",
                     "custom_type": {
                       "import": {

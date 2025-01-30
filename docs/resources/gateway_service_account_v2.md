@@ -42,7 +42,7 @@ resource "conduktor_gateway_service_account_v2" "external_sa" {
 
 ### Required
 
-- `name` (String) The name of the service account, must be unique, act as ID for import
+- `name` (String) The name of the service account, must be unique, acts as an ID for import
 - `spec` (Attributes) Service account specification (see [below for nested schema](#nestedatt--spec))
 
 ### Optional
