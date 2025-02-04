@@ -109,6 +109,10 @@ services:
       GATEWAY_OAUTH_JWKS_URL: "https://login.microsoftonline.com/common/discovery/keys"
       GATEWAY_OAUTH_EXPECTED_ISSUER: "https://sts.windows.net/38755287-df00-48cd-805b-1ebe914e8b11/"
       GATEWAY_OAUTH_EXPECTED_AUDIENCES: "[00000002-0000-0000-c000-000000000000]"
+    healthcheck:
+      test: curl localhost:8888/health
+      interval: 5s
+      retries: 25
 
 volumes:
   pg_data: {}
