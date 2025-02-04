@@ -18,7 +18,10 @@ This resource allows you to create, read, update and delete interceptors in Cond
 ```terraform
 resource "conduktor_gateway_interceptor_v2" "topic-policy" {
   name = "enforce-partition-limit"
-  spec {
+  scope = {
+    vcluster = "passthrough"
+  }
+  spec = {
     plugin_class = "io.conduktor.gateway.interceptor.safeguard.CreateTopicPolicyPlugin"
     priority     = 1
     config = jsonencode({
@@ -37,7 +40,11 @@ resource "conduktor_gateway_interceptor_v2" "topic-policy" {
 ```terraform
 resource "conduktor_gateway_interceptor_v2" "field-encryption" {
   name = "field-encryption"
-  spec {
+  scope = {
+    vcluster = "passthrough"
+    username = "my.user"
+  }
+  spec = {
     plugin_class = "io.conduktor.gateway.interceptor.EncryptPlugin"
     priority     = 1
     config = jsonencode({
@@ -79,7 +86,7 @@ jsondecode and jsonencode to nornamize the JSON in terraform state.
 ```terraform
 resource "conduktor_gateway_interceptor_v2" "header-removal" {
   name = "remove-headers"
-  spec {
+  spec = {
     plugin_class = "io.conduktor.gateway.interceptor.safeguard.MessageHeaderRemovalPlugin"
     priority     = 100
     config = jsonencode(jsondecode(<<EOF
@@ -99,23 +106,13 @@ resource "conduktor_gateway_interceptor_v2" "header-removal" {
 ### Required
 
 - `name` (String) The name of the interceptor, must be unique, acts as an ID for import
+- `spec` (Attributes) The interceptor specification (see [below for nested schema](#nestedatt--spec))
 
 ### Optional
 
-- `scope` (Block, Optional) (see [below for nested schema](#nestedblock--scope))
-- `spec` (Block, Optional) (see [below for nested schema](#nestedblock--spec))
+- `scope` (Attributes) The targeting scope of the interceptor. See [documentation](https://docs.conduktor.io/gateway/reference/resources-reference/#interceptor-targeting) (see [below for nested schema](#nestedatt--scope))
 
-<a id="nestedblock--scope"></a>
-### Nested Schema for `scope`
-
-Optional:
-
-- `group` (String) The name of the group the interceptor will be applied to. Optional parameter for defining the scope
-- `username` (String) The username the interceptor will be applied to. Optional parameter for defining the scope
-- `vcluster` (String) The name of the virtual cluster the interceptor will be applied to. Optional parameter for defining the scope
-
-
-<a id="nestedblock--spec"></a>
+<a id="nestedatt--spec"></a>
 ### Nested Schema for `spec`
 
 Required:
@@ -127,6 +124,16 @@ Required:
 Optional:
 
 - `comment` (String) An optional comment for the interceptor.
+
+
+<a id="nestedatt--scope"></a>
+### Nested Schema for `scope`
+
+Optional:
+
+- `group` (String) The name of the group the interceptor will be applied to. Optional parameter for defining the scope
+- `username` (String) The username the interceptor will be applied to. Optional parameter for defining the scope
+- `vcluster` (String) The name of the virtual cluster the interceptor will be applied to. Optional parameter for defining the scope
 
 
 

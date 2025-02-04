@@ -123,10 +123,15 @@ func (r *GatewayInterceptorV2Resource) Read(ctx context.Context, req resource.Re
 	}
 
 	// Only appending vcluster if present
-	// TODO: add user and group
 	queryString := "name=" + data.Name.ValueString()
 	if data.Scope.Vcluster.ValueString() != "" {
 		queryString += "&vcluster=" + data.Scope.Vcluster.ValueString()
+	}
+	if data.Scope.Username.ValueString() != "" {
+		queryString += "&username=" + data.Scope.Username.ValueString()
+	}
+	if data.Scope.Group.ValueString() != "" {
+		queryString += "&group=" + data.Scope.Group.ValueString()
 	}
 
 	tflog.Info(ctx, fmt.Sprintf("Read interceptor named %s", data.Name.String()))
@@ -221,6 +226,8 @@ func (r *GatewayInterceptorV2Resource) Delete(ctx context.Context, req resource.
 		Name: data.Name.ValueString(),
 		Scope: gateway.GatewayInterceptorScope{
 			VCluster: data.Scope.Vcluster.ValueString(),
+			Username: data.Scope.Username.ValueString(),
+			Group:    data.Scope.Group.ValueString(),
 		},
 	}
 

@@ -39,20 +39,41 @@ func TFToInternalModel(ctx context.Context, r *gwinterceptor.GatewayInterceptorV
 }
 
 func InternalModelToTerraform(ctx context.Context, r *gateway.GatewayInterceptorResource) (gwinterceptor.GatewayInterceptorV2Model, error) {
+	scopeValue, err := scopeInternalModelToTerraform(ctx, &r.Metadata.Scope)
+	if err != nil {
+		return gwinterceptor.GatewayInterceptorV2Model{}, err
+	}
+
 	specValue, err := specInternalModelToTerraform(ctx, r.Spec)
 	if err != nil {
 		return gwinterceptor.GatewayInterceptorV2Model{}, err
 	}
 
 	return gwinterceptor.GatewayInterceptorV2Model{
-		Name: types.StringValue(r.Metadata.Name),
-		Scope: gwinterceptor.ScopeValue{
-			Group:    schema.NewStringValue(r.Metadata.Scope.Group),
-			Vcluster: schema.NewStringValue(r.Metadata.Scope.VCluster),
-			Username: schema.NewStringValue(r.Metadata.Scope.Username),
-		},
-		Spec: specValue,
+		Name:  types.StringValue(r.Metadata.Name),
+		Scope: scopeValue,
+		Spec:  specValue,
 	}, nil
+}
+
+func scopeInternalModelToTerraform(ctx context.Context, r *gateway.GatewayInterceptorScope) (gwinterceptor.ScopeValue, error) {
+	unknownScopeObjectValue, diag := gwinterceptor.NewScopeValueUnknown().ToObjectValue(ctx)
+	if diag.HasError() {
+		return gwinterceptor.ScopeValue{}, mapper.WrapDiagError(diag, "scope", mapper.IntoTerraform)
+	}
+
+	var typesMap = unknownScopeObjectValue.AttributeTypes(ctx)
+	var valuesMap = schema.ValueMapFromTypes(ctx, typesMap)
+
+	valuesMap["vcluster"] = schema.NewStringValue(r.VCluster)
+	valuesMap["username"] = schema.NewStringValue(r.Username)
+	valuesMap["group"] = schema.NewStringValue(r.Group)
+
+	value, diag := gwinterceptor.NewScopeValue(typesMap, valuesMap)
+	if diag.HasError() {
+		return gwinterceptor.ScopeValue{}, mapper.WrapDiagError(diag, "scope", mapper.IntoTerraform)
+	}
+	return value, nil
 }
 
 func specInternalModelToTerraform(ctx context.Context, r *gateway.GatewayInterceptorSpec) (gwinterceptor.SpecValue, error) {

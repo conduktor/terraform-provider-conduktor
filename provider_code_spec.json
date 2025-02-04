@@ -1481,18 +1481,28 @@
                 }
               ]
             }
-          }
-        ],
-        "blocks": [
+          },
           {
             "name": "scope",
             "single_nested": {
+              "computed_optional_required": "computed_optional",
+              "description": "The targeting scope of the interceptor. See [documentation](https://docs.conduktor.io/gateway/reference/resources-reference/#interceptor-targeting)",
               "attributes": [
                 {
                   "name": "vcluster",
                   "string": {
                     "description": "The name of the virtual cluster the interceptor will be applied to. Optional parameter for defining the scope",
-                    "computed_optional_required": "optional",
+                    "computed_optional_required": "computed_optional",
+                    "default": {
+                      "custom": {
+                        "imports": [
+                          {
+                            "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+                          }
+                        ],
+                        "schema_definition": "stringdefault.StaticString(\"passthrough\")"
+                      }
+                    },
                     "validators": [
                       {
                         "custom": {
@@ -1554,12 +1564,28 @@
                     ]
                   }
                 }
-              ]
+              ],
+              "default": {
+                "custom": {
+                  "imports": [
+                    {
+                      "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/objectdefault"
+                    },
+
+                    {
+                      "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/default"
+                    }
+                  ],
+                  "schema_definition": "objectdefault.StaticValue(_default.DefaultScope)"
+                }
+              }
             }
           },
           {
             "name": "spec",
             "single_nested": {
+              "computed_optional_required": "required",
+              "description": "The interceptor specification",
               "attributes": [
                 {
                   "name": "comment",

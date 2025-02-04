@@ -5,12 +5,15 @@ package resource_gateway_interceptor_v2
 import (
 	"context"
 	"fmt"
+	"github.com/conduktor/terraform-provider-conduktor/internal/schema/default"
 	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -36,9 +39,7 @@ func GatewayInterceptorV2ResourceSchema(ctx context.Context) schema.Schema {
 					stringvalidator.RegexMatches(regexp.MustCompile("^[a-zA-Z0-9_-]{3,64}$"), ""),
 				},
 			},
-		},
-		Blocks: map[string]schema.Block{
-			"scope": schema.SingleNestedBlock{
+			"scope": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"group": schema.StringAttribute{
 						Optional:            true,
@@ -58,11 +59,13 @@ func GatewayInterceptorV2ResourceSchema(ctx context.Context) schema.Schema {
 					},
 					"vcluster": schema.StringAttribute{
 						Optional:            true,
+						Computed:            true,
 						Description:         "The name of the virtual cluster the interceptor will be applied to. Optional parameter for defining the scope",
 						MarkdownDescription: "The name of the virtual cluster the interceptor will be applied to. Optional parameter for defining the scope",
 						Validators: []validator.String{
 							stringvalidator.RegexMatches(regexp.MustCompile("^[a-zA-Z0-9_-]+$"), ""),
 						},
+						Default: stringdefault.StaticString("passthrough"),
 					},
 				},
 				CustomType: ScopeType{
@@ -70,8 +73,13 @@ func GatewayInterceptorV2ResourceSchema(ctx context.Context) schema.Schema {
 						AttrTypes: ScopeValue{}.AttributeTypes(ctx),
 					},
 				},
+				Optional:            true,
+				Computed:            true,
+				Description:         "The targeting scope of the interceptor. See [documentation](https://docs.conduktor.io/gateway/reference/resources-reference/#interceptor-targeting)",
+				MarkdownDescription: "The targeting scope of the interceptor. See [documentation](https://docs.conduktor.io/gateway/reference/resources-reference/#interceptor-targeting)",
+				Default:             objectdefault.StaticValue(_default.DefaultScope),
 			},
-			"spec": schema.SingleNestedBlock{
+			"spec": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"comment": schema.StringAttribute{
 						Optional:            true,
@@ -103,6 +111,9 @@ func GatewayInterceptorV2ResourceSchema(ctx context.Context) schema.Schema {
 						AttrTypes: SpecValue{}.AttributeTypes(ctx),
 					},
 				},
+				Required:            true,
+				Description:         "The interceptor specification",
+				MarkdownDescription: "The interceptor specification",
 			},
 		},
 	}

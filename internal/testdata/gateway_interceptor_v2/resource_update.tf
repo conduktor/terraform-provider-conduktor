@@ -1,7 +1,11 @@
 
-resource "conduktor_gateway_interceptor_v2" "topic-policy" {
-  name = "enforce-partition-limit"
-  spec {
+resource "conduktor_gateway_interceptor_v2" "topic-policy-test" {
+  name = "enforce-partition-limit-test"
+  scope = {
+    vcluster = "passthrough"
+    username = "my.user2"
+  }
+  spec = {
     plugin_class = "io.conduktor.gateway.interceptor.safeguard.CreateTopicPolicyPlugin"
     priority     = 100
     config = jsonencode({

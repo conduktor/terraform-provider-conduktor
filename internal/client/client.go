@@ -103,6 +103,7 @@ func ConfigureAuth(ctx context.Context, mode Mode, restyClient *resty.Client, ap
 		}
 	case GATEWAY:
 		{
+			restyClient.SetDisableWarn(true)
 			restyClient.SetBasicAuth(apiParameter.CdkUser, apiParameter.CdkPassword)
 
 			// Testing authentication parameters against /metrics API.

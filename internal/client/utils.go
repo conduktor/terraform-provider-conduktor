@@ -37,13 +37,23 @@ func uniformizeBaseUrl(baseUrl string) string {
 	return regex.ReplaceAllString(baseUrl, "/api")
 }
 
+func isLogLevelEnabled(envVars []string, level string) bool {
+	for _, envVar := range envVars {
+		if strings.ToUpper(os.Getenv(envVar)) == level {
+			return true
+		}
+	}
+	return false
+}
+
 // hack to guess if current provider logs are in trace level.
 func TraceLogEnabled() bool {
-	selfLevel := strings.ToUpper(os.Getenv("TF_LOG_PROVIDER_CONDUKTOR"))
-	providersLevel := strings.ToUpper(os.Getenv("TF_LOG_PROVIDER"))
-	terraformLevel := strings.ToUpper(os.Getenv("TF_LOG"))
+	return isLogLevelEnabled([]string{"TF_LOG_PROVIDER_CONDUKTOR", "TF_LOG_PROVIDER", "TF_LOG"}, "TRACE")
+}
 
-	return terraformLevel == "TRACE" || providersLevel == "TRACE" || selfLevel == "TRACE"
+// hack to guess if current provider logs are in debug or trace level.
+func DebugLogEnabled() bool {
+	return TraceLogEnabled() || isLogLevelEnabled([]string{"TF_LOG_PROVIDER_CONDUKTOR", "TF_LOG_PROVIDER", "TF_LOG"}, "DEBUG")
 }
 
 func InitTraceEnabled() bool {

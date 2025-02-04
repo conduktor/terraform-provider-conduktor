@@ -1,7 +1,10 @@
-
-resource "conduktor_gateway_interceptor_v2" "topic-policy" {
-  name = "enforce-partition-limit"
-  spec {
+resource "conduktor_gateway_interceptor_v2" "topic-policy-test" {
+  name = "enforce-partition-limit-test"
+  scope = {
+    vcluster = "passthrough"
+    username = "my.user"
+  }
+  spec = {
     plugin_class = "io.conduktor.gateway.interceptor.safeguard.CreateTopicPolicyPlugin"
     priority     = 1
     config = jsonencode({
@@ -17,7 +20,11 @@ resource "conduktor_gateway_interceptor_v2" "topic-policy" {
 
 resource "conduktor_gateway_interceptor_v2" "schema-encryption" {
   name = "schema-encryption"
-  spec {
+  scope = {
+    vcluster = "vcluster_sa" # should already be setup by init
+    group    = "group-a"     # should already be setup by init
+  }
+  spec = {
     plugin_class = "io.conduktor.gateway.interceptor.EncryptSchemaBasedPlugin"
     priority     = 2
     config = jsonencode({
@@ -34,7 +41,7 @@ resource "conduktor_gateway_interceptor_v2" "schema-encryption" {
 
 resource "conduktor_gateway_interceptor_v2" "full-encryption" {
   name = "full-encryption"
-  spec {
+  spec = {
     plugin_class = "io.conduktor.gateway.interceptor.EncryptPlugin"
     priority     = 3
     config = jsonencode({
@@ -60,7 +67,7 @@ resource "conduktor_gateway_interceptor_v2" "full-encryption" {
 
 resource "conduktor_gateway_interceptor_v2" "datamasking" {
   name = "mask-sensitive-fields"
-  spec {
+  spec = {
     plugin_class = "io.conduktor.gateway.interceptor.FieldLevelDataMaskingPlugin"
     priority     = 100
     config = jsonencode({

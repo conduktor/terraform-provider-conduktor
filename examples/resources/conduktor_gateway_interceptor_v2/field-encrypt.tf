@@ -1,6 +1,10 @@
 resource "conduktor_gateway_interceptor_v2" "field-encryption" {
   name = "field-encryption"
-  spec {
+  scope = {
+    vcluster = "passthrough"
+    username = "my.user"
+  }
+  spec = {
     plugin_class = "io.conduktor.gateway.interceptor.EncryptPlugin"
     priority     = 1
     config = jsonencode({

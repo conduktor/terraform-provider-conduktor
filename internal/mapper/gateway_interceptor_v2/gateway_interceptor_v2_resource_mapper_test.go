@@ -56,6 +56,8 @@ func TestGatewayInterceptorV2ModelMapping(t *testing.T) {
 	assert.Equal(t, types.StringValue("vcluster"), tfModel.Scope.Vcluster)
 	assert.Equal(t, types.StringValue("group"), tfModel.Scope.Group)
 	assert.Equal(t, types.StringValue("username"), tfModel.Scope.Username)
+	assert.Equal(t, false, tfModel.Scope.IsNull())
+	assert.Equal(t, false, tfModel.Scope.IsUnknown())
 	assert.Equal(t, types.Int64Value(100), tfModel.Spec.Priority)
 	assert.Equal(t, types.StringValue("io.conduktor.gateway.interceptor.FieldLevelDataMaskingPlugin"), tfModel.Spec.PluginClass)
 	assert.Equal(t, types.StringValue("Test interceptor payload"), tfModel.Spec.Comment)
