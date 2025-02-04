@@ -3,6 +3,9 @@ package provider
 import (
 	"context"
 	"fmt"
+	"time"
+
+	"github.com/dgrijalva/jwt-go"
 
 	"github.com/conduktor/terraform-provider-conduktor/internal/client"
 	mapper "github.com/conduktor/terraform-provider-conduktor/internal/mapper/gateway_token_v2"
@@ -11,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	jsoniter "github.com/json-iterator/go"
 )
 
 const gatewayTokenV2ApiPath = "/gateway/v2/token"
@@ -66,65 +70,38 @@ func (r *GatewayTokenV2Resource) Configure(ctx context.Context, req resource.Con
 	r.apiClient = data.Client
 }
 
-func (d *GatewayTokenV2Resource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *GatewayTokenV2Resource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data schema.GatewayTokenV2Model
 
-	// Read Terraform configuration data into the model
+	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	var gatewayRes gateway.GatewayTokenResource
-	if data.Token.IsNull() {
-		tflog.Info(ctx, fmt.Sprintf("Create token for username %s", data.Username.String()))
-		tflog.Trace(ctx, fmt.Sprintf("Create token with TF data: %+v", data))
+	tflog.Info(ctx, fmt.Sprintf("Read token for service account %s", data.Username.String()))
 
-		gatewayResource, err := mapper.TFToInternalModel(ctx, &data)
+	if !data.Token.IsNull() && data.Token.ValueString() != "" {
+		expired, err := isTokenExpired(data.Token.ValueString())
 		if err != nil {
-			resp.Diagnostics.AddError("Model Error", fmt.Sprintf("Unable to create token, got error: %s", err))
-			return
-		}
-		tflog.Debug(ctx, fmt.Sprintf("Token to create : %+v", gatewayResource))
-
-		apply, err := d.apiClient.ApplyGatewayToken(ctx, gatewayTokenV2ApiPath, gatewayResource)
-		if err != nil {
-			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create token, got error: %s", err))
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to validate token, got error: %s", err))
 			return
 		}
 
-		tflog.Debug(ctx, fmt.Sprintf("Token created with result: %s", apply))
-
-		err = gatewayRes.FromRawJsonInterface(apply.Resource)
-		if err != nil {
-			resp.Diagnostics.AddError("Unmarshall Error", fmt.Sprintf("Response resource can't be cast as token : %v, got error: %s", apply.Resource, err))
+		if expired {
+			tflog.Trace(ctx, "Token expired, removing resource from state")
+			resp.State.RemoveResource(ctx)
 			return
 		}
-		gatewayRes.VCluster = data.Vcluster.ValueString()
-		gatewayRes.Username = data.Username.ValueString()
-		gatewayRes.LifetimeSeconds = data.LifetimeSeconds.ValueInt64()
-		tflog.Debug(ctx, fmt.Sprintf("New token state : %+v", gatewayRes))
 	}
 
-	data, err := mapper.InternalModelToTerraform(ctx, &gatewayRes)
-	if err != nil {
-		resp.Diagnostics.AddError("Model Error", fmt.Sprintf("Unable to read token, got error: %s", err))
-		return
-	}
-
-	// Write logs using the tflog package
-	// Documentation: https://terraform.io/plugin/log
-	tflog.Trace(ctx, "read a data source")
-
-	// Save data into Terraform state
+	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
 func (r *GatewayTokenV2Resource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data schema.GatewayTokenV2Model
-	resourceMutex.Lock()
-	defer resourceMutex.Unlock()
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -142,7 +119,7 @@ func (r *GatewayTokenV2Resource) Create(ctx context.Context, req resource.Create
 	}
 	tflog.Debug(ctx, fmt.Sprintf("Token to create : %+v", gatewayResource))
 
-	apply, err := r.apiClient.ApplyGatewayToken(ctx, gatewayTokenV2ApiPath, gatewayResource)
+	apply, err := applyGatewayToken(ctx, r.apiClient, gatewayTokenV2ApiPath, gatewayResource)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create token, got error: %s", err))
 		return
@@ -158,6 +135,16 @@ func (r *GatewayTokenV2Resource) Create(ctx context.Context, req resource.Create
 	}
 	tflog.Debug(ctx, fmt.Sprintf("New token state : %+v", gatewayRes))
 
+	err = gatewayRes.FromRawJsonInterface(apply.Resource)
+	if err != nil {
+		resp.Diagnostics.AddError("Unmarshall Error", fmt.Sprintf("Response resource can't be cast as token : %v, got error: %s", apply.Resource, err))
+		return
+	}
+	gatewayRes.VCluster = data.Vcluster.ValueString()
+	gatewayRes.Username = data.Username.ValueString()
+	gatewayRes.LifetimeSeconds = data.LifetimeSeconds.ValueInt64()
+	tflog.Debug(ctx, fmt.Sprintf("New token state : %+v", gatewayRes))
+
 	data, err = mapper.InternalModelToTerraform(ctx, &gatewayRes)
 	if err != nil {
 		resp.Diagnostics.AddError("Model Error", fmt.Sprintf("Unable to read token, got error: %s", err))
@@ -168,57 +155,8 @@ func (r *GatewayTokenV2Resource) Create(ctx context.Context, req resource.Create
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-// func (r *GatewayTokenV2Resource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-// 	var data schema.GatewayTokenV2Model
-//
-// 	// Read Terraform prior state data into the model
-// 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
-//
-// 	if resp.Diagnostics.HasError() {
-// 		return
-// 	}
-//
-// 	// Only appending vcluster if present
-// 	queryString := "name=" + data.Name.ValueString()
-// 	if data.Vcluster.ValueString() != "" {
-// 		queryString += "&vcluster=" + data.Vcluster.ValueString()
-// 	}
-//
-// 	tflog.Info(ctx, fmt.Sprintf("Read token named %s", data.Name.String()))
-// 	get, err := r.apiClient.Describe(ctx, fmt.Sprintf("%s?%s", gatewayTokenV2ApiPath, queryString))
-// 	if err != nil {
-// 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read token, got error: %s", err))
-// 		return
-// 	}
-//
-// 	if len(get) == 0 {
-// 		tflog.Debug(ctx, fmt.Sprintf("Token %s not found, removing from state", data.Name.String()))
-// 		resp.State.RemoveResource(ctx)
-// 		return
-// 	}
-//
-// 	var gatewayRes = []gateway.GatewayTokenResource{}
-// 	err = json.Unmarshal(get, &gatewayRes)
-// 	if err != nil || len(gatewayRes) < 1 {
-// 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read token, got error: %s", err))
-// 		return
-// 	}
-// 	tflog.Debug(ctx, fmt.Sprintf("New token state : %+v", gatewayRes))
-//
-// 	data, err = mapper.InternalModelToTerraform(ctx, &gatewayRes[0])
-// 	if err != nil {
-// 		resp.Diagnostics.AddError("Model Error", fmt.Sprintf("Unable to read token, got error: %s", err))
-// 		return
-// 	}
-//
-// 	// Save updated data into Terraform state
-// 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-// }
-
 func (r *GatewayTokenV2Resource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data schema.GatewayTokenV2Model
-	resourceMutex.Lock()
-	defer resourceMutex.Unlock()
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -237,7 +175,7 @@ func (r *GatewayTokenV2Resource) Update(ctx context.Context, req resource.Update
 	}
 	tflog.Debug(ctx, fmt.Sprintf("Token to update : %+v", gatewayResource))
 
-	apply, err := r.apiClient.ApplyGatewayToken(ctx, gatewayTokenV2ApiPath, gatewayResource)
+	apply, err := applyGatewayToken(ctx, r.apiClient, gatewayTokenV2ApiPath, gatewayResource)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create token, got error: %s", err))
 		return
@@ -250,6 +188,10 @@ func (r *GatewayTokenV2Resource) Update(ctx context.Context, req resource.Update
 		resp.Diagnostics.AddError("Unmarshall Error", fmt.Sprintf("Response resource can't be cast as token : %v, got error: %s", apply.Resource, err))
 		return
 	}
+	tflog.Debug(ctx, fmt.Sprintf("New token state : %+v", gatewayRes))
+	gatewayRes.VCluster = data.Vcluster.ValueString()
+	gatewayRes.Username = data.Username.ValueString()
+	gatewayRes.LifetimeSeconds = data.LifetimeSeconds.ValueInt64()
 	tflog.Debug(ctx, fmt.Sprintf("New token state : %+v", gatewayRes))
 
 	data, err = mapper.InternalModelToTerraform(ctx, &gatewayRes)
@@ -264,8 +206,6 @@ func (r *GatewayTokenV2Resource) Update(ctx context.Context, req resource.Update
 
 func (r *GatewayTokenV2Resource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data schema.GatewayTokenV2Model
-	resourceMutex.Lock()
-	defer resourceMutex.Unlock()
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -291,4 +231,57 @@ func (r *GatewayTokenV2Resource) Delete(ctx context.Context, req resource.Delete
 
 func (r *GatewayTokenV2Resource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("name"), req, resp)
+}
+
+// Function to check if a JWT token is expired.
+func isTokenExpired(tokenString string) (bool, error) {
+	// Parse the token
+	token, _, err := new(jwt.Parser).ParseUnverified(tokenString, jwt.MapClaims{})
+	if err != nil {
+		return false, err
+	}
+
+	// claims = token.Claims.(jwt.MapClaims)
+	if claims, ok := token.Claims.(jwt.MapClaims); ok {
+		if exp, ok := claims["exp"].(float64); ok {
+			expirationTime := time.Unix(int64(exp), 0)
+			if time.Now().After(expirationTime) {
+				return true, nil
+			}
+		} else {
+			return false, fmt.Errorf("Expiration time not found in token")
+		}
+	} else {
+		return false, fmt.Errorf("Unable to parse claims")
+	}
+
+	return false, nil
+}
+
+// Helper function to issue a new token.
+func applyGatewayToken(ctx context.Context, cli *client.Client, path string, resource interface{}) (client.ApplyResult, error) {
+	url := cli.BaseUrl + path
+	jsonData, err := jsoniter.Marshal(resource)
+	if err != nil {
+		return client.ApplyResult{}, fmt.Errorf("Error marshalling resource: %s", err)
+	}
+
+	tflog.Trace(ctx, fmt.Sprintf("POST %s request body : %s", path, string(jsonData)))
+
+	resp, err := cli.Client.R().SetBody(jsonData).Post(url)
+	if err != nil {
+		return client.ApplyResult{}, err
+	} else if resp.IsError() {
+		return client.ApplyResult{}, fmt.Errorf("%s", client.ExtractApiError(resp))
+	}
+
+	bodyBytes := resp.Body()
+	tflog.Trace(ctx, fmt.Sprintf("POST %s response body : %s", path, string(bodyBytes)))
+
+	var upsertResponse gateway.GatewayTokenResource
+	err = jsoniter.Unmarshal(bodyBytes, &upsertResponse)
+	if err != nil {
+		return client.ApplyResult{}, fmt.Errorf("Error unmarshalling response: %s", err)
+	}
+	return client.ApplyResult{Resource: upsertResponse}, nil
 }

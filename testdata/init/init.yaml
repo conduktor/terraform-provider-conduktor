@@ -14,3 +14,11 @@ metadata:
  vCluster: "vcluster_sa"
 spec:
  type: "LOCAL"
+---
+apiVersion: gateway/v2
+kind: GatewayServiceAccount
+metadata:
+ name: "user_passthrough"
+ vCluster: "passthrough"
+spec:
+ type: "LOCAL"

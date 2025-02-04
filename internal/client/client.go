@@ -9,7 +9,6 @@ import (
 
 	ctlresource "github.com/conduktor/ctl/resource"
 	ctlschema "github.com/conduktor/ctl/schema"
-	gateway "github.com/conduktor/terraform-provider-conduktor/internal/model/gateway"
 	"github.com/go-resty/resty/v2"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	jsoniter "github.com/json-iterator/go"
@@ -25,8 +24,8 @@ const (
 )
 
 type Client struct {
-	baseUrl string
-	client  *resty.Client
+	BaseUrl string
+	Client  *resty.Client
 }
 
 type ApiParameter struct {
@@ -77,8 +76,8 @@ func Make(ctx context.Context, mode Mode, apiParameter ApiParameter, providerVer
 	}
 
 	return &Client{
-		baseUrl: apiParameter.BaseUrl,
-		client:  restyClient,
+		BaseUrl: apiParameter.BaseUrl,
+		Client:  restyClient,
 	}, nil
 }
 
@@ -133,7 +132,7 @@ func Login(apiParameter ApiParameter, client *resty.Client) (string, error) {
 		if resp.StatusCode() == 401 {
 			return "", fmt.Errorf("Invalid username or password")
 		} else {
-			return "", fmt.Errorf("%s", extractApiError(resp))
+			return "", fmt.Errorf("%s", ExtractApiError(resp))
 		}
 	}
 	result := LoginResult{}
@@ -183,15 +182,15 @@ func (client *Client) ApplyGeneric(ctx context.Context, cliResource ctlresource.
 		return "", err
 	}
 
-	url := client.baseUrl + applyPath
+	url := client.BaseUrl + applyPath
 
 	tflog.Trace(ctx, fmt.Sprintf("PUT on %s body : %s", applyPath, string(cliResource.Json)))
-	builder := client.client.R().SetBody(cliResource.Json)
+	builder := client.Client.R().SetBody(cliResource.Json)
 	resp, err := builder.Put(url)
 	if err != nil {
 		return "", err
 	} else if resp.IsError() {
-		return "", fmt.Errorf("%s", extractApiError(resp))
+		return "", fmt.Errorf("%s", ExtractApiError(resp))
 	}
 	bodyBytes := resp.Body()
 	var upsertResponse ApplyResult
@@ -203,7 +202,7 @@ func (client *Client) ApplyGeneric(ctx context.Context, cliResource ctlresource.
 }
 
 func (client *Client) Apply(ctx context.Context, path string, resource interface{}) (ApplyResult, error) {
-	url := client.baseUrl + path
+	url := client.BaseUrl + path
 	jsonData, err := jsoniter.Marshal(resource)
 	if err != nil {
 		return ApplyResult{}, fmt.Errorf("Error marshalling resource: %s", err)
@@ -211,11 +210,11 @@ func (client *Client) Apply(ctx context.Context, path string, resource interface
 
 	tflog.Trace(ctx, fmt.Sprintf("PUT %s request body : %s", path, string(jsonData)))
 
-	resp, err := client.client.R().SetBody(jsonData).Put(url)
+	resp, err := client.Client.R().SetBody(jsonData).Put(url)
 	if err != nil {
 		return ApplyResult{}, err
 	} else if resp.IsError() {
-		return ApplyResult{}, fmt.Errorf("%s", extractApiError(resp))
+		return ApplyResult{}, fmt.Errorf("%s", ExtractApiError(resp))
 	}
 
 	bodyBytes := resp.Body()
@@ -230,8 +229,8 @@ func (client *Client) Apply(ctx context.Context, path string, resource interface
 }
 
 func (client *Client) Describe(ctx context.Context, path string) ([]byte, error) {
-	url := client.baseUrl + path
-	resp, err := client.client.R().Get(url)
+	url := client.BaseUrl + path
+	resp, err := client.Client.R().Get(url)
 	if err != nil {
 		return []byte{}, err
 	} else if resp.IsError() {
@@ -246,11 +245,11 @@ func (client *Client) Describe(ctx context.Context, path string) ([]byte, error)
 
 func (client *Client) Delete(ctx context.Context, mode Mode, path string, resource interface{}) error {
 	var req *resty.Request
-	url := client.baseUrl + path
+	url := client.BaseUrl + path
 	tflog.Trace(ctx, fmt.Sprintf("DELETE %s", path))
 
 	if mode == CONSOLE {
-		req = client.client.R()
+		req = client.Client.R()
 	} else if mode == GATEWAY {
 		// Gateway API handles deletion in a different way
 		// It needs information about the resource in the body of the request
@@ -262,42 +261,15 @@ func (client *Client) Delete(ctx context.Context, mode Mode, path string, resour
 		tflog.Debug(ctx, string(jsonData))
 		tflog.Trace(ctx, fmt.Sprintf("DELETE %s request body : %s", path, string(jsonData)))
 
-		req = client.client.R().SetBody(string(jsonData))
+		req = client.Client.R().SetBody(string(jsonData))
 	}
 
 	resp, err := req.Delete(url)
 	if err != nil {
 		return err
 	} else if resp.IsError() {
-		return fmt.Errorf("%s", extractApiError(resp))
+		return fmt.Errorf("%s", ExtractApiError(resp))
 	}
 
 	return nil
-}
-
-func (client *Client) ApplyGatewayToken(ctx context.Context, path string, resource interface{}) (ApplyResult, error) {
-	url := client.baseUrl + path
-	jsonData, err := jsoniter.Marshal(resource)
-	if err != nil {
-		return ApplyResult{}, fmt.Errorf("Error marshalling resource: %s", err)
-	}
-
-	tflog.Trace(ctx, fmt.Sprintf("POST %s request body : %s", path, string(jsonData)))
-
-	resp, err := client.client.R().SetBody(jsonData).Post(url)
-	if err != nil {
-		return ApplyResult{}, err
-	} else if resp.IsError() {
-		return ApplyResult{}, fmt.Errorf("%s", extractApiError(resp))
-	}
-
-	bodyBytes := resp.Body()
-	tflog.Trace(ctx, fmt.Sprintf("POST %s response body : %s", path, string(bodyBytes)))
-
-	var upsertResponse gateway.GatewayTokenResource
-	err = jsoniter.Unmarshal(bodyBytes, &upsertResponse)
-	if err != nil {
-		return ApplyResult{}, fmt.Errorf("Error unmarshalling response: %s", err)
-	}
-	return ApplyResult{Resource: upsertResponse}, nil
 }

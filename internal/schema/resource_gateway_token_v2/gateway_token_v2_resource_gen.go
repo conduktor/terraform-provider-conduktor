@@ -6,6 +6,7 @@ import (
 	"context"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -23,15 +24,20 @@ func GatewayTokenV2ResourceSchema(ctx context.Context) schema.Schema {
 				Required:            true,
 				Description:         "The life time of the token in milliseconds.",
 				MarkdownDescription: "The life time of the token in milliseconds.",
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.RequiresReplace(),
+				},
 				Validators: []validator.Int64{
 					int64validator.Between(1, 2147483647),
 				},
 			},
 			"token": schema.StringAttribute{
 				Computed:            true,
-				Sensitive:           true,
 				Description:         "Response token.",
 				MarkdownDescription: "Response token.",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 			"username": schema.StringAttribute{
 				Required:            true,
