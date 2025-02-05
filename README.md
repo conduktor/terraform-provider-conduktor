@@ -72,9 +72,9 @@ This repository contains the Conduktor Terraform provider, which defines Condukt
 - [Kafka Clusters with Schema Registry](./docs/resources/console_kafka_cluster_v2.md)
 - [Kafka Connect Server](./docs/resources/console_kafka_connect_v2.md)
 
-### Gateway resources
-
-- [Gateway Service Account](./docs/resources/gateway_service_account_v2.md)
+<!--### Gateway resources-->
+<!---->
+<!--- [Gateway Service Account](./docs/resources/gateway_service_account_v2.md)-->
 
 ### Generic resource
 
