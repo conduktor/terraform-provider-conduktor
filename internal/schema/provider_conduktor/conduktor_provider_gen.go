@@ -59,8 +59,8 @@ func ConduktorProviderSchema(ctx context.Context) schema.Schema {
 			},
 			"mode": schema.StringAttribute{
 				Required:            true,
-				Description:         "The mode that you would like to set for the terraform provider. May be set using environment variable `CDK_PROVIDER_MODE`. Can either be one of `console` or `gateway`",
-				MarkdownDescription: "The mode that you would like to set for the terraform provider. May be set using environment variable `CDK_PROVIDER_MODE`. Can either be one of `console` or `gateway`",
+				Description:         "The mode that you would like to set for the terraform provider. May be set using environment variable `CDK_PROVIDER_MODE`. Can either be one of `console` or `gateway` \nNOTE: If you are using a multi provider configuration, you must specify the provider alias for each resource. See [documentation](https://github.com/conduktor/terraform-provider-conduktor/tree/ops-616-gateway-token-resource?tab=readme-ov-file#multi-client-configuration) for more information.",
+				MarkdownDescription: "The mode that you would like to set for the terraform provider. May be set using environment variable `CDK_PROVIDER_MODE`. Can either be one of `console` or `gateway` \nNOTE: If you are using a multi provider configuration, you must specify the provider alias for each resource. See [documentation](https://github.com/conduktor/terraform-provider-conduktor/tree/ops-616-gateway-token-resource?tab=readme-ov-file#multi-client-configuration) for more information.",
 				Validators: []validator.String{
 					stringvalidator.OneOf(validation.ValidProviderMode...),
 				},

@@ -104,7 +104,8 @@ resource "conduktor_gateway_service_account_v2" "gateway_sa" {
 
 ### Required
 
-- `mode` (String) The mode that you would like to set for the terraform provider. May be set using environment variable `CDK_PROVIDER_MODE`. Can either be one of `console` or `gateway`
+- `mode` (String) The mode that you would like to set for the terraform provider. May be set using environment variable `CDK_PROVIDER_MODE`. Can either be one of `console` or `gateway` 
+NOTE: If you are using a multi provider configuration, you must specify the provider alias for each resource. See [documentation](https://github.com/conduktor/terraform-provider-conduktor/tree/ops-616-gateway-token-resource?tab=readme-ov-file#multi-client-configuration) for more information.
 
 ### Optional
 
