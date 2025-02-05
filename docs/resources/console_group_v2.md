@@ -17,7 +17,7 @@ This resource allows you to create, read, update and delete groups in Conduktor.
 ```terraform
 resource "conduktor_console_group_v2" "example" {
   name = "simple-group"
-  spec {
+  spec = {
     display_name = "Simple Group"
     description  = "Simple group description"
   }
@@ -28,7 +28,7 @@ resource "conduktor_console_group_v2" "example" {
 ```terraform
 resource "conduktor_console_user_v2" "user1" {
   name = "user1@company.com"
-  spec {
+  spec = {
     firstname   = "User"
     lastname    = "1"
     permissions = []
@@ -37,7 +37,7 @@ resource "conduktor_console_user_v2" "user1" {
 
 resource "conduktor_console_group_v2" "example" {
   name = "complex-group"
-  spec {
+  spec = {
     display_name    = "Complex group"
     description     = "Complex group description"
     external_groups = ["sso-group1"]
@@ -66,12 +66,9 @@ resource "conduktor_console_group_v2" "example" {
 ### Required
 
 - `name` (String) Group name, must be unique, act as ID for import
+- `spec` (Attributes) Group specification (see [below for nested schema](#nestedatt--spec))
 
-### Optional
-
-- `spec` (Block, Optional) (see [below for nested schema](#nestedblock--spec))
-
-<a id="nestedblock--spec"></a>
+<a id="nestedatt--spec"></a>
 ### Nested Schema for `spec`
 
 Required:

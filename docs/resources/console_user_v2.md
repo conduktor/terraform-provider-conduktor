@@ -17,7 +17,7 @@ This resource allows you to create, read, update and delete users in Conduktor.
 ```terraform
 resource "conduktor_console_user_v2" "example" {
   name = "bob@company.io"
-  spec {
+  spec = {
     firstname = "Bob"
     lastname  = "Smith"
   }
@@ -28,7 +28,7 @@ resource "conduktor_console_user_v2" "example" {
 ```terraform
 resource "conduktor_console_user_v2" "example" {
   name = "bob@company.io"
-  spec {
+  spec = {
     firstname = "Bob"
     lastname  = "Smith"
     permissions = [
@@ -55,12 +55,9 @@ resource "conduktor_console_user_v2" "example" {
 ### Required
 
 - `name` (String) User email, must be unique, act as ID for import
+- `spec` (Attributes) User specification (see [below for nested schema](#nestedatt--spec))
 
-### Optional
-
-- `spec` (Block, Optional) (see [below for nested schema](#nestedblock--spec))
-
-<a id="nestedblock--spec"></a>
+<a id="nestedatt--spec"></a>
 ### Nested Schema for `spec`
 
 Optional:

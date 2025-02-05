@@ -38,22 +38,7 @@ func GatewayServiceAccountV2ResourceSchema(ctx context.Context) schema.Schema {
 					stringvalidator.RegexMatches(regexp.MustCompile("^[a-zA-Z0-9_-]{3,64}$"), ""),
 				},
 			},
-			"vcluster": schema.StringAttribute{
-				Optional:            true,
-				Computed:            true,
-				Description:         "The name of the virtual cluster the service account belongs to. If not provided, the service account will be created in the default passthrough virtual cluster.",
-				MarkdownDescription: "The name of the virtual cluster the service account belongs to. If not provided, the service account will be created in the default passthrough virtual cluster.",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
-				Validators: []validator.String{
-					stringvalidator.RegexMatches(regexp.MustCompile("^[a-zA-Z0-9_-]+$"), ""),
-				},
-				Default: stringdefault.StaticString("passthrough"),
-			},
-		},
-		Blocks: map[string]schema.Block{
-			"spec": schema.SingleNestedBlock{
+			"spec": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"external_names": schema.SetAttribute{
 						ElementType:         types.StringType,
@@ -80,6 +65,22 @@ func GatewayServiceAccountV2ResourceSchema(ctx context.Context) schema.Schema {
 						AttrTypes: SpecValue{}.AttributeTypes(ctx),
 					},
 				},
+				Required:            true,
+				Description:         "Service account specification",
+				MarkdownDescription: "Service account specification",
+			},
+			"vcluster": schema.StringAttribute{
+				Optional:            true,
+				Computed:            true,
+				Description:         "The name of the virtual cluster the service account belongs to. If not provided, the service account will be created in the default passthrough virtual cluster.",
+				MarkdownDescription: "The name of the virtual cluster the service account belongs to. If not provided, the service account will be created in the default passthrough virtual cluster.",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
+				Validators: []validator.String{
+					stringvalidator.RegexMatches(regexp.MustCompile("^[a-zA-Z0-9_-]+$"), ""),
+				},
+				Default: stringdefault.StaticString("passthrough"),
 			},
 		},
 	}
@@ -87,8 +88,8 @@ func GatewayServiceAccountV2ResourceSchema(ctx context.Context) schema.Schema {
 
 type GatewayServiceAccountV2Model struct {
 	Name     types.String `tfsdk:"name"`
-	Vcluster types.String `tfsdk:"vcluster"`
 	Spec     SpecValue    `tfsdk:"spec"`
+	Vcluster types.String `tfsdk:"vcluster"`
 }
 
 var _ basetypes.ObjectTypable = SpecType{}

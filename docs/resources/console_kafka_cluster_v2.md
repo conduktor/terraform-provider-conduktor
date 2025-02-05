@@ -18,7 +18,7 @@ This example creates a simple Kafka cluster definition without authentication re
 ```terraform
 resource "conduktor_console_kafka_cluster_v2" "simple" {
   name = "simple-cluster"
-  spec {
+  spec = {
     display_name                 = "Simple kafka Cluster"
     icon                         = "kafka"
     color                        = "#000000"
@@ -37,7 +37,7 @@ resource "conduktor_console_kafka_cluster_v2" "confluent" {
   labels = {
     "env" = "staging"
   }
-  spec {
+  spec = {
     display_name      = "Confluent Cluster"
     bootstrap_servers = "aaa-aaaa.us-west4.gcp.confluent.cloud:9092"
     properties = {
@@ -89,7 +89,7 @@ resource "conduktor_console_kafka_cluster_v2" "aiven" {
   labels = {
     "env" = "test"
   }
-  spec {
+  spec = {
     display_name      = "Aiven Cluster"
     bootstrap_servers = "cluster.aiven.io:9092"
     properties = {
@@ -127,7 +127,7 @@ resource "conduktor_console_kafka_cluster_v2" "aws_msk" {
   labels = {
     "env" = "prod"
   }
-  spec {
+  spec = {
     display_name      = "AWS MSK Cluster"
     bootstrap_servers = "b-3-public.xxxxx.yyyyy.zz.kafka.eu-west-1.amazonaws.com:9198,b-2-public.xxxxx.yyyyy.zz.kafka.eu-west-1.amazonaws.com:9198,b-1-public.xxxxx.yyyyy.zz.kafka.eu-west-1.amazonaws.com:9198"
     properties = {
@@ -162,7 +162,7 @@ resource "conduktor_console_kafka_cluster_v2" "gateway" {
   labels = {
     "env" = "prod"
   }
-  spec {
+  spec = {
     display_name      = "Gateway Cluster"
     bootstrap_servers = "gateway:6969"
     properties = {
@@ -199,13 +199,13 @@ resource "conduktor_console_kafka_cluster_v2" "gateway" {
 ### Required
 
 - `name` (String) Kafka cluster name, must be unique, acts as an ID for import
+- `spec` (Attributes) Kafka cluster specification (see [below for nested schema](#nestedatt--spec))
 
 ### Optional
 
 - `labels` (Map of String) Kafka cluster labels
-- `spec` (Block, Optional) (see [below for nested schema](#nestedblock--spec))
 
-<a id="nestedblock--spec"></a>
+<a id="nestedatt--spec"></a>
 ### Nested Schema for `spec`
 
 Required:

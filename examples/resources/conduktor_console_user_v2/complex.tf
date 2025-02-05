@@ -1,6 +1,6 @@
 resource "conduktor_console_user_v2" "example" {
   name = "bob@company.io"
-  spec {
+  spec = {
     firstname = "Bob"
     lastname  = "Smith"
     permissions = [

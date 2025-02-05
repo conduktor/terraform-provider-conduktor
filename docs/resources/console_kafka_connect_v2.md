@@ -18,7 +18,7 @@ This example creates a simple Kafka Connect server connection without any authen
 ```terraform
 resource "conduktor_console_kafka_cluster_v2" "minimal" {
   name = "mini-cluster"
-  spec {
+  spec = {
     display_name      = "Minimal Cluster"
     bootstrap_servers = "localhost:9092"
   }
@@ -27,7 +27,7 @@ resource "conduktor_console_kafka_cluster_v2" "minimal" {
 resource "conduktor_console_kafka_connect_v2" "simple" {
   name    = "simple-connect"
   cluster = conduktor_console_kafka_cluster_v2.minimal.name
-  spec {
+  spec = {
     display_name = "Simple Connect Server"
     urls         = "http://localhost:8083"
   }
@@ -39,7 +39,7 @@ This example creates a complex Kafka Connect server connection with basic authen
 ```terraform
 resource "conduktor_console_kafka_cluster_v2" "minimal" {
   name = "mini-cluster"
-  spec {
+  spec = {
     display_name      = "Minimal Cluster"
     bootstrap_servers = "localhost:9092"
   }
@@ -53,7 +53,7 @@ resource "conduktor_console_kafka_connect_v2" "basic" {
     documentation = "https://docs.mycompany.com/complex-connect"
     env           = "dev"
   }
-  spec {
+  spec = {
     display_name = "Basic Connect server"
     urls         = "http://localhost:8083"
     headers = {
@@ -75,7 +75,7 @@ This example creates a complex Kafka Connect server connection with bearer token
 ```terraform
 resource "conduktor_console_kafka_cluster_v2" "minimal" {
   name = "mini-cluster"
-  spec {
+  spec = {
     display_name      = "Minimal Cluster"
     bootstrap_servers = "localhost:9092"
   }
@@ -89,7 +89,7 @@ resource "conduktor_console_kafka_connect_v2" "bearer" {
     documentation = "https://docs.mycompany.com/complex-connect"
     env           = "dev"
   }
-  spec {
+  spec = {
     display_name = "Bearer Connect server"
     urls         = "http://localhost:8083"
     headers = {
@@ -110,7 +110,7 @@ This example creates a complex Kafka Connect server connection with mTLS authent
 ```terraform
 resource "conduktor_console_kafka_cluster_v2" "minimal" {
   name = "mini-cluster"
-  spec {
+  spec = {
     display_name      = "Minimal Cluster"
     bootstrap_servers = "localhost:9092"
   }
@@ -124,7 +124,7 @@ resource "conduktor_console_kafka_connect_v2" "mtls" {
     documentation = "https://docs.mycompany.com/complex-connect"
     env           = "dev"
   }
-  spec {
+  spec = {
     display_name = "mTLS Connect server"
     urls         = "http://localhost:8083"
     headers = {
@@ -160,13 +160,13 @@ EOT
 
 - `cluster` (String) Kafka cluster name linked with Kafka current connect server. Must exist in Conduktor Console
 - `name` (String) Kafka connect server name, must be unique, act as ID for import
+- `spec` (Attributes) Kafka connect server specification (see [below for nested schema](#nestedatt--spec))
 
 ### Optional
 
 - `labels` (Map of String) Kafka connect server labels
-- `spec` (Block, Optional) (see [below for nested schema](#nestedblock--spec))
 
-<a id="nestedblock--spec"></a>
+<a id="nestedatt--spec"></a>
 ### Nested Schema for `spec`
 
 Required:

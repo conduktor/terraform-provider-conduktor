@@ -125,12 +125,12 @@
                 }
               ]
             }
-          }
-        ],
-        "blocks": [
+          },
           {
             "name": "spec",
             "single_nested": {
+              "computed_optional_required": "required",
+              "description": "Group specification",
               "attributes": [
                 {
                   "name": "display_name",
@@ -365,12 +365,12 @@
                 "string": {}
               }
             }
-          }
-        ],
-        "blocks": [
+          },
           {
             "name": "spec",
             "single_nested": {
+              "computed_optional_required": "required",
+              "description": "Kafka cluster specification",
               "attributes": [
                 {
                   "name": "display_name",
@@ -875,12 +875,12 @@
                 "string": {}
               }
             }
-          }
-        ],
-        "blocks": [
+          },
           {
             "name": "spec",
             "single_nested": {
+              "computed_optional_required": "required",
+              "description": "Kafka connect server specification",
               "attributes": [
                 {
                   "name": "display_name",
@@ -1035,12 +1035,12 @@
                 }
               ]
             }
-          }
-        ],
-        "blocks": [
+          },
           {
             "name": "spec",
             "single_nested": {
+              "computed_optional_required": "required",
+              "description": "User specification",
               "attributes": [
                 {
                   "name": "firstname",
@@ -1247,12 +1247,12 @@
                 }
               ]
             }
-          }
-        ],
-        "blocks": [
+          },
           {
             "name": "spec",
             "single_nested": {
+              "computed_optional_required": "required",
+              "description": "Service account specification",
               "attributes": [
                 {
                   "name": "type",

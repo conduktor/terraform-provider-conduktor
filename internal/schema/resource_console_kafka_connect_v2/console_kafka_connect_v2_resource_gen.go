@@ -54,9 +54,7 @@ func ConsoleKafkaConnectV2ResourceSchema(ctx context.Context) schema.Schema {
 					stringvalidator.RegexMatches(regexp.MustCompile("^[0-9a-z\\_\\-.]+$"), ""),
 				},
 			},
-		},
-		Blocks: map[string]schema.Block{
-			"spec": schema.SingleNestedBlock{
+			"spec": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"display_name": schema.StringAttribute{
 						Required:            true,
@@ -135,6 +133,9 @@ func ConsoleKafkaConnectV2ResourceSchema(ctx context.Context) schema.Schema {
 						AttrTypes: SpecValue{}.AttributeTypes(ctx),
 					},
 				},
+				Required:            true,
+				Description:         "Kafka connect server specification",
+				MarkdownDescription: "Kafka connect server specification",
 			},
 		},
 	}

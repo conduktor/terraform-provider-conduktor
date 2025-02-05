@@ -36,9 +36,7 @@ func ConsoleUserV2ResourceSchema(ctx context.Context) schema.Schema {
 					stringvalidator.RegexMatches(regexp.MustCompile("^([\\w\\-_.]*[^.])@([\\w-]+\\.)+[\\w-]{2,4}$"), ""),
 				},
 			},
-		},
-		Blocks: map[string]schema.Block{
-			"spec": schema.SingleNestedBlock{
+			"spec": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"firstname": schema.StringAttribute{
 						Optional:            true,
@@ -111,6 +109,9 @@ func ConsoleUserV2ResourceSchema(ctx context.Context) schema.Schema {
 						AttrTypes: SpecValue{}.AttributeTypes(ctx),
 					},
 				},
+				Required:            true,
+				Description:         "User specification",
+				MarkdownDescription: "User specification",
 			},
 		},
 	}
