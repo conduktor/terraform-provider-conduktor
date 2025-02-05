@@ -11,7 +11,6 @@ import (
 	mapper "github.com/conduktor/terraform-provider-conduktor/internal/mapper/gateway_token_v2"
 	gateway "github.com/conduktor/terraform-provider-conduktor/internal/model/gateway"
 	schema "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_gateway_token_v2"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	jsoniter "github.com/json-iterator/go"
@@ -21,7 +20,6 @@ const gatewayTokenV2ApiPath = "/gateway/v2/token"
 
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &GatewayTokenV2Resource{}
-var _ resource.ResourceWithImportState = &GatewayTokenV2Resource{}
 
 func NewGatewayTokenV2Resource() resource.Resource {
 	return &GatewayTokenV2Resource{}
@@ -216,21 +214,7 @@ func (r *GatewayTokenV2Resource) Delete(ctx context.Context, req resource.Delete
 		return
 	}
 
-	// deleteRes := gateway.GatewayTokenMetadata{
-	// 	Name:     data.Name.ValueString(),
-	// 	VCluster: data.Vcluster.ValueString(),
-	// }
-
-	// err := r.apiClient.Delete(ctx, client.GATEWAY, gatewayTokenV2ApiPath, deleteRes)
-	// if err != nil {
-	// 	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete token account, got error: %s", err))
-	// 	return
-	// }
 	tflog.Debug(ctx, fmt.Sprintf("Token deleted for service account: %s", data.Username.String()))
-}
-
-func (r *GatewayTokenV2Resource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("name"), req, resp)
 }
 
 // Function to check if a JWT token is expired.
@@ -241,7 +225,6 @@ func isTokenExpired(tokenString string) (bool, error) {
 		return false, err
 	}
 
-	// claims = token.Claims.(jwt.MapClaims)
 	if claims, ok := token.Claims.(jwt.MapClaims); ok {
 		if exp, ok := claims["exp"].(float64); ok {
 			expirationTime := time.Unix(int64(exp), 0)

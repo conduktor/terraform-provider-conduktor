@@ -1426,7 +1426,7 @@
             "string": {
               "description": "Response token.",
               "computed_optional_required": "computed",
-              "sensitive": false,
+              "sensitive": true,
               "plan_modifiers": [
                 {
                   "custom": {

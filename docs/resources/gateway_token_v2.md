@@ -51,6 +51,6 @@ output "complex_token" {
 
 ### Read-Only
 
-- `token` (String) Response token.
+- `token` (String, Sensitive) Response token.
 
 

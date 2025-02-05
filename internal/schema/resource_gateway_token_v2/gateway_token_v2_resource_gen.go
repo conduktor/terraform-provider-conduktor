@@ -33,6 +33,7 @@ func GatewayTokenV2ResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"token": schema.StringAttribute{
 				Computed:            true,
+				Sensitive:           true,
 				Description:         "Response token.",
 				MarkdownDescription: "Response token.",
 				PlanModifiers: []planmodifier.String{
