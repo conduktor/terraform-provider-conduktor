@@ -20,7 +20,7 @@ build:	## Build the provider
 	go build
 
 .PHONY: deploy-locally
-deploy-locally: ## Install the provider locally in ~/.terraform.d/plugins. Optional set VERSION arg to use specific verion, otherwise 0.0.1 will be used
+deploy-locally: ## Install the provider locally in ~/.terraform.d/plugins. Optional set VERSION arg to use specific version, otherwise 0.0.1 will be used
 	"$(CURDIR)/scripts/deploy_locally.sh" $(VERSION)
 
 .PHONY: generate
