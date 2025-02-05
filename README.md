@@ -72,9 +72,10 @@ This repository contains the Conduktor Terraform provider, which defines Condukt
 - [Kafka Clusters with Schema Registry](./docs/resources/console_kafka_cluster_v2.md)
 - [Kafka Connect Server](./docs/resources/console_kafka_connect_v2.md)
 
-<!--### Gateway resources-->
-<!---->
-<!--- [Gateway Service Account](./docs/resources/gateway_service_account_v2.md)-->
+### Gateway resources
+
+- [Gateway Service Account](./docs/resources/gateway_service_account_v2.md)
+- [Gateway Interceptor](./docs/resources/gateway_interceptor_v2.md)
 
 ### Generic resource
 
@@ -352,8 +353,6 @@ We are currently reviewing the following resources:
   - [ApplicationInstancePermission](https://docs.conduktor.io/platform/reference/resource-reference/self-service/#application-instance-permissions)
   - [ApplicationGroup](https://docs.conduktor.io/platform/reference/resource-reference/self-service/#application-group)
 4. Gateway resources:
-  - [Interceptor](https://docs.conduktor.io/gateway/reference/resources-reference/#interceptor)
-  - [GatewayServiceAccount](https://docs.conduktor.io/gateway/reference/resources-reference/#gatewayserviceaccount)
   - [GatewayGroup](https://docs.conduktor.io/gateway/reference/resources-reference/#gatewaygroup)
   - [ConcentrationRule](https://docs.conduktor.io/gateway/reference/resources-reference/#concentrationrule)
   - [VirtualCluster](https://docs.conduktor.io/gateway/reference/resources-reference/#virtualcluster)
