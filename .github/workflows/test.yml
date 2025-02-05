@@ -107,7 +107,7 @@ jobs:
           fi
           
       - name: Run acceptance tests
-        shell: sh
+        shell: bash
         env:
           TF_ACC: "1"
           TESTARGS: "-cover ./internal/provider/"
