@@ -44,8 +44,12 @@ This repository contains the Conduktor Terraform provider, which defines Condukt
 - [Install](#install)
 - [Usage/Examples](#usageexamples)
   - [Provider authentication](#provider-authentication)
-    - [API key](#api-key)
-    - [Admin credentials](#admin-credentials)
+    - [Conduktor Console](#conduktor-console)
+        - [API key](#api-key)
+        - [Admin credentials](#admin-credentials)
+    - [Conduktor Gateway](#conduktor-gateway)
+        - [Admin credentials](#admin-credentials-2)
+  - [Multi client configuration](#multi-client-configuration)
 - [Development](#development)
   - [Requirements](#requirements)
   - [Install git hooks](#install-git-hooks)
@@ -61,10 +65,19 @@ This repository contains the Conduktor Terraform provider, which defines Condukt
 
 ## Supported resources
 
-- [Console user](./docs/resources/user_v2.md)
-- [Console group](./docs/resources/group_v2.md)
-- [Kafka Clusters with Schema Registry](./docs/resources/kafka_cluster_v2.md)
-- [Kafka Connect Server](./docs/resources/kafka_connect_v2.md)
+### Console resources
+
+- [Console user](./docs/resources/console_user_v2.md)
+- [Console group](./docs/resources/console_group_v2.md)
+- [Kafka Clusters with Schema Registry](./docs/resources/console_kafka_cluster_v2.md)
+- [Kafka Connect Server](./docs/resources/console_kafka_connect_v2.md)
+
+<!--### Gateway resources-->
+<!---->
+<!--- [Gateway Service Account](./docs/resources/gateway_service_account_v2.md)-->
+
+### Generic resource
+
 - [Generic](./docs/resources/generic.md) :warning: This resource is experimental and should be used with care.
 
 ## Install
@@ -133,29 +146,46 @@ You can also check out our [documentation](https://docs.conduktor.io/) for resou
 
 ### Provider authentication
 
+> [!IMPORTANT]
+> It is required to specify the provider `mode` to use, as it will determine the authentication method.
+
+The provider can be used in two modes: `console` and `gateway`.
+
+Example using console mode:
+```hcl
+provider "conduktor" {
+  mode = "console"
+  # ...
+}
+```
+
+#### Conduktor Console
+
 To use Conduktor Console API, the Terraform provider needs to authenticate against it.
 
 For that we offer two possibilities:
 
-#### API key
+##### API key
 
 Use an already manually forged API key. See [documentation](https://docs.conduktor.io/platform/reference/api-reference/#generate-an-api-key) to create one.
 
 Using HCL `api_token` attribute
 ```hcl
 provider "conduktor" {
+  mode      = "console"
   api_token = "your-api-key"
 }
 ```
 Using environment variables `CDK_API_TOKEN` or `CDK_API_KEY`.
 
-#### Admin credentials
+##### Admin credentials
 Use local user (usually admin) credentials pair. This will login against the API and use an ephemeral access token to make API calls.
 
 
 Using HCL `admin_user`/`admin_password` attributes
 ```hcl
 provider "conduktor" {
+  mode           = "console"
   admin_user     = "admin@my-org.com"
   admin_password = "admin-password"
 }
@@ -163,6 +193,56 @@ provider "conduktor" {
 Using environment variables `CDK_ADMIN_EMAIL` or `CDK_ADMIN_PASSWORD`.
 
 Either way be aware that API Key and admin credentials are sensitive data and should be stored and provided to Terraform [properly](https://developer.hashicorp.com/terraform/tutorials/configuration-language/sensitive-variables).
+
+#### Conduktor Gateway
+
+To use Conduktor Gateway API, the Terraform provider needs to authenticate against it.
+
+##### Admin credentials
+Use local user (usually admin) credentials pair. Those will be used in the authentication header for the HTTP requests against the API.
+
+Using HCL `admin_user`/`admin_password` attributes
+```hcl
+provider "conduktor" {
+  mode           = "gateway"
+  admin_user     = "admin@my-org.com"
+  admin_password = "admin-password"
+}
+```
+Using environment variables `CDK_ADMIN_EMAIL` or `CDK_ADMIN_PASSWORD`.
+
+### Multi client configuration
+
+Conduktor provider can also be configured to use multiple clients, each with its own authentication method.
+
+For this we will make use of the `alias` attribute in the provider definition. Further information can be found on the official [Terraform Documentation](https://developer.hashicorp.com/terraform/language/providers/configuration#alias-multiple-provider-configurations).
+
+```hcl
+provider "conduktor" {
+  alias    = "console"
+  mode     = "console"
+  # ...
+}
+
+provider "conduktor" {
+  alias    = "gateway"
+  mode     = "gateway"
+  # ...
+}
+```
+
+You will also need to specify the provider alias when defining resources.
+``` hcl
+resource "conduktor_console_user_v2" "user" {
+  provider = conduktor.console
+  # ...
+}
+
+resource "conduktor_gateway_service_account_v2" "gateway_sa" {
+  provider = conduktor.gateway
+  # ...
+}
+```
 
 ## Development
 ### Requirements
