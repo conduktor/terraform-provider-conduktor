@@ -1,6 +1,6 @@
 
-resource "conduktor_gateway_interceptor_v2" "topic-policy-test" {
-  name = "enforce-partition-limit-test"
+resource "conduktor_gateway_interceptor_v2" "topic-policy-default" {
+  name = "enforce-partition-limit-default"
   scope = {
     vcluster = "passthrough"
     username = "my.user2"

@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-
 	"github.com/conduktor/terraform-provider-conduktor/internal/client"
 	mapper "github.com/conduktor/terraform-provider-conduktor/internal/mapper/gateway_interceptor_v2"
 	gateway "github.com/conduktor/terraform-provider-conduktor/internal/model/gateway"
@@ -12,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"strings"
 )
 
 const gatewayInterceptorV2ApiPath = "/gateway/v2/interceptor"
@@ -122,8 +122,8 @@ func (r *GatewayInterceptorV2Resource) Read(ctx context.Context, req resource.Re
 		return
 	}
 
-	// Only appending vcluster if present
 	queryString := "name=" + data.Name.ValueString()
+	queryString += "&global=false"
 	if data.Scope.Vcluster.ValueString() != "" {
 		queryString += "&vcluster=" + data.Scope.Vcluster.ValueString()
 	}
@@ -222,16 +222,14 @@ func (r *GatewayInterceptorV2Resource) Delete(ctx context.Context, req resource.
 		return
 	}
 
-	deleteRes := gateway.GatewayInterceptorMetadata{
-		Name: data.Name.ValueString(),
-		Scope: gateway.GatewayInterceptorScope{
-			VCluster: data.Scope.Vcluster.ValueString(),
-			Username: data.Scope.Username.ValueString(),
-			Group:    data.Scope.Group.ValueString(),
-		},
+	deleteScope := gateway.GatewayInterceptorScope{
+		VCluster: data.Scope.Vcluster.ValueString(),
+		Username: data.Scope.Username.ValueString(),
+		Group:    data.Scope.Group.ValueString(),
 	}
+	deletePath := gatewayInterceptorV2ApiPath + "/" + data.Name.ValueString()
 
-	err := r.apiClient.Delete(ctx, client.GATEWAY, gatewayInterceptorV2ApiPath+"/"+deleteRes.Name, deleteRes.Scope)
+	err := r.apiClient.Delete(ctx, client.GATEWAY, deletePath, deleteScope)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete interceptor, got error: %s", err))
 		return
@@ -239,6 +237,27 @@ func (r *GatewayInterceptorV2Resource) Delete(ctx context.Context, req resource.
 	tflog.Debug(ctx, fmt.Sprintf("Interceptor %s deleted", data.Name.String()))
 }
 
+// ImportState imports the state of the resource from the given ID.
+// The ID is expected to be in the format: <interceptor_name>/<vcluster>/<group>/<username>.
 func (r *GatewayInterceptorV2Resource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("name"), req, resp)
+	idParts := strings.Split(req.ID, "/")
+
+	if len(idParts) != 4 || idParts[0] == "" {
+		resp.Diagnostics.AddError(
+			"Unexpected Import Identifier",
+			fmt.Sprintf("Expected import identifier with format: <interceptor_name>/<vcluster>/<group>/<username>. Got: %q", req.ID),
+		)
+		return
+	}
+
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("name"), idParts[0])...)
+	if idParts[1] != "" {
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("scope").AtName("vcluster"), idParts[1])...)
+	}
+	if idParts[2] != "" {
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("scope").AtName("group"), idParts[2])...)
+	}
+	if idParts[3] != "" {
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("scope").AtName("username"), idParts[3])...)
+	}
 }

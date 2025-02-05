@@ -142,13 +142,13 @@ Optional:
 
 In order to import an existing Conduktor Gateway interceptor, you need to know the interceptor's unique name.
 
-The import ID is constructed as follows: `< interceptor_name >`.
+The import ID is constructed as follows: <interceptor_name>/<vcluster>/<group>/<username>`.
 
 For example, using an [`import` block](https://developer.hashicorp.com/terraform/language/import) :
 ```terraform
 import {
   to = conduktor_gateway_interceptor_v2.example
-  id = "interceptor-name" # Import "interceptor-name" Interceptor
+  id = "interceptor-name/vcluster_sa//my.user" # Import <interceptor_name>/<vcluster>/<group>/<username> Interceptor
 }
 ```
 

@@ -7,7 +7,6 @@ import (
 	gateway "github.com/conduktor/terraform-provider-conduktor/internal/model/gateway"
 	schema "github.com/conduktor/terraform-provider-conduktor/internal/schema"
 	gwinterceptor "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_gateway_interceptor_v2"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 func TFToInternalModel(ctx context.Context, r *gwinterceptor.GatewayInterceptorV2Model) (gateway.GatewayInterceptorResource, error) {
@@ -50,7 +49,7 @@ func InternalModelToTerraform(ctx context.Context, r *gateway.GatewayInterceptor
 	}
 
 	return gwinterceptor.GatewayInterceptorV2Model{
-		Name:  types.StringValue(r.Metadata.Name),
+		Name:  schema.NewStringValue(r.Metadata.Name),
 		Scope: scopeValue,
 		Spec:  specValue,
 	}, nil

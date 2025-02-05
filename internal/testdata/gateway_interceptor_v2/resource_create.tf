@@ -1,8 +1,8 @@
-resource "conduktor_gateway_interceptor_v2" "topic-policy-test" {
+
+resource "conduktor_gateway_interceptor_v2" "topic-policy-default" {
   name = "enforce-partition-limit-test"
   scope = {
     vcluster = "passthrough"
-    username = "my.user"
   }
   spec = {
     plugin_class = "io.conduktor.gateway.interceptor.safeguard.CreateTopicPolicyPlugin"
@@ -16,6 +16,29 @@ resource "conduktor_gateway_interceptor_v2" "topic-policy-test" {
       }
     })
   }
+}
+
+resource "conduktor_gateway_interceptor_v2" "topic-policy-vcluster_sa" {
+  name = "enforce-partition-limit-test"
+  scope = {
+    vcluster = "vcluster_sa"
+    username = "my.user"
+  }
+  spec = {
+    plugin_class = "io.conduktor.gateway.interceptor.safeguard.CreateTopicPolicyPlugin"
+    priority     = 4
+    config = jsonencode({
+      topic = "other-.*"
+      numPartition = {
+        min    = 3
+        max    = 6
+        action = "INFO"
+      }
+    })
+  }
+  # force dependency on the default topic policy to force sequential creation of the interceptors with same name
+  # due to a limitaion in current Gateway API
+  depends_on = [conduktor_gateway_interceptor_v2.topic-policy-default]
 }
 
 resource "conduktor_gateway_interceptor_v2" "schema-encryption" {
