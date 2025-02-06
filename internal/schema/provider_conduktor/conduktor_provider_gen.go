@@ -59,8 +59,8 @@ func ConduktorProviderSchema(ctx context.Context) schema.Schema {
 			},
 			"mode": schema.StringAttribute{
 				Required:            true,
-				Description:         "The mode that you would like to set for the terraform provider. May be set using environment variable `CDK_PROVIDER_MODE`. Can either be one of `console` or `gateway`",
-				MarkdownDescription: "The mode that you would like to set for the terraform provider. May be set using environment variable `CDK_PROVIDER_MODE`. Can either be one of `console` or `gateway`",
+				Description:         "The mode for the Terraform provider. When using one provider, can be set to either `console` or `gateway`. Alternatively for multi-provider configuration, set both providers with an an alias, and set the relevant alias at the resource level. May also be set using environment variable `CDK_PROVIDER_MODE`.  \nSee [documentation](https://github.com/conduktor/terraform-provider-conduktor/blob/main/docs/index.md#multi-client-configuration-using-terraform-alias) for more information.",
+				MarkdownDescription: "The mode for the Terraform provider. When using one provider, can be set to either `console` or `gateway`. Alternatively for multi-provider configuration, set both providers with an an alias, and set the relevant alias at the resource level. May also be set using environment variable `CDK_PROVIDER_MODE`.  \nSee [documentation](https://github.com/conduktor/terraform-provider-conduktor/blob/main/docs/index.md#multi-client-configuration-using-terraform-alias) for more information.",
 				Validators: []validator.String{
 					stringvalidator.OneOf(validation.ValidProviderMode...),
 				},
