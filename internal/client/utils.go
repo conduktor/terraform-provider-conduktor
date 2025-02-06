@@ -22,7 +22,7 @@ func (e *ApiError) String() string {
 	}
 }
 
-func extractApiError(resp *resty.Response) string {
+func ExtractApiError(resp *resty.Response) string {
 	var apiError ApiError
 	jsonError := json.Unmarshal(resp.Body(), &apiError)
 	if jsonError != nil {

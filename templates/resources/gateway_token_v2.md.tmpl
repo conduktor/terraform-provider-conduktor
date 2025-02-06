@@ -1,0 +1,29 @@
+---
+page_title: "Conduktor : conduktor_gateway_token_v2 "
+subcategory: "gateway/v2"
+description: |-
+    Resource for managing Conduktor Gateway Tokens associated with Service Accounts.
+    This resource allows you to create and update authentication tokens associated with service accounts in Conduktor Gateway.
+    For a full workflow example of how to issue and use tokens for Gateway service accounts, refer to our [docs site](https://docs.conduktor.io/gateway/how-to/manage-service-accounts-and-acls/#manage-a-local-service-account).
+---
+
+# {{ .Name }}
+
+Resource for managing Conduktor Gateway tokens.
+This resource allows you to create and update tokens associated with service accounts in Conduktor Gateway.  
+After the initial token creation the provider will subsequently verify the validity of the token by checking the expiry time, and if needed, will create a new one on the next apply.
+
+## Example Usage
+
+### Simple token associated to a service account, no virtual cluster named, uses the default virtual cluster named passthrough
+{{tffile "examples/resources/conduktor_gateway_token_v2/simple.tf"}}
+
+### Complex token associated to a service account, with a virtual cluster named
+{{tffile "examples/resources/conduktor_gateway_token_v2/complex.tf"}}
+
+### Example usage where the token value is stored as output and in a local file
+Token value is stored as output and in a local file
+{{tffile "examples/resources/conduktor_gateway_token_v2/output.tf"}}
+
+
+{{ .SchemaMarkdown }}

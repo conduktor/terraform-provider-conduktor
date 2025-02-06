@@ -1,0 +1,5 @@
+{
+  "vCluster": "passthrough",
+  "username": "user1",
+  "lifeTimeSeconds": 3600
+}
