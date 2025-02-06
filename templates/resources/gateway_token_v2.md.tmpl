@@ -16,12 +16,14 @@ After the initial token creation the provider will subsequently verify the valid
 ## Example Usage
 
 ### Simple token associated to a service account, no virtual cluster named, uses the default virtual cluster named passthrough
-Two example output blocks to leverage the token value, in either an output, or to local file.
 {{tffile "examples/resources/conduktor_gateway_token_v2/simple.tf"}}
 
 ### Complex token associated to a service account, with a virtual cluster named
-Two example output blocks to leverage the token value, in either an output, or to local file.
 {{tffile "examples/resources/conduktor_gateway_token_v2/complex.tf"}}
+
+### Example usage where the token value is stored as output and in a local file
+Token value is stored as output and in a local file
+{{tffile "examples/resources/conduktor_gateway_token_v2/output.tf"}}
 
 
 {{ .SchemaMarkdown }}
