@@ -28,7 +28,7 @@ build:	## Build the provider
 	go build
 
 .PHONY: deploy-locally
-deploy-locally: ## Install the provider locally in ~/.terraform.d/plugins. Optional set VERSION arg to use specific version, otherwise 0.0.1 will be used
+deploy-locally: ## Install the provider locally in ~/.terraform.d/plugins. Optional set VERSION arg to use specific verion, otherwise 0.0.1 will be used
 	"$(CURDIR)/scripts/deploy_locally.sh" $(VERSION)
 
 .PHONY: generate
@@ -51,9 +51,6 @@ go-lint: tools ## Run Golang linters
 	@echo "==> Run Golang CLI linter..."
 	@golangci-lint run
 
-setup_test_env:
-	"$(CURDIR)/scripts/setup_test_env.sh"
-
 .PHONY: pull_test_assets
 pull_test_assets: ## Pull test docker images
 	@docker compose -f "$(CURDIR)/docker-compose.yaml" pull
@@ -62,7 +59,7 @@ pull_test_assets: ## Pull test docker images
 start_test_env: ## Start test environment
 	"$(CURDIR)/scripts/start_test_env.sh"
 	"$(CURDIR)/scripts/wait_for_test_env_ready.sh"
-	$(MAKE) setup_test_env
+	"$(CURDIR)/scripts/setup_test_env.sh"
 
 .PHONY: test
 test: ## Run acceptance tests only (no setup or cleanup)
