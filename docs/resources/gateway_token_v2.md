@@ -25,7 +25,7 @@ resource "conduktor_gateway_token_v2" "simple" {
 ### Complex token associated to a service account, with a virtual cluster named
 ```terraform
 resource "conduktor_gateway_token_v2" "complex" {
-  vcluster         = "vcluster_1"
+  vcluster         = "vcluster_sa"
   username         = "user10"
   lifetime_seconds = 3600
 }
