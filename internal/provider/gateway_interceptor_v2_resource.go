@@ -149,8 +149,13 @@ func (r *GatewayInterceptorV2Resource) Read(ctx context.Context, req resource.Re
 
 	var gatewayRes = []gateway.GatewayInterceptorResource{}
 	err = json.Unmarshal(get, &gatewayRes)
-	if err != nil || len(gatewayRes) < 1 {
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read interceptor, got error: %s", err))
+		return
+	}
+	if len(gatewayRes) < 1 {
+		tflog.Debug(ctx, fmt.Sprintf("Interceptor %s not found, removing from state", data.Name.String()))
+		resp.State.RemoveResource(ctx)
 		return
 	}
 	tflog.Debug(ctx, fmt.Sprintf("New interceptor state : %+v", gatewayRes))

@@ -1,9 +1,13 @@
 package provider
 
 import (
+	"context"
+	"github.com/conduktor/terraform-provider-conduktor/internal/client"
+	"github.com/conduktor/terraform-provider-conduktor/internal/model/gateway"
 	"github.com/conduktor/terraform-provider-conduktor/internal/test"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
@@ -15,6 +19,11 @@ func TestAccGatewayInterceptorV2Resource(t *testing.T) {
 	schemaEncRef := "conduktor_gateway_interceptor_v2.schema-encryption"
 	fullEncRef := "conduktor_gateway_interceptor_v2.full-encryption"
 	datamaskingRef := "conduktor_gateway_interceptor_v2.datamasking"
+
+	gwClient, err := testClient(client.GATEWAY)
+	if err != nil {
+		t.Fatalf("Error creating client: %s", err)
+	}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { test.TestAccPreCheck(t) },
@@ -78,6 +87,31 @@ func TestAccGatewayInterceptorV2Resource(t *testing.T) {
 				ImportStateVerify:                    true,
 				ImportStateId:                        "enforce-partition-limit-test/passthrough//",
 				ImportStateVerifyIdentifierAttribute: "name",
+			},
+			// Test plan changes if externally deleted resource
+			{
+				PreConfig: func() {
+					// wait a bit to ensure the interceptor is created
+					time.Sleep(1 * time.Second)
+					deleteScope := gateway.GatewayInterceptorScope{
+						VCluster: "passthrough",
+						Username: "",
+						Group:    "",
+					}
+					deletePath := gatewayInterceptorV2ApiPath + "/" + "mask-sensitive-fields"
+					err := gwClient.Delete(context.Background(), client.GATEWAY, deletePath, deleteScope)
+					if err != nil {
+						t.Fatalf("Error externally deleting interceptor: %s", err)
+					}
+				},
+				Config:             providerConfigGateway + test.TestAccTestdata(t, "gateway_interceptor_v2/resource_create.tf"),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PostApplyPostRefresh: []plancheck.PlanCheck{
+						plancheck.ExpectNonEmptyPlan(),
+					},
+				},
 			},
 			//Update and Read testing
 			{

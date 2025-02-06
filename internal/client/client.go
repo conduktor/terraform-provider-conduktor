@@ -28,21 +28,6 @@ type Client struct {
 	Client  *resty.Client
 }
 
-type ApiParameter struct {
-	ApiKey        string
-	BaseUrl       string
-	CdkUser       string
-	CdkPassword   string
-	TLSParameters TLSParameters
-}
-
-type TLSParameters struct {
-	Key      string
-	Cert     string
-	Cacert   string
-	Insecure bool
-}
-
 type LoginResult struct {
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`

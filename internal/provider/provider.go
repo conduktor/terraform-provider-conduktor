@@ -109,14 +109,7 @@ func (p *ConduktorProvider) PreFlightChecks(mode string, input schema.ConduktorM
 	case "console":
 		{
 			data.Mode = client.CONSOLE
-			apiParameter.BaseUrl = schemaUtils.GetStringConfig(input.BaseUrl, []string{"CDK_CONSOLE_BASE_URL", "CDK_BASE_URL"})
-			apiParameter.ApiKey = schemaUtils.GetStringConfig(input.ApiToken, []string{"CDK_API_TOKEN", "CDK_API_KEY"})
-			apiParameter.CdkUser = schemaUtils.GetStringConfig(input.AdminUser, []string{"CDK_CONSOLE_USER", "CDK_ADMIN_EMAIL", "CDK_ADMIN_USER"})
-			apiParameter.CdkPassword = schemaUtils.GetStringConfig(input.AdminPassword, []string{"CDK_CONSOLE_PASSWORD", "CDK_ADMIN_PASSWORD"})
-			apiParameter.TLSParameters.Key = schemaUtils.GetStringConfig(input.Cert, []string{"CDK_CONSOLE_CERT", "CDK_CERT"})
-			apiParameter.TLSParameters.Cacert = schemaUtils.GetStringConfig(input.Cacert, []string{"CDK_CONSOLE_CACERT", "CDK_CACERT"})
-			apiParameter.TLSParameters.Key = schemaUtils.GetStringConfig(input.Key, []string{"CDK_CONSOLE_KEY", "CDK_KEY"})
-			apiParameter.TLSParameters.Insecure = schemaUtils.GetBooleanConfig(input.Insecure, []string{"CDK_CONSOLE_INSECURE", "CDK_INSECURE"}, false)
+			apiParameter = client.LoadConfig(input, client.CONSOLE)
 
 			if apiParameter.ApiKey == "" {
 				// We only need to check user and password if no apiToken is provided.
@@ -136,13 +129,7 @@ func (p *ConduktorProvider) PreFlightChecks(mode string, input schema.ConduktorM
 	case "gateway":
 		{
 			data.Mode = client.GATEWAY
-			apiParameter.BaseUrl = schemaUtils.GetStringConfig(input.BaseUrl, []string{"CDK_GATEWAY_BASE_URL", "CDK_BASE_URL"})
-			apiParameter.CdkUser = schemaUtils.GetStringConfig(input.AdminUser, []string{"CDK_GATEWAY_USER", "CDK_ADMIN_USER"})
-			apiParameter.CdkPassword = schemaUtils.GetStringConfig(input.AdminPassword, []string{"CDK_GATEWAY_PASSWORD", "CDK_ADMIN_PASSWORD"})
-			apiParameter.TLSParameters.Cacert = schemaUtils.GetStringConfig(input.Cert, []string{"CDK_GATEWAY_CERT", "CDK_CERT"})
-			apiParameter.TLSParameters.Cacert = schemaUtils.GetStringConfig(input.Cacert, []string{"CDK_GATEWAY_CACERT", "CDK_CACERT"})
-			apiParameter.TLSParameters.Key = schemaUtils.GetStringConfig(input.Key, []string{"CDK_GATEWAY_KEY", "CDK_KEY"})
-			apiParameter.TLSParameters.Insecure = schemaUtils.GetBooleanConfig(input.Insecure, []string{"CDK_GATEWAY_INSECURE", "CDK_INSECURE"}, false)
+			apiParameter = client.LoadConfig(input, client.GATEWAY)
 
 			if apiParameter.CdkUser == "" || apiParameter.CdkPassword == "" {
 				details := "The provider cannot create the Gateway API client as there is a missing or empty value for the admin user and password. \n" +

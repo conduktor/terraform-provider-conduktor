@@ -105,7 +105,7 @@ jobs:
           if [ "${{ github.actor }}" != "dependabot[bot]" ]; then
             echo "CDK_LICENSE=${{ secrets.TEST_LICENSE }}" >> "$GITHUB_ENV"
           fi
-          
+
       - name: Run acceptance tests
         shell: bash
         env:
