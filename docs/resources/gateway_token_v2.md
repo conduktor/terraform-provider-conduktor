@@ -14,7 +14,7 @@ This resource allows you to create and update tokens associated with service acc
 
 ## Example Usage
 
-### Simple token without a using the default passthrough vCluster
+### Simple token associated to a service account, no virtual cluster named, uses the default virtual cluster named passthrough
 ```terraform
 resource "conduktor_gateway_token_v2" "simple" {
   username         = "user_passthrough"
@@ -22,10 +22,10 @@ resource "conduktor_gateway_token_v2" "simple" {
 }
 ```
 
-### Complex token associated to a service account with a vCluster
+### Complex token associated to a service account, with a virtual cluster named
 ```terraform
 resource "conduktor_gateway_token_v2" "complex" {
-  vcluster         = "vcluster_sa"
+  vcluster         = "vcluster_1"
   username         = "user10"
   lifetime_seconds = 3600
 }
