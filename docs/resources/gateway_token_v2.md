@@ -10,19 +10,32 @@ description: |-
 # conduktor_gateway_token_v2
 
 Resource for managing Conduktor Gateway tokens.
-This resource allows you to create and update tokens associated with service accounts in Conduktor Gateway.
+This resource allows you to create and update tokens associated with service accounts in Conduktor Gateway.  
+After the initial token creation the provider will subsequently verify the validity of the token by checking the expiry time, and if needed, will create a new one on the next apply.
 
 ## Example Usage
 
 ### Simple token associated to a service account, no virtual cluster named, uses the default virtual cluster named passthrough
+Two example output blocks to leverage the token value, in either an output, or to local file.
 ```terraform
 resource "conduktor_gateway_token_v2" "simple" {
   username         = "user_passthrough"
   lifetime_seconds = 3600
 }
+
+output "simple_token" {
+  value     = conduktor_gateway_token_v2.simple.token
+  sensitive = true
+}
+
+resource "local_file" "simple_token" {
+  content  = conduktor_gateway_token_v2.simple.token
+  filename = "${path.module}/simple_token.txt"
+}
 ```
 
 ### Complex token associated to a service account, with a virtual cluster named
+Two example output blocks to leverage the token value, in either an output, or to local file.
 ```terraform
 resource "conduktor_gateway_token_v2" "complex" {
   vcluster         = "vcluster_sa"
@@ -30,9 +43,15 @@ resource "conduktor_gateway_token_v2" "complex" {
   lifetime_seconds = 3600
 }
 
+
 output "complex_token" {
   value     = conduktor_gateway_token_v2.complex.token
   sensitive = true
+}
+
+resource "local_file" "complex_token" {
+  content  = conduktor_gateway_token_v2.complex.token
+  filename = "${path.module}/complex_token.txt"
 }
 ```
 
