@@ -17,10 +17,13 @@ This resource allows you to create, read, update and delete any resource support
 
 ## Example Usage
 
-### Using embedded YAML string
+### Using `yamlencoded` HCL value
 {{tffile "examples/resources/conduktor_generic/embedded.tf"}}
 
-### Using incuded YAML string
+### Using normalized raw yaml value
+{{tffile "examples/resources/conduktor_generic/raw_yaml.tf"}}
+
+### Using included YAML string
 {{tffile "examples/resources/conduktor_generic/include.tf"}}
 {{codefile "yaml" "examples/resources/conduktor_generic/cluster_a.yaml"}}
 

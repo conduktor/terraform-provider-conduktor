@@ -52,8 +52,20 @@ func TestAccGenericExample2Resource(t *testing.T) {
 			{
 				Config: providerConfigConsole + test.TestAccExample(t, "resources", "conduktor_generic", "embedded.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("conduktor_generic.example", "name", "bob@company.io"),
-					resource.TestCheckResourceAttrWith("conduktor_generic.example", "manifest",
+					resource.TestCheckResourceAttr("conduktor_generic.embedded", "name", "bob@company.io"),
+					resource.TestCheckResourceAttrWith("conduktor_generic.embedded", "manifest",
+						test.TestCheckResourceAttrContainsStringsFunc(
+							"\"name\": \"bob@company.io\"",
+							"\"firstName\": \"Bob\"",
+							"\"lastName\": \"Smith\"",
+						)),
+				),
+			},
+			{
+				Config: providerConfigConsole + test.TestAccExample(t, "resources", "conduktor_generic", "raw_yaml.tf"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("conduktor_generic.raw_yaml", "name", "bob@company.io"),
+					resource.TestCheckResourceAttrWith("conduktor_generic.raw_yaml", "manifest",
 						test.TestCheckResourceAttrContainsStringsFunc(
 							"\"name\": \"bob@company.io\"",
 							"\"firstName\": \"Bob\"",

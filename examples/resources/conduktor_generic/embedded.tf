@@ -1,4 +1,4 @@
-resource "conduktor_generic" "example" {
+resource "conduktor_generic" "embedded" {
   kind    = "User"
   version = "v2"
   name    = "bob@company.io"

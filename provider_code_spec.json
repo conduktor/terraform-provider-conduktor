@@ -1650,7 +1650,7 @@
           {
             "name": "kind",
             "string": {
-              "description": "resource kind",
+              "description": "Resource kind",
               "computed_optional_required": "required",
               "plan_modifiers": [
                 {
@@ -1669,7 +1669,7 @@
           {
             "name": "version",
             "string": {
-              "description": "resource version",
+              "description": "Resource version",
               "computed_optional_required": "required",
               "plan_modifiers": [
                 {
@@ -1688,7 +1688,7 @@
           {
             "name": "name",
             "string": {
-              "description": "resource name",
+              "description": "Resource name",
               "computed_optional_required": "required",
               "plan_modifiers": [
                 {
@@ -1707,7 +1707,7 @@
           {
             "name": "cluster",
             "string": {
-              "description": "resource parent cluster (if any)",
+              "description": "Resource parent cluster (if any)",
               "computed_optional_required": "optional",
               "plan_modifiers": [
                 {
@@ -1726,7 +1726,7 @@
           {
             "name": "manifest",
             "string": {
-              "description": "resource manifest in yaml format. See [reference documentation](https://docs.conduktor.io/platform/reference/resource-reference/console/#manifests) for more details",
+              "description": "Resource manifest in yaml format. Use `yamlencode`/`yamldecode` function to normalize input and avoid dirty plan. See [reference documentation](https://docs.conduktor.io/platform/reference/resource-reference/console/#manifests) for more details",
               "computed_optional_required": "required",
               "custom_type": {
                 "import": {
