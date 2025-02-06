@@ -64,15 +64,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # list whatever Terraform versions here you would like to support
         terraform:
           - version: "1.0.*"
             name: "TF-1.0"
           - version: "1.10.*"
             name: "TF-1.10"
         console:
-          - "1.28.0"
-          - "1.29.0"
+          - "1.26.0"
+          #- "1.27.0"
+          #- "1.28.0"
+          #- "1.29.0"
           - "1.30.0"
           - "1.31.0"
         gateway:
