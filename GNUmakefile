@@ -59,10 +59,7 @@ test: ## Run acceptance tests only (no setup or cleanup)
 # Run acceptance tests
 .PHONY: testacc
 testacc: start_test_env ## Start test environment, run acceptance tests and clean up
-	@function tearDown {
-		$(MAKE) clean
-	}
-	@trap tearDown EXIT
+	@trap '$(MAKE) clean' EXIT
 
 	$(MAKE) test
 
