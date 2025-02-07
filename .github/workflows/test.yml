@@ -64,19 +64,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # list whatever Terraform versions here you would like to support
         terraform:
           - version: "1.0.*"
             name: "TF-1.0"
-          - version: "1.9.*"
-            name: "TF-1.9"
+          - version: "1.10.*"
+            name: "TF-1.10"
         console:
           - "1.26.0"
-          - "1.27.0"
-          - "1.28.0"
-          - "1.29.0"
+          #- "1.27.0"
+          #- "1.28.0"
+          #- "1.29.0"
+          - "1.30.0"
+          - "1.31.0"
         gateway:
-          - "3.4.0"
+          - "3.5.2"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -88,13 +89,23 @@ jobs:
           terraform_version: ${{ matrix.terraform.version }}
           terraform_wrapper: false
       - run: go mod download
-      - run: make pull_test_assets
+
+      - name: Pull images
         timeout-minutes: 10
+        env:
+          CONDUKTOR_CONSOLE_IMAGE: conduktor/conduktor-console:${{ matrix.console }}
+          CONDUKTOR_CONSOLE_CORTEX_IMAGE: conduktor/conduktor-console-cortex:${{ matrix.console }}
+          CONDUKTOR_GATEWAY_IMAGE: conduktor/conduktor-gateway:${{ matrix.gateway }}
+        run: |
+          echo "" > .env
+          make pull_test_assets
+
       - name: Set License if not dependabot
         run: |
           if [ "${{ github.actor }}" != "dependabot[bot]" ]; then
             echo "CDK_LICENSE=${{ secrets.TEST_LICENSE }}" >> "$GITHUB_ENV"
           fi
+          
       - name: Run acceptance tests
         env:
           TF_ACC: "1"
