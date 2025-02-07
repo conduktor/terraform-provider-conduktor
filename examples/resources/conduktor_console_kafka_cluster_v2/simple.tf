@@ -1,6 +1,6 @@
 resource "conduktor_console_kafka_cluster_v2" "simple" {
   name = "simple-cluster"
-  spec {
+  spec = {
     display_name                 = "Simple kafka Cluster"
     icon                         = "kafka"
     color                        = "#000000"

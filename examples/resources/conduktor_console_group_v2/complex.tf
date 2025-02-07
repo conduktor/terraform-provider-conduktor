@@ -1,6 +1,6 @@
 resource "conduktor_console_user_v2" "user1" {
   name = "user1@company.com"
-  spec {
+  spec = {
     firstname   = "User"
     lastname    = "1"
     permissions = []
@@ -9,7 +9,7 @@ resource "conduktor_console_user_v2" "user1" {
 
 resource "conduktor_console_group_v2" "example" {
   name = "complex-group"
-  spec {
+  spec = {
     display_name    = "Complex group"
     description     = "Complex group description"
     external_groups = ["sso-group1"]

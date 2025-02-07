@@ -109,7 +109,7 @@ provider "conduktor" {
 # register an external user bob with PLATFORM.userView permission
 resource "conduktor_console_user_v2" "bob" {
   name = "bob@mycompany.io"
-  spec {
+  spec = {
     firstname = "Bob"
     lastname  = "Smith"
     permissions = [
@@ -124,7 +124,7 @@ resource "conduktor_console_user_v2" "bob" {
 # create a group with Bob as a member
 resource "conduktor_console_group_v2" "qa" {
   name = "qa"
-  spec {
+  spec = {
     display_name                 = "QA team"
     description                  = "Quality Assurance team"
     members                      = [ conduktor_user_v2.bob.name ]

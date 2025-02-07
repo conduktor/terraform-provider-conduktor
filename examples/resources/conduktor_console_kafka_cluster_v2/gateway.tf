@@ -3,7 +3,7 @@ resource "conduktor_console_kafka_cluster_v2" "gateway" {
   labels = {
     "env" = "prod"
   }
-  spec {
+  spec = {
     display_name      = "Gateway Cluster"
     bootstrap_servers = "gateway:6969"
     properties = {

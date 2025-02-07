@@ -1,6 +1,6 @@
 resource "conduktor_console_kafka_cluster_v2" "minimal" {
   name = "mini-cluster"
-  spec {
+  spec = {
     display_name      = "Minimal Cluster"
     bootstrap_servers = "localhost:9092"
   }
@@ -14,7 +14,7 @@ resource "conduktor_console_kafka_connect_v2" "mtls" {
     documentation = "https://docs.mycompany.com/complex-connect"
     env           = "dev"
   }
-  spec {
+  spec = {
     display_name = "mTLS Connect server"
     urls         = "http://localhost:8083"
     headers = {

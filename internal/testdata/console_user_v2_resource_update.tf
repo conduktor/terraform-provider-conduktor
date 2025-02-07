@@ -1,7 +1,7 @@
 
 resource "conduktor_console_user_v2" "test" {
   name = "pam.beesly@dunder.mifflin.com"
-  spec {
+  spec = {
     firstname = "Pam"
     lastname  = "Halpert"
     permissions = [

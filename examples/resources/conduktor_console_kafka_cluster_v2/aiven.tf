@@ -3,7 +3,7 @@ resource "conduktor_console_kafka_cluster_v2" "aiven" {
   labels = {
     "env" = "test"
   }
-  spec {
+  spec = {
     display_name      = "Aiven Cluster"
     bootstrap_servers = "cluster.aiven.io:9092"
     properties = {

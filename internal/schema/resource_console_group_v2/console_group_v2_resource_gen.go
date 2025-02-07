@@ -37,9 +37,7 @@ func ConsoleGroupV2ResourceSchema(ctx context.Context) schema.Schema {
 					stringvalidator.RegexMatches(regexp.MustCompile("^[0-9a-z\\_\\-]+$"), ""),
 				},
 			},
-		},
-		Blocks: map[string]schema.Block{
-			"spec": schema.SingleNestedBlock{
+			"spec": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"description": schema.StringAttribute{
 						Optional:            true,
@@ -135,6 +133,9 @@ func ConsoleGroupV2ResourceSchema(ctx context.Context) schema.Schema {
 						AttrTypes: SpecValue{}.AttributeTypes(ctx),
 					},
 				},
+				Required:            true,
+				Description:         "Group specification",
+				MarkdownDescription: "Group specification",
 			},
 		},
 	}

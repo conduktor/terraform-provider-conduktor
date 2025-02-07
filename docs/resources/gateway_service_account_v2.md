@@ -18,7 +18,7 @@ This resource allows you to create, read, update and delete service accounts in 
 ```terraform
 resource "conduktor_gateway_service_account_v2" "local_sa" {
   name = "simple-service-account"
-  spec {
+  spec = {
     type = "LOCAL"
   }
 }
@@ -29,7 +29,7 @@ resource "conduktor_gateway_service_account_v2" "local_sa" {
 resource "conduktor_gateway_service_account_v2" "external_sa" {
   name     = "complex-service-account"
   vcluster = "vcluster_sa"
-  spec {
+  spec = {
     type           = "EXTERNAL"
     external_names = ["externalName"]
   }
@@ -43,13 +43,13 @@ resource "conduktor_gateway_service_account_v2" "external_sa" {
 ### Required
 
 - `name` (String) The name of the service account, must be unique, act as ID for import
+- `spec` (Attributes) Service account specification (see [below for nested schema](#nestedatt--spec))
 
 ### Optional
 
-- `spec` (Block, Optional) (see [below for nested schema](#nestedblock--spec))
 - `vcluster` (String) The name of the virtual cluster the service account belongs to. If not provided, the service account will be created in the default passthrough virtual cluster.
 
-<a id="nestedblock--spec"></a>
+<a id="nestedatt--spec"></a>
 ### Nested Schema for `spec`
 
 Required:

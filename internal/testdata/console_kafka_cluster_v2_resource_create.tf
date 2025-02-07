@@ -4,7 +4,7 @@ resource "conduktor_console_kafka_cluster_v2" "test" {
   labels = {
     "env" = "test"
   }
-  spec {
+  spec = {
     display_name      = "Test Cluster"
     bootstrap_servers = "localhost:9092"
     properties         = {

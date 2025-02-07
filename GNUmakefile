@@ -1,9 +1,17 @@
-export SHELL:=/bin/bash
+export SHELL := /bin/sh
 export SHELLOPTS:=$(if $(SHELLOPTS),$(SHELLOPTS):)pipefail:errexit
 
-include .env
-
 .ONESHELL:
+
+# Include .env file
+include .env
+export $(shell sed 's/=.*//' .env)
+
+# Include .envrc file if it exists
+ifneq (,$(wildcard .envrc))
+  include .envrc
+  export $(shell grep -v '^#' .envrc | sed 's/export //')
+endif
 
 default: testacc
 
@@ -59,10 +67,7 @@ test: ## Run acceptance tests only (no setup or cleanup)
 # Run acceptance tests
 .PHONY: testacc
 testacc: start_test_env ## Start test environment, run acceptance tests and clean up
-	@function tearDown {
-		$(MAKE) clean
-	}
-	@trap tearDown EXIT
+	@trap '$(MAKE) clean' EXIT
 
 	$(MAKE) test
 

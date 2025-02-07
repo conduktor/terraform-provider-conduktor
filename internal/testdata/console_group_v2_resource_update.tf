@@ -1,7 +1,7 @@
 
 resource "conduktor_console_user_v2" "coworkers1" {
   name = "michael.scott@dunder.mifflin.com"
-  spec {
+  spec = {
     firstname   = "Michael"
     lastname    = "Scott"
     permissions = []
@@ -10,7 +10,7 @@ resource "conduktor_console_user_v2" "coworkers1" {
 
 resource "conduktor_console_group_v2" "test" {
   name = "sales"
-  spec {
+  spec = {
     display_name    = "New Sales Department"
     description     = "New Sales Department Group"
     external_groups = ["sales", "scranton"]

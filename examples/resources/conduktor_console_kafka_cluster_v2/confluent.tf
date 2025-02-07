@@ -3,7 +3,7 @@ resource "conduktor_console_kafka_cluster_v2" "confluent" {
   labels = {
     "env" = "staging"
   }
-  spec {
+  spec = {
     display_name      = "Confluent Cluster"
     bootstrap_servers = "aaa-aaaa.us-west4.gcp.confluent.cloud:9092"
     properties = {

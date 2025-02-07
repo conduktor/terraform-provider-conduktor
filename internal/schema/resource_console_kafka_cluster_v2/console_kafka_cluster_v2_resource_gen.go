@@ -44,9 +44,7 @@ func ConsoleKafkaClusterV2ResourceSchema(ctx context.Context) schema.Schema {
 					stringvalidator.RegexMatches(regexp.MustCompile("^[0-9a-z\\_\\-.]+$"), ""),
 				},
 			},
-		},
-		Blocks: map[string]schema.Block{
-			"spec": schema.SingleNestedBlock{
+			"spec": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"bootstrap_servers": schema.StringAttribute{
 						Required:            true,
@@ -322,6 +320,9 @@ func ConsoleKafkaClusterV2ResourceSchema(ctx context.Context) schema.Schema {
 						AttrTypes: SpecValue{}.AttributeTypes(ctx),
 					},
 				},
+				Required:            true,
+				Description:         "Kafka cluster specification",
+				MarkdownDescription: "Kafka cluster specification",
 			},
 		},
 	}

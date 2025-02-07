@@ -1,7 +1,7 @@
 
 resource "conduktor_console_group_v2" "minimal" {
   name = "minimal"
-  spec {
+  spec = {
     display_name    = "Minimal"
   }
 }

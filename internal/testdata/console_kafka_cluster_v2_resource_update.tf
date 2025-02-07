@@ -5,7 +5,7 @@ resource "conduktor_console_kafka_cluster_v2" "test" {
     "env" = "test"
     "sec" = "C1"
   }
-  spec {
+  spec = {
     display_name      = "Test Cluster"
     bootstrap_servers = "cluster.aiven.io:9092"
     properties         = {
