@@ -82,10 +82,10 @@ func TestAccGatewayInterceptorV2Resource(t *testing.T) {
 			},
 			//Importing matches the state of the previous step.
 			{
-				ResourceName:                         policyDefaultRef,
+				ResourceName:                         schemaEncRef,
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateId:                        "enforce-partition-limit-test/passthrough//",
+				ImportStateId:                        "schema-encryption/vcluster_sa/group-a/",
 				ImportStateVerifyIdentifierAttribute: "name",
 			},
 			// Test plan changes if externally deleted resource
