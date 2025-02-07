@@ -256,13 +256,13 @@ func (r *GatewayInterceptorV2Resource) ImportState(ctx context.Context, req reso
 	}
 
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("name"), idParts[0])...)
-	if idParts[1] != "" {
+	if idParts[1] != "" && idParts[1] != "null" {
 		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("scope").AtName("vcluster"), idParts[1])...)
 	}
-	if idParts[2] != "" {
+	if idParts[2] != "" && idParts[2] != "null" {
 		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("scope").AtName("group"), idParts[2])...)
 	}
-	if idParts[3] != "" {
+	if idParts[3] != "" && idParts[3] != "null" {
 		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("scope").AtName("username"), idParts[3])...)
 	}
 }

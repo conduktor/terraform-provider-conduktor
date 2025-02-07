@@ -85,7 +85,15 @@ func TestAccGatewayInterceptorV2Resource(t *testing.T) {
 				ResourceName:                         schemaEncRef,
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateId:                        "schema-encryption/vcluster_sa/group-a/",
+				ImportStateId:                        "schema-encryption/vcluster_sa/group-a/null", // username is empty
+				ImportStateVerifyIdentifierAttribute: "name",
+			},
+			//Importing matches the state of the previous step.
+			{
+				ResourceName:                         datamaskingRef,
+				ImportState:                          true,
+				ImportStateVerify:                    true,
+				ImportStateId:                        "mask-sensitive-fields/passthrough//", // group and username are empty
 				ImportStateVerifyIdentifierAttribute: "name",
 			},
 			// Test plan changes if externally deleted resource

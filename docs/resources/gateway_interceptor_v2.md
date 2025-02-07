@@ -10,6 +10,7 @@ description: |-
 # conduktor_gateway_interceptor_v2
 
 Resource for managing Conduktor interceptors.
+
 This resource allows you to create, read, update and delete interceptors in Conduktor Gateway.
 
 ## Example Usage
@@ -142,7 +143,11 @@ Optional:
 
 In order to import an existing Conduktor Gateway interceptor, you need to know the interceptor's unique name.
 
-The import ID is constructed as follows: <interceptor_name>/<vcluster>/<group>/<username>`.
+The import ID is constructed as follows: `<interceptor_name>/<vcluster>/<group>/<username>`.
+
+If optional `group` or `username` are not part of interceptor state, they can be replaced by empty string or `null` in the import ID.
+
+Like this: `<interceptor_name>/<vcluster>//<username>` or `<interceptor_name>/<vcluster>/<group>/null`.
 
 For example, using an [`import` block](https://developer.hashicorp.com/terraform/language/import) :
 ```terraform
