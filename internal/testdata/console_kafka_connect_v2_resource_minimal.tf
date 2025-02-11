@@ -8,7 +8,7 @@ resource "conduktor_console_kafka_cluster_v2" "minimal" {
 }
 
 resource "conduktor_console_kafka_connect_v2" "minimal" {
-  name = "minimal-connect"
+  name    = "minimal-connect"
   cluster = conduktor_console_kafka_cluster_v2.minimal.name
   spec = {
     display_name = "Minimal Connect"

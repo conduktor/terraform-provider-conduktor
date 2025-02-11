@@ -95,7 +95,7 @@
           {
             "name": "name",
             "string": {
-              "description": "Group name, must be unique, act as ID for import",
+              "description": "Group name, must be unique, acts as an ID for import",
               "computed_optional_required": "required",
               "plan_modifiers": [
                 {
@@ -801,7 +801,7 @@
           {
             "name": "name",
             "string": {
-              "description": "Kafka connect server name, must be unique, act as ID for import",
+              "description": "Kafka connect server name, must be unique, acts as an ID for import",
               "computed_optional_required": "required",
               "plan_modifiers": [
                 {
@@ -1005,7 +1005,7 @@
           {
             "name": "name",
             "string": {
-              "description": "User email, must be unique, act as ID for import",
+              "description": "User email, must be unique, acts as an ID for import",
               "computed_optional_required": "required",
               "plan_modifiers": [
                 {
@@ -1173,7 +1173,7 @@
           {
             "name": "name",
             "string": {
-              "description": "The name of the service account, must be unique, act as ID for import",
+              "description": "The name of the service account, must be unique, acts as an ID for import",
               "computed_optional_required": "required",
               "plan_modifiers": [
                 {
@@ -1436,6 +1436,205 @@
                       }
                     ],
                     "schema_definition": "stringplanmodifier.RequiresReplace()"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "gateway_interceptor_v2",
+      "schema": {
+        "attributes": [
+          {
+            "name": "name",
+            "string": {
+              "description": "The name of the interceptor, must be unique, acts as an ID for import",
+              "computed_optional_required": "required",
+              "plan_modifiers": [
+                {
+                  "custom": {
+                    "imports": [
+                      {
+                        "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+                      }
+                    ],
+                    "schema_definition": "stringplanmodifier.RequiresReplace()"
+                  }
+                }
+              ],
+              "validators": [
+                {
+                  "custom": {
+                    "imports": [
+                      {
+                        "path": "regexp"
+                      },
+                      {
+                        "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                      }
+                    ],
+                    "schema_definition": "stringvalidator.RegexMatches(regexp.MustCompile(\"^[a-zA-Z0-9_-]{3,64}$\"), \"\")"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "scope",
+            "single_nested": {
+              "computed_optional_required": "computed_optional",
+              "description": "The targeting scope of the interceptor. See [documentation](https://docs.conduktor.io/gateway/reference/resources-reference/#interceptor-targeting)",
+              "attributes": [
+                {
+                  "name": "vcluster",
+                  "string": {
+                    "description": "The name of the virtual cluster the interceptor will be applied to. Optional parameter for defining the scope",
+                    "computed_optional_required": "computed_optional",
+                    "default": {
+                      "custom": {
+                        "imports": [
+                          {
+                            "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+                          }
+                        ],
+                        "schema_definition": "stringdefault.StaticString(\"passthrough\")"
+                      }
+                    },
+                    "validators": [
+                      {
+                        "custom": {
+                          "imports": [
+                            {
+                              "path": "regexp"
+                            },
+                            {
+                              "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                            }
+                          ],
+                          "schema_definition": "stringvalidator.RegexMatches(regexp.MustCompile(\"^[a-zA-Z0-9_-]+$\"), \"\")"
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "group",
+                  "string": {
+                    "description": "The name of the group the interceptor will be applied to. Optional parameter for defining the scope",
+                    "computed_optional_required": "optional",
+                    "validators": [
+                      {
+                        "custom": {
+                          "imports": [
+                            {
+                              "path": "regexp"
+                            },
+                            {
+                              "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                            }
+                          ],
+                          "schema_definition": "stringvalidator.RegexMatches(regexp.MustCompile(\"^[a-zA-Z0-9_-]+$\"), \"\")"
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "username",
+                  "string": {
+                    "description": "The username the interceptor will be applied to. Optional parameter for defining the scope",
+                    "computed_optional_required": "optional",
+                    "validators": [
+                      {
+                        "custom": {
+                          "imports": [
+                            {
+                              "path": "regexp"
+                            },
+                            {
+                              "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                            }
+                          ],
+                          "schema_definition": "stringvalidator.RegexMatches(regexp.MustCompile(\"^[a-zA-Z0-9._-]+$\"), \"\")"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ],
+              "default": {
+                "custom": {
+                  "imports": [
+                    {
+                      "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/objectdefault"
+                    },
+
+                    {
+                      "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/default"
+                    }
+                  ],
+                  "schema_definition": "objectdefault.StaticValue(_default.DefaultScope)"
+                }
+              }
+            }
+          },
+          {
+            "name": "spec",
+            "single_nested": {
+              "computed_optional_required": "required",
+              "description": "The interceptor specification",
+              "attributes": [
+                {
+                  "name": "comment",
+                  "string": {
+                    "description": "An optional comment for the interceptor.",
+                    "computed_optional_required": "optional"
+                  }
+                },
+                {
+                  "name": "plugin_class",
+                  "string": {
+                    "description": "The class of the plugin. Check the [interceptor catalog](https://docs.conduktor.io/gateway/category/interceptor-catalog/) for available plugins",
+                    "computed_optional_required": "required"
+                  }
+                },
+                {
+                  "name": "priority",
+                  "int64": {
+                    "description": "The priority of the interceptor. Must be greater than 0",
+                    "computed_optional_required": "required",
+                    "validators": [
+                      {
+                        "custom": {
+                          "imports": [
+                            {
+                              "path": "regexp"
+                            },
+                            {
+                              "path": "github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+                            }
+                          ],
+                          "schema_definition": "int64validator.Between(1,2147483647)"
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "config",
+                  "string": {
+                    "description": "Plugin configuration in JSON format. Check the [interceptor catalog](https://docs.conduktor.io/gateway/category/interceptor-catalog/) for details on the configuration",
+                    "computed_optional_required": "required",
+                    "custom_type": {
+                      "import": {
+                        "path": "github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
+                      },
+                      "type": "jsontypes.NormalizedType{}",
+                      "value_type": "jsontypes.Normalized"
+                    }
                   }
                 }
               ]

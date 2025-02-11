@@ -28,21 +28,6 @@ type Client struct {
 	Client  *resty.Client
 }
 
-type ApiParameter struct {
-	ApiKey        string
-	BaseUrl       string
-	CdkUser       string
-	CdkPassword   string
-	TLSParameters TLSParameters
-}
-
-type TLSParameters struct {
-	Key      string
-	Cert     string
-	Cacert   string
-	Insecure bool
-}
-
 type LoginResult struct {
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
@@ -62,8 +47,8 @@ func Make(ctx context.Context, mode Mode, apiParameter ApiParameter, providerVer
 	}
 	var err error
 
-	// Enable http client debug logs when provider log is set to TRACE
-	restyClient.SetDebug(TraceLogEnabled())
+	// Enable http client debug logs when TF_LOG_PROVIDER_CONDUKTOR_INIT is set to trace
+	restyClient.SetDebug(InitTraceEnabled())
 
 	restyClient, err = ConfigureTLS(ctx, restyClient, apiParameter.TLSParameters)
 	if err != nil {
@@ -74,6 +59,9 @@ func Make(ctx context.Context, mode Mode, apiParameter ApiParameter, providerVer
 	if err != nil {
 		return nil, err
 	}
+
+	// Enable http client debug logs when provider log is set to TRACE
+	restyClient.SetDebug(TraceLogEnabled())
 
 	return &Client{
 		BaseUrl: apiParameter.BaseUrl,
@@ -100,6 +88,7 @@ func ConfigureAuth(ctx context.Context, mode Mode, restyClient *resty.Client, ap
 		}
 	case GATEWAY:
 		{
+			restyClient.SetDisableWarn(true)
 			restyClient.SetBasicAuth(apiParameter.CdkUser, apiParameter.CdkPassword)
 
 			// Testing authentication parameters against /metrics API.

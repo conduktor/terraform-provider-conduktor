@@ -54,7 +54,7 @@ resource "conduktor_console_user_v2" "example" {
 
 ### Required
 
-- `name` (String) User email, must be unique, act as ID for import
+- `name` (String) User email, must be unique, acts as an ID for import
 - `spec` (Attributes) User specification (see [below for nested schema](#nestedatt--spec))
 
 <a id="nestedatt--spec"></a>

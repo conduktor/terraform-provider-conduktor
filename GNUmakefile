@@ -39,6 +39,10 @@ generate: ## Run go generate
 go-fmt: ## Run go fmt
 	go fmt ./...
 
+.PHONY: tf-fmt
+tf-fmt: ## Run terraform fmt
+	terraform fmt -recursive
+
 tools:
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.60.2
 
@@ -46,9 +50,6 @@ tools:
 go-lint: tools ## Run Golang linters
 	@echo "==> Run Golang CLI linter..."
 	@golangci-lint run
-
-setup_test_env:
-	"$(CURDIR)/scripts/setup_test_env.sh"
 
 .PHONY: pull_test_assets
 pull_test_assets: ## Pull test docker images
@@ -58,7 +59,7 @@ pull_test_assets: ## Pull test docker images
 start_test_env: ## Start test environment
 	"$(CURDIR)/scripts/start_test_env.sh"
 	"$(CURDIR)/scripts/wait_for_test_env_ready.sh"
-	$(MAKE) setup_test_env
+	"$(CURDIR)/scripts/setup_test_env.sh"
 
 .PHONY: test
 test: ## Run acceptance tests only (no setup or cleanup)

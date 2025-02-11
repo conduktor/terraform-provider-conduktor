@@ -1,0 +1,41 @@
+# Init manifests are used to initialize Gateway  with the necessary resources using CLI.
+---
+apiVersion: gateway/v2
+kind: VirtualCluster
+metadata:
+ name: "vcluster_sa"
+spec:
+ aclEnabled: false # defaults to false
+---
+apiVersion: gateway/v2
+kind: GatewayServiceAccount
+metadata:
+ vCluster: "vcluster_sa"
+ name: "admin"
+spec:
+ type: LOCAL
+---
+apiVersion: gateway/v2
+kind: GatewayServiceAccount
+metadata:
+ name: "user10"
+ vCluster: "vcluster_sa"
+spec:
+ type: "LOCAL"
+---
+apiVersion: gateway/v2
+kind: GatewayServiceAccount
+metadata:
+ name: "user_passthrough"
+ vCluster: "passthrough"
+spec:
+ type: "LOCAL"
+---
+apiVersion: gateway/v2
+kind: GatewayGroup
+metadata:
+ name: "group-a"
+spec:
+ members:
+  - vCluster: "vcluster_sa"
+    name: "admin"

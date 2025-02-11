@@ -1,0 +1,43 @@
+{
+  "kind" : "GatewayInterceptor",
+  "apiVersion" : "gateway/v2",
+  "metadata" : {
+    "name" : "mask-sensitive-fields",
+    "scope" : {
+      "vCluster" : "vcluster",
+      "group" : "group",
+      "username" : "username"
+    }
+  },
+  "spec" : {
+    "comment" : "Test interceptor payload",
+    "pluginClass" : "io.conduktor.gateway.interceptor.FieldLevelDataMaskingPlugin",
+    "priority" : 100,
+    "config" : {
+      "policies" : [
+        {
+          "fields" : [
+            "profile.creditCardNumber",
+            "contact.email"
+          ],
+          "name" : "Mask credit card",
+          "rule" : {
+            "type" : "MASK_ALL"
+          }
+        },
+        {
+          "fields" : [
+            "contact.phone"
+          ],
+          "name" : "Partial mask phone",
+          "rule" : {
+            "maskingChar" : "*",
+            "numberOfChars" : 9,
+            "type" : "MASK_FIRST_N"
+          }
+        }
+      ],
+      "topic" : "^[A-Za-z]*_masked$"
+    }
+  }
+}

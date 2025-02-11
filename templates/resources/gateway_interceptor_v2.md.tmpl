@@ -1,0 +1,47 @@
+---
+page_title: "Conduktor : gateway_interceptor_v2 "
+subcategory: "gateway/v2"
+description: |-
+    Resource for managing Conduktor Gateway Interceptors.
+    This resource allows you to create, read, update and delete interceptors in Conduktor Gateway.
+    For a full description of what Gateway interceptors are, refer to our [docs site](https://docs.conduktor.io/gateway/reference/resources-reference/#interceptor).
+---
+
+# {{ .Name }}
+
+Resource for managing Conduktor interceptors.
+
+This resource allows you to create, read, update and delete interceptors in Conduktor Gateway.
+
+## Example Usage
+
+### Simple CreateTopicPolicyPlugin interceptor using jsonencode config
+{{tffile "examples/resources/conduktor_gateway_interceptor_v2/topic-policy.tf"}}
+
+### Example EncryptPlugin interceptor using jsonencode config
+{{tffile "examples/resources/conduktor_gateway_interceptor_v2/field-encrypt.tf"}}
+
+### Example MessageHeaderRemovalPlugin interceptor using raw json string config
+This example shows that you can use raw json string as config for the interceptor and use terraform functions
+jsondecode and jsonencode to nornamize the JSON in terraform state.
+{{tffile "examples/resources/conduktor_gateway_interceptor_v2/header-removal.tf"}}
+
+{{ .SchemaMarkdown }}
+
+## Import
+
+In order to import an existing Conduktor Gateway interceptor, you need to know the interceptor's unique name.
+
+The import ID is constructed as follows: `<interceptor_name>/<vcluster>/<group>/<username>`.
+
+If optional `group` or `username` are not part of interceptor state, they can be replaced by empty string or `null` in the import ID.
+
+Like this: `<interceptor_name>/<vcluster>//<username>` or `<interceptor_name>/<vcluster>/<group>/null`.
+
+For example, using an [`import` block](https://developer.hashicorp.com/terraform/language/import) :
+{{tffile "examples/resources/conduktor_gateway_interceptor_v2/import.tf"}}
+
+Using the `terraform import` command:
+```shell
+terraform import conduktor_gateway_interceptor_v2.example interceptor-name
+```

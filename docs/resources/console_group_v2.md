@@ -65,7 +65,7 @@ resource "conduktor_console_group_v2" "example" {
 
 ### Required
 
-- `name` (String) Group name, must be unique, act as ID for import
+- `name` (String) Group name, must be unique, acts as an ID for import
 - `spec` (Attributes) Group specification (see [below for nested schema](#nestedatt--spec))
 
 <a id="nestedatt--spec"></a>

@@ -1,6 +1,9 @@
 package provider
 
 import (
+	"context"
+	"github.com/conduktor/terraform-provider-conduktor/internal/client"
+	schema "github.com/conduktor/terraform-provider-conduktor/internal/schema/provider_conduktor"
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 )
@@ -28,4 +31,9 @@ provider "conduktor" {
 // reattach.
 var testAccProtoV6ProviderFactories = map[string]func() (tfprotov6.ProviderServer, error){
 	"conduktor": providerserver.NewProtocol6WithError(New("test", "none", "unknown")()),
+}
+
+func testClient(mode client.Mode) (*client.Client, error) {
+	var apiParameter = client.LoadConfig(schema.ConduktorModel{}, mode)
+	return client.Make(context.Background(), mode, apiParameter, "test")
 }

@@ -28,8 +28,8 @@ func ConsoleGroupV2ResourceSchema(ctx context.Context) schema.Schema {
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
 				Required:            true,
-				Description:         "Group name, must be unique, act as ID for import",
-				MarkdownDescription: "Group name, must be unique, act as ID for import",
+				Description:         "Group name, must be unique, acts as an ID for import",
+				MarkdownDescription: "Group name, must be unique, acts as an ID for import",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
