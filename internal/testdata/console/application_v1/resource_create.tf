@@ -1,10 +1,9 @@
 
-resource "conduktor_console_application_v1" "app" {
-  name = "myapp"
+resource "conduktor_console_application_v1" "test" {
+  name = "my-application"
   spec = {
-    title       = "Application"
-    description = "My Application description"
-    owner       = "Application owner"
+    title = "My Application"
+    owner = "admin"
   }
 }
 

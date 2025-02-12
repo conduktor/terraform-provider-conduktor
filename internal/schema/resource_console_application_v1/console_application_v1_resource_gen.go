@@ -43,8 +43,8 @@ func ConsoleApplicationV1ResourceSchema(ctx context.Context) schema.Schema {
 					},
 					"owner": schema.StringAttribute{
 						Required:            true,
-						Description:         "Application owner",
-						MarkdownDescription: "Application owner",
+						Description:         "Application owner, must be a valid Console Group id",
+						MarkdownDescription: "Application owner, must be a valid Console Group id",
 					},
 					"title": schema.StringAttribute{
 						Required:            true,
