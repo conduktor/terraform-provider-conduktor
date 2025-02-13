@@ -17,7 +17,7 @@ func TestAccKafkaConnectV2Resource(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read testing
 			{
-				Config: providerConfigConsole + test.TestAccTestdata(t, "console_kafka_connect_v2_resource_create.tf"),
+				Config: providerConfigConsole + test.TestAccTestdata(t, "console/kafka_connect_v2/resource_create.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceRef, "name", "test-connect"),
 					resource.TestCheckResourceAttr(resourceRef, "cluster", "mini-cluster"),
@@ -42,7 +42,7 @@ func TestAccKafkaConnectV2Resource(t *testing.T) {
 			},
 			// Update and Read testing
 			{
-				Config: providerConfigConsole + test.TestAccTestdata(t, "console_kafka_connect_v2_resource_update.tf"),
+				Config: providerConfigConsole + test.TestAccTestdata(t, "console/kafka_connect_v2/resource_update.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceRef, "name", "test-connect"),
 					resource.TestCheckResourceAttr(resourceRef, "cluster", "mini-cluster"),
@@ -74,7 +74,7 @@ func TestAccKafkaConnectV2Minimal(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read from minimal example
 			{
-				Config: providerConfigConsole + test.TestAccTestdata(t, "console_kafka_connect_v2_resource_minimal.tf"),
+				Config: providerConfigConsole + test.TestAccTestdata(t, "console/kafka_connect_v2/resource_minimal.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceRef, "name", "minimal-connect"),
 					resource.TestCheckResourceAttr(resourceRef, "cluster", "mini-cluster"),
@@ -98,7 +98,7 @@ func TestAccKafkaConnectV2Constraints(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Try to create with conflicting security attributes
 			{
-				Config:      providerConfigConsole + test.TestAccTestdata(t, "console_kafka_connect_v2_resource_not_valid.tf"),
+				Config:      providerConfigConsole + test.TestAccTestdata(t, "console/kafka_connect_v2/resource_not_valid.tf"),
 				ExpectError: regexp.MustCompile(`Invalid Attribute Combination`),
 			},
 		},
