@@ -227,7 +227,8 @@ func (r *GenericResource) ImportState(ctx context.Context, req resource.ImportSt
 
 // Search for the kind in the CLI default schema.
 func getKindFromName(kindName string) (ctlschema.Kind, error) {
-	kinds := ctlschema.ConsoleDefaultKind() // TODO support gateway kinds and client too
+	catalog := ctlschema.ConsoleDefaultCatalog() // TODO support gateway kinds and client too
+	kinds := catalog.Kind
 	kind, ok := kinds[kindName]
 	if !ok {
 		return ctlschema.Kind{}, fmt.Errorf("kind %s not found", kindName)
