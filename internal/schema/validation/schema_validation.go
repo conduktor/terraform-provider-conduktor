@@ -47,6 +47,12 @@ var ValidPermissions = []string{
 // Provider modes.
 var ValidProviderMode = []string{"console", "gateway"}
 
+// Console Application Instance.
+var ValidResourceTypes = []string{"TOPIC", "CONSUMER_GROUP", "SUBJECT", "CONNECTOR"}
+var ValidPatternTypes = []string{"LITERAL", "PREFIXED"} // This seems to be a duplicate of ValidPermissionPatternTypes, keeping separate for now to avoid confusion.
+var ValidOwnershipModes = []string{"ALL", "LIMITED"}
+var ValidCatalogVisibilities = []string{"PRIVATE", "PUBLIC"}
+
 var ValidPermissionTypes = []string{"CLUSTER", "CONSUMER_GROUP", "KAFKA_CONNECT", "KSQLDB", "PLATFORM", "SUBJECT", "TOPIC"}
 var ValidPermissionPatternTypes = []string{"LITERAL", "PREFIXED"}
 
