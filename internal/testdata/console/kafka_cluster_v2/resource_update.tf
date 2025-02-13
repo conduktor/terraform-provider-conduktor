@@ -17,19 +17,22 @@ resource "conduktor_console_kafka_cluster_v2" "test" {
     color                        = "#FF0000"
     ignore_untrusted_certificate = true
     kafka_flavor = {
-      type         = "Aiven"
-      api_token    = "aiven-api-token"
-      project      = "aiven-project"
-      service_name = "aiven-service-name"
+      aiven = {
+        api_token    = "aiven-api-token"
+        project      = "aiven-project"
+        service_name = "aiven-service-name"
+      }
     }
     schema_registry = {
-      type                         = "ConfluentLike"
-      url                          = "http://localhost:8081"
-      ignore_untrusted_certificate = false
-      security = {
-        type     = "BasicAuth"
-        username = "user"
-        password = "password"
+      confluent_like = {
+        url                          = "http://localhost:8081"
+        ignore_untrusted_certificate = false
+        security = {
+          basic_auth = {
+              username = "user"
+              password = "password"
+          }
+        }
       }
     }
   }

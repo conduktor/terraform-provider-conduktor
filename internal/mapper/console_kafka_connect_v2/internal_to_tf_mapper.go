@@ -6,7 +6,6 @@ import (
 	console "github.com/conduktor/terraform-provider-conduktor/internal/model/console"
 	schemaUtils "github.com/conduktor/terraform-provider-conduktor/internal/schema"
 	schema "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_console_kafka_connect_v2"
-	"github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
@@ -80,18 +79,35 @@ func securityInternalModelToTerraform(ctx context.Context, r *console.KafkaConne
 	var valuesMap = schemaUtils.ValueMapFromTypes(ctx, typesMap)
 
 	if r.BasicAuth != nil {
-		valuesMap["type"] = schemaUtils.NewStringValue(validation.BasicAuthSchemaRegistrySecurity)
-		valuesMap["username"] = schemaUtils.NewStringValue(r.BasicAuth.Username)
-		valuesMap["password"] = schemaUtils.NewStringValue(r.BasicAuth.Password)
+		var basicTypesMap = schema.NewBasicAuthValueNull().AttributeTypes(ctx)
+		var basicValuesMap = schemaUtils.ValueMapFromTypes(ctx, basicTypesMap)
+		basicValuesMap["username"] = schemaUtils.NewStringValue(r.BasicAuth.Username)
+		basicValuesMap["password"] = schemaUtils.NewStringValue(r.BasicAuth.Password)
+		valuesMap["basic_auth"], diag = types.ObjectValue(basicTypesMap, basicValuesMap)
+		if diag.HasError() {
+			return schema.SecurityValue{}, mapper.WrapDiagError(diag, "security.basic_auth", mapper.IntoTerraform)
+		}
 	}
+
 	if r.BearerToken != nil {
-		valuesMap["type"] = schemaUtils.NewStringValue(validation.BearerTokenSchemaRegistrySecurity)
-		valuesMap["token"] = schemaUtils.NewStringValue(r.BearerToken.Token)
+		var bearerTokenTypesMap = schema.NewBearerTokenValueNull().AttributeTypes(ctx)
+		var bearerTokenValuesMap = schemaUtils.ValueMapFromTypes(ctx, bearerTokenTypesMap)
+		bearerTokenValuesMap["token"] = schemaUtils.NewStringValue(r.BearerToken.Token)
+		valuesMap["bearer_token"], diag = types.ObjectValue(bearerTokenTypesMap, bearerTokenValuesMap)
+		if diag.HasError() {
+			return schema.SecurityValue{}, mapper.WrapDiagError(diag, "security.bearer_token", mapper.IntoTerraform)
+		}
 	}
+
 	if r.SSLAuth != nil {
-		valuesMap["type"] = schemaUtils.NewStringValue(validation.SSLAuthSchemaRegistrySecurity)
-		valuesMap["certificate_chain"] = schemaUtils.NewStringValue(r.SSLAuth.CertificateChain)
-		valuesMap["key"] = schemaUtils.NewStringValue(r.SSLAuth.Key)
+		var sslAuthTypesMap = schema.NewSslAuthValueNull().AttributeTypes(ctx)
+		var sslAuthValuesMap = schemaUtils.ValueMapFromTypes(ctx, sslAuthTypesMap)
+		sslAuthValuesMap["certificate_chain"] = schemaUtils.NewStringValue(r.SSLAuth.CertificateChain)
+		sslAuthValuesMap["key"] = schemaUtils.NewStringValue(r.SSLAuth.Key)
+		valuesMap["ssl_auth"], diag = types.ObjectValue(sslAuthTypesMap, sslAuthValuesMap)
+		if diag.HasError() {
+			return schema.SecurityValue{}, mapper.WrapDiagError(diag, "security.ssl_auth", mapper.IntoTerraform)
+		}
 	}
 
 	value, diag := schema.NewSecurityValue(typesMap, valuesMap)

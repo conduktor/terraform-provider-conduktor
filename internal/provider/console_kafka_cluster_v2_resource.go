@@ -7,6 +7,7 @@ import (
 	mapper "github.com/conduktor/terraform-provider-conduktor/internal/mapper/console_kafka_cluster_v2"
 	console "github.com/conduktor/terraform-provider-conduktor/internal/model/console"
 	schema "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_console_kafka_cluster_v2"
+	"github.com/hashicorp/terraform-plugin-framework-validators/resourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -18,6 +19,7 @@ const kafkaClusterV2ApiPath = "/public/console/v2/kafka-cluster"
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &KafkaClusterV2Resource{}
 var _ resource.ResourceWithImportState = &KafkaClusterV2Resource{}
+var _ resource.ResourceWithConfigValidators = &KafkaClusterV2Resource{}
 
 func NewKafkaClusterV2Resource() resource.Resource {
 	return &KafkaClusterV2Resource{}
@@ -64,6 +66,31 @@ func (r *KafkaClusterV2Resource) Configure(_ context.Context, req resource.Confi
 	}
 
 	r.apiClient = data.Client
+}
+
+func (r *KafkaClusterV2Resource) ConfigValidators(_ctx context.Context) []resource.ConfigValidator {
+	return []resource.ConfigValidator{
+		resourcevalidator.Conflicting(
+			path.MatchRoot("spec").AtName("kafka_flavor").AtName("aiven"),
+			path.MatchRoot("spec").AtName("kafka_flavor").AtName("confluent"),
+			path.MatchRoot("spec").AtName("kafka_flavor").AtName("gateway"),
+		),
+		resourcevalidator.Conflicting(
+			path.MatchRoot("spec").AtName("schema_registry").AtName("confluent_like"),
+			path.MatchRoot("spec").AtName("schema_registry").AtName("glue"),
+		),
+		resourcevalidator.Conflicting(
+			path.MatchRoot("spec").AtName("schema_registry").AtName("confluent_like").AtName("security").AtName("basic_auth"),
+			path.MatchRoot("spec").AtName("schema_registry").AtName("confluent_like").AtName("security").AtName("bearer_token"),
+			path.MatchRoot("spec").AtName("schema_registry").AtName("confluent_like").AtName("security").AtName("ssl_auth"),
+		),
+		resourcevalidator.Conflicting(
+			path.MatchRoot("spec").AtName("schema_registry").AtName("glue").AtName("security").AtName("credentials"),
+			path.MatchRoot("spec").AtName("schema_registry").AtName("glue").AtName("security").AtName("from_context"),
+			path.MatchRoot("spec").AtName("schema_registry").AtName("glue").AtName("security").AtName("from_role"),
+			path.MatchRoot("spec").AtName("schema_registry").AtName("glue").AtName("security").AtName("iam_anywhere"),
+		),
+	}
 }
 
 func (r *KafkaClusterV2Resource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {

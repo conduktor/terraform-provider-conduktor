@@ -23,8 +23,9 @@ resource "conduktor_console_kafka_connect_v2" "bearer" {
     }
     ignore_untrusted_certificate = false
     security = {
-      type  = "BearerToken"
-      token = "token"
+      bearer_token = {
+          token = "token"
+      }
     }
   }
 }

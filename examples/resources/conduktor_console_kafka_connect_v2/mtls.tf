@@ -23,21 +23,22 @@ resource "conduktor_console_kafka_connect_v2" "mtls" {
     }
     ignore_untrusted_certificate = false
     security = {
-      type              = "SSLAuth"
-      key               = <<EOT
+      ssl_auth = {
+        key               = <<EOT
 -----BEGIN PRIVATE KEY-----
 MIIOXzCCDUegAwIBAgIRAPRytMVYJNUgCbhnA+eYumgwDQYJKoZIhvcNAQELBQAw
 ...
 IFyCs+xkcgvHFtBjjel4pnIET0agtbGJbGDEQBNxX+i4MDA=
 -----END PRIVATE KEY-----
 EOT
-      certificate_chain = <<EOT
+        certificate_chain = <<EOT
 -----BEGIN CERTIFICATE-----
 MIIOXzCCDUegAwIBAgIRAPRytMVYJNUgCbhnA+eYumgwDQYJKoZIhvcNAQELBQAw
 ...
 IFyCs+xkcgvHFtBjjel4pnIET0agtbGJbGDEQBNxX+i4MDA=
 -----END CERTIFICATE-----
 EOT
+      }
     }
   }
 }

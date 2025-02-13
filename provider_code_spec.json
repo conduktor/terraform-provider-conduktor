@@ -430,208 +430,256 @@
                 {
                   "name": "schema_registry",
                   "single_nested": {
-                    "description": "Schema registry configuration",
+                    "description": "Schema registry configuration. One of `confluent_like`, `glue`",
                     "computed_optional_required": "optional",
                     "attributes": [
                       {
-                        "name": "type",
-                        "string": {
-                          "description": "Schema registry type valid values are: `ConfluentLike`, `Glue`\n\nMore detail on our [documentation](https://docs.conduktor.io/platform/reference/resource-reference/console/#schema-registry)",
-                          "computed_optional_required": "required",
-                          "validators": [
-                            {
-                              "custom": {
-                                "imports": [
-                                  {
-                                    "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-                                  },
-                                  {
-                                    "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
-                                  }
-                                ],
-                                "schema_definition": "stringvalidator.OneOf(validation.ValidSchemaRegistryTypes...)"
-                              }
-                            }
-                          ]
-                        }
-                      },
-                      {
-                        "name": "url",
-                        "string": {
-                          "description": "Schema registry URL. Required if type is `ConfluentLike`",
-                          "computed_optional_required": "optional"
-                        }
-                      },
-                      {
-                        "name": "properties",
-                        "string": {
-                          "description": "Schema registry properties. Only used if type is `ConfluentLike`",
-                          "computed_optional_required": "optional"
-                        }
-                      },
-                      {
-                        "name": "ignore_untrusted_certificate",
-                        "bool": {
-                          "description": "Ignore untrusted certificate for schema registry. Only used if type is `ConfluentLike`",
-                          "computed_optional_required": "computed_optional",
-                          "default": {
-                            "custom": {
-                              "imports": [
-                                {
-                                  "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-                                }
-                              ],
-                              "schema_definition": "booldefault.StaticBool(false)"
-                            }
-                          }
-                        }
-                      },
-                      {
-                        "name": "security",
+                        "name": "confluent_like",
                         "single_nested": {
-                          "description": "Schema registry configuration. Required if type is `ConfluentLike` or `Glue`",
-                          "computed_optional_required": "required",
+                          "description": "Confluent like schema registry configuration",
+                          "computed_optional_required": "optional",
                           "attributes": [
                             {
-                              "name": "type",
+                              "name": "url",
                               "string": {
-                                "description": "Schema registry security type. Required if type is `ConfluentLike` or `Glue`.\n\nValid values are:\n\n- For **ConfluentLike** : `NoSecurity`, `BasicAuth`, `BearerToken`, `SSLAuth` \n\n- For **Glue** : `Credentials`, `FromContext`, `FromRole`, `IAMAnywhere`\n\n More detail on our [documentation](https://docs.conduktor.io/platform/reference/resource-reference/console/#schema-registry)",
-                                "computed_optional_required": "required",
-                                "validators": [
+                                "description": "Schema registry URL. Required if type is `ConfluentLike`",
+                                "computed_optional_required": "optional"
+                              }
+                            },
+                            {
+                              "name": "properties",
+                              "string": {
+                                "description": "Schema registry properties. Only used if type is `ConfluentLike`",
+                                "computed_optional_required": "optional"
+                              }
+                            },
+                            {
+                              "name": "ignore_untrusted_certificate",
+                              "bool": {
+                                "description": "Ignore untrusted certificate for schema registry. Only used if type is `ConfluentLike`",
+                                "computed_optional_required": "computed_optional",
+                                "default": {
+                                  "custom": {
+                                    "imports": [
+                                      {
+                                        "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+                                      }
+                                    ],
+                                    "schema_definition": "booldefault.StaticBool(false)"
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "name": "security",
+                              "model_name": "confluent_security",
+                              "single_nested": {
+                                "description": "Confluent Schema registry security configuration. One of `basic_auth`, `bearer_token`, `ssl_auth`. If none provided, no security is used.",
+                                "computed_optional_required": "optional",
+                                "attributes": [
                                   {
-                                    "custom": {
-                                      "imports": [
+                                    "name": "basic_auth",
+                                    "single_nested": {
+                                      "description": "Basic auth schema registry security configuration.",
+                                      "computed_optional_required": "optional",
+                                      "attributes": [
                                         {
-                                          "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                          "name": "username",
+                                          "string": {
+                                            "description": "Schema registry basic auth username.",
+                                            "computed_optional_required": "required"
+                                          }
                                         },
                                         {
-                                          "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
+                                          "name": "password",
+                                          "string": {
+                                            "description": "Schema registry basic auth password.",
+                                            "computed_optional_required": "required",
+                                            "sensitive": true
+                                          }
                                         }
-                                      ],
-                                      "schema_definition": "stringvalidator.OneOf(validation.ValidSchemaRegistrySecurityTypes...)"
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "name": "bearer_token",
+                                    "single_nested": {
+                                      "description": "Bearer token schema registry security configuration.",
+                                      "computed_optional_required": "optional",
+                                      "attributes": [
+                                        {
+                                          "name": "token",
+                                          "string": {
+                                            "description": "Schema registry bearer token.",
+                                            "computed_optional_required": "required",
+                                            "sensitive": true
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "name": "ssl_auth",
+                                    "single_nested": {
+                                      "description": "SSL auth (mTLS) schema registry security configuration.",
+                                      "computed_optional_required": "optional",
+                                      "attributes": [
+                                        {
+                                          "name": "key",
+                                          "string": {
+                                            "description": "Schema registry SSL auth private key PEM.",
+                                            "computed_optional_required": "required",
+                                            "sensitive": true
+                                          }
+                                        },
+                                        {
+                                          "name": "certificate_chain",
+                                          "string": {
+                                            "description": "Schema registry SSL auth certificate chain PEM.",
+                                            "computed_optional_required": "required"
+                                          }
+                                        }
+                                      ]
                                     }
                                   }
                                 ]
                               }
-                            },
-                            {
-                              "name": "username",
-                              "string": {
-                                "description": "Schema registry basic auth username. Required if security type is `BasicAuth`",
-                                "computed_optional_required": "optional"
-                              }
-                            },
-                            {
-                              "name": "password",
-                              "string": {
-                                "description": "Schema registry basic auth password. Required if security type is `BasicAuth`",
-                                "computed_optional_required": "optional",
-                                "sensitive": true
-                              }
-                            },
-                            {
-                              "name": "token",
-                              "string": {
-                                "description": "Schema registry bearer token. Required if security type is `BearerToken`",
-                                "computed_optional_required": "optional",
-                                "sensitive": true
-                              }
-                            },
-                            {
-                              "name": "key",
-                              "string": {
-                                "description": "Schema registry SSL auth private key PEM. Required if security type is `SSLAuth`",
-                                "computed_optional_required": "optional",
-                                "sensitive": true
-                              }
-                            },
-                            {
-                              "name": "certificate_chain",
-                              "string": {
-                                "description": "Schema registry SSL auth certificate chain PEM. Required if security type is `SSLAuth`",
-                                "computed_optional_required": "optional"
-                              }
-                            },
-                            {
-                              "name": "access_key_id",
-                              "string": {
-                                "description": "Glue Schema registry AWS access key ID. Required if type is Glue with security `Credentials`",
-                                "computed_optional_required": "optional",
-                                "sensitive": true
-                              }
-                            },
-                            {
-                              "name": "secret_key",
-                              "string": {
-                                "description": "Glue Schema registry AWS secret key. Required if type is Glue with security `Credentials`",
-                                "computed_optional_required": "optional",
-                                "sensitive": true
-                              }
-                            },
-                            {
-                              "name": "profile",
-                              "string": {
-                                "description": "Glue Schema registry AWS profile name. Required if type is Glue with security `FromContext`",
-                                "computed_optional_required": "optional"
-                              }
-                            },
-                            {
-                              "name": "role",
-                              "string": {
-                                "description": "Glue Schema registry AWS role ARN. Required if type is Glue with security `FromRole`",
-                                "computed_optional_required": "optional"
-                              }
-                            },
-                            {
-                              "name": "trust_anchor_arn",
-                              "string": {
-                                "description": "Glue Schema registry AWS trust anchor ARN. Required if type is Glue with security `IAMAnywhere`",
-                                "computed_optional_required": "optional"
-                              }
-                            },
-                            {
-                              "name": "profile_arn",
-                              "string": {
-                                "description": "Glue Schema registry AWS profile ARN. Required if type is Glue with security `IAMAnywhere`",
-                                "computed_optional_required": "optional"
-                              }
-                            },
-                            {
-                              "name": "role_arn",
-                              "string": {
-                                "description": "Glue Schema registry AWS role ARN. Required if type is Glue with security `IAMAnywhere`",
-                                "computed_optional_required": "optional"
-                              }
-                            },
-                            {
-                              "name": "certificate",
-                              "string": {
-                                "description": "Glue Schema registry AWS certificate. Required if type is Glue with security `IAMAnywhere`",
-                                "computed_optional_required": "optional"
-                              }
-                            },
-                            {
-                              "name": "private_key",
-                              "string": {
-                                "description": "Glue Schema registry AWS private key. Required if type is Glue with security `IAMAnywhere`",
-                                "computed_optional_required": "optional"
-                              }
                             }
                           ]
                         }
                       },
                       {
-                        "name": "registry_name",
-                        "string": {
-                          "description": "Glue Schema registry name. Only used if type is `Glue`",
-                          "computed_optional_required": "optional"
-                        }
-                      },
-                      {
-                        "name": "region",
-                        "string": {
-                          "description": "Glue Schema registry AWS region. Required if type is `Glue`",
-                          "computed_optional_required": "optional"
+                        "name": "glue",
+                        "single_nested": {
+                          "description": "AWS Glue schema registry configuration",
+                          "computed_optional_required": "optional",
+                          "attributes": [
+                            {
+                              "name": "registry_name",
+                              "string": {
+                                "description": "Glue Schema registry name",
+                                "computed_optional_required": "optional"
+                              }
+                            },
+                            {
+                              "name": "region",
+                              "string": {
+                                "description": "Glue Schema registry AWS region",
+                                "computed_optional_required": "optional"
+                              }
+                            },
+                            {
+                              "name": "security",
+                              "model_name": "glue_security",
+                              "single_nested": {
+                                "description": "Schema registry configuration. One of `credentials`, `from_context`, `from_role`, `iam_anywhere`",
+                                "computed_optional_required": "required",
+                                "attributes": [
+                                  {
+                                    "name": "credentials",
+                                    "single_nested": {
+                                      "description": "AWS credentials GLUE schema registry security configuration.",
+                                      "computed_optional_required": "optional",
+                                      "attributes": [
+                                        {
+                                          "name": "access_key_id",
+                                          "string": {
+                                            "description": "Glue Schema registry AWS access key ID.",
+                                            "computed_optional_required": "required",
+                                            "sensitive": true
+                                          }
+                                        },
+                                        {
+                                          "name": "secret_key",
+                                          "string": {
+                                            "description": "Glue Schema registry AWS secret key.",
+                                            "computed_optional_required": "required",
+                                            "sensitive": true
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "name": "from_context",
+                                    "single_nested": {
+                                      "description": "AWS context GLUE schema registry security configuration.",
+                                      "computed_optional_required": "optional",
+                                      "attributes": [
+                                        {
+                                          "name": "profile",
+                                          "string": {
+                                            "description": "Glue Schema registry AWS profile name. ",
+                                            "computed_optional_required": "required"
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "name": "from_role",
+                                    "single_nested": {
+                                      "description": "AWS role GLUE schema registry security configuration.",
+                                      "computed_optional_required": "optional",
+                                      "attributes": [
+                                        {
+                                          "name": "role",
+                                          "string": {
+                                            "description": "Glue Schema registry AWS role ARN.",
+                                            "computed_optional_required": "required"
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "name": "iam_anywhere",
+                                    "single_nested": {
+                                      "description": "AWS IAM Anywhere GLUE schema registry security configuration.",
+                                      "computed_optional_required": "optional",
+                                      "attributes": [
+                                        {
+                                          "name": "trust_anchor_arn",
+                                          "string": {
+                                            "description": "Glue Schema registry AWS trust anchor ARN.",
+                                            "computed_optional_required": "required"
+                                          }
+                                        },
+                                        {
+                                          "name": "profile_arn",
+                                          "string": {
+                                            "description": "Glue Schema registry AWS profile ARN.",
+                                            "computed_optional_required": "required"
+                                          }
+                                        },
+                                        {
+                                          "name": "role_arn",
+                                          "string": {
+                                            "description": "Glue Schema registry AWS role ARN.",
+                                            "computed_optional_required": "required"
+                                          }
+                                        },
+                                        {
+                                          "name": "certificate",
+                                          "string": {
+                                            "description": "Glue Schema registry AWS certificate.",
+                                            "computed_optional_required": "required"
+                                          }
+                                        },
+                                        {
+                                          "name": "private_key",
+                                          "string": {
+                                            "description": "Glue Schema registry AWS private key.",
+                                            "computed_optional_required": "required"
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
                         }
                       }
                     ]
@@ -640,149 +688,154 @@
                 {
                   "name": "kafka_flavor",
                   "single_nested": {
-                    "description": "Schema registry configuration",
+                    "description": "Kafka flavor configuration. One of `confluent`, `aiven`, `gateway`",
                     "computed_optional_required": "optional",
                     "attributes": [
                       {
-                        "name": "type",
-                        "string": {
-                          "description": "Kafka provider type : `Confluent`, `Aiven`, `Gateway`. More detail on our [documentation](https://docs.conduktor.io/platform/reference/resource-reference/console/#kafka-provider)",
-                          "computed_optional_required": "required",
-                          "validators": [
+                        "name": "confluent",
+                        "single_nested": {
+                          "description": "Confluent Kafka flavor configuration",
+                          "computed_optional_required": "optional",
+                          "attributes": [
                             {
-                              "custom": {
-                                "imports": [
-                                  {
-                                    "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-                                  },
-                                  {
-                                    "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
-                                  }
-                                ],
-                                "schema_definition": "stringvalidator.OneOf(validation.ValidKafkaFlavorTypes...)"
+                              "name": "key",
+                              "string": {
+                                "description": "Confluent API key.",
+                                "computed_optional_required": "required",
+                                "sensitive": true
+                              }
+                            },
+                            {
+                              "name": "secret",
+                              "string": {
+                                "description": "Confluent API secret.",
+                                "computed_optional_required": "required",
+                                "sensitive": true
+                              }
+                            },
+                            {
+                              "name": "confluent_environment_id",
+                              "string": {
+                                "description": "Confluent environment identifier.",
+                                "computed_optional_required": "required"
+                              }
+                            },
+                            {
+                              "name": "confluent_cluster_id",
+                              "string": {
+                                "description": "Confluent cluster identifier.",
+                                "computed_optional_required": "required"
                               }
                             }
                           ]
                         }
                       },
                       {
-                        "name": "key",
-                        "string": {
-                          "description": "Confluent API key. Required if type is `Confluent`",
+                        "name": "aiven",
+                        "single_nested": {
+                          "description": "Aiven Kafka flavor configuration",
                           "computed_optional_required": "optional",
-                          "sensitive": true
-                        }
-                      },
-                      {
-                        "name": "secret",
-                        "string": {
-                          "description": "Confluent API secret. Required if type is `Confluent`",
-                          "computed_optional_required": "optional",
-                          "sensitive": true
-                        }
-                      },
-                      {
-                        "name": "confluent_environment_id",
-                        "string": {
-                          "description": "Confluent environment identifier. Required if type is `Confluent`",
-                          "computed_optional_required": "optional"
-                        }
-                      },
-                      {
-                        "name": "confluent_cluster_id",
-                        "string": {
-                          "description": "Confluent cluster identifier. Required if type is `Confluent`",
-                          "computed_optional_required": "optional"
-                        }
-                      },
-                      {
-                        "name": "api_token",
-                        "string": {
-                          "description": "Aiven API token. Required if type is `Aiven`",
-                          "computed_optional_required": "optional",
-                          "sensitive": true
-                        }
-                      },
-                      {
-                        "name": "project",
-                        "string": {
-                          "description": "Aiven project name. Required if type is `Aiven`",
-                          "computed_optional_required": "optional"
-                        }
-                      },
-                      {
-                        "name": "service_name",
-                        "string": {
-                          "description": "Aiven service name. Required if type is `Aiven`",
-                          "computed_optional_required": "optional"
-                        }
-                      },
-                      {
-                        "name": "url",
-                        "string": {
-                          "description": "Conduktor Gateway Admin API URL. Required if type is `Gateway`",
-                          "computed_optional_required": "optional"
-                        }
-                      },
-                      {
-                        "name": "user",
-                        "string": {
-                          "description": "Conduktor Gateway Admin user. Required if type is `Gateway`",
-                          "computed_optional_required": "optional"
-                        }
-                      },
-                      {
-                        "name": "password",
-                        "string": {
-                          "description": "Conduktor Gateway Admin password. Required if type is `Gateway`",
-                          "computed_optional_required": "optional",
-                          "sensitive": true
-                        }
-                      },
-                      {
-                        "name": "virtual_cluster",
-                        "string": {
-                          "description": "Conduktor Gateway Virtual cluster name (default `passthrough`). Only used if type is `Gateway`",
-                          "computed_optional_required": "computed_optional",
-                          "default": {
-                            "custom": {
-                              "imports": [
-                                {
-                                  "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
-                                }
-                              ],
-                              "schema_definition": "stringdefault.StaticString(\"passthrough\")"
-                            }
-                          },
-                          "validators": [
+                          "attributes": [
                             {
-                              "custom": {
-                                "imports": [
-                                  {
-                                    "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
-                                  }
-                                ],
-                                "schema_definition": "validation.NonEmptyString()"
+                              "name": "api_token",
+                              "string": {
+                                "description": "Aiven API token.",
+                                "computed_optional_required": "required",
+                                "sensitive": true
+                              }
+                            },
+                            {
+                              "name": "project",
+                              "string": {
+                                "description": "Aiven project name.",
+                                "computed_optional_required": "required"
+                              }
+                            },
+                            {
+                              "name": "service_name",
+                              "string": {
+                                "description": "Aiven service name.",
+                                "computed_optional_required": "required"
                               }
                             }
                           ]
                         }
                       },
                       {
-                        "name": "ignore_untrusted_certificate",
-                        "bool": {
-                          "description": "Ignore untrusted certificate for Gateway Admin API. Only used if type is `Gateway`",
-                          "computed_optional_required": "computed_optional",
-                          "default": {
-                            "custom": {
-                              "imports": [
-                                {
-                                  "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+                        "name": "gateway",
+                        "single_nested": {
+                          "description": "Conduktor Gateway Kafka flavor configuration",
+                          "computed_optional_required": "optional",
+                          "attributes": [
+                            {
+                              "name": "url",
+                              "string": {
+                                "description": "Conduktor Gateway Admin API URL.",
+                                "computed_optional_required": "required"
+                              }
+                            },
+                            {
+                              "name": "user",
+                              "string": {
+                                "description": "Conduktor Gateway Admin user.",
+                                "computed_optional_required": "required"
+                              }
+                            },
+                            {
+                              "name": "password",
+                              "string": {
+                                "description": "Conduktor Gateway Admin password.",
+                                "computed_optional_required": "required",
+                                "sensitive": true
+                              }
+                            },
+                            {
+                              "name": "virtual_cluster",
+                              "string": {
+                                "description": "Conduktor Gateway Virtual cluster name (default `passthrough`).",
+                                "computed_optional_required": "computed_optional",
+                                "default": {
+                                  "custom": {
+                                    "imports": [
+                                      {
+                                        "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+                                      }
+                                    ],
+                                    "schema_definition": "stringdefault.StaticString(\"passthrough\")"
+                                  }
+                                },
+                                "validators": [
+                                  {
+                                    "custom": {
+                                      "imports": [
+                                        {
+                                          "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
+                                        }
+                                      ],
+                                      "schema_definition": "validation.NonEmptyString()"
+                                    }
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "name": "ignore_untrusted_certificate",
+                              "bool": {
+                                "description": "Ignore untrusted certificate for Gateway Admin API.",
+                                "computed_optional_required": "computed_optional",
+                                "default": {
+                                  "custom": {
+                                    "imports": [
+                                      {
+                                        "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+                                      }
+                                    ],
+                                    "schema_definition": "booldefault.StaticBool(false)"
+                                  }
                                 }
-                              ],
-                              "schema_definition": "booldefault.StaticBool(false)"
+                              }
                             }
-                          }
+                          ]
                         }
                       }
                     ]
@@ -926,67 +979,72 @@
                 {
                   "name": "security",
                   "single_nested": {
-                    "description": "Kafka connect server security configuration. One of `BasicAuth`, `BearerToken`, `SSLAuth`",
+                    "description": "Kafka connect server security configuration. One of `basic_auth`, `bearer_token`, `ssl_auth`",
                     "computed_optional_required": "optional",
                     "attributes": [
                       {
-                        "name": "type",
-                        "string": {
-                          "description": "Kafka connect server security type. Either `BasicAuth`, `BearerToken`, `SSLAuth`\n\n More detail on our [documentation](https://docs.conduktor.io/platform/reference/resource-reference/console/#kafkaconnectcluster)",
-                          "computed_optional_required": "required",
-                          "validators": [
+                        "name": "basic_auth",
+                        "single_nested": {
+                          "description": "Basic auth for Kafka connect server security configuration.",
+                          "computed_optional_required": "optional",
+                          "attributes": [
                             {
-                              "custom": {
-                                "imports": [
-                                  {
-                                    "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-                                  },
-                                  {
-                                    "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
-                                  }
-                                ],
-                                "schema_definition": "stringvalidator.OneOf(validation.ValidKafkaConnectSecurityTypes...)"
+                              "name": "username",
+                              "string": {
+                                "description": "Kafka connect server basic auth username.",
+                                "computed_optional_required": "required"
+                              }
+                            },
+                            {
+                              "name": "password",
+                              "string": {
+                                "description": "Kafka connect server basic auth password.",
+                                "computed_optional_required": "required",
+                                "sensitive": true
                               }
                             }
                           ]
                         }
                       },
                       {
-                        "name": "username",
-                        "string": {
-                          "description": "Kafka connect server basic auth username. Required if security type is `BasicAuth`",
-                          "computed_optional_required": "optional"
-                        }
-                      },
-                      {
-                        "name": "password",
-                        "string": {
-                          "description": "Kafka connect server basic auth password. Required if security type is `BasicAuth`",
+                        "name": "bearer_token",
+                        "single_nested": {
+                          "description": "Bearer token for Kafka connect server security configuration.",
                           "computed_optional_required": "optional",
-                          "sensitive": true
+                          "attributes": [
+                            {
+                              "name": "token",
+                              "string": {
+                                "description": "Kafka connect server bearer token.",
+                                "computed_optional_required": "required",
+                                "sensitive": true
+                              }
+                            }
+                          ]
                         }
                       },
                       {
-                        "name": "token",
-                        "string": {
-                          "description": "Kafka connect server bearer token. Required if security type is `BearerToken`",
+                        "name": "ssl_auth",
+                        "single_nested": {
+                          "description": "SSL auth (mTLS) for Kafka connect server security configuration.",
                           "computed_optional_required": "optional",
-                          "sensitive": true
-                        }
-                      },
-                      {
-                        "name": "key",
-                        "string": {
-                          "description": "Kafka connect server mTLS auth private key PEM. Required if security type is `SSLAuth`",
-                          "computed_optional_required": "optional",
-                          "sensitive": true
-                        }
-                      },
-                      {
-                        "name": "certificate_chain",
-                        "string": {
-                          "description": "Kafka connect server mTLS auth certificate chain PEM. Required if security type is `SSLAuth`",
-                          "computed_optional_required": "optional"
+                          "attributes": [
+                            {
+                              "name": "key",
+                              "string": {
+                                "description": "Kafka connect server mTLS auth private key PEM.",
+                                "computed_optional_required": "required",
+                                "sensitive": true
+                              }
+                            },
+                            {
+                              "name": "certificate_chain",
+                              "string": {
+                                "description": "Kafka connect server mTLS auth certificate chain PEM.",
+                                "computed_optional_required": "required"
+                              }
+                            }
+                          ]
                         }
                       }
                     ]

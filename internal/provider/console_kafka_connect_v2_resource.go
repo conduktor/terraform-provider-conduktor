@@ -7,6 +7,7 @@ import (
 	mapper "github.com/conduktor/terraform-provider-conduktor/internal/mapper/console_kafka_connect_v2"
 	console "github.com/conduktor/terraform-provider-conduktor/internal/model/console"
 	schema "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_console_kafka_connect_v2"
+	"github.com/hashicorp/terraform-plugin-framework-validators/resourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -25,6 +26,7 @@ func kafkaConnectV2ApiGetPath(cluster string, connectServerName string) string {
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &KafkaConnectV2Resource{}
 var _ resource.ResourceWithImportState = &KafkaConnectV2Resource{}
+var _ resource.ResourceWithConfigValidators = &KafkaConnectV2Resource{}
 
 func NewKafkaConnectV2Resource() resource.Resource {
 	return &KafkaConnectV2Resource{}
@@ -71,6 +73,16 @@ func (r *KafkaConnectV2Resource) Configure(_ context.Context, req resource.Confi
 	}
 
 	r.apiClient = data.Client
+}
+
+func (r *KafkaConnectV2Resource) ConfigValidators(_ctx context.Context) []resource.ConfigValidator {
+	return []resource.ConfigValidator{
+		resourcevalidator.Conflicting(
+			path.MatchRoot("spec").AtName("security").AtName("basic_auth"),
+			path.MatchRoot("spec").AtName("security").AtName("bearer_token"),
+			path.MatchRoot("spec").AtName("security").AtName("ssl_auth"),
+		),
+	}
 }
 
 func (r *KafkaConnectV2Resource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {

@@ -16,13 +16,15 @@ resource "conduktor_console_kafka_cluster_v2" "aws_msk" {
     color                        = "#FF0000"
     ignore_untrusted_certificate = true
     schema_registry = {
-      type          = "Glue"
-      region        = "eu-west-1"
-      registry_name = "default"
-      security = {
-        type          = "Credentials"
-        access_key_id = "accessKey"
-        secret_key    = "secretKey"
+      glue = {
+        region        = "eu-west-1"
+        registry_name = "default"
+        security = {
+          credentials = {
+            access_key_id = "accessKey"
+            secret_key    = "secretKey"
+          }
+        }
       }
     }
   }

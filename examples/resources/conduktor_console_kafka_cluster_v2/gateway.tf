@@ -14,20 +14,23 @@ resource "conduktor_console_kafka_cluster_v2" "gateway" {
     icon                         = "shield-blank"
     ignore_untrusted_certificate = true
     kafka_flavor = {
-      type                         = "Gateway"
-      url                          = "http://gateway:8888"
-      user                         = "admin"
-      password                     = "admin"
-      virtual_cluster              = "passthrough"
-      ignore_untrusted_certificate = true
+      gateway = {
+        url                          = "http://gateway:8888"
+        user                         = "admin"
+        password                     = "admin"
+        virtual_cluster              = "passthrough"
+        ignore_untrusted_certificate = true
+      }
     }
     schema_registry = {
-      type                         = "ConfluentLike"
-      url                          = "http://localhost:8081"
-      ignore_untrusted_certificate = true
-      security = {
-        type  = "BearerToken"
-        token = "auth-token"
+      confluent_like = {
+        url                          = "http://localhost:8081"
+        ignore_untrusted_certificate = true
+        security = {
+          bearer_token = {
+            token = "auth-token"
+          }
+        }
       }
     }
   }

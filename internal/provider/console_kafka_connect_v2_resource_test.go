@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"regexp"
 	"testing"
 
 	"github.com/conduktor/terraform-provider-conduktor/internal/test"
@@ -28,8 +29,7 @@ func TestAccKafkaConnectV2Resource(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceRef, "spec.headers.X-PROJECT-HEADER", "value"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.headers.AnotherHeader", "test"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.ignore_untrusted_certificate", "true"),
-					resource.TestCheckResourceAttr(resourceRef, "spec.security.type", "BearerToken"),
-					resource.TestCheckResourceAttr(resourceRef, "spec.security.token", "auth-token"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.security.bearer_token.token", "auth-token"),
 				),
 			},
 			//Importing matches the state of the previous step.
@@ -56,9 +56,8 @@ func TestAccKafkaConnectV2Resource(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceRef, "spec.headers.AnotherHeader", "test"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.headers.Cache-Control", "no-store"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.ignore_untrusted_certificate", "false"),
-					resource.TestCheckResourceAttr(resourceRef, "spec.security.type", "BasicAuth"),
-					resource.TestCheckResourceAttr(resourceRef, "spec.security.username", "user"),
-					resource.TestCheckResourceAttr(resourceRef, "spec.security.password", "password"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.security.basic_auth.username", "user"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.security.basic_auth.password", "password"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -87,6 +86,21 @@ func TestAccKafkaConnectV2Minimal(t *testing.T) {
 				),
 			},
 			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccKafkaConnectV2Constraints(t *testing.T) {
+	test.CheckEnterpriseEnabled(t)
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { test.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Try to create with conflicting security attributes
+			{
+				Config:      providerConfigConsole + test.TestAccTestdata(t, "console_kafka_connect_v2_resource_not_valid.tf"),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Combination`),
+			},
 		},
 	})
 }
@@ -133,7 +147,8 @@ func TestAccKafkaConnectV2ExampleResource(t *testing.T) {
 					resource.TestCheckResourceAttr(mtlsResourceRef, "spec.headers.X-PROJECT-HEADER", "value"),
 					resource.TestCheckResourceAttr(mtlsResourceRef, "spec.headers.Cache-Control", "no-cache"),
 					resource.TestCheckResourceAttr(mtlsResourceRef, "spec.ignore_untrusted_certificate", "false"),
-					resource.TestCheckResourceAttr(mtlsResourceRef, "spec.security.type", "SSLAuth"),
+					resource.TestCheckResourceAttr(mtlsResourceRef, "spec.security.ssl_auth.key", "-----BEGIN PRIVATE KEY-----\nMIIOXzCCDUegAwIBAgIRAPRytMVYJNUgCbhnA+eYumgwDQYJKoZIhvcNAQELBQAw\n...\nIFyCs+xkcgvHFtBjjel4pnIET0agtbGJbGDEQBNxX+i4MDA=\n-----END PRIVATE KEY-----\n"),
+					resource.TestCheckResourceAttr(mtlsResourceRef, "spec.security.ssl_auth.certificate_chain", "-----BEGIN CERTIFICATE-----\nMIIOXzCCDUegAwIBAgIRAPRytMVYJNUgCbhnA+eYumgwDQYJKoZIhvcNAQELBQAw\n...\nIFyCs+xkcgvHFtBjjel4pnIET0agtbGJbGDEQBNxX+i4MDA=\n-----END CERTIFICATE-----\n"),
 				),
 			},
 			{
@@ -151,9 +166,8 @@ func TestAccKafkaConnectV2ExampleResource(t *testing.T) {
 					resource.TestCheckResourceAttr(basicResourceRef, "spec.headers.X-PROJECT-HEADER", "value"),
 					resource.TestCheckResourceAttr(basicResourceRef, "spec.headers.Cache-Control", "no-cache"),
 					resource.TestCheckResourceAttr(basicResourceRef, "spec.ignore_untrusted_certificate", "false"),
-					resource.TestCheckResourceAttr(basicResourceRef, "spec.security.type", "BasicAuth"),
-					resource.TestCheckResourceAttr(basicResourceRef, "spec.security.username", "user"),
-					resource.TestCheckResourceAttr(basicResourceRef, "spec.security.password", "password"),
+					resource.TestCheckResourceAttr(basicResourceRef, "spec.security.basic_auth.username", "user"),
+					resource.TestCheckResourceAttr(basicResourceRef, "spec.security.basic_auth.password", "password"),
 				),
 			},
 			{
@@ -171,8 +185,7 @@ func TestAccKafkaConnectV2ExampleResource(t *testing.T) {
 					resource.TestCheckResourceAttr(bearerResourceRef, "spec.headers.X-PROJECT-HEADER", "value"),
 					resource.TestCheckResourceAttr(bearerResourceRef, "spec.headers.Cache-Control", "no-cache"),
 					resource.TestCheckResourceAttr(bearerResourceRef, "spec.ignore_untrusted_certificate", "false"),
-					resource.TestCheckResourceAttr(bearerResourceRef, "spec.security.type", "BearerToken"),
-					resource.TestCheckResourceAttr(bearerResourceRef, "spec.security.token", "token"),
+					resource.TestCheckResourceAttr(bearerResourceRef, "spec.security.bearer_token.token", "token"),
 				),
 			},
 		},
