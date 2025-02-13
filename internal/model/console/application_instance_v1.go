@@ -24,7 +24,7 @@ type ApplicationInstanceConsoleSpec struct {
 	Cluster                          string                        `json:"cluster"`
 	TopicPolicyRef                   []string                      `json:"topicPolicyRef,omitempty"`
 	Resources                        []model.ResourceWithOwnership `json:"resources,omitempty"`
-	ApplicationManagedServiceAccount bool                          `json:"applicationManagedServiceAccount,omitempty"`
+	ApplicationManagedServiceAccount bool                          `json:"applicationManagedServiceAccount"`
 	ServiceAccount                   string                        `json:"serviceAccount,omitempty"`
 	DefaultCatalogVisibility         string                        `json:"defaultCatalogVisibility,omitempty"`
 }

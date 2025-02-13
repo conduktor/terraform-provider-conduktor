@@ -43,11 +43,18 @@ func TestApplicationInstanceV1ModelMapping(t *testing.T) {
 	assert.Equal(t, "v1", internal.ApiVersion)
 	assert.Equal(t, "appinstance", internal.Metadata.Name)
 	assert.Equal(t, "cluster", internal.Spec.Cluster)
-	assert.Equal(t, []string{"ref1", "ref2"}, internal.Spec.TopicPolicyRef)
+	assert.Equal(t, []string{"ref2", "ref1"}, internal.Spec.TopicPolicyRef)
 	assert.Equal(t, false, internal.Spec.ApplicationManagedServiceAccount)
 	assert.Equal(t, "serviceaccount", internal.Spec.ServiceAccount)
 	assert.Equal(t, "PRIVATE", internal.Spec.DefaultCatalogVisibility)
 	expectedInternalResources := []model.ResourceWithOwnership{
+		{
+			Type:           "CONSUMER_GROUP",
+			Name:           "resource-2",
+			PatternType:    "PREFIXED",
+			ConnectCluster: "connectCluster",
+			OwnershipMode:  "LIMITED",
+		},
 		{
 			Type:           "TOPIC",
 			Name:           "resource-1",
@@ -64,8 +71,8 @@ func TestApplicationInstanceV1ModelMapping(t *testing.T) {
 		t.Fatal(err)
 		return
 	}
-	topicPolicyRef, _ := schema.StringArrayToSetValue([]string{"ref1", "ref2"})
-	assert.Equal(t, types.StringValue("sales"), tfModel.Name)
+	topicPolicyRef, _ := schema.StringArrayToSetValue([]string{"ref2", "ref1"})
+	assert.Equal(t, types.StringValue("appinstance"), tfModel.Name)
 	assert.Equal(t, types.StringValue("cluster"), tfModel.Spec.Cluster)
 	assert.Equal(t, topicPolicyRef, tfModel.Spec.TopicPolicyRef)
 	assert.Equal(t, types.BoolValue(false), tfModel.Spec.ApplicationManagedServiceAccount)
@@ -81,12 +88,12 @@ func TestApplicationInstanceV1ModelMapping(t *testing.T) {
 	}
 	assert.Equal(t, "ApplicationInstance", internal2.Kind)
 	assert.Equal(t, "v1", internal2.ApiVersion)
-	assert.Equal(t, "appinstance", internal.Metadata.Name)
-	assert.Equal(t, "cluster", internal.Spec.Cluster)
-	assert.Equal(t, []string{"ref1", "ref2"}, internal.Spec.TopicPolicyRef)
-	assert.Equal(t, false, internal.Spec.ApplicationManagedServiceAccount)
-	assert.Equal(t, "serviceaccount", internal.Spec.ServiceAccount)
-	assert.Equal(t, "PRIVATE", internal.Spec.DefaultCatalogVisibility)
+	assert.Equal(t, "appinstance", internal2.Metadata.Name)
+	assert.Equal(t, "cluster", internal2.Spec.Cluster)
+	assert.Equal(t, []string{"ref2", "ref1"}, internal2.Spec.TopicPolicyRef)
+	assert.Equal(t, false, internal2.Spec.ApplicationManagedServiceAccount)
+	assert.Equal(t, "serviceaccount", internal2.Spec.ServiceAccount)
+	assert.Equal(t, "PRIVATE", internal2.Spec.DefaultCatalogVisibility)
 	assert.Equal(t, expectedInternalResources, internal2.Spec.Resources)
 	assert.Equal(t, internal, internal2)
 
