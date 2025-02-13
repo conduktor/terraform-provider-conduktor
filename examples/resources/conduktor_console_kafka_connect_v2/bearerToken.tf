@@ -24,7 +24,7 @@ resource "conduktor_console_kafka_connect_v2" "bearer" {
     ignore_untrusted_certificate = false
     security = {
       bearer_token = {
-          token = "token"
+        token = "token"
       }
     }
   }

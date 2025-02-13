@@ -62,9 +62,10 @@ resource "conduktor_console_kafka_connect_v2" "basic" {
     }
     ignore_untrusted_certificate = false
     security = {
-      type     = "BasicAuth"
-      username = "user"
-      password = "password"
+      basic_auth = {
+        username = "user"
+        password = "password"
+      }
     }
   }
 }
@@ -98,8 +99,9 @@ resource "conduktor_console_kafka_connect_v2" "bearer" {
     }
     ignore_untrusted_certificate = false
     security = {
-      type  = "BearerToken"
-      token = "token"
+      bearer_token = {
+        token = "token"
+      }
     }
   }
 }
@@ -133,21 +135,22 @@ resource "conduktor_console_kafka_connect_v2" "mtls" {
     }
     ignore_untrusted_certificate = false
     security = {
-      type              = "SSLAuth"
-      key               = <<EOT
+      ssl_auth = {
+        key               = <<EOT
 -----BEGIN PRIVATE KEY-----
 MIIOXzCCDUegAwIBAgIRAPRytMVYJNUgCbhnA+eYumgwDQYJKoZIhvcNAQELBQAw
 ...
 IFyCs+xkcgvHFtBjjel4pnIET0agtbGJbGDEQBNxX+i4MDA=
 -----END PRIVATE KEY-----
 EOT
-      certificate_chain = <<EOT
+        certificate_chain = <<EOT
 -----BEGIN CERTIFICATE-----
 MIIOXzCCDUegAwIBAgIRAPRytMVYJNUgCbhnA+eYumgwDQYJKoZIhvcNAQELBQAw
 ...
 IFyCs+xkcgvHFtBjjel4pnIET0agtbGJbGDEQBNxX+i4MDA=
 -----END CERTIFICATE-----
 EOT
+      }
     }
   }
 }
@@ -178,24 +181,42 @@ Optional:
 
 - `headers` (Map of String) Key-Value HTTP headers to add to requests
 - `ignore_untrusted_certificate` (Boolean) Ignore untrusted certificate for Kafka connect server requests
-- `security` (Attributes) Kafka connect server security configuration. One of `BasicAuth`, `BearerToken`, `SSLAuth` (see [below for nested schema](#nestedatt--spec--security))
+- `security` (Attributes) Kafka connect server security configuration. One of `basic_auth`, `bearer_token`, `ssl_auth` (see [below for nested schema](#nestedatt--spec--security))
 
 <a id="nestedatt--spec--security"></a>
 ### Nested Schema for `spec.security`
 
-Required:
-
-- `type` (String) Kafka connect server security type. Either `BasicAuth`, `BearerToken`, `SSLAuth`
-
- More detail on our [documentation](https://docs.conduktor.io/platform/reference/resource-reference/console/#kafkaconnectcluster)
-
 Optional:
 
-- `certificate_chain` (String) Kafka connect server mTLS auth certificate chain PEM. Required if security type is `SSLAuth`
-- `key` (String, Sensitive) Kafka connect server mTLS auth private key PEM. Required if security type is `SSLAuth`
-- `password` (String, Sensitive) Kafka connect server basic auth password. Required if security type is `BasicAuth`
-- `token` (String, Sensitive) Kafka connect server bearer token. Required if security type is `BearerToken`
-- `username` (String) Kafka connect server basic auth username. Required if security type is `BasicAuth`
+- `basic_auth` (Attributes) Basic auth for Kafka connect server security configuration. (see [below for nested schema](#nestedatt--spec--security--basic_auth))
+- `bearer_token` (Attributes) Bearer token for Kafka connect server security configuration. (see [below for nested schema](#nestedatt--spec--security--bearer_token))
+- `ssl_auth` (Attributes) SSL auth (mTLS) for Kafka connect server security configuration. (see [below for nested schema](#nestedatt--spec--security--ssl_auth))
+
+<a id="nestedatt--spec--security--basic_auth"></a>
+### Nested Schema for `spec.security.basic_auth`
+
+Required:
+
+- `password` (String, Sensitive) Kafka connect server basic auth password.
+- `username` (String) Kafka connect server basic auth username.
+
+
+<a id="nestedatt--spec--security--bearer_token"></a>
+### Nested Schema for `spec.security.bearer_token`
+
+Required:
+
+- `token` (String, Sensitive) Kafka connect server bearer token.
+
+
+<a id="nestedatt--spec--security--ssl_auth"></a>
+### Nested Schema for `spec.security.ssl_auth`
+
+Required:
+
+- `certificate_chain` (String) Kafka connect server mTLS auth certificate chain PEM.
+- `key` (String, Sensitive) Kafka connect server mTLS auth private key PEM.
+
 
 
 

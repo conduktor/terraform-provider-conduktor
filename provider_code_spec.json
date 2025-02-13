@@ -472,8 +472,8 @@
                             },
                             {
                               "name": "security",
-                              "model_name": "confluent_security",
                               "single_nested": {
+                                "custom_type_name": "confluent_security",
                                 "description": "Confluent Schema registry security configuration. One of `basic_auth`, `bearer_token`, `ssl_auth`. If none provided, no security is used.",
                                 "computed_optional_required": "optional",
                                 "attributes": [
@@ -570,8 +570,8 @@
                             },
                             {
                               "name": "security",
-                              "model_name": "glue_security",
                               "single_nested": {
+                                "custom_type_name": "glue_security",
                                 "description": "Schema registry configuration. One of `credentials`, `from_context`, `from_role`, `iam_anywhere`",
                                 "computed_optional_required": "required",
                                 "attributes": [

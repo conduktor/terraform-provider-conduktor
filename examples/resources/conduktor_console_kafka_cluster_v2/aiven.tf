@@ -15,9 +15,9 @@ resource "conduktor_console_kafka_cluster_v2" "aiven" {
     ignore_untrusted_certificate = true
     kafka_flavor = {
       aiven = {
-          api_token    = "a1b2c3d4e5f6g7h8i9j0"
-          project      = "my-kafka-project"
-          service_name = "my-kafka-service"
+        api_token    = "a1b2c3d4e5f6g7h8i9j0"
+        project      = "my-kafka-project"
+        service_name = "my-kafka-service"
       }
     }
     schema_registry = {
