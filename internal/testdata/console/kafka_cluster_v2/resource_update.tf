@@ -29,8 +29,8 @@ resource "conduktor_console_kafka_cluster_v2" "test" {
         ignore_untrusted_certificate = false
         security = {
           basic_auth = {
-              username = "user"
-              password = "password"
+            username = "user"
+            password = "password"
           }
         }
       }

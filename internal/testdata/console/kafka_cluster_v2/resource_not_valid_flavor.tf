@@ -16,8 +16,8 @@ resource "conduktor_console_kafka_cluster_v2" "test" {
     ignore_untrusted_certificate = true
     kafka_flavor = {
       aiven = {
-        api_token = "aiven-api-token"
-        project = "aiven-project"
+        api_token    = "aiven-api-token"
+        project      = "aiven-project"
         service_name = "aiven-service-name"
       }
       confluent = {
