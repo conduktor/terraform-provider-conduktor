@@ -127,7 +127,7 @@
             }
           },
           {
-            "name": "application_name",
+            "name": "application",
             "string": {
               "description": "Reference to the application this instance belongs to",
               "computed_optional_required": "required",
@@ -252,7 +252,7 @@
                           "name": "ownership_mode",
                           "string": {
                             "description": "Ownership mode for the resource",
-                            "computed_optional_required": "required",
+                            "computed_optional_required": "optional",
                             "validators": [
                               {
                                 "custom": {
@@ -292,7 +292,7 @@
                   "name": "default_catalog_visibility",
                   "string": {
                     "description": "Default catalog visibility for the application instance, valid values are: PRIVATE, PUBLIC",
-                    "computed_optional_required": "required",
+                    "computed_optional_required": "optional",
                     "validators": [
                       {
                         "custom": {

@@ -24,7 +24,7 @@ import (
 func ConsoleApplicationInstanceV1ResourceSchema(ctx context.Context) schema.Schema {
 	return schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			"application_name": schema.StringAttribute{
+			"application": schema.StringAttribute{
 				Required:            true,
 				Description:         "Reference to the application this instance belongs to",
 				MarkdownDescription: "Reference to the application this instance belongs to",
@@ -59,7 +59,7 @@ func ConsoleApplicationInstanceV1ResourceSchema(ctx context.Context) schema.Sche
 						},
 					},
 					"default_catalog_visibility": schema.StringAttribute{
-						Required:            true,
+						Optional:            true,
 						Description:         "Default catalog visibility for the application instance, valid values are: PRIVATE, PUBLIC",
 						MarkdownDescription: "Default catalog visibility for the application instance, valid values are: PRIVATE, PUBLIC",
 						Validators: []validator.String{
@@ -80,7 +80,7 @@ func ConsoleApplicationInstanceV1ResourceSchema(ctx context.Context) schema.Sche
 									MarkdownDescription: "Name of the resource",
 								},
 								"ownership_mode": schema.StringAttribute{
-									Required:            true,
+									Optional:            true,
 									Description:         "Ownership mode for the resource",
 									MarkdownDescription: "Ownership mode for the resource",
 									Validators: []validator.String{
@@ -141,9 +141,9 @@ func ConsoleApplicationInstanceV1ResourceSchema(ctx context.Context) schema.Sche
 }
 
 type ConsoleApplicationInstanceV1Model struct {
-	ApplicationName types.String `tfsdk:"application_name"`
-	Name            types.String `tfsdk:"name"`
-	Spec            SpecValue    `tfsdk:"spec"`
+	Application types.String `tfsdk:"application"`
+	Name        types.String `tfsdk:"name"`
+	Spec        SpecValue    `tfsdk:"spec"`
 }
 
 var _ basetypes.ObjectTypable = SpecType{}

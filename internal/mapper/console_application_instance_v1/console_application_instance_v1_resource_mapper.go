@@ -13,19 +13,21 @@ import (
 )
 
 func TFToInternalModel(ctx context.Context, r *appinstance.ConsoleApplicationInstanceV1Model) (console.ApplicationInstanceConsoleResource, error) {
-
-	// TODO Resources
-	// permissions, err := schema.SetValueToPermissionArray(ctx, schema.GROUPS, r.Spec.Permissions)
-	// if err != nil {
-	// 	return console.ApplicationInstanceConsoleResource{}, err
-	// }
+	topicPolicyRef, diag := schema.SetValueToStringArray(ctx, r.Spec.TopicPolicyRef)
+	if diag.HasError() {
+		return console.ApplicationInstanceConsoleResource{}, mapper.WrapDiagError(diag, "topic_policy_ref", mapper.FromTerraform)
+	}
+	resources, err := schema.SetValueToResourceArray(ctx, r.Spec.Resources)
+	if err != nil {
+		return console.ApplicationInstanceConsoleResource{}, err
+	}
 
 	return console.NewApplicationInstanceConsoleResource(
 		r.Name.ValueString(),
 		console.ApplicationInstanceConsoleSpec{
 			Cluster:                          r.Spec.Cluster.ValueString(),
-			TopicPolicyRef:                   nil, // TODO
-			Resources:                        nil, // TODO
+			TopicPolicyRef:                   topicPolicyRef,
+			Resources:                        resources,
 			ApplicationManagedServiceAccount: r.Spec.ApplicationManagedServiceAccount.ValueBool(),
 			ServiceAccount:                   r.Spec.ServiceAccount.ValueString(),
 			DefaultCatalogVisibility:         r.Spec.DefaultCatalogVisibility.ValueString(),
@@ -34,24 +36,28 @@ func TFToInternalModel(ctx context.Context, r *appinstance.ConsoleApplicationIns
 }
 
 func InternalModelToTerraform(ctx context.Context, r *console.ApplicationInstanceConsoleResource) (appinstance.ConsoleApplicationInstanceV1Model, error) {
-	// permissionsList, err := schema.PermissionArrayToSetValue(ctx, schema.GROUPS, r.Spec.Permissions)
-	// if err != nil {
-	// 	return appinstance.ConsoleGroupV2Model{}, err
-	// }
+	topicPolicyRef, diag := schema.StringArrayToSetValue(r.Spec.TopicPolicyRef)
+	if diag.HasError() {
+		return appinstance.ConsoleApplicationInstanceV1Model{}, mapper.WrapDiagError(diag, "topic_policy_ref", mapper.FromTerraform)
+	}
+	resourcesSet, err := schema.ResourceArrayToSetValue(ctx, r.Spec.Resources)
+	if err != nil {
+		return appinstance.ConsoleApplicationInstanceV1Model{}, err
+	}
 
 	specValue, diag := appinstance.NewSpecValue(
 		map[string]attr.Type{
 			"cluster":                             basetypes.StringType{},
-			"topic_policy_ref":                    nil, // TODO
-			"resources":                           nil, // TODO permissionsList.Type(ctx),
+			"topic_policy_ref":                    topicPolicyRef.Type(ctx),
+			"resources":                           resourcesSet.Type(ctx),
 			"application_managed_service_account": basetypes.BoolType{},
 			"service_account":                     basetypes.StringType{},
 			"default_catalog_visibility":          basetypes.StringType{},
 		},
 		map[string]attr.Value{
 			"cluster":                             schema.NewStringValue(r.Spec.Cluster),
-			"topic_policy_ref":                    nil, // TODO
-			"resources":                           nil, // TODO permissionsList.Type(ctx),
+			"topic_policy_ref":                    topicPolicyRef,
+			"resources":                           resourcesSet,
 			"application_managed_service_account": basetypes.NewBoolValue(r.Spec.ApplicationManagedServiceAccount),
 			"service_account":                     schema.NewStringValue(r.Spec.ServiceAccount),
 			"default_catalog_visibility":          schema.NewStringValue(r.Spec.DefaultCatalogVisibility),

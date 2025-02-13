@@ -7,16 +7,23 @@
   "spec": {
     "cluster": "cluster",
     "topicPolicyRef": [
-      "ref1",
-      "ref2"
+      "ref2",
+      "ref1"
     ],
     "resources": [
+      {
+        "type": "CONSUMER_GROUP",
+        "name": "resource-2",
+        "patternType": "PREFIXED",
+        "connectCluster": "connectCluster",
+        "ownershipMode": "LIMITED"
+      },
       {
         "type": "TOPIC",
         "name": "resource-1",
         "patternType": "LITERAL",
         "connectCluster": "connectCluster",
-        "ownerShipMode": "ALL"
+        "ownershipMode": "ALL"
       }
     ],
     "applicationManagedServiceAccount": false,
