@@ -1,0 +1,26 @@
+{
+  "kind": "ApplicationInstance",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "appinstance"
+  },
+  "spec": {
+    "cluster": "cluster",
+    "topicPolicyRef": [
+      "ref1",
+      "ref2"
+    ],
+    "resources": [
+      {
+        "type": "TOPIC",
+        "name": "resource-1",
+        "patternType": "LITERAL",
+        "connectCluster": "connectCluster",
+        "ownerShipMode": "ALL"
+      }
+    ],
+    "applicationManagedServiceAccount": false,
+    "serviceAccount": "serviceaccount",
+    "defaultCatalogVisibility": "PRIVATE"
+  }
+}
