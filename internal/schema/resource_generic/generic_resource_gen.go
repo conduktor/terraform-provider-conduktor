@@ -4,6 +4,7 @@ package resource_generic
 
 import (
 	"context"
+	"github.com/conduktor/terraform-provider-conduktor/internal/customtypes"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -16,37 +17,38 @@ func GenericResourceSchema(ctx context.Context) schema.Schema {
 		Attributes: map[string]schema.Attribute{
 			"cluster": schema.StringAttribute{
 				Optional:            true,
-				Description:         "resource parent cluster (if any)",
-				MarkdownDescription: "resource parent cluster (if any)",
+				Description:         "Resource parent cluster (if any)",
+				MarkdownDescription: "Resource parent cluster (if any)",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
 			"kind": schema.StringAttribute{
 				Required:            true,
-				Description:         "resource kind",
-				MarkdownDescription: "resource kind",
+				Description:         "Resource kind",
+				MarkdownDescription: "Resource kind",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
 			"manifest": schema.StringAttribute{
+				CustomType:          customtypes.YAMLNormalizedType{},
 				Required:            true,
-				Description:         "resource manifest in yaml format. See [reference documentation](https://docs.conduktor.io/platform/reference/resource-reference/console/#manifests) for more details",
-				MarkdownDescription: "resource manifest in yaml format. See [reference documentation](https://docs.conduktor.io/platform/reference/resource-reference/console/#manifests) for more details",
+				Description:         "Resource manifest in yaml format. Use `yamlencode`/`yamldecode` function to normalize input and avoid dirty plan. See [reference documentation](https://docs.conduktor.io/platform/reference/resource-reference/console/#manifests) for more details",
+				MarkdownDescription: "Resource manifest in yaml format. Use `yamlencode`/`yamldecode` function to normalize input and avoid dirty plan. See [reference documentation](https://docs.conduktor.io/platform/reference/resource-reference/console/#manifests) for more details",
 			},
 			"name": schema.StringAttribute{
 				Required:            true,
-				Description:         "resource name",
-				MarkdownDescription: "resource name",
+				Description:         "Resource name",
+				MarkdownDescription: "Resource name",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
 			"version": schema.StringAttribute{
 				Required:            true,
-				Description:         "resource version",
-				MarkdownDescription: "resource version",
+				Description:         "Resource version",
+				MarkdownDescription: "Resource version",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
@@ -56,9 +58,9 @@ func GenericResourceSchema(ctx context.Context) schema.Schema {
 }
 
 type GenericModel struct {
-	Cluster  types.String `tfsdk:"cluster"`
-	Kind     types.String `tfsdk:"kind"`
-	Manifest types.String `tfsdk:"manifest"`
-	Name     types.String `tfsdk:"name"`
-	Version  types.String `tfsdk:"version"`
+	Cluster  types.String               `tfsdk:"cluster"`
+	Kind     types.String               `tfsdk:"kind"`
+	Manifest customtypes.YAMLNormalized `tfsdk:"manifest"`
+	Name     types.String               `tfsdk:"name"`
+	Version  types.String               `tfsdk:"version"`
 }

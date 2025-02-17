@@ -17,10 +17,13 @@ This resource allows you to create, read, update and delete any resource support
 
 ## Example Usage
 
-### Using embedded YAML string
+### Using `yamlencoded` HCL value
 {{tffile "examples/resources/conduktor_generic/embedded.tf"}}
 
-### Using incuded YAML string
+### Using normalized raw yaml value
+{{tffile "examples/resources/conduktor_generic/raw_yaml.tf"}}
+
+### Using included YAML string
 {{tffile "examples/resources/conduktor_generic/include.tf"}}
 {{codefile "yaml" "examples/resources/conduktor_generic/cluster_a.yaml"}}
 
@@ -32,7 +35,6 @@ This resource allows you to create, read, update and delete any resource support
 Current limitation of this resource are :
 
 - `import` is not supported.
-- `plan` after `apply` show changes because of YAML automatic formatting and ordering.
 - only support Console resources for now
 
 ## Migrations notes

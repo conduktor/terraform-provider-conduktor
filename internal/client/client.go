@@ -158,8 +158,8 @@ func ConfigureTLS(ctx context.Context, restyClient *resty.Client, tlsParameter T
 }
 
 func (client *Client) ApplyGeneric(ctx context.Context, cliResource ctlresource.Resource) (string, error) {
-	kinds := ctlschema.ConsoleDefaultKind() // TODO support gateway kind and client too
-
+	catalog := ctlschema.ConsoleDefaultCatalog() // TODO support gateway kind and client too
+	kinds := catalog.Kind
 	kindName := cliResource.Kind
 	kind, ok := kinds[kindName]
 	if !ok {
@@ -171,7 +171,7 @@ func (client *Client) ApplyGeneric(ctx context.Context, cliResource ctlresource.
 		return "", err
 	}
 
-	url := client.BaseUrl + applyPath
+	url := client.BaseUrl + applyPath.Path
 
 	tflog.Trace(ctx, fmt.Sprintf("PUT on %s body : %s", applyPath, string(cliResource.Json)))
 	builder := client.Client.R().SetBody(cliResource.Json)

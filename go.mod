@@ -5,7 +5,7 @@ go 1.23
 toolchain go1.23.0
 
 require (
-	github.com/conduktor/ctl v0.3.2
+	github.com/conduktor/ctl v0.4.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-resty/resty/v2 v2.16.5
@@ -20,6 +20,7 @@ require (
 	github.com/hashicorp/terraform-plugin-testing v1.11.0
 	github.com/json-iterator/go v1.1.12
 	github.com/stretchr/testify v1.10.0
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 // Use fork of terraform-plugin-codegen-frameworkon branch https://github.com/conduktor/terraform-plugin-codegen-framework/tree/cdk-fix-model-name-conflicts
@@ -115,5 +116,4 @@ require (
 	google.golang.org/grpc v1.69.4 // indirect
 	google.golang.org/protobuf v1.36.3 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

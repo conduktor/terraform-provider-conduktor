@@ -17,39 +17,75 @@ This resource allows you to create, read, update and delete any resource support
 
 ## Example Usage
 
-### Using embedded YAML string
+### Using `yamlencoded` HCL value
 ```terraform
-resource "conduktor_generic" "example" {
-  kind     = "User"
-  version  = "v2"
-  name     = "bob@company.io"
-  manifest = <<EOF
-apiVersion: v2
-kind: User
-metadata:
-  name: bob@company.io
-spec:
-  firstName: Bob
-  lastName: Smith
-  permissions:
-    - permissions:
-        - userView
-        - datamaskingView
-        - auditLogView
-      resourceType: PLATFORM
-    - permissions:
-        - topicViewConfig
-        - topicConsume
-        - topicProduce
-      resourceType: TOPIC
-      name: "test-topic"
-      cluster: "*"
-      patternType: LITERAL
-  EOF
+resource "conduktor_generic" "embedded" {
+  kind    = "User"
+  version = "v2"
+  name    = "bob@company.io"
+  manifest = yamlencode({
+    apiVersion = "v2"
+    kind       = "User"
+    metadata = {
+      name = "bob@company.io"
+    }
+    spec = {
+      firstName = "Bob"
+      lastName  = "Smith"
+      permissions = [
+        {
+          permissions = [
+            "userView",
+            "datamaskingView",
+            "auditLogView"
+          ]
+          resourceType = "PLATFORM"
+        },
+        {
+          permissions = [
+            "topicViewConfig",
+            "topicConsume",
+            "topicProduce"
+          ]
+          resourceType = "TOPIC"
+          name         = "test-topic"
+          cluster      = "*"
+          patternType  = "LITERAL"
+        }
+      ]
+    }
+  })
 }
 ```
 
-### Using incuded YAML string
+### Using normalized raw yaml value
+```terraform
+resource "conduktor_generic" "raw_yaml" {
+  kind    = "User"
+  version = "v2"
+  name    = "bob@company.io"
+  manifest = yamlencode(yamldecode(<<EOF
+      apiVersion: v2
+      kind: User
+      metadata:
+        name: "bob@company.io"
+      spec:
+        firstName: "Bob"
+        lastName: Smith
+        permissions:
+          - resourceType: PLATFORM
+            permissions: ["userView", "datamaskingView", "auditLogView"]
+          - resourceType: TOPIC
+            cluster: '*'
+            name: test-topic
+            patternType: LITERAL
+            permissions: [ "topicViewConfig", "topicConsume", "topicProduce" ]
+      EOF
+  ))
+}
+```
+
+### Using included YAML string
 ```terraform
 resource "conduktor_generic" "test" {
   kind     = "KafkaCluster"
@@ -75,14 +111,14 @@ spec:
 
 ### Required
 
-- `kind` (String) resource kind
-- `manifest` (String) resource manifest in yaml format. See [reference documentation](https://docs.conduktor.io/platform/reference/resource-reference/console/#manifests) for more details
-- `name` (String) resource name
-- `version` (String) resource version
+- `kind` (String) Resource kind
+- `manifest` (String) Resource manifest in yaml format. Use `yamlencode`/`yamldecode` function to normalize input and avoid dirty plan. See [reference documentation](https://docs.conduktor.io/platform/reference/resource-reference/console/#manifests) for more details
+- `name` (String) Resource name
+- `version` (String) Resource version
 
 ### Optional
 
-- `cluster` (String) resource parent cluster (if any)
+- `cluster` (String) Resource parent cluster (if any)
 
 
 
@@ -92,7 +128,6 @@ spec:
 Current limitation of this resource are :
 
 - `import` is not supported.
-- `plan` after `apply` show changes because of YAML automatic formatting and ordering.
 - only support Console resources for now
 
 ## Migrations notes
