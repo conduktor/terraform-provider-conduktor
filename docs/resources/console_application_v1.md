@@ -13,17 +13,6 @@ This resource allows you to create, read, update and delete applications in Cond
 
 ## Example Usage
 
-### Simple applications without description
-```terraform
-resource "conduktor_console_application_v1" "example" {
-  name = "simple-app"
-  spec = {
-    title = "Simple Application"
-    owner = "admin"
-  }
-}
-```
-
 ### Complex application with description
 ```terraform
 resource "conduktor_console_application_v1" "example" {

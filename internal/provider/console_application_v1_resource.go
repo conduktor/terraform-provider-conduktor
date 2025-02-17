@@ -86,7 +86,6 @@ func (r *ApplicationV1Resource) Create(ctx context.Context, req resource.CreateR
 		return
 	}
 	tflog.Debug(ctx, fmt.Sprintf("Application to create : %+v", consoleResource))
-	fmt.Println("consoleResource", consoleResource)
 
 	apply, err := r.apiClient.Apply(ctx, applicationV1ApiPath, consoleResource)
 	if err != nil {

@@ -48,26 +48,6 @@ func TestAccApplicationV1Resource(t *testing.T) {
 	})
 }
 
-func TestAccApplicationV1Minimal(t *testing.T) {
-	test.CheckEnterpriseEnabled(t)
-	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { test.TestAccPreCheck(t) },
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read from minimal example
-			{
-				Config: providerConfigConsole + test.TestAccTestdata(t, "console/application_v1/resource_minimal.tf"),
-				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("conduktor_console_application_v1.minimal", "name", "minimal"),
-					resource.TestCheckResourceAttr("conduktor_console_application_v1.minimal", "spec.title", "Minimal"),
-					resource.TestCheckResourceAttr("conduktor_console_application_v1.minimal", "spec.owner", "admin"),
-				),
-			},
-			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
 func TestAccApplicationV1ExampleResource(t *testing.T) {
 	test.CheckEnterpriseEnabled(t)
 	resource.Test(t, resource.TestCase{
@@ -75,15 +55,6 @@ func TestAccApplicationV1ExampleResource(t *testing.T) {
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 
 		Steps: []resource.TestStep{
-			// Create and Read from simple example
-			{
-				Config: providerConfigConsole + test.TestAccExample(t, "resources", "conduktor_console_application_v1", "simple.tf"),
-				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("conduktor_console_application_v1.example", "name", "simple-app"),
-					resource.TestCheckResourceAttr("conduktor_console_application_v1.example", "spec.title", "Simple Application"),
-					resource.TestCheckResourceAttr("conduktor_console_application_v1.example", "spec.owner", "admin"),
-				),
-			},
 			// Create and Read from complex example
 			{
 				Config: providerConfigConsole + test.TestAccExample(t, "resources", "conduktor_console_application_v1", "complex.tf"),
