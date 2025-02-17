@@ -14,32 +14,35 @@ resource "conduktor_console_kafka_cluster_v2" "confluent" {
     icon                         = "kafka"
     ignore_untrusted_certificate = false
     kafka_flavor = {
-      type                     = "Confluent"
-      key                      = "yourApiKey123456"
-      secret                   = "yourApiSecret123456"
-      confluent_environment_id = "env-12345"
-      confluent_cluster_id     = "lkc-67890"
+      confluent = {
+        key                      = "yourApiKey123456"
+        secret                   = "yourApiSecret123456"
+        confluent_environment_id = "env-12345"
+        confluent_cluster_id     = "lkc-67890"
+      }
     }
     schema_registry = {
-      type                         = "ConfluentLike"
-      url                          = "https://bbb-bbbb.us-west4.gcp.confluent.cloud:8081"
-      ignore_untrusted_certificate = false
-      security = {
-        type              = "SSLAuth"
-        key               = <<EOT
+      confluent_like = {
+        url                          = "https://bbb-bbbb.us-west4.gcp.confluent.cloud:8081"
+        ignore_untrusted_certificate = false
+        security = {
+          ssl_auth = {
+            key               = <<EOT
 -----BEGIN PRIVATE KEY-----
 MIIOXzCCDUegAwIBAgIRAPRytMVYJNUgCbhnA+eYumgwDQYJKoZIhvcNAQELBQAw
 ...
 IFyCs+xkcgvHFtBjjel4pnIET0agtbGJbGDEQBNxX+i4MDA=
 -----END PRIVATE KEY-----
 EOT
-        certificate_chain = <<EOT
+            certificate_chain = <<EOT
 -----BEGIN CERTIFICATE-----
 MIIOXzCCDUegAwIBAgIRAPRytMVYJNUgCbhnA+eYumgwDQYJKoZIhvcNAQELBQAw
 ...
 IFyCs+xkcgvHFtBjjel4pnIET0agtbGJbGDEQBNxX+i4MDA=
 -----END CERTIFICATE-----
 EOT
+          }
+        }
       }
     }
   }

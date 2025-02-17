@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"regexp"
 	"testing"
 
 	"github.com/conduktor/terraform-provider-conduktor/internal/test"
@@ -16,7 +17,7 @@ func TestAccKafkaClusterV2Resource(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read testing
 			{
-				Config: providerConfigConsole + test.TestAccTestdata(t, "console_kafka_cluster_v2_resource_create.tf"),
+				Config: providerConfigConsole + test.TestAccTestdata(t, "console/kafka_cluster_v2/resource_create.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceRef, "name", "test-cluster"),
 					resource.TestCheckResourceAttr(resourceRef, "labels.%", "1"),
@@ -30,15 +31,12 @@ func TestAccKafkaClusterV2Resource(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceRef, "spec.properties.security.protocol", "SASL_SSL"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.properties.sasl.mechanism", "PLAIN"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.ignore_untrusted_certificate", "true"),
-					resource.TestCheckResourceAttr(resourceRef, "spec.kafka_flavor.type", "Confluent"),
-					resource.TestCheckResourceAttr(resourceRef, "spec.kafka_flavor.key", "confluent-key"),
-					resource.TestCheckResourceAttr(resourceRef, "spec.kafka_flavor.secret", "confluent-secret"),
-					resource.TestCheckResourceAttr(resourceRef, "spec.kafka_flavor.confluent_cluster_id", "confluent-cluster-id"),
-					resource.TestCheckResourceAttr(resourceRef, "spec.kafka_flavor.confluent_environment_id", "confluent-environment-id"),
-					resource.TestCheckResourceAttr(resourceRef, "spec.schema_registry.type", "ConfluentLike"),
-					resource.TestCheckResourceAttr(resourceRef, "spec.schema_registry.url", "http://localhost:8081"),
-					resource.TestCheckResourceAttr(resourceRef, "spec.schema_registry.security.type", "BearerToken"),
-					resource.TestCheckResourceAttr(resourceRef, "spec.schema_registry.security.token", "auth-token"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.kafka_flavor.confluent.key", "confluent-key"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.kafka_flavor.confluent.secret", "confluent-secret"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.kafka_flavor.confluent.confluent_cluster_id", "confluent-cluster-id"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.kafka_flavor.confluent.confluent_environment_id", "confluent-environment-id"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.schema_registry.confluent_like.url", "http://localhost:8081"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.schema_registry.confluent_like.security.bearer_token.token", "auth-token"),
 				),
 			},
 			//Importing matches the state of the previous step.
@@ -51,7 +49,7 @@ func TestAccKafkaClusterV2Resource(t *testing.T) {
 			},
 			// Update and Read testing
 			{
-				Config: providerConfigConsole + test.TestAccTestdata(t, "console_kafka_cluster_v2_resource_update.tf"),
+				Config: providerConfigConsole + test.TestAccTestdata(t, "console/kafka_cluster_v2/resource_update.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceRef, "name", "test-cluster"),
 					resource.TestCheckResourceAttr(resourceRef, "labels.%", "2"),
@@ -66,15 +64,12 @@ func TestAccKafkaClusterV2Resource(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceRef, "spec.properties.security.protocol", "SASL_SSL"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.properties.sasl.mechanism", "PLAIN"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.ignore_untrusted_certificate", "true"),
-					resource.TestCheckResourceAttr(resourceRef, "spec.kafka_flavor.type", "Aiven"),
-					resource.TestCheckResourceAttr(resourceRef, "spec.kafka_flavor.api_token", "aiven-api-token"),
-					resource.TestCheckResourceAttr(resourceRef, "spec.kafka_flavor.project", "aiven-project"),
-					resource.TestCheckResourceAttr(resourceRef, "spec.kafka_flavor.service_name", "aiven-service-name"),
-					resource.TestCheckResourceAttr(resourceRef, "spec.schema_registry.type", "ConfluentLike"),
-					resource.TestCheckResourceAttr(resourceRef, "spec.schema_registry.url", "http://localhost:8081"),
-					resource.TestCheckResourceAttr(resourceRef, "spec.schema_registry.security.type", "BasicAuth"),
-					resource.TestCheckResourceAttr(resourceRef, "spec.schema_registry.security.username", "user"),
-					resource.TestCheckResourceAttr(resourceRef, "spec.schema_registry.security.password", "password"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.kafka_flavor.aiven.api_token", "aiven-api-token"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.kafka_flavor.aiven.project", "aiven-project"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.kafka_flavor.aiven.service_name", "aiven-service-name"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.schema_registry.confluent_like.url", "http://localhost:8081"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.schema_registry.confluent_like.security.basic_auth.username", "user"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.schema_registry.confluent_like.security.basic_auth.password", "password"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -91,7 +86,7 @@ func TestAccKafkaClusterV2Minimal(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read from minimal example
 			{
-				Config: providerConfigConsole + test.TestAccTestdata(t, "console_kafka_cluster_v2_resource_minimal.tf"),
+				Config: providerConfigConsole + test.TestAccTestdata(t, "console/kafka_cluster_v2/resource_minimal.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceRef, "name", "mini-cluster"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.display_name", "Minimal Cluster"),
@@ -99,6 +94,33 @@ func TestAccKafkaClusterV2Minimal(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceRef, "spec.ignore_untrusted_certificate", "false"),
 					resource.TestCheckResourceAttr(resourceRef, "labels.%", "0"),
 				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccKafkaClusterV2Constraints(t *testing.T) {
+	test.CheckEnterpriseEnabled(t)
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { test.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{ // Try to create with conflicting flavors
+				Config:      providerConfigConsole + test.TestAccTestdata(t, "console/kafka_cluster_v2/resource_not_valid_flavor.tf"),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Combination`),
+			},
+			{ // Try to create with conflicting schema registry
+				Config:      providerConfigConsole + test.TestAccTestdata(t, "console/kafka_cluster_v2/resource_not_valid_sr.tf"),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Combination`),
+			},
+			{ // Try to create with conflicting confluent security
+				Config:      providerConfigConsole + test.TestAccTestdata(t, "console/kafka_cluster_v2/resource_not_valid_confluent_security.tf"),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Combination`),
+			},
+			{ // Try to create with conflicting glue security
+				Config:      providerConfigConsole + test.TestAccTestdata(t, "console/kafka_cluster_v2/resource_not_valid_glue_security.tf"),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Combination`),
 			},
 			// Delete testing automatically occurs in TestCase
 		},
@@ -141,16 +163,13 @@ func TestAccKafkaClusterV2ExampleResource(t *testing.T) {
 					resource.TestCheckResourceAttr(gatewayResourceRef, "spec.bootstrap_servers", "gateway:6969"),
 					resource.TestCheckResourceAttr(gatewayResourceRef, "spec.properties.%", "3"),
 					resource.TestCheckResourceAttr(gatewayResourceRef, "spec.ignore_untrusted_certificate", "true"),
-					resource.TestCheckResourceAttr(gatewayResourceRef, "spec.kafka_flavor.type", "Gateway"),
-					resource.TestCheckResourceAttr(gatewayResourceRef, "spec.kafka_flavor.url", "http://gateway:8888"),
-					resource.TestCheckResourceAttr(gatewayResourceRef, "spec.kafka_flavor.user", "admin"),
-					resource.TestCheckResourceAttr(gatewayResourceRef, "spec.kafka_flavor.password", "admin"),
-					resource.TestCheckResourceAttr(gatewayResourceRef, "spec.kafka_flavor.virtual_cluster", "passthrough"),
-					resource.TestCheckResourceAttr(gatewayResourceRef, "spec.kafka_flavor.ignore_untrusted_certificate", "true"),
-					resource.TestCheckResourceAttr(gatewayResourceRef, "spec.schema_registry.type", "ConfluentLike"),
-					resource.TestCheckResourceAttr(gatewayResourceRef, "spec.schema_registry.url", "http://localhost:8081"),
-					resource.TestCheckResourceAttr(gatewayResourceRef, "spec.schema_registry.security.type", "BearerToken"),
-					resource.TestCheckResourceAttr(gatewayResourceRef, "spec.schema_registry.security.token", "auth-token"),
+					resource.TestCheckResourceAttr(gatewayResourceRef, "spec.kafka_flavor.gateway.url", "http://gateway:8888"),
+					resource.TestCheckResourceAttr(gatewayResourceRef, "spec.kafka_flavor.gateway.user", "admin"),
+					resource.TestCheckResourceAttr(gatewayResourceRef, "spec.kafka_flavor.gateway.password", "admin"),
+					resource.TestCheckResourceAttr(gatewayResourceRef, "spec.kafka_flavor.gateway.virtual_cluster", "passthrough"),
+					resource.TestCheckResourceAttr(gatewayResourceRef, "spec.kafka_flavor.gateway.ignore_untrusted_certificate", "true"),
+					resource.TestCheckResourceAttr(gatewayResourceRef, "spec.schema_registry.confluent_like.url", "http://localhost:8081"),
+					resource.TestCheckResourceAttr(gatewayResourceRef, "spec.schema_registry.confluent_like.security.bearer_token.token", "auth-token"),
 				),
 			},
 			{
@@ -162,16 +181,13 @@ func TestAccKafkaClusterV2ExampleResource(t *testing.T) {
 					resource.TestCheckResourceAttr(aivenResourceRef, "spec.bootstrap_servers", "cluster.aiven.io:9092"),
 					resource.TestCheckResourceAttr(aivenResourceRef, "spec.properties.%", "3"),
 					resource.TestCheckResourceAttr(aivenResourceRef, "spec.ignore_untrusted_certificate", "true"),
-					resource.TestCheckResourceAttr(aivenResourceRef, "spec.kafka_flavor.type", "Aiven"),
-					resource.TestCheckResourceAttr(aivenResourceRef, "spec.kafka_flavor.api_token", "a1b2c3d4e5f6g7h8i9j0"),
-					resource.TestCheckResourceAttr(aivenResourceRef, "spec.kafka_flavor.project", "my-kafka-project"),
-					resource.TestCheckResourceAttr(aivenResourceRef, "spec.kafka_flavor.service_name", "my-kafka-service"),
-					resource.TestCheckResourceAttr(aivenResourceRef, "spec.schema_registry.type", "ConfluentLike"),
-					resource.TestCheckResourceAttr(aivenResourceRef, "spec.schema_registry.url", "https://sr.aiven.io:8081"),
-					resource.TestCheckResourceAttr(aivenResourceRef, "spec.schema_registry.ignore_untrusted_certificate", "false"),
-					resource.TestCheckResourceAttr(aivenResourceRef, "spec.schema_registry.security.type", "BasicAuth"),
-					resource.TestCheckResourceAttr(aivenResourceRef, "spec.schema_registry.security.username", "uuuuuuu"),
-					resource.TestCheckResourceAttr(aivenResourceRef, "spec.schema_registry.security.password", "ppppppp"),
+					resource.TestCheckResourceAttr(aivenResourceRef, "spec.kafka_flavor.aiven.api_token", "a1b2c3d4e5f6g7h8i9j0"),
+					resource.TestCheckResourceAttr(aivenResourceRef, "spec.kafka_flavor.aiven.project", "my-kafka-project"),
+					resource.TestCheckResourceAttr(aivenResourceRef, "spec.kafka_flavor.aiven.service_name", "my-kafka-service"),
+					resource.TestCheckResourceAttr(aivenResourceRef, "spec.schema_registry.confluent_like.url", "https://sr.aiven.io:8081"),
+					resource.TestCheckResourceAttr(aivenResourceRef, "spec.schema_registry.confluent_like.ignore_untrusted_certificate", "false"),
+					resource.TestCheckResourceAttr(aivenResourceRef, "spec.schema_registry.confluent_like.security.basic_auth.username", "uuuuuuu"),
+					resource.TestCheckResourceAttr(aivenResourceRef, "spec.schema_registry.confluent_like.security.basic_auth.password", "ppppppp"),
 				),
 			},
 			{
@@ -183,12 +199,10 @@ func TestAccKafkaClusterV2ExampleResource(t *testing.T) {
 					resource.TestCheckResourceAttr(awsResourceRef, "spec.bootstrap_servers", "b-3-public.xxxxx.yyyyy.zz.kafka.eu-west-1.amazonaws.com:9198,b-2-public.xxxxx.yyyyy.zz.kafka.eu-west-1.amazonaws.com:9198,b-1-public.xxxxx.yyyyy.zz.kafka.eu-west-1.amazonaws.com:9198"),
 					resource.TestCheckResourceAttr(awsResourceRef, "spec.properties.%", "4"),
 					resource.TestCheckResourceAttr(awsResourceRef, "spec.ignore_untrusted_certificate", "true"),
-					resource.TestCheckResourceAttr(awsResourceRef, "spec.schema_registry.type", "Glue"),
-					resource.TestCheckResourceAttr(awsResourceRef, "spec.schema_registry.region", "eu-west-1"),
-					resource.TestCheckResourceAttr(awsResourceRef, "spec.schema_registry.registry_name", "default"),
-					resource.TestCheckResourceAttr(awsResourceRef, "spec.schema_registry.security.type", "Credentials"),
-					resource.TestCheckResourceAttr(awsResourceRef, "spec.schema_registry.security.access_key_id", "accessKey"),
-					resource.TestCheckResourceAttr(awsResourceRef, "spec.schema_registry.security.secret_key", "secretKey"),
+					resource.TestCheckResourceAttr(awsResourceRef, "spec.schema_registry.glue.region", "eu-west-1"),
+					resource.TestCheckResourceAttr(awsResourceRef, "spec.schema_registry.glue.registry_name", "default"),
+					resource.TestCheckResourceAttr(awsResourceRef, "spec.schema_registry.glue.security.credentials.access_key_id", "accessKey"),
+					resource.TestCheckResourceAttr(awsResourceRef, "spec.schema_registry.glue.security.credentials.secret_key", "secretKey"),
 				),
 			},
 			{
@@ -199,15 +213,14 @@ func TestAccKafkaClusterV2ExampleResource(t *testing.T) {
 					resource.TestCheckResourceAttr(confluentResourceRef, "spec.display_name", "Confluent Cluster"),
 					resource.TestCheckResourceAttr(confluentResourceRef, "spec.bootstrap_servers", "aaa-aaaa.us-west4.gcp.confluent.cloud:9092"),
 					resource.TestCheckResourceAttr(confluentResourceRef, "spec.properties.%", "3"),
-					resource.TestCheckResourceAttr(confluentResourceRef, "spec.kafka_flavor.type", "Confluent"),
-					resource.TestCheckResourceAttr(confluentResourceRef, "spec.kafka_flavor.key", "yourApiKey123456"),
-					resource.TestCheckResourceAttr(confluentResourceRef, "spec.kafka_flavor.secret", "yourApiSecret123456"),
-					resource.TestCheckResourceAttr(confluentResourceRef, "spec.kafka_flavor.confluent_environment_id", "env-12345"),
-					resource.TestCheckResourceAttr(confluentResourceRef, "spec.kafka_flavor.confluent_cluster_id", "lkc-67890"),
-					resource.TestCheckResourceAttr(confluentResourceRef, "spec.schema_registry.type", "ConfluentLike"),
-					resource.TestCheckResourceAttr(confluentResourceRef, "spec.schema_registry.url", "https://bbb-bbbb.us-west4.gcp.confluent.cloud:8081"),
-					resource.TestCheckResourceAttr(confluentResourceRef, "spec.schema_registry.ignore_untrusted_certificate", "false"),
-					resource.TestCheckResourceAttr(confluentResourceRef, "spec.schema_registry.security.type", "SSLAuth"),
+					resource.TestCheckResourceAttr(confluentResourceRef, "spec.kafka_flavor.confluent.key", "yourApiKey123456"),
+					resource.TestCheckResourceAttr(confluentResourceRef, "spec.kafka_flavor.confluent.secret", "yourApiSecret123456"),
+					resource.TestCheckResourceAttr(confluentResourceRef, "spec.kafka_flavor.confluent.confluent_environment_id", "env-12345"),
+					resource.TestCheckResourceAttr(confluentResourceRef, "spec.kafka_flavor.confluent.confluent_cluster_id", "lkc-67890"),
+					resource.TestCheckResourceAttr(confluentResourceRef, "spec.schema_registry.confluent_like.url", "https://bbb-bbbb.us-west4.gcp.confluent.cloud:8081"),
+					resource.TestCheckResourceAttr(confluentResourceRef, "spec.schema_registry.confluent_like.ignore_untrusted_certificate", "false"),
+					resource.TestCheckResourceAttr(confluentResourceRef, "spec.schema_registry.confluent_like.security.ssl_auth.key", "-----BEGIN PRIVATE KEY-----\nMIIOXzCCDUegAwIBAgIRAPRytMVYJNUgCbhnA+eYumgwDQYJKoZIhvcNAQELBQAw\n...\nIFyCs+xkcgvHFtBjjel4pnIET0agtbGJbGDEQBNxX+i4MDA=\n-----END PRIVATE KEY-----\n"),
+					resource.TestCheckResourceAttr(confluentResourceRef, "spec.schema_registry.confluent_like.security.ssl_auth.certificate_chain", "-----BEGIN CERTIFICATE-----\nMIIOXzCCDUegAwIBAgIRAPRytMVYJNUgCbhnA+eYumgwDQYJKoZIhvcNAQELBQAw\n...\nIFyCs+xkcgvHFtBjjel4pnIET0agtbGJbGDEQBNxX+i4MDA=\n-----END CERTIFICATE-----\n"),
 				),
 			},
 		},
