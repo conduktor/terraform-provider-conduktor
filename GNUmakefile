@@ -44,11 +44,12 @@ tf-fmt: ## Run terraform fmt
 	terraform fmt -recursive
 
 tools:
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.60.2
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.5
 
 .PHONY: go-lint
 go-lint: tools ## Run Golang linters
 	@echo "==> Run Golang CLI linter..."
+	@golangci-lint config verify
 	@golangci-lint run
 
 .PHONY: pull_test_assets
