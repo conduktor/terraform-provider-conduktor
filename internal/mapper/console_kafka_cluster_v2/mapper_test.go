@@ -18,7 +18,7 @@ func TestKafkaClusterV2ModelMapping(t *testing.T) {
 
 	ctx := context.Background()
 
-	jsonKafkaClusterV2Resource := []byte(test.TestAccTestdata(t, "console_kafka_cluster_v2_confluent_api.json"))
+	jsonKafkaClusterV2Resource := []byte(test.TestAccTestdata(t, "console/kafka_cluster_v2/api_confluent.json"))
 
 	ctlResource := ctlresource.Resource{}
 	err := ctlResource.UnmarshalJSON(jsonKafkaClusterV2Resource)
@@ -123,7 +123,7 @@ func TestKafkaClusterV2ModelMapping(t *testing.T) {
 func TestAWSKafkaClusterV2ModelMapping(t *testing.T) {
 	ctx := context.Background()
 
-	jsonKafkaClusterV2Resource := []byte(test.TestAccTestdata(t, "console_kafka_cluster_v2_aws_api.json"))
+	jsonKafkaClusterV2Resource := []byte(test.TestAccTestdata(t, "console/kafka_cluster_v2/api_aws.json"))
 
 	ctlResource := ctlresource.Resource{}
 	err := ctlResource.UnmarshalJSON(jsonKafkaClusterV2Resource)
@@ -201,7 +201,7 @@ func TestAWSKafkaClusterV2ModelMapping(t *testing.T) {
 func TestMinimalKafkaClusterV2ModelMapping(t *testing.T) {
 	ctx := context.Background()
 
-	jsonKafkaClusterV2Resource := []byte(test.TestAccTestdata(t, "console_kafka_cluster_v2_minimal_api.json"))
+	jsonKafkaClusterV2Resource := []byte(test.TestAccTestdata(t, "console/kafka_cluster_v2/api_minimal.json"))
 
 	ctlResource := ctlresource.Resource{}
 	err := ctlResource.UnmarshalJSON(jsonKafkaClusterV2Resource)

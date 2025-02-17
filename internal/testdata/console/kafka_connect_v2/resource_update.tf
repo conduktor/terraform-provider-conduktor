@@ -24,9 +24,10 @@ resource "conduktor_console_kafka_connect_v2" "test" {
     }
     ignore_untrusted_certificate = false
     security = {
-      type     = "BasicAuth"
-      username = "user"
-      password = "password"
+      basic_auth = {
+        username = "user"
+        password = "password"
+      }
     }
   }
 }

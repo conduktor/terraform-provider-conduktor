@@ -77,84 +77,112 @@ func ConsoleKafkaClusterV2ResourceSchema(ctx context.Context) schema.Schema {
 					},
 					"kafka_flavor": schema.SingleNestedAttribute{
 						Attributes: map[string]schema.Attribute{
-							"api_token": schema.StringAttribute{
-								Optional:            true,
-								Sensitive:           true,
-								Description:         "Aiven API token. Required if type is `Aiven`",
-								MarkdownDescription: "Aiven API token. Required if type is `Aiven`",
-							},
-							"confluent_cluster_id": schema.StringAttribute{
-								Optional:            true,
-								Description:         "Confluent cluster identifier. Required if type is `Confluent`",
-								MarkdownDescription: "Confluent cluster identifier. Required if type is `Confluent`",
-							},
-							"confluent_environment_id": schema.StringAttribute{
-								Optional:            true,
-								Description:         "Confluent environment identifier. Required if type is `Confluent`",
-								MarkdownDescription: "Confluent environment identifier. Required if type is `Confluent`",
-							},
-							"ignore_untrusted_certificate": schema.BoolAttribute{
-								Optional:            true,
-								Computed:            true,
-								Description:         "Ignore untrusted certificate for Gateway Admin API. Only used if type is `Gateway`",
-								MarkdownDescription: "Ignore untrusted certificate for Gateway Admin API. Only used if type is `Gateway`",
-								Default:             booldefault.StaticBool(false),
-							},
-							"key": schema.StringAttribute{
-								Optional:            true,
-								Sensitive:           true,
-								Description:         "Confluent API key. Required if type is `Confluent`",
-								MarkdownDescription: "Confluent API key. Required if type is `Confluent`",
-							},
-							"password": schema.StringAttribute{
-								Optional:            true,
-								Sensitive:           true,
-								Description:         "Conduktor Gateway Admin password. Required if type is `Gateway`",
-								MarkdownDescription: "Conduktor Gateway Admin password. Required if type is `Gateway`",
-							},
-							"project": schema.StringAttribute{
-								Optional:            true,
-								Description:         "Aiven project name. Required if type is `Aiven`",
-								MarkdownDescription: "Aiven project name. Required if type is `Aiven`",
-							},
-							"secret": schema.StringAttribute{
-								Optional:            true,
-								Sensitive:           true,
-								Description:         "Confluent API secret. Required if type is `Confluent`",
-								MarkdownDescription: "Confluent API secret. Required if type is `Confluent`",
-							},
-							"service_name": schema.StringAttribute{
-								Optional:            true,
-								Description:         "Aiven service name. Required if type is `Aiven`",
-								MarkdownDescription: "Aiven service name. Required if type is `Aiven`",
-							},
-							"type": schema.StringAttribute{
-								Required:            true,
-								Description:         "Kafka provider type : `Confluent`, `Aiven`, `Gateway`. More detail on our [documentation](https://docs.conduktor.io/platform/reference/resource-reference/console/#kafka-provider)",
-								MarkdownDescription: "Kafka provider type : `Confluent`, `Aiven`, `Gateway`. More detail on our [documentation](https://docs.conduktor.io/platform/reference/resource-reference/console/#kafka-provider)",
-								Validators: []validator.String{
-									stringvalidator.OneOf(validation.ValidKafkaFlavorTypes...),
+							"aiven": schema.SingleNestedAttribute{
+								Attributes: map[string]schema.Attribute{
+									"api_token": schema.StringAttribute{
+										Required:            true,
+										Sensitive:           true,
+										Description:         "Aiven API token.",
+										MarkdownDescription: "Aiven API token.",
+									},
+									"project": schema.StringAttribute{
+										Required:            true,
+										Description:         "Aiven project name.",
+										MarkdownDescription: "Aiven project name.",
+									},
+									"service_name": schema.StringAttribute{
+										Required:            true,
+										Description:         "Aiven service name.",
+										MarkdownDescription: "Aiven service name.",
+									},
 								},
-							},
-							"url": schema.StringAttribute{
-								Optional:            true,
-								Description:         "Conduktor Gateway Admin API URL. Required if type is `Gateway`",
-								MarkdownDescription: "Conduktor Gateway Admin API URL. Required if type is `Gateway`",
-							},
-							"user": schema.StringAttribute{
-								Optional:            true,
-								Description:         "Conduktor Gateway Admin user. Required if type is `Gateway`",
-								MarkdownDescription: "Conduktor Gateway Admin user. Required if type is `Gateway`",
-							},
-							"virtual_cluster": schema.StringAttribute{
-								Optional:            true,
-								Computed:            true,
-								Description:         "Conduktor Gateway Virtual cluster name (default `passthrough`). Only used if type is `Gateway`",
-								MarkdownDescription: "Conduktor Gateway Virtual cluster name (default `passthrough`). Only used if type is `Gateway`",
-								Validators: []validator.String{
-									validation.NonEmptyString(),
+								CustomType: AivenType{
+									ObjectType: types.ObjectType{
+										AttrTypes: AivenValue{}.AttributeTypes(ctx),
+									},
 								},
-								Default: stringdefault.StaticString("passthrough"),
+								Optional:            true,
+								Description:         "Aiven Kafka flavor configuration",
+								MarkdownDescription: "Aiven Kafka flavor configuration",
+							},
+							"confluent": schema.SingleNestedAttribute{
+								Attributes: map[string]schema.Attribute{
+									"confluent_cluster_id": schema.StringAttribute{
+										Required:            true,
+										Description:         "Confluent cluster identifier.",
+										MarkdownDescription: "Confluent cluster identifier.",
+									},
+									"confluent_environment_id": schema.StringAttribute{
+										Required:            true,
+										Description:         "Confluent environment identifier.",
+										MarkdownDescription: "Confluent environment identifier.",
+									},
+									"key": schema.StringAttribute{
+										Required:            true,
+										Sensitive:           true,
+										Description:         "Confluent API key.",
+										MarkdownDescription: "Confluent API key.",
+									},
+									"secret": schema.StringAttribute{
+										Required:            true,
+										Sensitive:           true,
+										Description:         "Confluent API secret.",
+										MarkdownDescription: "Confluent API secret.",
+									},
+								},
+								CustomType: ConfluentType{
+									ObjectType: types.ObjectType{
+										AttrTypes: ConfluentValue{}.AttributeTypes(ctx),
+									},
+								},
+								Optional:            true,
+								Description:         "Confluent Kafka flavor configuration",
+								MarkdownDescription: "Confluent Kafka flavor configuration",
+							},
+							"gateway": schema.SingleNestedAttribute{
+								Attributes: map[string]schema.Attribute{
+									"ignore_untrusted_certificate": schema.BoolAttribute{
+										Optional:            true,
+										Computed:            true,
+										Description:         "Ignore untrusted certificate for Gateway Admin API.",
+										MarkdownDescription: "Ignore untrusted certificate for Gateway Admin API.",
+										Default:             booldefault.StaticBool(false),
+									},
+									"password": schema.StringAttribute{
+										Required:            true,
+										Sensitive:           true,
+										Description:         "Conduktor Gateway Admin password.",
+										MarkdownDescription: "Conduktor Gateway Admin password.",
+									},
+									"url": schema.StringAttribute{
+										Required:            true,
+										Description:         "Conduktor Gateway Admin API URL.",
+										MarkdownDescription: "Conduktor Gateway Admin API URL.",
+									},
+									"user": schema.StringAttribute{
+										Required:            true,
+										Description:         "Conduktor Gateway Admin user.",
+										MarkdownDescription: "Conduktor Gateway Admin user.",
+									},
+									"virtual_cluster": schema.StringAttribute{
+										Optional:            true,
+										Computed:            true,
+										Description:         "Conduktor Gateway Virtual cluster name (default `passthrough`).",
+										MarkdownDescription: "Conduktor Gateway Virtual cluster name (default `passthrough`).",
+										Validators: []validator.String{
+											validation.NonEmptyString(),
+										},
+										Default: stringdefault.StaticString("passthrough"),
+									},
+								},
+								CustomType: GatewayType{
+									ObjectType: types.ObjectType{
+										AttrTypes: GatewayValue{}.AttributeTypes(ctx),
+									},
+								},
+								Optional:            true,
+								Description:         "Conduktor Gateway Kafka flavor configuration",
+								MarkdownDescription: "Conduktor Gateway Kafka flavor configuration",
 							},
 						},
 						CustomType: KafkaFlavorType{
@@ -163,8 +191,8 @@ func ConsoleKafkaClusterV2ResourceSchema(ctx context.Context) schema.Schema {
 							},
 						},
 						Optional:            true,
-						Description:         "Schema registry configuration",
-						MarkdownDescription: "Schema registry configuration",
+						Description:         "Kafka flavor configuration. One of `confluent`, `aiven`, `gateway`",
+						MarkdownDescription: "Kafka flavor configuration. One of `confluent`, `aiven`, `gateway`",
 					},
 					"properties": schema.MapAttribute{
 						ElementType:         types.StringType,
@@ -174,135 +202,239 @@ func ConsoleKafkaClusterV2ResourceSchema(ctx context.Context) schema.Schema {
 					},
 					"schema_registry": schema.SingleNestedAttribute{
 						Attributes: map[string]schema.Attribute{
-							"ignore_untrusted_certificate": schema.BoolAttribute{
-								Optional:            true,
-								Computed:            true,
-								Description:         "Ignore untrusted certificate for schema registry. Only used if type is `ConfluentLike`",
-								MarkdownDescription: "Ignore untrusted certificate for schema registry. Only used if type is `ConfluentLike`",
-								Default:             booldefault.StaticBool(false),
-							},
-							"properties": schema.StringAttribute{
-								Optional:            true,
-								Description:         "Schema registry properties. Only used if type is `ConfluentLike`",
-								MarkdownDescription: "Schema registry properties. Only used if type is `ConfluentLike`",
-							},
-							"region": schema.StringAttribute{
-								Optional:            true,
-								Description:         "Glue Schema registry AWS region. Required if type is `Glue`",
-								MarkdownDescription: "Glue Schema registry AWS region. Required if type is `Glue`",
-							},
-							"registry_name": schema.StringAttribute{
-								Optional:            true,
-								Description:         "Glue Schema registry name. Only used if type is `Glue`",
-								MarkdownDescription: "Glue Schema registry name. Only used if type is `Glue`",
-							},
-							"security": schema.SingleNestedAttribute{
+							"confluent_like": schema.SingleNestedAttribute{
 								Attributes: map[string]schema.Attribute{
-									"access_key_id": schema.StringAttribute{
+									"ignore_untrusted_certificate": schema.BoolAttribute{
 										Optional:            true,
-										Sensitive:           true,
-										Description:         "Glue Schema registry AWS access key ID. Required if type is Glue with security `Credentials`",
-										MarkdownDescription: "Glue Schema registry AWS access key ID. Required if type is Glue with security `Credentials`",
+										Computed:            true,
+										Description:         "Ignore untrusted certificate for schema registry. Only used if type is `ConfluentLike`",
+										MarkdownDescription: "Ignore untrusted certificate for schema registry. Only used if type is `ConfluentLike`",
+										Default:             booldefault.StaticBool(false),
 									},
-									"certificate": schema.StringAttribute{
+									"properties": schema.StringAttribute{
 										Optional:            true,
-										Description:         "Glue Schema registry AWS certificate. Required if type is Glue with security `IAMAnywhere`",
-										MarkdownDescription: "Glue Schema registry AWS certificate. Required if type is Glue with security `IAMAnywhere`",
+										Description:         "Schema registry properties. Only used if type is `ConfluentLike`",
+										MarkdownDescription: "Schema registry properties. Only used if type is `ConfluentLike`",
 									},
-									"certificate_chain": schema.StringAttribute{
-										Optional:            true,
-										Description:         "Schema registry SSL auth certificate chain PEM. Required if security type is `SSLAuth`",
-										MarkdownDescription: "Schema registry SSL auth certificate chain PEM. Required if security type is `SSLAuth`",
-									},
-									"key": schema.StringAttribute{
-										Optional:            true,
-										Sensitive:           true,
-										Description:         "Schema registry SSL auth private key PEM. Required if security type is `SSLAuth`",
-										MarkdownDescription: "Schema registry SSL auth private key PEM. Required if security type is `SSLAuth`",
-									},
-									"password": schema.StringAttribute{
-										Optional:            true,
-										Sensitive:           true,
-										Description:         "Schema registry basic auth password. Required if security type is `BasicAuth`",
-										MarkdownDescription: "Schema registry basic auth password. Required if security type is `BasicAuth`",
-									},
-									"private_key": schema.StringAttribute{
-										Optional:            true,
-										Description:         "Glue Schema registry AWS private key. Required if type is Glue with security `IAMAnywhere`",
-										MarkdownDescription: "Glue Schema registry AWS private key. Required if type is Glue with security `IAMAnywhere`",
-									},
-									"profile": schema.StringAttribute{
-										Optional:            true,
-										Description:         "Glue Schema registry AWS profile name. Required if type is Glue with security `FromContext`",
-										MarkdownDescription: "Glue Schema registry AWS profile name. Required if type is Glue with security `FromContext`",
-									},
-									"profile_arn": schema.StringAttribute{
-										Optional:            true,
-										Description:         "Glue Schema registry AWS profile ARN. Required if type is Glue with security `IAMAnywhere`",
-										MarkdownDescription: "Glue Schema registry AWS profile ARN. Required if type is Glue with security `IAMAnywhere`",
-									},
-									"role": schema.StringAttribute{
-										Optional:            true,
-										Description:         "Glue Schema registry AWS role ARN. Required if type is Glue with security `FromRole`",
-										MarkdownDescription: "Glue Schema registry AWS role ARN. Required if type is Glue with security `FromRole`",
-									},
-									"role_arn": schema.StringAttribute{
-										Optional:            true,
-										Description:         "Glue Schema registry AWS role ARN. Required if type is Glue with security `IAMAnywhere`",
-										MarkdownDescription: "Glue Schema registry AWS role ARN. Required if type is Glue with security `IAMAnywhere`",
-									},
-									"secret_key": schema.StringAttribute{
-										Optional:            true,
-										Sensitive:           true,
-										Description:         "Glue Schema registry AWS secret key. Required if type is Glue with security `Credentials`",
-										MarkdownDescription: "Glue Schema registry AWS secret key. Required if type is Glue with security `Credentials`",
-									},
-									"token": schema.StringAttribute{
-										Optional:            true,
-										Sensitive:           true,
-										Description:         "Schema registry bearer token. Required if security type is `BearerToken`",
-										MarkdownDescription: "Schema registry bearer token. Required if security type is `BearerToken`",
-									},
-									"trust_anchor_arn": schema.StringAttribute{
-										Optional:            true,
-										Description:         "Glue Schema registry AWS trust anchor ARN. Required if type is Glue with security `IAMAnywhere`",
-										MarkdownDescription: "Glue Schema registry AWS trust anchor ARN. Required if type is Glue with security `IAMAnywhere`",
-									},
-									"type": schema.StringAttribute{
-										Required:            true,
-										Description:         "Schema registry security type. Required if type is `ConfluentLike` or `Glue`.\n\nValid values are:\n\n- For **ConfluentLike** : `NoSecurity`, `BasicAuth`, `BearerToken`, `SSLAuth` \n\n- For **Glue** : `Credentials`, `FromContext`, `FromRole`, `IAMAnywhere`\n\n More detail on our [documentation](https://docs.conduktor.io/platform/reference/resource-reference/console/#schema-registry)",
-										MarkdownDescription: "Schema registry security type. Required if type is `ConfluentLike` or `Glue`.\n\nValid values are:\n\n- For **ConfluentLike** : `NoSecurity`, `BasicAuth`, `BearerToken`, `SSLAuth` \n\n- For **Glue** : `Credentials`, `FromContext`, `FromRole`, `IAMAnywhere`\n\n More detail on our [documentation](https://docs.conduktor.io/platform/reference/resource-reference/console/#schema-registry)",
-										Validators: []validator.String{
-											stringvalidator.OneOf(validation.ValidSchemaRegistrySecurityTypes...),
+									"security": schema.SingleNestedAttribute{
+										Attributes: map[string]schema.Attribute{
+											"basic_auth": schema.SingleNestedAttribute{
+												Attributes: map[string]schema.Attribute{
+													"password": schema.StringAttribute{
+														Required:            true,
+														Sensitive:           true,
+														Description:         "Schema registry basic auth password.",
+														MarkdownDescription: "Schema registry basic auth password.",
+													},
+													"username": schema.StringAttribute{
+														Required:            true,
+														Description:         "Schema registry basic auth username.",
+														MarkdownDescription: "Schema registry basic auth username.",
+													},
+												},
+												CustomType: BasicAuthType{
+													ObjectType: types.ObjectType{
+														AttrTypes: BasicAuthValue{}.AttributeTypes(ctx),
+													},
+												},
+												Optional:            true,
+												Description:         "Basic auth schema registry security configuration.",
+												MarkdownDescription: "Basic auth schema registry security configuration.",
+											},
+											"bearer_token": schema.SingleNestedAttribute{
+												Attributes: map[string]schema.Attribute{
+													"token": schema.StringAttribute{
+														Required:            true,
+														Sensitive:           true,
+														Description:         "Schema registry bearer token.",
+														MarkdownDescription: "Schema registry bearer token.",
+													},
+												},
+												CustomType: BearerTokenType{
+													ObjectType: types.ObjectType{
+														AttrTypes: BearerTokenValue{}.AttributeTypes(ctx),
+													},
+												},
+												Optional:            true,
+												Description:         "Bearer token schema registry security configuration.",
+												MarkdownDescription: "Bearer token schema registry security configuration.",
+											},
+											"ssl_auth": schema.SingleNestedAttribute{
+												Attributes: map[string]schema.Attribute{
+													"certificate_chain": schema.StringAttribute{
+														Required:            true,
+														Description:         "Schema registry SSL auth certificate chain PEM.",
+														MarkdownDescription: "Schema registry SSL auth certificate chain PEM.",
+													},
+													"key": schema.StringAttribute{
+														Required:            true,
+														Sensitive:           true,
+														Description:         "Schema registry SSL auth private key PEM.",
+														MarkdownDescription: "Schema registry SSL auth private key PEM.",
+													},
+												},
+												CustomType: SslAuthType{
+													ObjectType: types.ObjectType{
+														AttrTypes: SslAuthValue{}.AttributeTypes(ctx),
+													},
+												},
+												Optional:            true,
+												Description:         "SSL auth (mTLS) schema registry security configuration.",
+												MarkdownDescription: "SSL auth (mTLS) schema registry security configuration.",
+											},
 										},
-									},
-									"username": schema.StringAttribute{
+										CustomType: ConfluentSecurityType{
+											ObjectType: types.ObjectType{
+												AttrTypes: ConfluentSecurityValue{}.AttributeTypes(ctx),
+											},
+										},
 										Optional:            true,
-										Description:         "Schema registry basic auth username. Required if security type is `BasicAuth`",
-										MarkdownDescription: "Schema registry basic auth username. Required if security type is `BasicAuth`",
+										Description:         "Confluent Schema registry security configuration. One of `basic_auth`, `bearer_token`, `ssl_auth`. If none provided, no security is used.",
+										MarkdownDescription: "Confluent Schema registry security configuration. One of `basic_auth`, `bearer_token`, `ssl_auth`. If none provided, no security is used.",
+									},
+									"url": schema.StringAttribute{
+										Optional:            true,
+										Description:         "Schema registry URL. Required if type is `ConfluentLike`",
+										MarkdownDescription: "Schema registry URL. Required if type is `ConfluentLike`",
 									},
 								},
-								CustomType: SecurityType{
+								CustomType: ConfluentLikeType{
 									ObjectType: types.ObjectType{
-										AttrTypes: SecurityValue{}.AttributeTypes(ctx),
+										AttrTypes: ConfluentLikeValue{}.AttributeTypes(ctx),
 									},
 								},
-								Required:            true,
-								Description:         "Schema registry configuration. Required if type is `ConfluentLike` or `Glue`",
-								MarkdownDescription: "Schema registry configuration. Required if type is `ConfluentLike` or `Glue`",
-							},
-							"type": schema.StringAttribute{
-								Required:            true,
-								Description:         "Schema registry type valid values are: `ConfluentLike`, `Glue`\n\nMore detail on our [documentation](https://docs.conduktor.io/platform/reference/resource-reference/console/#schema-registry)",
-								MarkdownDescription: "Schema registry type valid values are: `ConfluentLike`, `Glue`\n\nMore detail on our [documentation](https://docs.conduktor.io/platform/reference/resource-reference/console/#schema-registry)",
-								Validators: []validator.String{
-									stringvalidator.OneOf(validation.ValidSchemaRegistryTypes...),
-								},
-							},
-							"url": schema.StringAttribute{
 								Optional:            true,
-								Description:         "Schema registry URL. Required if type is `ConfluentLike`",
-								MarkdownDescription: "Schema registry URL. Required if type is `ConfluentLike`",
+								Description:         "Confluent like schema registry configuration",
+								MarkdownDescription: "Confluent like schema registry configuration",
+							},
+							"glue": schema.SingleNestedAttribute{
+								Attributes: map[string]schema.Attribute{
+									"region": schema.StringAttribute{
+										Optional:            true,
+										Description:         "Glue Schema registry AWS region",
+										MarkdownDescription: "Glue Schema registry AWS region",
+									},
+									"registry_name": schema.StringAttribute{
+										Optional:            true,
+										Description:         "Glue Schema registry name",
+										MarkdownDescription: "Glue Schema registry name",
+									},
+									"security": schema.SingleNestedAttribute{
+										Attributes: map[string]schema.Attribute{
+											"credentials": schema.SingleNestedAttribute{
+												Attributes: map[string]schema.Attribute{
+													"access_key_id": schema.StringAttribute{
+														Required:            true,
+														Sensitive:           true,
+														Description:         "Glue Schema registry AWS access key ID.",
+														MarkdownDescription: "Glue Schema registry AWS access key ID.",
+													},
+													"secret_key": schema.StringAttribute{
+														Required:            true,
+														Sensitive:           true,
+														Description:         "Glue Schema registry AWS secret key.",
+														MarkdownDescription: "Glue Schema registry AWS secret key.",
+													},
+												},
+												CustomType: CredentialsType{
+													ObjectType: types.ObjectType{
+														AttrTypes: CredentialsValue{}.AttributeTypes(ctx),
+													},
+												},
+												Optional:            true,
+												Description:         "AWS credentials GLUE schema registry security configuration.",
+												MarkdownDescription: "AWS credentials GLUE schema registry security configuration.",
+											},
+											"from_context": schema.SingleNestedAttribute{
+												Attributes: map[string]schema.Attribute{
+													"profile": schema.StringAttribute{
+														Required:            true,
+														Description:         "Glue Schema registry AWS profile name. ",
+														MarkdownDescription: "Glue Schema registry AWS profile name. ",
+													},
+												},
+												CustomType: FromContextType{
+													ObjectType: types.ObjectType{
+														AttrTypes: FromContextValue{}.AttributeTypes(ctx),
+													},
+												},
+												Optional:            true,
+												Description:         "AWS context GLUE schema registry security configuration.",
+												MarkdownDescription: "AWS context GLUE schema registry security configuration.",
+											},
+											"from_role": schema.SingleNestedAttribute{
+												Attributes: map[string]schema.Attribute{
+													"role": schema.StringAttribute{
+														Required:            true,
+														Description:         "Glue Schema registry AWS role ARN.",
+														MarkdownDescription: "Glue Schema registry AWS role ARN.",
+													},
+												},
+												CustomType: FromRoleType{
+													ObjectType: types.ObjectType{
+														AttrTypes: FromRoleValue{}.AttributeTypes(ctx),
+													},
+												},
+												Optional:            true,
+												Description:         "AWS role GLUE schema registry security configuration.",
+												MarkdownDescription: "AWS role GLUE schema registry security configuration.",
+											},
+											"iam_anywhere": schema.SingleNestedAttribute{
+												Attributes: map[string]schema.Attribute{
+													"certificate": schema.StringAttribute{
+														Required:            true,
+														Description:         "Glue Schema registry AWS certificate.",
+														MarkdownDescription: "Glue Schema registry AWS certificate.",
+													},
+													"private_key": schema.StringAttribute{
+														Required:            true,
+														Description:         "Glue Schema registry AWS private key.",
+														MarkdownDescription: "Glue Schema registry AWS private key.",
+													},
+													"profile_arn": schema.StringAttribute{
+														Required:            true,
+														Description:         "Glue Schema registry AWS profile ARN.",
+														MarkdownDescription: "Glue Schema registry AWS profile ARN.",
+													},
+													"role_arn": schema.StringAttribute{
+														Required:            true,
+														Description:         "Glue Schema registry AWS role ARN.",
+														MarkdownDescription: "Glue Schema registry AWS role ARN.",
+													},
+													"trust_anchor_arn": schema.StringAttribute{
+														Required:            true,
+														Description:         "Glue Schema registry AWS trust anchor ARN.",
+														MarkdownDescription: "Glue Schema registry AWS trust anchor ARN.",
+													},
+												},
+												CustomType: IamAnywhereType{
+													ObjectType: types.ObjectType{
+														AttrTypes: IamAnywhereValue{}.AttributeTypes(ctx),
+													},
+												},
+												Optional:            true,
+												Description:         "AWS IAM Anywhere GLUE schema registry security configuration.",
+												MarkdownDescription: "AWS IAM Anywhere GLUE schema registry security configuration.",
+											},
+										},
+										CustomType: GlueSecurityType{
+											ObjectType: types.ObjectType{
+												AttrTypes: GlueSecurityValue{}.AttributeTypes(ctx),
+											},
+										},
+										Required:            true,
+										Description:         "Schema registry configuration. One of `credentials`, `from_context`, `from_role`, `iam_anywhere`",
+										MarkdownDescription: "Schema registry configuration. One of `credentials`, `from_context`, `from_role`, `iam_anywhere`",
+									},
+								},
+								CustomType: GlueType{
+									ObjectType: types.ObjectType{
+										AttrTypes: GlueValue{}.AttributeTypes(ctx),
+									},
+								},
+								Optional:            true,
+								Description:         "AWS Glue schema registry configuration",
+								MarkdownDescription: "AWS Glue schema registry configuration",
 							},
 						},
 						CustomType: SchemaRegistryType{
@@ -311,8 +443,8 @@ func ConsoleKafkaClusterV2ResourceSchema(ctx context.Context) schema.Schema {
 							},
 						},
 						Optional:            true,
-						Description:         "Schema registry configuration",
-						MarkdownDescription: "Schema registry configuration",
+						Description:         "Schema registry configuration. One of `confluent_like`, `glue`",
+						MarkdownDescription: "Schema registry configuration. One of `confluent_like`, `glue`",
 					},
 				},
 				CustomType: SpecType{
@@ -1159,238 +1291,58 @@ func (t KafkaFlavorType) ValueFromObject(ctx context.Context, in basetypes.Objec
 
 	attributes := in.Attributes()
 
-	apiTokenAttribute, ok := attributes["api_token"]
+	aivenAttribute, ok := attributes["aiven"]
 
 	if !ok {
 		diags.AddError(
 			"Attribute Missing",
-			`api_token is missing from object`)
+			`aiven is missing from object`)
 
 		return nil, diags
 	}
 
-	apiTokenVal, ok := apiTokenAttribute.(basetypes.StringValue)
+	aivenVal, ok := aivenAttribute.(basetypes.ObjectValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`api_token expected to be basetypes.StringValue, was: %T`, apiTokenAttribute))
+			fmt.Sprintf(`aiven expected to be basetypes.ObjectValue, was: %T`, aivenAttribute))
 	}
 
-	confluentClusterIdAttribute, ok := attributes["confluent_cluster_id"]
+	confluentAttribute, ok := attributes["confluent"]
 
 	if !ok {
 		diags.AddError(
 			"Attribute Missing",
-			`confluent_cluster_id is missing from object`)
+			`confluent is missing from object`)
 
 		return nil, diags
 	}
 
-	confluentClusterIdVal, ok := confluentClusterIdAttribute.(basetypes.StringValue)
+	confluentVal, ok := confluentAttribute.(basetypes.ObjectValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`confluent_cluster_id expected to be basetypes.StringValue, was: %T`, confluentClusterIdAttribute))
+			fmt.Sprintf(`confluent expected to be basetypes.ObjectValue, was: %T`, confluentAttribute))
 	}
 
-	confluentEnvironmentIdAttribute, ok := attributes["confluent_environment_id"]
+	gatewayAttribute, ok := attributes["gateway"]
 
 	if !ok {
 		diags.AddError(
 			"Attribute Missing",
-			`confluent_environment_id is missing from object`)
+			`gateway is missing from object`)
 
 		return nil, diags
 	}
 
-	confluentEnvironmentIdVal, ok := confluentEnvironmentIdAttribute.(basetypes.StringValue)
+	gatewayVal, ok := gatewayAttribute.(basetypes.ObjectValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`confluent_environment_id expected to be basetypes.StringValue, was: %T`, confluentEnvironmentIdAttribute))
-	}
-
-	ignoreUntrustedCertificateAttribute, ok := attributes["ignore_untrusted_certificate"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`ignore_untrusted_certificate is missing from object`)
-
-		return nil, diags
-	}
-
-	ignoreUntrustedCertificateVal, ok := ignoreUntrustedCertificateAttribute.(basetypes.BoolValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`ignore_untrusted_certificate expected to be basetypes.BoolValue, was: %T`, ignoreUntrustedCertificateAttribute))
-	}
-
-	keyAttribute, ok := attributes["key"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`key is missing from object`)
-
-		return nil, diags
-	}
-
-	keyVal, ok := keyAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`key expected to be basetypes.StringValue, was: %T`, keyAttribute))
-	}
-
-	passwordAttribute, ok := attributes["password"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`password is missing from object`)
-
-		return nil, diags
-	}
-
-	passwordVal, ok := passwordAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`password expected to be basetypes.StringValue, was: %T`, passwordAttribute))
-	}
-
-	projectAttribute, ok := attributes["project"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`project is missing from object`)
-
-		return nil, diags
-	}
-
-	projectVal, ok := projectAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`project expected to be basetypes.StringValue, was: %T`, projectAttribute))
-	}
-
-	secretAttribute, ok := attributes["secret"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`secret is missing from object`)
-
-		return nil, diags
-	}
-
-	secretVal, ok := secretAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`secret expected to be basetypes.StringValue, was: %T`, secretAttribute))
-	}
-
-	serviceNameAttribute, ok := attributes["service_name"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`service_name is missing from object`)
-
-		return nil, diags
-	}
-
-	serviceNameVal, ok := serviceNameAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`service_name expected to be basetypes.StringValue, was: %T`, serviceNameAttribute))
-	}
-
-	typeAttribute, ok := attributes["type"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`type is missing from object`)
-
-		return nil, diags
-	}
-
-	typeVal, ok := typeAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`type expected to be basetypes.StringValue, was: %T`, typeAttribute))
-	}
-
-	urlAttribute, ok := attributes["url"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`url is missing from object`)
-
-		return nil, diags
-	}
-
-	urlVal, ok := urlAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`url expected to be basetypes.StringValue, was: %T`, urlAttribute))
-	}
-
-	userAttribute, ok := attributes["user"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`user is missing from object`)
-
-		return nil, diags
-	}
-
-	userVal, ok := userAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`user expected to be basetypes.StringValue, was: %T`, userAttribute))
-	}
-
-	virtualClusterAttribute, ok := attributes["virtual_cluster"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`virtual_cluster is missing from object`)
-
-		return nil, diags
-	}
-
-	virtualClusterVal, ok := virtualClusterAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`virtual_cluster expected to be basetypes.StringValue, was: %T`, virtualClusterAttribute))
+			fmt.Sprintf(`gateway expected to be basetypes.ObjectValue, was: %T`, gatewayAttribute))
 	}
 
 	if diags.HasError() {
@@ -1398,20 +1350,10 @@ func (t KafkaFlavorType) ValueFromObject(ctx context.Context, in basetypes.Objec
 	}
 
 	return KafkaFlavorValue{
-		ApiToken:                   apiTokenVal,
-		ConfluentClusterId:         confluentClusterIdVal,
-		ConfluentEnvironmentId:     confluentEnvironmentIdVal,
-		IgnoreUntrustedCertificate: ignoreUntrustedCertificateVal,
-		Key:                        keyVal,
-		Password:                   passwordVal,
-		Project:                    projectVal,
-		Secret:                     secretVal,
-		ServiceName:                serviceNameVal,
-		KafkaFlavorType:            typeVal,
-		Url:                        urlVal,
-		User:                       userVal,
-		VirtualCluster:             virtualClusterVal,
-		state:                      attr.ValueStateKnown,
+		Aiven:     aivenVal,
+		Confluent: confluentVal,
+		Gateway:   gatewayVal,
+		state:     attr.ValueStateKnown,
 	}, diags
 }
 
@@ -1478,238 +1420,58 @@ func NewKafkaFlavorValue(attributeTypes map[string]attr.Type, attributes map[str
 		return NewKafkaFlavorValueUnknown(), diags
 	}
 
-	apiTokenAttribute, ok := attributes["api_token"]
+	aivenAttribute, ok := attributes["aiven"]
 
 	if !ok {
 		diags.AddError(
 			"Attribute Missing",
-			`api_token is missing from object`)
+			`aiven is missing from object`)
 
 		return NewKafkaFlavorValueUnknown(), diags
 	}
 
-	apiTokenVal, ok := apiTokenAttribute.(basetypes.StringValue)
+	aivenVal, ok := aivenAttribute.(basetypes.ObjectValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`api_token expected to be basetypes.StringValue, was: %T`, apiTokenAttribute))
+			fmt.Sprintf(`aiven expected to be basetypes.ObjectValue, was: %T`, aivenAttribute))
 	}
 
-	confluentClusterIdAttribute, ok := attributes["confluent_cluster_id"]
+	confluentAttribute, ok := attributes["confluent"]
 
 	if !ok {
 		diags.AddError(
 			"Attribute Missing",
-			`confluent_cluster_id is missing from object`)
+			`confluent is missing from object`)
 
 		return NewKafkaFlavorValueUnknown(), diags
 	}
 
-	confluentClusterIdVal, ok := confluentClusterIdAttribute.(basetypes.StringValue)
+	confluentVal, ok := confluentAttribute.(basetypes.ObjectValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`confluent_cluster_id expected to be basetypes.StringValue, was: %T`, confluentClusterIdAttribute))
+			fmt.Sprintf(`confluent expected to be basetypes.ObjectValue, was: %T`, confluentAttribute))
 	}
 
-	confluentEnvironmentIdAttribute, ok := attributes["confluent_environment_id"]
+	gatewayAttribute, ok := attributes["gateway"]
 
 	if !ok {
 		diags.AddError(
 			"Attribute Missing",
-			`confluent_environment_id is missing from object`)
+			`gateway is missing from object`)
 
 		return NewKafkaFlavorValueUnknown(), diags
 	}
 
-	confluentEnvironmentIdVal, ok := confluentEnvironmentIdAttribute.(basetypes.StringValue)
+	gatewayVal, ok := gatewayAttribute.(basetypes.ObjectValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`confluent_environment_id expected to be basetypes.StringValue, was: %T`, confluentEnvironmentIdAttribute))
-	}
-
-	ignoreUntrustedCertificateAttribute, ok := attributes["ignore_untrusted_certificate"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`ignore_untrusted_certificate is missing from object`)
-
-		return NewKafkaFlavorValueUnknown(), diags
-	}
-
-	ignoreUntrustedCertificateVal, ok := ignoreUntrustedCertificateAttribute.(basetypes.BoolValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`ignore_untrusted_certificate expected to be basetypes.BoolValue, was: %T`, ignoreUntrustedCertificateAttribute))
-	}
-
-	keyAttribute, ok := attributes["key"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`key is missing from object`)
-
-		return NewKafkaFlavorValueUnknown(), diags
-	}
-
-	keyVal, ok := keyAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`key expected to be basetypes.StringValue, was: %T`, keyAttribute))
-	}
-
-	passwordAttribute, ok := attributes["password"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`password is missing from object`)
-
-		return NewKafkaFlavorValueUnknown(), diags
-	}
-
-	passwordVal, ok := passwordAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`password expected to be basetypes.StringValue, was: %T`, passwordAttribute))
-	}
-
-	projectAttribute, ok := attributes["project"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`project is missing from object`)
-
-		return NewKafkaFlavorValueUnknown(), diags
-	}
-
-	projectVal, ok := projectAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`project expected to be basetypes.StringValue, was: %T`, projectAttribute))
-	}
-
-	secretAttribute, ok := attributes["secret"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`secret is missing from object`)
-
-		return NewKafkaFlavorValueUnknown(), diags
-	}
-
-	secretVal, ok := secretAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`secret expected to be basetypes.StringValue, was: %T`, secretAttribute))
-	}
-
-	serviceNameAttribute, ok := attributes["service_name"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`service_name is missing from object`)
-
-		return NewKafkaFlavorValueUnknown(), diags
-	}
-
-	serviceNameVal, ok := serviceNameAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`service_name expected to be basetypes.StringValue, was: %T`, serviceNameAttribute))
-	}
-
-	typeAttribute, ok := attributes["type"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`type is missing from object`)
-
-		return NewKafkaFlavorValueUnknown(), diags
-	}
-
-	typeVal, ok := typeAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`type expected to be basetypes.StringValue, was: %T`, typeAttribute))
-	}
-
-	urlAttribute, ok := attributes["url"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`url is missing from object`)
-
-		return NewKafkaFlavorValueUnknown(), diags
-	}
-
-	urlVal, ok := urlAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`url expected to be basetypes.StringValue, was: %T`, urlAttribute))
-	}
-
-	userAttribute, ok := attributes["user"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`user is missing from object`)
-
-		return NewKafkaFlavorValueUnknown(), diags
-	}
-
-	userVal, ok := userAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`user expected to be basetypes.StringValue, was: %T`, userAttribute))
-	}
-
-	virtualClusterAttribute, ok := attributes["virtual_cluster"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`virtual_cluster is missing from object`)
-
-		return NewKafkaFlavorValueUnknown(), diags
-	}
-
-	virtualClusterVal, ok := virtualClusterAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`virtual_cluster expected to be basetypes.StringValue, was: %T`, virtualClusterAttribute))
+			fmt.Sprintf(`gateway expected to be basetypes.ObjectValue, was: %T`, gatewayAttribute))
 	}
 
 	if diags.HasError() {
@@ -1717,20 +1479,10 @@ func NewKafkaFlavorValue(attributeTypes map[string]attr.Type, attributes map[str
 	}
 
 	return KafkaFlavorValue{
-		ApiToken:                   apiTokenVal,
-		ConfluentClusterId:         confluentClusterIdVal,
-		ConfluentEnvironmentId:     confluentEnvironmentIdVal,
-		IgnoreUntrustedCertificate: ignoreUntrustedCertificateVal,
-		Key:                        keyVal,
-		Password:                   passwordVal,
-		Project:                    projectVal,
-		Secret:                     secretVal,
-		ServiceName:                serviceNameVal,
-		KafkaFlavorType:            typeVal,
-		Url:                        urlVal,
-		User:                       userVal,
-		VirtualCluster:             virtualClusterVal,
-		state:                      attr.ValueStateKnown,
+		Aiven:     aivenVal,
+		Confluent: confluentVal,
+		Gateway:   gatewayVal,
+		state:     attr.ValueStateKnown,
 	}, diags
 }
 
@@ -1802,47 +1554,542 @@ func (t KafkaFlavorType) ValueType(ctx context.Context) attr.Value {
 var _ basetypes.ObjectValuable = KafkaFlavorValue{}
 
 type KafkaFlavorValue struct {
-	ApiToken                   basetypes.StringValue `tfsdk:"api_token"`
-	ConfluentClusterId         basetypes.StringValue `tfsdk:"confluent_cluster_id"`
-	ConfluentEnvironmentId     basetypes.StringValue `tfsdk:"confluent_environment_id"`
-	IgnoreUntrustedCertificate basetypes.BoolValue   `tfsdk:"ignore_untrusted_certificate"`
-	Key                        basetypes.StringValue `tfsdk:"key"`
-	Password                   basetypes.StringValue `tfsdk:"password"`
-	Project                    basetypes.StringValue `tfsdk:"project"`
-	Secret                     basetypes.StringValue `tfsdk:"secret"`
-	ServiceName                basetypes.StringValue `tfsdk:"service_name"`
-	KafkaFlavorType            basetypes.StringValue `tfsdk:"type"`
-	Url                        basetypes.StringValue `tfsdk:"url"`
-	User                       basetypes.StringValue `tfsdk:"user"`
-	VirtualCluster             basetypes.StringValue `tfsdk:"virtual_cluster"`
-	state                      attr.ValueState
+	Aiven     basetypes.ObjectValue `tfsdk:"aiven"`
+	Confluent basetypes.ObjectValue `tfsdk:"confluent"`
+	Gateway   basetypes.ObjectValue `tfsdk:"gateway"`
+	state     attr.ValueState
 }
 
 func (v KafkaFlavorValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
-	attrTypes := make(map[string]tftypes.Type, 13)
+	attrTypes := make(map[string]tftypes.Type, 3)
 
 	var val tftypes.Value
 	var err error
 
-	attrTypes["api_token"] = basetypes.StringType{}.TerraformType(ctx)
-	attrTypes["confluent_cluster_id"] = basetypes.StringType{}.TerraformType(ctx)
-	attrTypes["confluent_environment_id"] = basetypes.StringType{}.TerraformType(ctx)
-	attrTypes["ignore_untrusted_certificate"] = basetypes.BoolType{}.TerraformType(ctx)
-	attrTypes["key"] = basetypes.StringType{}.TerraformType(ctx)
-	attrTypes["password"] = basetypes.StringType{}.TerraformType(ctx)
-	attrTypes["project"] = basetypes.StringType{}.TerraformType(ctx)
-	attrTypes["secret"] = basetypes.StringType{}.TerraformType(ctx)
-	attrTypes["service_name"] = basetypes.StringType{}.TerraformType(ctx)
-	attrTypes["type"] = basetypes.StringType{}.TerraformType(ctx)
-	attrTypes["url"] = basetypes.StringType{}.TerraformType(ctx)
-	attrTypes["user"] = basetypes.StringType{}.TerraformType(ctx)
-	attrTypes["virtual_cluster"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["aiven"] = basetypes.ObjectType{
+		AttrTypes: AivenValue{}.AttributeTypes(ctx),
+	}.TerraformType(ctx)
+	attrTypes["confluent"] = basetypes.ObjectType{
+		AttrTypes: ConfluentValue{}.AttributeTypes(ctx),
+	}.TerraformType(ctx)
+	attrTypes["gateway"] = basetypes.ObjectType{
+		AttrTypes: GatewayValue{}.AttributeTypes(ctx),
+	}.TerraformType(ctx)
 
 	objectType := tftypes.Object{AttributeTypes: attrTypes}
 
 	switch v.state {
 	case attr.ValueStateKnown:
-		vals := make(map[string]tftypes.Value, 13)
+		vals := make(map[string]tftypes.Value, 3)
+
+		val, err = v.Aiven.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["aiven"] = val
+
+		val, err = v.Confluent.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["confluent"] = val
+
+		val, err = v.Gateway.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["gateway"] = val
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v KafkaFlavorValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v KafkaFlavorValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v KafkaFlavorValue) String() string {
+	return "KafkaFlavorValue"
+}
+
+func (v KafkaFlavorValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	var aiven basetypes.ObjectValue
+
+	if v.Aiven.IsNull() {
+		aiven = types.ObjectNull(
+			AivenValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if v.Aiven.IsUnknown() {
+		aiven = types.ObjectUnknown(
+			AivenValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if !v.Aiven.IsNull() && !v.Aiven.IsUnknown() {
+		aiven = types.ObjectValueMust(
+			AivenValue{}.AttributeTypes(ctx),
+			v.Aiven.Attributes(),
+		)
+	}
+
+	var confluent basetypes.ObjectValue
+
+	if v.Confluent.IsNull() {
+		confluent = types.ObjectNull(
+			ConfluentValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if v.Confluent.IsUnknown() {
+		confluent = types.ObjectUnknown(
+			ConfluentValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if !v.Confluent.IsNull() && !v.Confluent.IsUnknown() {
+		confluent = types.ObjectValueMust(
+			ConfluentValue{}.AttributeTypes(ctx),
+			v.Confluent.Attributes(),
+		)
+	}
+
+	var gateway basetypes.ObjectValue
+
+	if v.Gateway.IsNull() {
+		gateway = types.ObjectNull(
+			GatewayValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if v.Gateway.IsUnknown() {
+		gateway = types.ObjectUnknown(
+			GatewayValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if !v.Gateway.IsNull() && !v.Gateway.IsUnknown() {
+		gateway = types.ObjectValueMust(
+			GatewayValue{}.AttributeTypes(ctx),
+			v.Gateway.Attributes(),
+		)
+	}
+
+	attributeTypes := map[string]attr.Type{
+		"aiven": basetypes.ObjectType{
+			AttrTypes: AivenValue{}.AttributeTypes(ctx),
+		},
+		"confluent": basetypes.ObjectType{
+			AttrTypes: ConfluentValue{}.AttributeTypes(ctx),
+		},
+		"gateway": basetypes.ObjectType{
+			AttrTypes: GatewayValue{}.AttributeTypes(ctx),
+		},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{
+			"aiven":     aiven,
+			"confluent": confluent,
+			"gateway":   gateway,
+		})
+
+	return objVal, diags
+}
+
+func (v KafkaFlavorValue) Equal(o attr.Value) bool {
+	other, ok := o.(KafkaFlavorValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	if !v.Aiven.Equal(other.Aiven) {
+		return false
+	}
+
+	if !v.Confluent.Equal(other.Confluent) {
+		return false
+	}
+
+	if !v.Gateway.Equal(other.Gateway) {
+		return false
+	}
+
+	return true
+}
+
+func (v KafkaFlavorValue) Type(ctx context.Context) attr.Type {
+	return KafkaFlavorType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v KafkaFlavorValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"aiven": basetypes.ObjectType{
+			AttrTypes: AivenValue{}.AttributeTypes(ctx),
+		},
+		"confluent": basetypes.ObjectType{
+			AttrTypes: ConfluentValue{}.AttributeTypes(ctx),
+		},
+		"gateway": basetypes.ObjectType{
+			AttrTypes: GatewayValue{}.AttributeTypes(ctx),
+		},
+	}
+}
+
+var _ basetypes.ObjectTypable = AivenType{}
+
+type AivenType struct {
+	basetypes.ObjectType
+}
+
+func (t AivenType) Equal(o attr.Type) bool {
+	other, ok := o.(AivenType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t AivenType) String() string {
+	return "AivenType"
+}
+
+func (t AivenType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	apiTokenAttribute, ok := attributes["api_token"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`api_token is missing from object`)
+
+		return nil, diags
+	}
+
+	apiTokenVal, ok := apiTokenAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`api_token expected to be basetypes.StringValue, was: %T`, apiTokenAttribute))
+	}
+
+	projectAttribute, ok := attributes["project"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`project is missing from object`)
+
+		return nil, diags
+	}
+
+	projectVal, ok := projectAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`project expected to be basetypes.StringValue, was: %T`, projectAttribute))
+	}
+
+	serviceNameAttribute, ok := attributes["service_name"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`service_name is missing from object`)
+
+		return nil, diags
+	}
+
+	serviceNameVal, ok := serviceNameAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`service_name expected to be basetypes.StringValue, was: %T`, serviceNameAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return AivenValue{
+		ApiToken:    apiTokenVal,
+		Project:     projectVal,
+		ServiceName: serviceNameVal,
+		state:       attr.ValueStateKnown,
+	}, diags
+}
+
+func NewAivenValueNull() AivenValue {
+	return AivenValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewAivenValueUnknown() AivenValue {
+	return AivenValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewAivenValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (AivenValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing AivenValue Attribute Value",
+				"While creating a AivenValue value, a missing attribute value was detected. "+
+					"A AivenValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("AivenValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid AivenValue Attribute Type",
+				"While creating a AivenValue value, an invalid attribute value was detected. "+
+					"A AivenValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("AivenValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("AivenValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra AivenValue Attribute Value",
+				"While creating a AivenValue value, an extra attribute value was detected. "+
+					"A AivenValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra AivenValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewAivenValueUnknown(), diags
+	}
+
+	apiTokenAttribute, ok := attributes["api_token"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`api_token is missing from object`)
+
+		return NewAivenValueUnknown(), diags
+	}
+
+	apiTokenVal, ok := apiTokenAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`api_token expected to be basetypes.StringValue, was: %T`, apiTokenAttribute))
+	}
+
+	projectAttribute, ok := attributes["project"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`project is missing from object`)
+
+		return NewAivenValueUnknown(), diags
+	}
+
+	projectVal, ok := projectAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`project expected to be basetypes.StringValue, was: %T`, projectAttribute))
+	}
+
+	serviceNameAttribute, ok := attributes["service_name"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`service_name is missing from object`)
+
+		return NewAivenValueUnknown(), diags
+	}
+
+	serviceNameVal, ok := serviceNameAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`service_name expected to be basetypes.StringValue, was: %T`, serviceNameAttribute))
+	}
+
+	if diags.HasError() {
+		return NewAivenValueUnknown(), diags
+	}
+
+	return AivenValue{
+		ApiToken:    apiTokenVal,
+		Project:     projectVal,
+		ServiceName: serviceNameVal,
+		state:       attr.ValueStateKnown,
+	}, diags
+}
+
+func NewAivenValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) AivenValue {
+	object, diags := NewAivenValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewAivenValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t AivenType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewAivenValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewAivenValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewAivenValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewAivenValueMust(AivenValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t AivenType) ValueType(ctx context.Context) attr.Value {
+	return AivenValue{}
+}
+
+var _ basetypes.ObjectValuable = AivenValue{}
+
+type AivenValue struct {
+	ApiToken    basetypes.StringValue `tfsdk:"api_token"`
+	Project     basetypes.StringValue `tfsdk:"project"`
+	ServiceName basetypes.StringValue `tfsdk:"service_name"`
+	state       attr.ValueState
+}
+
+func (v AivenValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 3)
+
+	var val tftypes.Value
+	var err error
+
+	attrTypes["api_token"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["project"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["service_name"] = basetypes.StringType{}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 3)
 
 		val, err = v.ApiToken.ToTerraformValue(ctx)
 
@@ -1851,6 +2098,472 @@ func (v KafkaFlavorValue) ToTerraformValue(ctx context.Context) (tftypes.Value, 
 		}
 
 		vals["api_token"] = val
+
+		val, err = v.Project.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["project"] = val
+
+		val, err = v.ServiceName.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["service_name"] = val
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v AivenValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v AivenValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v AivenValue) String() string {
+	return "AivenValue"
+}
+
+func (v AivenValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributeTypes := map[string]attr.Type{
+		"api_token":    basetypes.StringType{},
+		"project":      basetypes.StringType{},
+		"service_name": basetypes.StringType{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{
+			"api_token":    v.ApiToken,
+			"project":      v.Project,
+			"service_name": v.ServiceName,
+		})
+
+	return objVal, diags
+}
+
+func (v AivenValue) Equal(o attr.Value) bool {
+	other, ok := o.(AivenValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	if !v.ApiToken.Equal(other.ApiToken) {
+		return false
+	}
+
+	if !v.Project.Equal(other.Project) {
+		return false
+	}
+
+	if !v.ServiceName.Equal(other.ServiceName) {
+		return false
+	}
+
+	return true
+}
+
+func (v AivenValue) Type(ctx context.Context) attr.Type {
+	return AivenType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v AivenValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"api_token":    basetypes.StringType{},
+		"project":      basetypes.StringType{},
+		"service_name": basetypes.StringType{},
+	}
+}
+
+var _ basetypes.ObjectTypable = ConfluentType{}
+
+type ConfluentType struct {
+	basetypes.ObjectType
+}
+
+func (t ConfluentType) Equal(o attr.Type) bool {
+	other, ok := o.(ConfluentType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t ConfluentType) String() string {
+	return "ConfluentType"
+}
+
+func (t ConfluentType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	confluentClusterIdAttribute, ok := attributes["confluent_cluster_id"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`confluent_cluster_id is missing from object`)
+
+		return nil, diags
+	}
+
+	confluentClusterIdVal, ok := confluentClusterIdAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`confluent_cluster_id expected to be basetypes.StringValue, was: %T`, confluentClusterIdAttribute))
+	}
+
+	confluentEnvironmentIdAttribute, ok := attributes["confluent_environment_id"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`confluent_environment_id is missing from object`)
+
+		return nil, diags
+	}
+
+	confluentEnvironmentIdVal, ok := confluentEnvironmentIdAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`confluent_environment_id expected to be basetypes.StringValue, was: %T`, confluentEnvironmentIdAttribute))
+	}
+
+	keyAttribute, ok := attributes["key"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`key is missing from object`)
+
+		return nil, diags
+	}
+
+	keyVal, ok := keyAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`key expected to be basetypes.StringValue, was: %T`, keyAttribute))
+	}
+
+	secretAttribute, ok := attributes["secret"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`secret is missing from object`)
+
+		return nil, diags
+	}
+
+	secretVal, ok := secretAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`secret expected to be basetypes.StringValue, was: %T`, secretAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return ConfluentValue{
+		ConfluentClusterId:     confluentClusterIdVal,
+		ConfluentEnvironmentId: confluentEnvironmentIdVal,
+		Key:                    keyVal,
+		Secret:                 secretVal,
+		state:                  attr.ValueStateKnown,
+	}, diags
+}
+
+func NewConfluentValueNull() ConfluentValue {
+	return ConfluentValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewConfluentValueUnknown() ConfluentValue {
+	return ConfluentValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewConfluentValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (ConfluentValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing ConfluentValue Attribute Value",
+				"While creating a ConfluentValue value, a missing attribute value was detected. "+
+					"A ConfluentValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("ConfluentValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid ConfluentValue Attribute Type",
+				"While creating a ConfluentValue value, an invalid attribute value was detected. "+
+					"A ConfluentValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("ConfluentValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("ConfluentValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra ConfluentValue Attribute Value",
+				"While creating a ConfluentValue value, an extra attribute value was detected. "+
+					"A ConfluentValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra ConfluentValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewConfluentValueUnknown(), diags
+	}
+
+	confluentClusterIdAttribute, ok := attributes["confluent_cluster_id"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`confluent_cluster_id is missing from object`)
+
+		return NewConfluentValueUnknown(), diags
+	}
+
+	confluentClusterIdVal, ok := confluentClusterIdAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`confluent_cluster_id expected to be basetypes.StringValue, was: %T`, confluentClusterIdAttribute))
+	}
+
+	confluentEnvironmentIdAttribute, ok := attributes["confluent_environment_id"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`confluent_environment_id is missing from object`)
+
+		return NewConfluentValueUnknown(), diags
+	}
+
+	confluentEnvironmentIdVal, ok := confluentEnvironmentIdAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`confluent_environment_id expected to be basetypes.StringValue, was: %T`, confluentEnvironmentIdAttribute))
+	}
+
+	keyAttribute, ok := attributes["key"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`key is missing from object`)
+
+		return NewConfluentValueUnknown(), diags
+	}
+
+	keyVal, ok := keyAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`key expected to be basetypes.StringValue, was: %T`, keyAttribute))
+	}
+
+	secretAttribute, ok := attributes["secret"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`secret is missing from object`)
+
+		return NewConfluentValueUnknown(), diags
+	}
+
+	secretVal, ok := secretAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`secret expected to be basetypes.StringValue, was: %T`, secretAttribute))
+	}
+
+	if diags.HasError() {
+		return NewConfluentValueUnknown(), diags
+	}
+
+	return ConfluentValue{
+		ConfluentClusterId:     confluentClusterIdVal,
+		ConfluentEnvironmentId: confluentEnvironmentIdVal,
+		Key:                    keyVal,
+		Secret:                 secretVal,
+		state:                  attr.ValueStateKnown,
+	}, diags
+}
+
+func NewConfluentValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) ConfluentValue {
+	object, diags := NewConfluentValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewConfluentValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t ConfluentType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewConfluentValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewConfluentValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewConfluentValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewConfluentValueMust(ConfluentValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t ConfluentType) ValueType(ctx context.Context) attr.Value {
+	return ConfluentValue{}
+}
+
+var _ basetypes.ObjectValuable = ConfluentValue{}
+
+type ConfluentValue struct {
+	ConfluentClusterId     basetypes.StringValue `tfsdk:"confluent_cluster_id"`
+	ConfluentEnvironmentId basetypes.StringValue `tfsdk:"confluent_environment_id"`
+	Key                    basetypes.StringValue `tfsdk:"key"`
+	Secret                 basetypes.StringValue `tfsdk:"secret"`
+	state                  attr.ValueState
+}
+
+func (v ConfluentValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 4)
+
+	var val tftypes.Value
+	var err error
+
+	attrTypes["confluent_cluster_id"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["confluent_environment_id"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["key"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["secret"] = basetypes.StringType{}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 4)
 
 		val, err = v.ConfluentClusterId.ToTerraformValue(ctx)
 
@@ -1868,14 +2581,6 @@ func (v KafkaFlavorValue) ToTerraformValue(ctx context.Context) (tftypes.Value, 
 
 		vals["confluent_environment_id"] = val
 
-		val, err = v.IgnoreUntrustedCertificate.ToTerraformValue(ctx)
-
-		if err != nil {
-			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
-		}
-
-		vals["ignore_untrusted_certificate"] = val
-
 		val, err = v.Key.ToTerraformValue(ctx)
 
 		if err != nil {
@@ -1883,22 +2588,6 @@ func (v KafkaFlavorValue) ToTerraformValue(ctx context.Context) (tftypes.Value, 
 		}
 
 		vals["key"] = val
-
-		val, err = v.Password.ToTerraformValue(ctx)
-
-		if err != nil {
-			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
-		}
-
-		vals["password"] = val
-
-		val, err = v.Project.ToTerraformValue(ctx)
-
-		if err != nil {
-			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
-		}
-
-		vals["project"] = val
 
 		val, err = v.Secret.ToTerraformValue(ctx)
 
@@ -1908,21 +2597,518 @@ func (v KafkaFlavorValue) ToTerraformValue(ctx context.Context) (tftypes.Value, 
 
 		vals["secret"] = val
 
-		val, err = v.ServiceName.ToTerraformValue(ctx)
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v ConfluentValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v ConfluentValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v ConfluentValue) String() string {
+	return "ConfluentValue"
+}
+
+func (v ConfluentValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributeTypes := map[string]attr.Type{
+		"confluent_cluster_id":     basetypes.StringType{},
+		"confluent_environment_id": basetypes.StringType{},
+		"key":                      basetypes.StringType{},
+		"secret":                   basetypes.StringType{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{
+			"confluent_cluster_id":     v.ConfluentClusterId,
+			"confluent_environment_id": v.ConfluentEnvironmentId,
+			"key":                      v.Key,
+			"secret":                   v.Secret,
+		})
+
+	return objVal, diags
+}
+
+func (v ConfluentValue) Equal(o attr.Value) bool {
+	other, ok := o.(ConfluentValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	if !v.ConfluentClusterId.Equal(other.ConfluentClusterId) {
+		return false
+	}
+
+	if !v.ConfluentEnvironmentId.Equal(other.ConfluentEnvironmentId) {
+		return false
+	}
+
+	if !v.Key.Equal(other.Key) {
+		return false
+	}
+
+	if !v.Secret.Equal(other.Secret) {
+		return false
+	}
+
+	return true
+}
+
+func (v ConfluentValue) Type(ctx context.Context) attr.Type {
+	return ConfluentType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v ConfluentValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"confluent_cluster_id":     basetypes.StringType{},
+		"confluent_environment_id": basetypes.StringType{},
+		"key":                      basetypes.StringType{},
+		"secret":                   basetypes.StringType{},
+	}
+}
+
+var _ basetypes.ObjectTypable = GatewayType{}
+
+type GatewayType struct {
+	basetypes.ObjectType
+}
+
+func (t GatewayType) Equal(o attr.Type) bool {
+	other, ok := o.(GatewayType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t GatewayType) String() string {
+	return "GatewayType"
+}
+
+func (t GatewayType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	ignoreUntrustedCertificateAttribute, ok := attributes["ignore_untrusted_certificate"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`ignore_untrusted_certificate is missing from object`)
+
+		return nil, diags
+	}
+
+	ignoreUntrustedCertificateVal, ok := ignoreUntrustedCertificateAttribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`ignore_untrusted_certificate expected to be basetypes.BoolValue, was: %T`, ignoreUntrustedCertificateAttribute))
+	}
+
+	passwordAttribute, ok := attributes["password"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`password is missing from object`)
+
+		return nil, diags
+	}
+
+	passwordVal, ok := passwordAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`password expected to be basetypes.StringValue, was: %T`, passwordAttribute))
+	}
+
+	urlAttribute, ok := attributes["url"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`url is missing from object`)
+
+		return nil, diags
+	}
+
+	urlVal, ok := urlAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`url expected to be basetypes.StringValue, was: %T`, urlAttribute))
+	}
+
+	userAttribute, ok := attributes["user"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`user is missing from object`)
+
+		return nil, diags
+	}
+
+	userVal, ok := userAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`user expected to be basetypes.StringValue, was: %T`, userAttribute))
+	}
+
+	virtualClusterAttribute, ok := attributes["virtual_cluster"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`virtual_cluster is missing from object`)
+
+		return nil, diags
+	}
+
+	virtualClusterVal, ok := virtualClusterAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`virtual_cluster expected to be basetypes.StringValue, was: %T`, virtualClusterAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return GatewayValue{
+		IgnoreUntrustedCertificate: ignoreUntrustedCertificateVal,
+		Password:                   passwordVal,
+		Url:                        urlVal,
+		User:                       userVal,
+		VirtualCluster:             virtualClusterVal,
+		state:                      attr.ValueStateKnown,
+	}, diags
+}
+
+func NewGatewayValueNull() GatewayValue {
+	return GatewayValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewGatewayValueUnknown() GatewayValue {
+	return GatewayValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewGatewayValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (GatewayValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing GatewayValue Attribute Value",
+				"While creating a GatewayValue value, a missing attribute value was detected. "+
+					"A GatewayValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("GatewayValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid GatewayValue Attribute Type",
+				"While creating a GatewayValue value, an invalid attribute value was detected. "+
+					"A GatewayValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("GatewayValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("GatewayValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra GatewayValue Attribute Value",
+				"While creating a GatewayValue value, an extra attribute value was detected. "+
+					"A GatewayValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra GatewayValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewGatewayValueUnknown(), diags
+	}
+
+	ignoreUntrustedCertificateAttribute, ok := attributes["ignore_untrusted_certificate"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`ignore_untrusted_certificate is missing from object`)
+
+		return NewGatewayValueUnknown(), diags
+	}
+
+	ignoreUntrustedCertificateVal, ok := ignoreUntrustedCertificateAttribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`ignore_untrusted_certificate expected to be basetypes.BoolValue, was: %T`, ignoreUntrustedCertificateAttribute))
+	}
+
+	passwordAttribute, ok := attributes["password"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`password is missing from object`)
+
+		return NewGatewayValueUnknown(), diags
+	}
+
+	passwordVal, ok := passwordAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`password expected to be basetypes.StringValue, was: %T`, passwordAttribute))
+	}
+
+	urlAttribute, ok := attributes["url"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`url is missing from object`)
+
+		return NewGatewayValueUnknown(), diags
+	}
+
+	urlVal, ok := urlAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`url expected to be basetypes.StringValue, was: %T`, urlAttribute))
+	}
+
+	userAttribute, ok := attributes["user"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`user is missing from object`)
+
+		return NewGatewayValueUnknown(), diags
+	}
+
+	userVal, ok := userAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`user expected to be basetypes.StringValue, was: %T`, userAttribute))
+	}
+
+	virtualClusterAttribute, ok := attributes["virtual_cluster"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`virtual_cluster is missing from object`)
+
+		return NewGatewayValueUnknown(), diags
+	}
+
+	virtualClusterVal, ok := virtualClusterAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`virtual_cluster expected to be basetypes.StringValue, was: %T`, virtualClusterAttribute))
+	}
+
+	if diags.HasError() {
+		return NewGatewayValueUnknown(), diags
+	}
+
+	return GatewayValue{
+		IgnoreUntrustedCertificate: ignoreUntrustedCertificateVal,
+		Password:                   passwordVal,
+		Url:                        urlVal,
+		User:                       userVal,
+		VirtualCluster:             virtualClusterVal,
+		state:                      attr.ValueStateKnown,
+	}, diags
+}
+
+func NewGatewayValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) GatewayValue {
+	object, diags := NewGatewayValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewGatewayValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t GatewayType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewGatewayValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewGatewayValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewGatewayValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewGatewayValueMust(GatewayValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t GatewayType) ValueType(ctx context.Context) attr.Value {
+	return GatewayValue{}
+}
+
+var _ basetypes.ObjectValuable = GatewayValue{}
+
+type GatewayValue struct {
+	IgnoreUntrustedCertificate basetypes.BoolValue   `tfsdk:"ignore_untrusted_certificate"`
+	Password                   basetypes.StringValue `tfsdk:"password"`
+	Url                        basetypes.StringValue `tfsdk:"url"`
+	User                       basetypes.StringValue `tfsdk:"user"`
+	VirtualCluster             basetypes.StringValue `tfsdk:"virtual_cluster"`
+	state                      attr.ValueState
+}
+
+func (v GatewayValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 5)
+
+	var val tftypes.Value
+	var err error
+
+	attrTypes["ignore_untrusted_certificate"] = basetypes.BoolType{}.TerraformType(ctx)
+	attrTypes["password"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["url"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["user"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["virtual_cluster"] = basetypes.StringType{}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 5)
+
+		val, err = v.IgnoreUntrustedCertificate.ToTerraformValue(ctx)
 
 		if err != nil {
 			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
 		}
 
-		vals["service_name"] = val
+		vals["ignore_untrusted_certificate"] = val
 
-		val, err = v.KafkaFlavorType.ToTerraformValue(ctx)
+		val, err = v.Password.ToTerraformValue(ctx)
 
 		if err != nil {
 			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
 		}
 
-		vals["type"] = val
+		vals["password"] = val
 
 		val, err = v.Url.ToTerraformValue(ctx)
 
@@ -1962,32 +3148,24 @@ func (v KafkaFlavorValue) ToTerraformValue(ctx context.Context) (tftypes.Value, 
 	}
 }
 
-func (v KafkaFlavorValue) IsNull() bool {
+func (v GatewayValue) IsNull() bool {
 	return v.state == attr.ValueStateNull
 }
 
-func (v KafkaFlavorValue) IsUnknown() bool {
+func (v GatewayValue) IsUnknown() bool {
 	return v.state == attr.ValueStateUnknown
 }
 
-func (v KafkaFlavorValue) String() string {
-	return "KafkaFlavorValue"
+func (v GatewayValue) String() string {
+	return "GatewayValue"
 }
 
-func (v KafkaFlavorValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+func (v GatewayValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	attributeTypes := map[string]attr.Type{
-		"api_token":                    basetypes.StringType{},
-		"confluent_cluster_id":         basetypes.StringType{},
-		"confluent_environment_id":     basetypes.StringType{},
 		"ignore_untrusted_certificate": basetypes.BoolType{},
-		"key":                          basetypes.StringType{},
 		"password":                     basetypes.StringType{},
-		"project":                      basetypes.StringType{},
-		"secret":                       basetypes.StringType{},
-		"service_name":                 basetypes.StringType{},
-		"type":                         basetypes.StringType{},
 		"url":                          basetypes.StringType{},
 		"user":                         basetypes.StringType{},
 		"virtual_cluster":              basetypes.StringType{},
@@ -2004,16 +3182,8 @@ func (v KafkaFlavorValue) ToObjectValue(ctx context.Context) (basetypes.ObjectVa
 	objVal, diags := types.ObjectValue(
 		attributeTypes,
 		map[string]attr.Value{
-			"api_token":                    v.ApiToken,
-			"confluent_cluster_id":         v.ConfluentClusterId,
-			"confluent_environment_id":     v.ConfluentEnvironmentId,
 			"ignore_untrusted_certificate": v.IgnoreUntrustedCertificate,
-			"key":                          v.Key,
 			"password":                     v.Password,
-			"project":                      v.Project,
-			"secret":                       v.Secret,
-			"service_name":                 v.ServiceName,
-			"type":                         v.KafkaFlavorType,
 			"url":                          v.Url,
 			"user":                         v.User,
 			"virtual_cluster":              v.VirtualCluster,
@@ -2022,8 +3192,8 @@ func (v KafkaFlavorValue) ToObjectValue(ctx context.Context) (basetypes.ObjectVa
 	return objVal, diags
 }
 
-func (v KafkaFlavorValue) Equal(o attr.Value) bool {
-	other, ok := o.(KafkaFlavorValue)
+func (v GatewayValue) Equal(o attr.Value) bool {
+	other, ok := o.(GatewayValue)
 
 	if !ok {
 		return false
@@ -2037,43 +3207,11 @@ func (v KafkaFlavorValue) Equal(o attr.Value) bool {
 		return true
 	}
 
-	if !v.ApiToken.Equal(other.ApiToken) {
-		return false
-	}
-
-	if !v.ConfluentClusterId.Equal(other.ConfluentClusterId) {
-		return false
-	}
-
-	if !v.ConfluentEnvironmentId.Equal(other.ConfluentEnvironmentId) {
-		return false
-	}
-
 	if !v.IgnoreUntrustedCertificate.Equal(other.IgnoreUntrustedCertificate) {
 		return false
 	}
 
-	if !v.Key.Equal(other.Key) {
-		return false
-	}
-
 	if !v.Password.Equal(other.Password) {
-		return false
-	}
-
-	if !v.Project.Equal(other.Project) {
-		return false
-	}
-
-	if !v.Secret.Equal(other.Secret) {
-		return false
-	}
-
-	if !v.ServiceName.Equal(other.ServiceName) {
-		return false
-	}
-
-	if !v.KafkaFlavorType.Equal(other.KafkaFlavorType) {
 		return false
 	}
 
@@ -2092,26 +3230,18 @@ func (v KafkaFlavorValue) Equal(o attr.Value) bool {
 	return true
 }
 
-func (v KafkaFlavorValue) Type(ctx context.Context) attr.Type {
-	return KafkaFlavorType{
+func (v GatewayValue) Type(ctx context.Context) attr.Type {
+	return GatewayType{
 		basetypes.ObjectType{
 			AttrTypes: v.AttributeTypes(ctx),
 		},
 	}
 }
 
-func (v KafkaFlavorValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+func (v GatewayValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 	return map[string]attr.Type{
-		"api_token":                    basetypes.StringType{},
-		"confluent_cluster_id":         basetypes.StringType{},
-		"confluent_environment_id":     basetypes.StringType{},
 		"ignore_untrusted_certificate": basetypes.BoolType{},
-		"key":                          basetypes.StringType{},
 		"password":                     basetypes.StringType{},
-		"project":                      basetypes.StringType{},
-		"secret":                       basetypes.StringType{},
-		"service_name":                 basetypes.StringType{},
-		"type":                         basetypes.StringType{},
 		"url":                          basetypes.StringType{},
 		"user":                         basetypes.StringType{},
 		"virtual_cluster":              basetypes.StringType{},
@@ -2143,130 +3273,40 @@ func (t SchemaRegistryType) ValueFromObject(ctx context.Context, in basetypes.Ob
 
 	attributes := in.Attributes()
 
-	ignoreUntrustedCertificateAttribute, ok := attributes["ignore_untrusted_certificate"]
+	confluentLikeAttribute, ok := attributes["confluent_like"]
 
 	if !ok {
 		diags.AddError(
 			"Attribute Missing",
-			`ignore_untrusted_certificate is missing from object`)
+			`confluent_like is missing from object`)
 
 		return nil, diags
 	}
 
-	ignoreUntrustedCertificateVal, ok := ignoreUntrustedCertificateAttribute.(basetypes.BoolValue)
+	confluentLikeVal, ok := confluentLikeAttribute.(basetypes.ObjectValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`ignore_untrusted_certificate expected to be basetypes.BoolValue, was: %T`, ignoreUntrustedCertificateAttribute))
+			fmt.Sprintf(`confluent_like expected to be basetypes.ObjectValue, was: %T`, confluentLikeAttribute))
 	}
 
-	propertiesAttribute, ok := attributes["properties"]
+	glueAttribute, ok := attributes["glue"]
 
 	if !ok {
 		diags.AddError(
 			"Attribute Missing",
-			`properties is missing from object`)
+			`glue is missing from object`)
 
 		return nil, diags
 	}
 
-	propertiesVal, ok := propertiesAttribute.(basetypes.StringValue)
+	glueVal, ok := glueAttribute.(basetypes.ObjectValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`properties expected to be basetypes.StringValue, was: %T`, propertiesAttribute))
-	}
-
-	regionAttribute, ok := attributes["region"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`region is missing from object`)
-
-		return nil, diags
-	}
-
-	regionVal, ok := regionAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`region expected to be basetypes.StringValue, was: %T`, regionAttribute))
-	}
-
-	registryNameAttribute, ok := attributes["registry_name"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`registry_name is missing from object`)
-
-		return nil, diags
-	}
-
-	registryNameVal, ok := registryNameAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`registry_name expected to be basetypes.StringValue, was: %T`, registryNameAttribute))
-	}
-
-	securityAttribute, ok := attributes["security"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`security is missing from object`)
-
-		return nil, diags
-	}
-
-	securityVal, ok := securityAttribute.(basetypes.ObjectValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`security expected to be basetypes.ObjectValue, was: %T`, securityAttribute))
-	}
-
-	typeAttribute, ok := attributes["type"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`type is missing from object`)
-
-		return nil, diags
-	}
-
-	typeVal, ok := typeAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`type expected to be basetypes.StringValue, was: %T`, typeAttribute))
-	}
-
-	urlAttribute, ok := attributes["url"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`url is missing from object`)
-
-		return nil, diags
-	}
-
-	urlVal, ok := urlAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`url expected to be basetypes.StringValue, was: %T`, urlAttribute))
+			fmt.Sprintf(`glue expected to be basetypes.ObjectValue, was: %T`, glueAttribute))
 	}
 
 	if diags.HasError() {
@@ -2274,14 +3314,9 @@ func (t SchemaRegistryType) ValueFromObject(ctx context.Context, in basetypes.Ob
 	}
 
 	return SchemaRegistryValue{
-		IgnoreUntrustedCertificate: ignoreUntrustedCertificateVal,
-		Properties:                 propertiesVal,
-		Region:                     regionVal,
-		RegistryName:               registryNameVal,
-		Security:                   securityVal,
-		SchemaRegistryType:         typeVal,
-		Url:                        urlVal,
-		state:                      attr.ValueStateKnown,
+		ConfluentLike: confluentLikeVal,
+		Glue:          glueVal,
+		state:         attr.ValueStateKnown,
 	}, diags
 }
 
@@ -2348,130 +3383,40 @@ func NewSchemaRegistryValue(attributeTypes map[string]attr.Type, attributes map[
 		return NewSchemaRegistryValueUnknown(), diags
 	}
 
-	ignoreUntrustedCertificateAttribute, ok := attributes["ignore_untrusted_certificate"]
+	confluentLikeAttribute, ok := attributes["confluent_like"]
 
 	if !ok {
 		diags.AddError(
 			"Attribute Missing",
-			`ignore_untrusted_certificate is missing from object`)
+			`confluent_like is missing from object`)
 
 		return NewSchemaRegistryValueUnknown(), diags
 	}
 
-	ignoreUntrustedCertificateVal, ok := ignoreUntrustedCertificateAttribute.(basetypes.BoolValue)
+	confluentLikeVal, ok := confluentLikeAttribute.(basetypes.ObjectValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`ignore_untrusted_certificate expected to be basetypes.BoolValue, was: %T`, ignoreUntrustedCertificateAttribute))
+			fmt.Sprintf(`confluent_like expected to be basetypes.ObjectValue, was: %T`, confluentLikeAttribute))
 	}
 
-	propertiesAttribute, ok := attributes["properties"]
+	glueAttribute, ok := attributes["glue"]
 
 	if !ok {
 		diags.AddError(
 			"Attribute Missing",
-			`properties is missing from object`)
+			`glue is missing from object`)
 
 		return NewSchemaRegistryValueUnknown(), diags
 	}
 
-	propertiesVal, ok := propertiesAttribute.(basetypes.StringValue)
+	glueVal, ok := glueAttribute.(basetypes.ObjectValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`properties expected to be basetypes.StringValue, was: %T`, propertiesAttribute))
-	}
-
-	regionAttribute, ok := attributes["region"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`region is missing from object`)
-
-		return NewSchemaRegistryValueUnknown(), diags
-	}
-
-	regionVal, ok := regionAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`region expected to be basetypes.StringValue, was: %T`, regionAttribute))
-	}
-
-	registryNameAttribute, ok := attributes["registry_name"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`registry_name is missing from object`)
-
-		return NewSchemaRegistryValueUnknown(), diags
-	}
-
-	registryNameVal, ok := registryNameAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`registry_name expected to be basetypes.StringValue, was: %T`, registryNameAttribute))
-	}
-
-	securityAttribute, ok := attributes["security"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`security is missing from object`)
-
-		return NewSchemaRegistryValueUnknown(), diags
-	}
-
-	securityVal, ok := securityAttribute.(basetypes.ObjectValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`security expected to be basetypes.ObjectValue, was: %T`, securityAttribute))
-	}
-
-	typeAttribute, ok := attributes["type"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`type is missing from object`)
-
-		return NewSchemaRegistryValueUnknown(), diags
-	}
-
-	typeVal, ok := typeAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`type expected to be basetypes.StringValue, was: %T`, typeAttribute))
-	}
-
-	urlAttribute, ok := attributes["url"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`url is missing from object`)
-
-		return NewSchemaRegistryValueUnknown(), diags
-	}
-
-	urlVal, ok := urlAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`url expected to be basetypes.StringValue, was: %T`, urlAttribute))
+			fmt.Sprintf(`glue expected to be basetypes.ObjectValue, was: %T`, glueAttribute))
 	}
 
 	if diags.HasError() {
@@ -2479,14 +3424,9 @@ func NewSchemaRegistryValue(attributeTypes map[string]attr.Type, attributes map[
 	}
 
 	return SchemaRegistryValue{
-		IgnoreUntrustedCertificate: ignoreUntrustedCertificateVal,
-		Properties:                 propertiesVal,
-		Region:                     regionVal,
-		RegistryName:               registryNameVal,
-		Security:                   securityVal,
-		SchemaRegistryType:         typeVal,
-		Url:                        urlVal,
-		state:                      attr.ValueStateKnown,
+		ConfluentLike: confluentLikeVal,
+		Glue:          glueVal,
+		state:         attr.ValueStateKnown,
 	}, diags
 }
 
@@ -2558,93 +3498,45 @@ func (t SchemaRegistryType) ValueType(ctx context.Context) attr.Value {
 var _ basetypes.ObjectValuable = SchemaRegistryValue{}
 
 type SchemaRegistryValue struct {
-	IgnoreUntrustedCertificate basetypes.BoolValue   `tfsdk:"ignore_untrusted_certificate"`
-	Properties                 basetypes.StringValue `tfsdk:"properties"`
-	Region                     basetypes.StringValue `tfsdk:"region"`
-	RegistryName               basetypes.StringValue `tfsdk:"registry_name"`
-	Security                   basetypes.ObjectValue `tfsdk:"security"`
-	SchemaRegistryType         basetypes.StringValue `tfsdk:"type"`
-	Url                        basetypes.StringValue `tfsdk:"url"`
-	state                      attr.ValueState
+	ConfluentLike basetypes.ObjectValue `tfsdk:"confluent_like"`
+	Glue          basetypes.ObjectValue `tfsdk:"glue"`
+	state         attr.ValueState
 }
 
 func (v SchemaRegistryValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
-	attrTypes := make(map[string]tftypes.Type, 7)
+	attrTypes := make(map[string]tftypes.Type, 2)
 
 	var val tftypes.Value
 	var err error
 
-	attrTypes["ignore_untrusted_certificate"] = basetypes.BoolType{}.TerraformType(ctx)
-	attrTypes["properties"] = basetypes.StringType{}.TerraformType(ctx)
-	attrTypes["region"] = basetypes.StringType{}.TerraformType(ctx)
-	attrTypes["registry_name"] = basetypes.StringType{}.TerraformType(ctx)
-	attrTypes["security"] = basetypes.ObjectType{
-		AttrTypes: SecurityValue{}.AttributeTypes(ctx),
+	attrTypes["confluent_like"] = basetypes.ObjectType{
+		AttrTypes: ConfluentLikeValue{}.AttributeTypes(ctx),
 	}.TerraformType(ctx)
-	attrTypes["type"] = basetypes.StringType{}.TerraformType(ctx)
-	attrTypes["url"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["glue"] = basetypes.ObjectType{
+		AttrTypes: GlueValue{}.AttributeTypes(ctx),
+	}.TerraformType(ctx)
 
 	objectType := tftypes.Object{AttributeTypes: attrTypes}
 
 	switch v.state {
 	case attr.ValueStateKnown:
-		vals := make(map[string]tftypes.Value, 7)
+		vals := make(map[string]tftypes.Value, 2)
 
-		val, err = v.IgnoreUntrustedCertificate.ToTerraformValue(ctx)
-
-		if err != nil {
-			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
-		}
-
-		vals["ignore_untrusted_certificate"] = val
-
-		val, err = v.Properties.ToTerraformValue(ctx)
+		val, err = v.ConfluentLike.ToTerraformValue(ctx)
 
 		if err != nil {
 			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
 		}
 
-		vals["properties"] = val
+		vals["confluent_like"] = val
 
-		val, err = v.Region.ToTerraformValue(ctx)
-
-		if err != nil {
-			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
-		}
-
-		vals["region"] = val
-
-		val, err = v.RegistryName.ToTerraformValue(ctx)
+		val, err = v.Glue.ToTerraformValue(ctx)
 
 		if err != nil {
 			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
 		}
 
-		vals["registry_name"] = val
-
-		val, err = v.Security.ToTerraformValue(ctx)
-
-		if err != nil {
-			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
-		}
-
-		vals["security"] = val
-
-		val, err = v.SchemaRegistryType.ToTerraformValue(ctx)
-
-		if err != nil {
-			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
-		}
-
-		vals["type"] = val
-
-		val, err = v.Url.ToTerraformValue(ctx)
-
-		if err != nil {
-			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
-		}
-
-		vals["url"] = val
+		vals["glue"] = val
 
 		if err := tftypes.ValidateValue(objectType, vals); err != nil {
 			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
@@ -2675,37 +3567,55 @@ func (v SchemaRegistryValue) String() string {
 func (v SchemaRegistryValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	var security basetypes.ObjectValue
+	var confluentLike basetypes.ObjectValue
 
-	if v.Security.IsNull() {
-		security = types.ObjectNull(
-			SecurityValue{}.AttributeTypes(ctx),
+	if v.ConfluentLike.IsNull() {
+		confluentLike = types.ObjectNull(
+			ConfluentLikeValue{}.AttributeTypes(ctx),
 		)
 	}
 
-	if v.Security.IsUnknown() {
-		security = types.ObjectUnknown(
-			SecurityValue{}.AttributeTypes(ctx),
+	if v.ConfluentLike.IsUnknown() {
+		confluentLike = types.ObjectUnknown(
+			ConfluentLikeValue{}.AttributeTypes(ctx),
 		)
 	}
 
-	if !v.Security.IsNull() && !v.Security.IsUnknown() {
-		security = types.ObjectValueMust(
-			SecurityValue{}.AttributeTypes(ctx),
-			v.Security.Attributes(),
+	if !v.ConfluentLike.IsNull() && !v.ConfluentLike.IsUnknown() {
+		confluentLike = types.ObjectValueMust(
+			ConfluentLikeValue{}.AttributeTypes(ctx),
+			v.ConfluentLike.Attributes(),
+		)
+	}
+
+	var glue basetypes.ObjectValue
+
+	if v.Glue.IsNull() {
+		glue = types.ObjectNull(
+			GlueValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if v.Glue.IsUnknown() {
+		glue = types.ObjectUnknown(
+			GlueValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if !v.Glue.IsNull() && !v.Glue.IsUnknown() {
+		glue = types.ObjectValueMust(
+			GlueValue{}.AttributeTypes(ctx),
+			v.Glue.Attributes(),
 		)
 	}
 
 	attributeTypes := map[string]attr.Type{
-		"ignore_untrusted_certificate": basetypes.BoolType{},
-		"properties":                   basetypes.StringType{},
-		"region":                       basetypes.StringType{},
-		"registry_name":                basetypes.StringType{},
-		"security": basetypes.ObjectType{
-			AttrTypes: SecurityValue{}.AttributeTypes(ctx),
+		"confluent_like": basetypes.ObjectType{
+			AttrTypes: ConfluentLikeValue{}.AttributeTypes(ctx),
 		},
-		"type": basetypes.StringType{},
-		"url":  basetypes.StringType{},
+		"glue": basetypes.ObjectType{
+			AttrTypes: GlueValue{}.AttributeTypes(ctx),
+		},
 	}
 
 	if v.IsNull() {
@@ -2719,13 +3629,8 @@ func (v SchemaRegistryValue) ToObjectValue(ctx context.Context) (basetypes.Objec
 	objVal, diags := types.ObjectValue(
 		attributeTypes,
 		map[string]attr.Value{
-			"ignore_untrusted_certificate": v.IgnoreUntrustedCertificate,
-			"properties":                   v.Properties,
-			"region":                       v.Region,
-			"registry_name":                v.RegistryName,
-			"security":                     security,
-			"type":                         v.SchemaRegistryType,
-			"url":                          v.Url,
+			"confluent_like": confluentLike,
+			"glue":           glue,
 		})
 
 	return objVal, diags
@@ -2746,31 +3651,11 @@ func (v SchemaRegistryValue) Equal(o attr.Value) bool {
 		return true
 	}
 
-	if !v.IgnoreUntrustedCertificate.Equal(other.IgnoreUntrustedCertificate) {
+	if !v.ConfluentLike.Equal(other.ConfluentLike) {
 		return false
 	}
 
-	if !v.Properties.Equal(other.Properties) {
-		return false
-	}
-
-	if !v.Region.Equal(other.Region) {
-		return false
-	}
-
-	if !v.RegistryName.Equal(other.RegistryName) {
-		return false
-	}
-
-	if !v.Security.Equal(other.Security) {
-		return false
-	}
-
-	if !v.SchemaRegistryType.Equal(other.SchemaRegistryType) {
-		return false
-	}
-
-	if !v.Url.Equal(other.Url) {
+	if !v.Glue.Equal(other.Glue) {
 		return false
 	}
 
@@ -2787,26 +3672,23 @@ func (v SchemaRegistryValue) Type(ctx context.Context) attr.Type {
 
 func (v SchemaRegistryValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 	return map[string]attr.Type{
-		"ignore_untrusted_certificate": basetypes.BoolType{},
-		"properties":                   basetypes.StringType{},
-		"region":                       basetypes.StringType{},
-		"registry_name":                basetypes.StringType{},
-		"security": basetypes.ObjectType{
-			AttrTypes: SecurityValue{}.AttributeTypes(ctx),
+		"confluent_like": basetypes.ObjectType{
+			AttrTypes: ConfluentLikeValue{}.AttributeTypes(ctx),
 		},
-		"type": basetypes.StringType{},
-		"url":  basetypes.StringType{},
+		"glue": basetypes.ObjectType{
+			AttrTypes: GlueValue{}.AttributeTypes(ctx),
+		},
 	}
 }
 
-var _ basetypes.ObjectTypable = SecurityType{}
+var _ basetypes.ObjectTypable = ConfluentLikeType{}
 
-type SecurityType struct {
+type ConfluentLikeType struct {
 	basetypes.ObjectType
 }
 
-func (t SecurityType) Equal(o attr.Type) bool {
-	other, ok := o.(SecurityType)
+func (t ConfluentLikeType) Equal(o attr.Type) bool {
+	other, ok := o.(ConfluentLikeType)
 
 	if !ok {
 		return false
@@ -2815,322 +3697,113 @@ func (t SecurityType) Equal(o attr.Type) bool {
 	return t.ObjectType.Equal(other.ObjectType)
 }
 
-func (t SecurityType) String() string {
-	return "SecurityType"
+func (t ConfluentLikeType) String() string {
+	return "ConfluentLikeType"
 }
 
-func (t SecurityType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+func (t ConfluentLikeType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	attributes := in.Attributes()
 
-	accessKeyIdAttribute, ok := attributes["access_key_id"]
+	ignoreUntrustedCertificateAttribute, ok := attributes["ignore_untrusted_certificate"]
 
 	if !ok {
 		diags.AddError(
 			"Attribute Missing",
-			`access_key_id is missing from object`)
+			`ignore_untrusted_certificate is missing from object`)
 
 		return nil, diags
 	}
 
-	accessKeyIdVal, ok := accessKeyIdAttribute.(basetypes.StringValue)
+	ignoreUntrustedCertificateVal, ok := ignoreUntrustedCertificateAttribute.(basetypes.BoolValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`access_key_id expected to be basetypes.StringValue, was: %T`, accessKeyIdAttribute))
+			fmt.Sprintf(`ignore_untrusted_certificate expected to be basetypes.BoolValue, was: %T`, ignoreUntrustedCertificateAttribute))
 	}
 
-	certificateAttribute, ok := attributes["certificate"]
+	propertiesAttribute, ok := attributes["properties"]
 
 	if !ok {
 		diags.AddError(
 			"Attribute Missing",
-			`certificate is missing from object`)
+			`properties is missing from object`)
 
 		return nil, diags
 	}
 
-	certificateVal, ok := certificateAttribute.(basetypes.StringValue)
+	propertiesVal, ok := propertiesAttribute.(basetypes.StringValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`certificate expected to be basetypes.StringValue, was: %T`, certificateAttribute))
+			fmt.Sprintf(`properties expected to be basetypes.StringValue, was: %T`, propertiesAttribute))
 	}
 
-	certificateChainAttribute, ok := attributes["certificate_chain"]
+	securityAttribute, ok := attributes["security"]
 
 	if !ok {
 		diags.AddError(
 			"Attribute Missing",
-			`certificate_chain is missing from object`)
+			`security is missing from object`)
 
 		return nil, diags
 	}
 
-	certificateChainVal, ok := certificateChainAttribute.(basetypes.StringValue)
+	securityVal, ok := securityAttribute.(basetypes.ObjectValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`certificate_chain expected to be basetypes.StringValue, was: %T`, certificateChainAttribute))
+			fmt.Sprintf(`security expected to be basetypes.ObjectValue, was: %T`, securityAttribute))
 	}
 
-	keyAttribute, ok := attributes["key"]
+	urlAttribute, ok := attributes["url"]
 
 	if !ok {
 		diags.AddError(
 			"Attribute Missing",
-			`key is missing from object`)
+			`url is missing from object`)
 
 		return nil, diags
 	}
 
-	keyVal, ok := keyAttribute.(basetypes.StringValue)
+	urlVal, ok := urlAttribute.(basetypes.StringValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`key expected to be basetypes.StringValue, was: %T`, keyAttribute))
-	}
-
-	passwordAttribute, ok := attributes["password"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`password is missing from object`)
-
-		return nil, diags
-	}
-
-	passwordVal, ok := passwordAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`password expected to be basetypes.StringValue, was: %T`, passwordAttribute))
-	}
-
-	privateKeyAttribute, ok := attributes["private_key"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`private_key is missing from object`)
-
-		return nil, diags
-	}
-
-	privateKeyVal, ok := privateKeyAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`private_key expected to be basetypes.StringValue, was: %T`, privateKeyAttribute))
-	}
-
-	profileAttribute, ok := attributes["profile"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`profile is missing from object`)
-
-		return nil, diags
-	}
-
-	profileVal, ok := profileAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`profile expected to be basetypes.StringValue, was: %T`, profileAttribute))
-	}
-
-	profileArnAttribute, ok := attributes["profile_arn"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`profile_arn is missing from object`)
-
-		return nil, diags
-	}
-
-	profileArnVal, ok := profileArnAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`profile_arn expected to be basetypes.StringValue, was: %T`, profileArnAttribute))
-	}
-
-	roleAttribute, ok := attributes["role"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`role is missing from object`)
-
-		return nil, diags
-	}
-
-	roleVal, ok := roleAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`role expected to be basetypes.StringValue, was: %T`, roleAttribute))
-	}
-
-	roleArnAttribute, ok := attributes["role_arn"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`role_arn is missing from object`)
-
-		return nil, diags
-	}
-
-	roleArnVal, ok := roleArnAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`role_arn expected to be basetypes.StringValue, was: %T`, roleArnAttribute))
-	}
-
-	secretKeyAttribute, ok := attributes["secret_key"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`secret_key is missing from object`)
-
-		return nil, diags
-	}
-
-	secretKeyVal, ok := secretKeyAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`secret_key expected to be basetypes.StringValue, was: %T`, secretKeyAttribute))
-	}
-
-	tokenAttribute, ok := attributes["token"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`token is missing from object`)
-
-		return nil, diags
-	}
-
-	tokenVal, ok := tokenAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`token expected to be basetypes.StringValue, was: %T`, tokenAttribute))
-	}
-
-	trustAnchorArnAttribute, ok := attributes["trust_anchor_arn"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`trust_anchor_arn is missing from object`)
-
-		return nil, diags
-	}
-
-	trustAnchorArnVal, ok := trustAnchorArnAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`trust_anchor_arn expected to be basetypes.StringValue, was: %T`, trustAnchorArnAttribute))
-	}
-
-	typeAttribute, ok := attributes["type"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`type is missing from object`)
-
-		return nil, diags
-	}
-
-	typeVal, ok := typeAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`type expected to be basetypes.StringValue, was: %T`, typeAttribute))
-	}
-
-	usernameAttribute, ok := attributes["username"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`username is missing from object`)
-
-		return nil, diags
-	}
-
-	usernameVal, ok := usernameAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`username expected to be basetypes.StringValue, was: %T`, usernameAttribute))
+			fmt.Sprintf(`url expected to be basetypes.StringValue, was: %T`, urlAttribute))
 	}
 
 	if diags.HasError() {
 		return nil, diags
 	}
 
-	return SecurityValue{
-		AccessKeyId:      accessKeyIdVal,
-		Certificate:      certificateVal,
-		CertificateChain: certificateChainVal,
-		Key:              keyVal,
-		Password:         passwordVal,
-		PrivateKey:       privateKeyVal,
-		Profile:          profileVal,
-		ProfileArn:       profileArnVal,
-		Role:             roleVal,
-		RoleArn:          roleArnVal,
-		SecretKey:        secretKeyVal,
-		Token:            tokenVal,
-		TrustAnchorArn:   trustAnchorArnVal,
-		SecurityType:     typeVal,
-		Username:         usernameVal,
-		state:            attr.ValueStateKnown,
+	return ConfluentLikeValue{
+		IgnoreUntrustedCertificate: ignoreUntrustedCertificateVal,
+		Properties:                 propertiesVal,
+		Security:                   securityVal,
+		Url:                        urlVal,
+		state:                      attr.ValueStateKnown,
 	}, diags
 }
 
-func NewSecurityValueNull() SecurityValue {
-	return SecurityValue{
+func NewConfluentLikeValueNull() ConfluentLikeValue {
+	return ConfluentLikeValue{
 		state: attr.ValueStateNull,
 	}
 }
 
-func NewSecurityValueUnknown() SecurityValue {
-	return SecurityValue{
+func NewConfluentLikeValueUnknown() ConfluentLikeValue {
+	return ConfluentLikeValue{
 		state: attr.ValueStateUnknown,
 	}
 }
 
-func NewSecurityValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (SecurityValue, diag.Diagnostics) {
+func NewConfluentLikeValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (ConfluentLikeValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
@@ -3141,11 +3814,11 @@ func NewSecurityValue(attributeTypes map[string]attr.Type, attributes map[string
 
 		if !ok {
 			diags.AddError(
-				"Missing SecurityValue Attribute Value",
-				"While creating a SecurityValue value, a missing attribute value was detected. "+
-					"A SecurityValue must contain values for all attributes, even if null or unknown. "+
+				"Missing ConfluentLikeValue Attribute Value",
+				"While creating a ConfluentLikeValue value, a missing attribute value was detected. "+
+					"A ConfluentLikeValue must contain values for all attributes, even if null or unknown. "+
 					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
-					fmt.Sprintf("SecurityValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+					fmt.Sprintf("ConfluentLikeValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
 			)
 
 			continue
@@ -3153,12 +3826,12 @@ func NewSecurityValue(attributeTypes map[string]attr.Type, attributes map[string
 
 		if !attributeType.Equal(attribute.Type(ctx)) {
 			diags.AddError(
-				"Invalid SecurityValue Attribute Type",
-				"While creating a SecurityValue value, an invalid attribute value was detected. "+
-					"A SecurityValue must use a matching attribute type for the value. "+
+				"Invalid ConfluentLikeValue Attribute Type",
+				"While creating a ConfluentLikeValue value, an invalid attribute value was detected. "+
+					"A ConfluentLikeValue must use a matching attribute type for the value. "+
 					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
-					fmt.Sprintf("SecurityValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
-					fmt.Sprintf("SecurityValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+					fmt.Sprintf("ConfluentLikeValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("ConfluentLikeValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
 			)
 		}
 	}
@@ -3168,315 +3841,106 @@ func NewSecurityValue(attributeTypes map[string]attr.Type, attributes map[string
 
 		if !ok {
 			diags.AddError(
-				"Extra SecurityValue Attribute Value",
-				"While creating a SecurityValue value, an extra attribute value was detected. "+
-					"A SecurityValue must not contain values beyond the expected attribute types. "+
+				"Extra ConfluentLikeValue Attribute Value",
+				"While creating a ConfluentLikeValue value, an extra attribute value was detected. "+
+					"A ConfluentLikeValue must not contain values beyond the expected attribute types. "+
 					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
-					fmt.Sprintf("Extra SecurityValue Attribute Name: %s", name),
+					fmt.Sprintf("Extra ConfluentLikeValue Attribute Name: %s", name),
 			)
 		}
 	}
 
 	if diags.HasError() {
-		return NewSecurityValueUnknown(), diags
+		return NewConfluentLikeValueUnknown(), diags
 	}
 
-	accessKeyIdAttribute, ok := attributes["access_key_id"]
+	ignoreUntrustedCertificateAttribute, ok := attributes["ignore_untrusted_certificate"]
 
 	if !ok {
 		diags.AddError(
 			"Attribute Missing",
-			`access_key_id is missing from object`)
+			`ignore_untrusted_certificate is missing from object`)
 
-		return NewSecurityValueUnknown(), diags
+		return NewConfluentLikeValueUnknown(), diags
 	}
 
-	accessKeyIdVal, ok := accessKeyIdAttribute.(basetypes.StringValue)
+	ignoreUntrustedCertificateVal, ok := ignoreUntrustedCertificateAttribute.(basetypes.BoolValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`access_key_id expected to be basetypes.StringValue, was: %T`, accessKeyIdAttribute))
+			fmt.Sprintf(`ignore_untrusted_certificate expected to be basetypes.BoolValue, was: %T`, ignoreUntrustedCertificateAttribute))
 	}
 
-	certificateAttribute, ok := attributes["certificate"]
+	propertiesAttribute, ok := attributes["properties"]
 
 	if !ok {
 		diags.AddError(
 			"Attribute Missing",
-			`certificate is missing from object`)
+			`properties is missing from object`)
 
-		return NewSecurityValueUnknown(), diags
+		return NewConfluentLikeValueUnknown(), diags
 	}
 
-	certificateVal, ok := certificateAttribute.(basetypes.StringValue)
+	propertiesVal, ok := propertiesAttribute.(basetypes.StringValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`certificate expected to be basetypes.StringValue, was: %T`, certificateAttribute))
+			fmt.Sprintf(`properties expected to be basetypes.StringValue, was: %T`, propertiesAttribute))
 	}
 
-	certificateChainAttribute, ok := attributes["certificate_chain"]
+	securityAttribute, ok := attributes["security"]
 
 	if !ok {
 		diags.AddError(
 			"Attribute Missing",
-			`certificate_chain is missing from object`)
+			`security is missing from object`)
 
-		return NewSecurityValueUnknown(), diags
+		return NewConfluentLikeValueUnknown(), diags
 	}
 
-	certificateChainVal, ok := certificateChainAttribute.(basetypes.StringValue)
+	securityVal, ok := securityAttribute.(basetypes.ObjectValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`certificate_chain expected to be basetypes.StringValue, was: %T`, certificateChainAttribute))
+			fmt.Sprintf(`security expected to be basetypes.ObjectValue, was: %T`, securityAttribute))
 	}
 
-	keyAttribute, ok := attributes["key"]
+	urlAttribute, ok := attributes["url"]
 
 	if !ok {
 		diags.AddError(
 			"Attribute Missing",
-			`key is missing from object`)
+			`url is missing from object`)
 
-		return NewSecurityValueUnknown(), diags
+		return NewConfluentLikeValueUnknown(), diags
 	}
 
-	keyVal, ok := keyAttribute.(basetypes.StringValue)
+	urlVal, ok := urlAttribute.(basetypes.StringValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`key expected to be basetypes.StringValue, was: %T`, keyAttribute))
-	}
-
-	passwordAttribute, ok := attributes["password"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`password is missing from object`)
-
-		return NewSecurityValueUnknown(), diags
-	}
-
-	passwordVal, ok := passwordAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`password expected to be basetypes.StringValue, was: %T`, passwordAttribute))
-	}
-
-	privateKeyAttribute, ok := attributes["private_key"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`private_key is missing from object`)
-
-		return NewSecurityValueUnknown(), diags
-	}
-
-	privateKeyVal, ok := privateKeyAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`private_key expected to be basetypes.StringValue, was: %T`, privateKeyAttribute))
-	}
-
-	profileAttribute, ok := attributes["profile"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`profile is missing from object`)
-
-		return NewSecurityValueUnknown(), diags
-	}
-
-	profileVal, ok := profileAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`profile expected to be basetypes.StringValue, was: %T`, profileAttribute))
-	}
-
-	profileArnAttribute, ok := attributes["profile_arn"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`profile_arn is missing from object`)
-
-		return NewSecurityValueUnknown(), diags
-	}
-
-	profileArnVal, ok := profileArnAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`profile_arn expected to be basetypes.StringValue, was: %T`, profileArnAttribute))
-	}
-
-	roleAttribute, ok := attributes["role"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`role is missing from object`)
-
-		return NewSecurityValueUnknown(), diags
-	}
-
-	roleVal, ok := roleAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`role expected to be basetypes.StringValue, was: %T`, roleAttribute))
-	}
-
-	roleArnAttribute, ok := attributes["role_arn"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`role_arn is missing from object`)
-
-		return NewSecurityValueUnknown(), diags
-	}
-
-	roleArnVal, ok := roleArnAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`role_arn expected to be basetypes.StringValue, was: %T`, roleArnAttribute))
-	}
-
-	secretKeyAttribute, ok := attributes["secret_key"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`secret_key is missing from object`)
-
-		return NewSecurityValueUnknown(), diags
-	}
-
-	secretKeyVal, ok := secretKeyAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`secret_key expected to be basetypes.StringValue, was: %T`, secretKeyAttribute))
-	}
-
-	tokenAttribute, ok := attributes["token"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`token is missing from object`)
-
-		return NewSecurityValueUnknown(), diags
-	}
-
-	tokenVal, ok := tokenAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`token expected to be basetypes.StringValue, was: %T`, tokenAttribute))
-	}
-
-	trustAnchorArnAttribute, ok := attributes["trust_anchor_arn"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`trust_anchor_arn is missing from object`)
-
-		return NewSecurityValueUnknown(), diags
-	}
-
-	trustAnchorArnVal, ok := trustAnchorArnAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`trust_anchor_arn expected to be basetypes.StringValue, was: %T`, trustAnchorArnAttribute))
-	}
-
-	typeAttribute, ok := attributes["type"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`type is missing from object`)
-
-		return NewSecurityValueUnknown(), diags
-	}
-
-	typeVal, ok := typeAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`type expected to be basetypes.StringValue, was: %T`, typeAttribute))
-	}
-
-	usernameAttribute, ok := attributes["username"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`username is missing from object`)
-
-		return NewSecurityValueUnknown(), diags
-	}
-
-	usernameVal, ok := usernameAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`username expected to be basetypes.StringValue, was: %T`, usernameAttribute))
+			fmt.Sprintf(`url expected to be basetypes.StringValue, was: %T`, urlAttribute))
 	}
 
 	if diags.HasError() {
-		return NewSecurityValueUnknown(), diags
+		return NewConfluentLikeValueUnknown(), diags
 	}
 
-	return SecurityValue{
-		AccessKeyId:      accessKeyIdVal,
-		Certificate:      certificateVal,
-		CertificateChain: certificateChainVal,
-		Key:              keyVal,
-		Password:         passwordVal,
-		PrivateKey:       privateKeyVal,
-		Profile:          profileVal,
-		ProfileArn:       profileArnVal,
-		Role:             roleVal,
-		RoleArn:          roleArnVal,
-		SecretKey:        secretKeyVal,
-		Token:            tokenVal,
-		TrustAnchorArn:   trustAnchorArnVal,
-		SecurityType:     typeVal,
-		Username:         usernameVal,
-		state:            attr.ValueStateKnown,
+	return ConfluentLikeValue{
+		IgnoreUntrustedCertificate: ignoreUntrustedCertificateVal,
+		Properties:                 propertiesVal,
+		Security:                   securityVal,
+		Url:                        urlVal,
+		state:                      attr.ValueStateKnown,
 	}, diags
 }
 
-func NewSecurityValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) SecurityValue {
-	object, diags := NewSecurityValue(attributeTypes, attributes)
+func NewConfluentLikeValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) ConfluentLikeValue {
+	object, diags := NewConfluentLikeValue(attributeTypes, attributes)
 
 	if diags.HasError() {
 		// This could potentially be added to the diag package.
@@ -3490,15 +3954,15 @@ func NewSecurityValueMust(attributeTypes map[string]attr.Type, attributes map[st
 				diagnostic.Detail()))
 		}
 
-		panic("NewSecurityValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+		panic("NewConfluentLikeValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
 	}
 
 	return object
 }
 
-func (t SecurityType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+func (t ConfluentLikeType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
 	if in.Type() == nil {
-		return NewSecurityValueNull(), nil
+		return NewConfluentLikeValueNull(), nil
 	}
 
 	if !in.Type().Equal(t.TerraformType(ctx)) {
@@ -3506,11 +3970,11 @@ func (t SecurityType) ValueFromTerraform(ctx context.Context, in tftypes.Value) 
 	}
 
 	if !in.IsKnown() {
-		return NewSecurityValueUnknown(), nil
+		return NewConfluentLikeValueUnknown(), nil
 	}
 
 	if in.IsNull() {
-		return NewSecurityValueNull(), nil
+		return NewConfluentLikeValueNull(), nil
 	}
 
 	attributes := map[string]attr.Value{}
@@ -3533,93 +3997,990 @@ func (t SecurityType) ValueFromTerraform(ctx context.Context, in tftypes.Value) 
 		attributes[k] = a
 	}
 
-	return NewSecurityValueMust(SecurityValue{}.AttributeTypes(ctx), attributes), nil
+	return NewConfluentLikeValueMust(ConfluentLikeValue{}.AttributeTypes(ctx), attributes), nil
 }
 
-func (t SecurityType) ValueType(ctx context.Context) attr.Value {
-	return SecurityValue{}
+func (t ConfluentLikeType) ValueType(ctx context.Context) attr.Value {
+	return ConfluentLikeValue{}
 }
 
-var _ basetypes.ObjectValuable = SecurityValue{}
+var _ basetypes.ObjectValuable = ConfluentLikeValue{}
 
-type SecurityValue struct {
-	AccessKeyId      basetypes.StringValue `tfsdk:"access_key_id"`
-	Certificate      basetypes.StringValue `tfsdk:"certificate"`
-	CertificateChain basetypes.StringValue `tfsdk:"certificate_chain"`
-	Key              basetypes.StringValue `tfsdk:"key"`
-	Password         basetypes.StringValue `tfsdk:"password"`
-	PrivateKey       basetypes.StringValue `tfsdk:"private_key"`
-	Profile          basetypes.StringValue `tfsdk:"profile"`
-	ProfileArn       basetypes.StringValue `tfsdk:"profile_arn"`
-	Role             basetypes.StringValue `tfsdk:"role"`
-	RoleArn          basetypes.StringValue `tfsdk:"role_arn"`
-	SecretKey        basetypes.StringValue `tfsdk:"secret_key"`
-	Token            basetypes.StringValue `tfsdk:"token"`
-	TrustAnchorArn   basetypes.StringValue `tfsdk:"trust_anchor_arn"`
-	SecurityType     basetypes.StringValue `tfsdk:"type"`
-	Username         basetypes.StringValue `tfsdk:"username"`
-	state            attr.ValueState
+type ConfluentLikeValue struct {
+	IgnoreUntrustedCertificate basetypes.BoolValue   `tfsdk:"ignore_untrusted_certificate"`
+	Properties                 basetypes.StringValue `tfsdk:"properties"`
+	Security                   basetypes.ObjectValue `tfsdk:"security"`
+	Url                        basetypes.StringValue `tfsdk:"url"`
+	state                      attr.ValueState
 }
 
-func (v SecurityValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
-	attrTypes := make(map[string]tftypes.Type, 15)
+func (v ConfluentLikeValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 4)
 
 	var val tftypes.Value
 	var err error
 
-	attrTypes["access_key_id"] = basetypes.StringType{}.TerraformType(ctx)
-	attrTypes["certificate"] = basetypes.StringType{}.TerraformType(ctx)
-	attrTypes["certificate_chain"] = basetypes.StringType{}.TerraformType(ctx)
-	attrTypes["key"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["ignore_untrusted_certificate"] = basetypes.BoolType{}.TerraformType(ctx)
+	attrTypes["properties"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["security"] = basetypes.ObjectType{
+		AttrTypes: ConfluentSecurityValue{}.AttributeTypes(ctx),
+	}.TerraformType(ctx)
+	attrTypes["url"] = basetypes.StringType{}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 4)
+
+		val, err = v.IgnoreUntrustedCertificate.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["ignore_untrusted_certificate"] = val
+
+		val, err = v.Properties.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["properties"] = val
+
+		val, err = v.Security.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["security"] = val
+
+		val, err = v.Url.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["url"] = val
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v ConfluentLikeValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v ConfluentLikeValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v ConfluentLikeValue) String() string {
+	return "ConfluentLikeValue"
+}
+
+func (v ConfluentLikeValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	var security basetypes.ObjectValue
+
+	if v.Security.IsNull() {
+		security = types.ObjectNull(
+			ConfluentSecurityValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if v.Security.IsUnknown() {
+		security = types.ObjectUnknown(
+			ConfluentSecurityValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if !v.Security.IsNull() && !v.Security.IsUnknown() {
+		security = types.ObjectValueMust(
+			ConfluentSecurityValue{}.AttributeTypes(ctx),
+			v.Security.Attributes(),
+		)
+	}
+
+	attributeTypes := map[string]attr.Type{
+		"ignore_untrusted_certificate": basetypes.BoolType{},
+		"properties":                   basetypes.StringType{},
+		"security": basetypes.ObjectType{
+			AttrTypes: ConfluentSecurityValue{}.AttributeTypes(ctx),
+		},
+		"url": basetypes.StringType{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{
+			"ignore_untrusted_certificate": v.IgnoreUntrustedCertificate,
+			"properties":                   v.Properties,
+			"security":                     security,
+			"url":                          v.Url,
+		})
+
+	return objVal, diags
+}
+
+func (v ConfluentLikeValue) Equal(o attr.Value) bool {
+	other, ok := o.(ConfluentLikeValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	if !v.IgnoreUntrustedCertificate.Equal(other.IgnoreUntrustedCertificate) {
+		return false
+	}
+
+	if !v.Properties.Equal(other.Properties) {
+		return false
+	}
+
+	if !v.Security.Equal(other.Security) {
+		return false
+	}
+
+	if !v.Url.Equal(other.Url) {
+		return false
+	}
+
+	return true
+}
+
+func (v ConfluentLikeValue) Type(ctx context.Context) attr.Type {
+	return ConfluentLikeType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v ConfluentLikeValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"ignore_untrusted_certificate": basetypes.BoolType{},
+		"properties":                   basetypes.StringType{},
+		"security": basetypes.ObjectType{
+			AttrTypes: ConfluentSecurityValue{}.AttributeTypes(ctx),
+		},
+		"url": basetypes.StringType{},
+	}
+}
+
+var _ basetypes.ObjectTypable = ConfluentSecurityType{}
+
+type ConfluentSecurityType struct {
+	basetypes.ObjectType
+}
+
+func (t ConfluentSecurityType) Equal(o attr.Type) bool {
+	other, ok := o.(ConfluentSecurityType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t ConfluentSecurityType) String() string {
+	return "ConfluentSecurityType"
+}
+
+func (t ConfluentSecurityType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	basicAuthAttribute, ok := attributes["basic_auth"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`basic_auth is missing from object`)
+
+		return nil, diags
+	}
+
+	basicAuthVal, ok := basicAuthAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`basic_auth expected to be basetypes.ObjectValue, was: %T`, basicAuthAttribute))
+	}
+
+	bearerTokenAttribute, ok := attributes["bearer_token"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`bearer_token is missing from object`)
+
+		return nil, diags
+	}
+
+	bearerTokenVal, ok := bearerTokenAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`bearer_token expected to be basetypes.ObjectValue, was: %T`, bearerTokenAttribute))
+	}
+
+	sslAuthAttribute, ok := attributes["ssl_auth"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`ssl_auth is missing from object`)
+
+		return nil, diags
+	}
+
+	sslAuthVal, ok := sslAuthAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`ssl_auth expected to be basetypes.ObjectValue, was: %T`, sslAuthAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return ConfluentSecurityValue{
+		BasicAuth:   basicAuthVal,
+		BearerToken: bearerTokenVal,
+		SslAuth:     sslAuthVal,
+		state:       attr.ValueStateKnown,
+	}, diags
+}
+
+func NewConfluentSecurityValueNull() ConfluentSecurityValue {
+	return ConfluentSecurityValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewConfluentSecurityValueUnknown() ConfluentSecurityValue {
+	return ConfluentSecurityValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewConfluentSecurityValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (ConfluentSecurityValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing ConfluentSecurityValue Attribute Value",
+				"While creating a ConfluentSecurityValue value, a missing attribute value was detected. "+
+					"A ConfluentSecurityValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("ConfluentSecurityValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid ConfluentSecurityValue Attribute Type",
+				"While creating a ConfluentSecurityValue value, an invalid attribute value was detected. "+
+					"A ConfluentSecurityValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("ConfluentSecurityValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("ConfluentSecurityValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra ConfluentSecurityValue Attribute Value",
+				"While creating a ConfluentSecurityValue value, an extra attribute value was detected. "+
+					"A ConfluentSecurityValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra ConfluentSecurityValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewConfluentSecurityValueUnknown(), diags
+	}
+
+	basicAuthAttribute, ok := attributes["basic_auth"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`basic_auth is missing from object`)
+
+		return NewConfluentSecurityValueUnknown(), diags
+	}
+
+	basicAuthVal, ok := basicAuthAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`basic_auth expected to be basetypes.ObjectValue, was: %T`, basicAuthAttribute))
+	}
+
+	bearerTokenAttribute, ok := attributes["bearer_token"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`bearer_token is missing from object`)
+
+		return NewConfluentSecurityValueUnknown(), diags
+	}
+
+	bearerTokenVal, ok := bearerTokenAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`bearer_token expected to be basetypes.ObjectValue, was: %T`, bearerTokenAttribute))
+	}
+
+	sslAuthAttribute, ok := attributes["ssl_auth"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`ssl_auth is missing from object`)
+
+		return NewConfluentSecurityValueUnknown(), diags
+	}
+
+	sslAuthVal, ok := sslAuthAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`ssl_auth expected to be basetypes.ObjectValue, was: %T`, sslAuthAttribute))
+	}
+
+	if diags.HasError() {
+		return NewConfluentSecurityValueUnknown(), diags
+	}
+
+	return ConfluentSecurityValue{
+		BasicAuth:   basicAuthVal,
+		BearerToken: bearerTokenVal,
+		SslAuth:     sslAuthVal,
+		state:       attr.ValueStateKnown,
+	}, diags
+}
+
+func NewConfluentSecurityValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) ConfluentSecurityValue {
+	object, diags := NewConfluentSecurityValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewConfluentSecurityValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t ConfluentSecurityType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewConfluentSecurityValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewConfluentSecurityValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewConfluentSecurityValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewConfluentSecurityValueMust(ConfluentSecurityValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t ConfluentSecurityType) ValueType(ctx context.Context) attr.Value {
+	return ConfluentSecurityValue{}
+}
+
+var _ basetypes.ObjectValuable = ConfluentSecurityValue{}
+
+type ConfluentSecurityValue struct {
+	BasicAuth   basetypes.ObjectValue `tfsdk:"basic_auth"`
+	BearerToken basetypes.ObjectValue `tfsdk:"bearer_token"`
+	SslAuth     basetypes.ObjectValue `tfsdk:"ssl_auth"`
+	state       attr.ValueState
+}
+
+func (v ConfluentSecurityValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 3)
+
+	var val tftypes.Value
+	var err error
+
+	attrTypes["basic_auth"] = basetypes.ObjectType{
+		AttrTypes: BasicAuthValue{}.AttributeTypes(ctx),
+	}.TerraformType(ctx)
+	attrTypes["bearer_token"] = basetypes.ObjectType{
+		AttrTypes: BearerTokenValue{}.AttributeTypes(ctx),
+	}.TerraformType(ctx)
+	attrTypes["ssl_auth"] = basetypes.ObjectType{
+		AttrTypes: SslAuthValue{}.AttributeTypes(ctx),
+	}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 3)
+
+		val, err = v.BasicAuth.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["basic_auth"] = val
+
+		val, err = v.BearerToken.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["bearer_token"] = val
+
+		val, err = v.SslAuth.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["ssl_auth"] = val
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v ConfluentSecurityValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v ConfluentSecurityValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v ConfluentSecurityValue) String() string {
+	return "ConfluentSecurityValue"
+}
+
+func (v ConfluentSecurityValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	var basicAuth basetypes.ObjectValue
+
+	if v.BasicAuth.IsNull() {
+		basicAuth = types.ObjectNull(
+			BasicAuthValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if v.BasicAuth.IsUnknown() {
+		basicAuth = types.ObjectUnknown(
+			BasicAuthValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if !v.BasicAuth.IsNull() && !v.BasicAuth.IsUnknown() {
+		basicAuth = types.ObjectValueMust(
+			BasicAuthValue{}.AttributeTypes(ctx),
+			v.BasicAuth.Attributes(),
+		)
+	}
+
+	var bearerToken basetypes.ObjectValue
+
+	if v.BearerToken.IsNull() {
+		bearerToken = types.ObjectNull(
+			BearerTokenValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if v.BearerToken.IsUnknown() {
+		bearerToken = types.ObjectUnknown(
+			BearerTokenValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if !v.BearerToken.IsNull() && !v.BearerToken.IsUnknown() {
+		bearerToken = types.ObjectValueMust(
+			BearerTokenValue{}.AttributeTypes(ctx),
+			v.BearerToken.Attributes(),
+		)
+	}
+
+	var sslAuth basetypes.ObjectValue
+
+	if v.SslAuth.IsNull() {
+		sslAuth = types.ObjectNull(
+			SslAuthValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if v.SslAuth.IsUnknown() {
+		sslAuth = types.ObjectUnknown(
+			SslAuthValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if !v.SslAuth.IsNull() && !v.SslAuth.IsUnknown() {
+		sslAuth = types.ObjectValueMust(
+			SslAuthValue{}.AttributeTypes(ctx),
+			v.SslAuth.Attributes(),
+		)
+	}
+
+	attributeTypes := map[string]attr.Type{
+		"basic_auth": basetypes.ObjectType{
+			AttrTypes: BasicAuthValue{}.AttributeTypes(ctx),
+		},
+		"bearer_token": basetypes.ObjectType{
+			AttrTypes: BearerTokenValue{}.AttributeTypes(ctx),
+		},
+		"ssl_auth": basetypes.ObjectType{
+			AttrTypes: SslAuthValue{}.AttributeTypes(ctx),
+		},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{
+			"basic_auth":   basicAuth,
+			"bearer_token": bearerToken,
+			"ssl_auth":     sslAuth,
+		})
+
+	return objVal, diags
+}
+
+func (v ConfluentSecurityValue) Equal(o attr.Value) bool {
+	other, ok := o.(ConfluentSecurityValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	if !v.BasicAuth.Equal(other.BasicAuth) {
+		return false
+	}
+
+	if !v.BearerToken.Equal(other.BearerToken) {
+		return false
+	}
+
+	if !v.SslAuth.Equal(other.SslAuth) {
+		return false
+	}
+
+	return true
+}
+
+func (v ConfluentSecurityValue) Type(ctx context.Context) attr.Type {
+	return ConfluentSecurityType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v ConfluentSecurityValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"basic_auth": basetypes.ObjectType{
+			AttrTypes: BasicAuthValue{}.AttributeTypes(ctx),
+		},
+		"bearer_token": basetypes.ObjectType{
+			AttrTypes: BearerTokenValue{}.AttributeTypes(ctx),
+		},
+		"ssl_auth": basetypes.ObjectType{
+			AttrTypes: SslAuthValue{}.AttributeTypes(ctx),
+		},
+	}
+}
+
+var _ basetypes.ObjectTypable = BasicAuthType{}
+
+type BasicAuthType struct {
+	basetypes.ObjectType
+}
+
+func (t BasicAuthType) Equal(o attr.Type) bool {
+	other, ok := o.(BasicAuthType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t BasicAuthType) String() string {
+	return "BasicAuthType"
+}
+
+func (t BasicAuthType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	passwordAttribute, ok := attributes["password"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`password is missing from object`)
+
+		return nil, diags
+	}
+
+	passwordVal, ok := passwordAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`password expected to be basetypes.StringValue, was: %T`, passwordAttribute))
+	}
+
+	usernameAttribute, ok := attributes["username"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`username is missing from object`)
+
+		return nil, diags
+	}
+
+	usernameVal, ok := usernameAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`username expected to be basetypes.StringValue, was: %T`, usernameAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return BasicAuthValue{
+		Password: passwordVal,
+		Username: usernameVal,
+		state:    attr.ValueStateKnown,
+	}, diags
+}
+
+func NewBasicAuthValueNull() BasicAuthValue {
+	return BasicAuthValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewBasicAuthValueUnknown() BasicAuthValue {
+	return BasicAuthValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewBasicAuthValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (BasicAuthValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing BasicAuthValue Attribute Value",
+				"While creating a BasicAuthValue value, a missing attribute value was detected. "+
+					"A BasicAuthValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("BasicAuthValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid BasicAuthValue Attribute Type",
+				"While creating a BasicAuthValue value, an invalid attribute value was detected. "+
+					"A BasicAuthValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("BasicAuthValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("BasicAuthValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra BasicAuthValue Attribute Value",
+				"While creating a BasicAuthValue value, an extra attribute value was detected. "+
+					"A BasicAuthValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra BasicAuthValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewBasicAuthValueUnknown(), diags
+	}
+
+	passwordAttribute, ok := attributes["password"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`password is missing from object`)
+
+		return NewBasicAuthValueUnknown(), diags
+	}
+
+	passwordVal, ok := passwordAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`password expected to be basetypes.StringValue, was: %T`, passwordAttribute))
+	}
+
+	usernameAttribute, ok := attributes["username"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`username is missing from object`)
+
+		return NewBasicAuthValueUnknown(), diags
+	}
+
+	usernameVal, ok := usernameAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`username expected to be basetypes.StringValue, was: %T`, usernameAttribute))
+	}
+
+	if diags.HasError() {
+		return NewBasicAuthValueUnknown(), diags
+	}
+
+	return BasicAuthValue{
+		Password: passwordVal,
+		Username: usernameVal,
+		state:    attr.ValueStateKnown,
+	}, diags
+}
+
+func NewBasicAuthValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) BasicAuthValue {
+	object, diags := NewBasicAuthValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewBasicAuthValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t BasicAuthType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewBasicAuthValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewBasicAuthValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewBasicAuthValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewBasicAuthValueMust(BasicAuthValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t BasicAuthType) ValueType(ctx context.Context) attr.Value {
+	return BasicAuthValue{}
+}
+
+var _ basetypes.ObjectValuable = BasicAuthValue{}
+
+type BasicAuthValue struct {
+	Password basetypes.StringValue `tfsdk:"password"`
+	Username basetypes.StringValue `tfsdk:"username"`
+	state    attr.ValueState
+}
+
+func (v BasicAuthValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 2)
+
+	var val tftypes.Value
+	var err error
+
 	attrTypes["password"] = basetypes.StringType{}.TerraformType(ctx)
-	attrTypes["private_key"] = basetypes.StringType{}.TerraformType(ctx)
-	attrTypes["profile"] = basetypes.StringType{}.TerraformType(ctx)
-	attrTypes["profile_arn"] = basetypes.StringType{}.TerraformType(ctx)
-	attrTypes["role"] = basetypes.StringType{}.TerraformType(ctx)
-	attrTypes["role_arn"] = basetypes.StringType{}.TerraformType(ctx)
-	attrTypes["secret_key"] = basetypes.StringType{}.TerraformType(ctx)
-	attrTypes["token"] = basetypes.StringType{}.TerraformType(ctx)
-	attrTypes["trust_anchor_arn"] = basetypes.StringType{}.TerraformType(ctx)
-	attrTypes["type"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["username"] = basetypes.StringType{}.TerraformType(ctx)
 
 	objectType := tftypes.Object{AttributeTypes: attrTypes}
 
 	switch v.state {
 	case attr.ValueStateKnown:
-		vals := make(map[string]tftypes.Value, 15)
-
-		val, err = v.AccessKeyId.ToTerraformValue(ctx)
-
-		if err != nil {
-			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
-		}
-
-		vals["access_key_id"] = val
-
-		val, err = v.Certificate.ToTerraformValue(ctx)
-
-		if err != nil {
-			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
-		}
-
-		vals["certificate"] = val
-
-		val, err = v.CertificateChain.ToTerraformValue(ctx)
-
-		if err != nil {
-			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
-		}
-
-		vals["certificate_chain"] = val
-
-		val, err = v.Key.ToTerraformValue(ctx)
-
-		if err != nil {
-			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
-		}
-
-		vals["key"] = val
+		vals := make(map[string]tftypes.Value, 2)
 
 		val, err = v.Password.ToTerraformValue(ctx)
 
@@ -3628,78 +4989,6 @@ func (v SecurityValue) ToTerraformValue(ctx context.Context) (tftypes.Value, err
 		}
 
 		vals["password"] = val
-
-		val, err = v.PrivateKey.ToTerraformValue(ctx)
-
-		if err != nil {
-			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
-		}
-
-		vals["private_key"] = val
-
-		val, err = v.Profile.ToTerraformValue(ctx)
-
-		if err != nil {
-			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
-		}
-
-		vals["profile"] = val
-
-		val, err = v.ProfileArn.ToTerraformValue(ctx)
-
-		if err != nil {
-			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
-		}
-
-		vals["profile_arn"] = val
-
-		val, err = v.Role.ToTerraformValue(ctx)
-
-		if err != nil {
-			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
-		}
-
-		vals["role"] = val
-
-		val, err = v.RoleArn.ToTerraformValue(ctx)
-
-		if err != nil {
-			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
-		}
-
-		vals["role_arn"] = val
-
-		val, err = v.SecretKey.ToTerraformValue(ctx)
-
-		if err != nil {
-			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
-		}
-
-		vals["secret_key"] = val
-
-		val, err = v.Token.ToTerraformValue(ctx)
-
-		if err != nil {
-			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
-		}
-
-		vals["token"] = val
-
-		val, err = v.TrustAnchorArn.ToTerraformValue(ctx)
-
-		if err != nil {
-			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
-		}
-
-		vals["trust_anchor_arn"] = val
-
-		val, err = v.SecurityType.ToTerraformValue(ctx)
-
-		if err != nil {
-			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
-		}
-
-		vals["type"] = val
 
 		val, err = v.Username.ToTerraformValue(ctx)
 
@@ -3723,37 +5012,24 @@ func (v SecurityValue) ToTerraformValue(ctx context.Context) (tftypes.Value, err
 	}
 }
 
-func (v SecurityValue) IsNull() bool {
+func (v BasicAuthValue) IsNull() bool {
 	return v.state == attr.ValueStateNull
 }
 
-func (v SecurityValue) IsUnknown() bool {
+func (v BasicAuthValue) IsUnknown() bool {
 	return v.state == attr.ValueStateUnknown
 }
 
-func (v SecurityValue) String() string {
-	return "SecurityValue"
+func (v BasicAuthValue) String() string {
+	return "BasicAuthValue"
 }
 
-func (v SecurityValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+func (v BasicAuthValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	attributeTypes := map[string]attr.Type{
-		"access_key_id":     basetypes.StringType{},
-		"certificate":       basetypes.StringType{},
-		"certificate_chain": basetypes.StringType{},
-		"key":               basetypes.StringType{},
-		"password":          basetypes.StringType{},
-		"private_key":       basetypes.StringType{},
-		"profile":           basetypes.StringType{},
-		"profile_arn":       basetypes.StringType{},
-		"role":              basetypes.StringType{},
-		"role_arn":          basetypes.StringType{},
-		"secret_key":        basetypes.StringType{},
-		"token":             basetypes.StringType{},
-		"trust_anchor_arn":  basetypes.StringType{},
-		"type":              basetypes.StringType{},
-		"username":          basetypes.StringType{},
+		"password": basetypes.StringType{},
+		"username": basetypes.StringType{},
 	}
 
 	if v.IsNull() {
@@ -3767,28 +5043,2155 @@ func (v SecurityValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue
 	objVal, diags := types.ObjectValue(
 		attributeTypes,
 		map[string]attr.Value{
-			"access_key_id":     v.AccessKeyId,
-			"certificate":       v.Certificate,
-			"certificate_chain": v.CertificateChain,
-			"key":               v.Key,
-			"password":          v.Password,
-			"private_key":       v.PrivateKey,
-			"profile":           v.Profile,
-			"profile_arn":       v.ProfileArn,
-			"role":              v.Role,
-			"role_arn":          v.RoleArn,
-			"secret_key":        v.SecretKey,
-			"token":             v.Token,
-			"trust_anchor_arn":  v.TrustAnchorArn,
-			"type":              v.SecurityType,
-			"username":          v.Username,
+			"password": v.Password,
+			"username": v.Username,
 		})
 
 	return objVal, diags
 }
 
-func (v SecurityValue) Equal(o attr.Value) bool {
-	other, ok := o.(SecurityValue)
+func (v BasicAuthValue) Equal(o attr.Value) bool {
+	other, ok := o.(BasicAuthValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	if !v.Password.Equal(other.Password) {
+		return false
+	}
+
+	if !v.Username.Equal(other.Username) {
+		return false
+	}
+
+	return true
+}
+
+func (v BasicAuthValue) Type(ctx context.Context) attr.Type {
+	return BasicAuthType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v BasicAuthValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"password": basetypes.StringType{},
+		"username": basetypes.StringType{},
+	}
+}
+
+var _ basetypes.ObjectTypable = BearerTokenType{}
+
+type BearerTokenType struct {
+	basetypes.ObjectType
+}
+
+func (t BearerTokenType) Equal(o attr.Type) bool {
+	other, ok := o.(BearerTokenType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t BearerTokenType) String() string {
+	return "BearerTokenType"
+}
+
+func (t BearerTokenType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	tokenAttribute, ok := attributes["token"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`token is missing from object`)
+
+		return nil, diags
+	}
+
+	tokenVal, ok := tokenAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`token expected to be basetypes.StringValue, was: %T`, tokenAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return BearerTokenValue{
+		Token: tokenVal,
+		state: attr.ValueStateKnown,
+	}, diags
+}
+
+func NewBearerTokenValueNull() BearerTokenValue {
+	return BearerTokenValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewBearerTokenValueUnknown() BearerTokenValue {
+	return BearerTokenValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewBearerTokenValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (BearerTokenValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing BearerTokenValue Attribute Value",
+				"While creating a BearerTokenValue value, a missing attribute value was detected. "+
+					"A BearerTokenValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("BearerTokenValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid BearerTokenValue Attribute Type",
+				"While creating a BearerTokenValue value, an invalid attribute value was detected. "+
+					"A BearerTokenValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("BearerTokenValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("BearerTokenValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra BearerTokenValue Attribute Value",
+				"While creating a BearerTokenValue value, an extra attribute value was detected. "+
+					"A BearerTokenValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra BearerTokenValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewBearerTokenValueUnknown(), diags
+	}
+
+	tokenAttribute, ok := attributes["token"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`token is missing from object`)
+
+		return NewBearerTokenValueUnknown(), diags
+	}
+
+	tokenVal, ok := tokenAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`token expected to be basetypes.StringValue, was: %T`, tokenAttribute))
+	}
+
+	if diags.HasError() {
+		return NewBearerTokenValueUnknown(), diags
+	}
+
+	return BearerTokenValue{
+		Token: tokenVal,
+		state: attr.ValueStateKnown,
+	}, diags
+}
+
+func NewBearerTokenValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) BearerTokenValue {
+	object, diags := NewBearerTokenValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewBearerTokenValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t BearerTokenType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewBearerTokenValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewBearerTokenValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewBearerTokenValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewBearerTokenValueMust(BearerTokenValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t BearerTokenType) ValueType(ctx context.Context) attr.Value {
+	return BearerTokenValue{}
+}
+
+var _ basetypes.ObjectValuable = BearerTokenValue{}
+
+type BearerTokenValue struct {
+	Token basetypes.StringValue `tfsdk:"token"`
+	state attr.ValueState
+}
+
+func (v BearerTokenValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 1)
+
+	var val tftypes.Value
+	var err error
+
+	attrTypes["token"] = basetypes.StringType{}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 1)
+
+		val, err = v.Token.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["token"] = val
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v BearerTokenValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v BearerTokenValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v BearerTokenValue) String() string {
+	return "BearerTokenValue"
+}
+
+func (v BearerTokenValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributeTypes := map[string]attr.Type{
+		"token": basetypes.StringType{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{
+			"token": v.Token,
+		})
+
+	return objVal, diags
+}
+
+func (v BearerTokenValue) Equal(o attr.Value) bool {
+	other, ok := o.(BearerTokenValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	if !v.Token.Equal(other.Token) {
+		return false
+	}
+
+	return true
+}
+
+func (v BearerTokenValue) Type(ctx context.Context) attr.Type {
+	return BearerTokenType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v BearerTokenValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"token": basetypes.StringType{},
+	}
+}
+
+var _ basetypes.ObjectTypable = SslAuthType{}
+
+type SslAuthType struct {
+	basetypes.ObjectType
+}
+
+func (t SslAuthType) Equal(o attr.Type) bool {
+	other, ok := o.(SslAuthType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t SslAuthType) String() string {
+	return "SslAuthType"
+}
+
+func (t SslAuthType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	certificateChainAttribute, ok := attributes["certificate_chain"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`certificate_chain is missing from object`)
+
+		return nil, diags
+	}
+
+	certificateChainVal, ok := certificateChainAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`certificate_chain expected to be basetypes.StringValue, was: %T`, certificateChainAttribute))
+	}
+
+	keyAttribute, ok := attributes["key"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`key is missing from object`)
+
+		return nil, diags
+	}
+
+	keyVal, ok := keyAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`key expected to be basetypes.StringValue, was: %T`, keyAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return SslAuthValue{
+		CertificateChain: certificateChainVal,
+		Key:              keyVal,
+		state:            attr.ValueStateKnown,
+	}, diags
+}
+
+func NewSslAuthValueNull() SslAuthValue {
+	return SslAuthValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewSslAuthValueUnknown() SslAuthValue {
+	return SslAuthValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewSslAuthValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (SslAuthValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing SslAuthValue Attribute Value",
+				"While creating a SslAuthValue value, a missing attribute value was detected. "+
+					"A SslAuthValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("SslAuthValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid SslAuthValue Attribute Type",
+				"While creating a SslAuthValue value, an invalid attribute value was detected. "+
+					"A SslAuthValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("SslAuthValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("SslAuthValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra SslAuthValue Attribute Value",
+				"While creating a SslAuthValue value, an extra attribute value was detected. "+
+					"A SslAuthValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra SslAuthValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewSslAuthValueUnknown(), diags
+	}
+
+	certificateChainAttribute, ok := attributes["certificate_chain"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`certificate_chain is missing from object`)
+
+		return NewSslAuthValueUnknown(), diags
+	}
+
+	certificateChainVal, ok := certificateChainAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`certificate_chain expected to be basetypes.StringValue, was: %T`, certificateChainAttribute))
+	}
+
+	keyAttribute, ok := attributes["key"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`key is missing from object`)
+
+		return NewSslAuthValueUnknown(), diags
+	}
+
+	keyVal, ok := keyAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`key expected to be basetypes.StringValue, was: %T`, keyAttribute))
+	}
+
+	if diags.HasError() {
+		return NewSslAuthValueUnknown(), diags
+	}
+
+	return SslAuthValue{
+		CertificateChain: certificateChainVal,
+		Key:              keyVal,
+		state:            attr.ValueStateKnown,
+	}, diags
+}
+
+func NewSslAuthValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) SslAuthValue {
+	object, diags := NewSslAuthValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewSslAuthValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t SslAuthType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewSslAuthValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewSslAuthValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewSslAuthValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewSslAuthValueMust(SslAuthValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t SslAuthType) ValueType(ctx context.Context) attr.Value {
+	return SslAuthValue{}
+}
+
+var _ basetypes.ObjectValuable = SslAuthValue{}
+
+type SslAuthValue struct {
+	CertificateChain basetypes.StringValue `tfsdk:"certificate_chain"`
+	Key              basetypes.StringValue `tfsdk:"key"`
+	state            attr.ValueState
+}
+
+func (v SslAuthValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 2)
+
+	var val tftypes.Value
+	var err error
+
+	attrTypes["certificate_chain"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["key"] = basetypes.StringType{}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 2)
+
+		val, err = v.CertificateChain.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["certificate_chain"] = val
+
+		val, err = v.Key.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["key"] = val
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v SslAuthValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v SslAuthValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v SslAuthValue) String() string {
+	return "SslAuthValue"
+}
+
+func (v SslAuthValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributeTypes := map[string]attr.Type{
+		"certificate_chain": basetypes.StringType{},
+		"key":               basetypes.StringType{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{
+			"certificate_chain": v.CertificateChain,
+			"key":               v.Key,
+		})
+
+	return objVal, diags
+}
+
+func (v SslAuthValue) Equal(o attr.Value) bool {
+	other, ok := o.(SslAuthValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	if !v.CertificateChain.Equal(other.CertificateChain) {
+		return false
+	}
+
+	if !v.Key.Equal(other.Key) {
+		return false
+	}
+
+	return true
+}
+
+func (v SslAuthValue) Type(ctx context.Context) attr.Type {
+	return SslAuthType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v SslAuthValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"certificate_chain": basetypes.StringType{},
+		"key":               basetypes.StringType{},
+	}
+}
+
+var _ basetypes.ObjectTypable = GlueType{}
+
+type GlueType struct {
+	basetypes.ObjectType
+}
+
+func (t GlueType) Equal(o attr.Type) bool {
+	other, ok := o.(GlueType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t GlueType) String() string {
+	return "GlueType"
+}
+
+func (t GlueType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	regionAttribute, ok := attributes["region"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`region is missing from object`)
+
+		return nil, diags
+	}
+
+	regionVal, ok := regionAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`region expected to be basetypes.StringValue, was: %T`, regionAttribute))
+	}
+
+	registryNameAttribute, ok := attributes["registry_name"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`registry_name is missing from object`)
+
+		return nil, diags
+	}
+
+	registryNameVal, ok := registryNameAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`registry_name expected to be basetypes.StringValue, was: %T`, registryNameAttribute))
+	}
+
+	securityAttribute, ok := attributes["security"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`security is missing from object`)
+
+		return nil, diags
+	}
+
+	securityVal, ok := securityAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`security expected to be basetypes.ObjectValue, was: %T`, securityAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return GlueValue{
+		Region:       regionVal,
+		RegistryName: registryNameVal,
+		Security:     securityVal,
+		state:        attr.ValueStateKnown,
+	}, diags
+}
+
+func NewGlueValueNull() GlueValue {
+	return GlueValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewGlueValueUnknown() GlueValue {
+	return GlueValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewGlueValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (GlueValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing GlueValue Attribute Value",
+				"While creating a GlueValue value, a missing attribute value was detected. "+
+					"A GlueValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("GlueValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid GlueValue Attribute Type",
+				"While creating a GlueValue value, an invalid attribute value was detected. "+
+					"A GlueValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("GlueValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("GlueValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra GlueValue Attribute Value",
+				"While creating a GlueValue value, an extra attribute value was detected. "+
+					"A GlueValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra GlueValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewGlueValueUnknown(), diags
+	}
+
+	regionAttribute, ok := attributes["region"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`region is missing from object`)
+
+		return NewGlueValueUnknown(), diags
+	}
+
+	regionVal, ok := regionAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`region expected to be basetypes.StringValue, was: %T`, regionAttribute))
+	}
+
+	registryNameAttribute, ok := attributes["registry_name"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`registry_name is missing from object`)
+
+		return NewGlueValueUnknown(), diags
+	}
+
+	registryNameVal, ok := registryNameAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`registry_name expected to be basetypes.StringValue, was: %T`, registryNameAttribute))
+	}
+
+	securityAttribute, ok := attributes["security"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`security is missing from object`)
+
+		return NewGlueValueUnknown(), diags
+	}
+
+	securityVal, ok := securityAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`security expected to be basetypes.ObjectValue, was: %T`, securityAttribute))
+	}
+
+	if diags.HasError() {
+		return NewGlueValueUnknown(), diags
+	}
+
+	return GlueValue{
+		Region:       regionVal,
+		RegistryName: registryNameVal,
+		Security:     securityVal,
+		state:        attr.ValueStateKnown,
+	}, diags
+}
+
+func NewGlueValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) GlueValue {
+	object, diags := NewGlueValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewGlueValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t GlueType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewGlueValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewGlueValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewGlueValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewGlueValueMust(GlueValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t GlueType) ValueType(ctx context.Context) attr.Value {
+	return GlueValue{}
+}
+
+var _ basetypes.ObjectValuable = GlueValue{}
+
+type GlueValue struct {
+	Region       basetypes.StringValue `tfsdk:"region"`
+	RegistryName basetypes.StringValue `tfsdk:"registry_name"`
+	Security     basetypes.ObjectValue `tfsdk:"security"`
+	state        attr.ValueState
+}
+
+func (v GlueValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 3)
+
+	var val tftypes.Value
+	var err error
+
+	attrTypes["region"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["registry_name"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["security"] = basetypes.ObjectType{
+		AttrTypes: GlueSecurityValue{}.AttributeTypes(ctx),
+	}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 3)
+
+		val, err = v.Region.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["region"] = val
+
+		val, err = v.RegistryName.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["registry_name"] = val
+
+		val, err = v.Security.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["security"] = val
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v GlueValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v GlueValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v GlueValue) String() string {
+	return "GlueValue"
+}
+
+func (v GlueValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	var security basetypes.ObjectValue
+
+	if v.Security.IsNull() {
+		security = types.ObjectNull(
+			GlueSecurityValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if v.Security.IsUnknown() {
+		security = types.ObjectUnknown(
+			GlueSecurityValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if !v.Security.IsNull() && !v.Security.IsUnknown() {
+		security = types.ObjectValueMust(
+			GlueSecurityValue{}.AttributeTypes(ctx),
+			v.Security.Attributes(),
+		)
+	}
+
+	attributeTypes := map[string]attr.Type{
+		"region":        basetypes.StringType{},
+		"registry_name": basetypes.StringType{},
+		"security": basetypes.ObjectType{
+			AttrTypes: GlueSecurityValue{}.AttributeTypes(ctx),
+		},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{
+			"region":        v.Region,
+			"registry_name": v.RegistryName,
+			"security":      security,
+		})
+
+	return objVal, diags
+}
+
+func (v GlueValue) Equal(o attr.Value) bool {
+	other, ok := o.(GlueValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	if !v.Region.Equal(other.Region) {
+		return false
+	}
+
+	if !v.RegistryName.Equal(other.RegistryName) {
+		return false
+	}
+
+	if !v.Security.Equal(other.Security) {
+		return false
+	}
+
+	return true
+}
+
+func (v GlueValue) Type(ctx context.Context) attr.Type {
+	return GlueType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v GlueValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"region":        basetypes.StringType{},
+		"registry_name": basetypes.StringType{},
+		"security": basetypes.ObjectType{
+			AttrTypes: GlueSecurityValue{}.AttributeTypes(ctx),
+		},
+	}
+}
+
+var _ basetypes.ObjectTypable = GlueSecurityType{}
+
+type GlueSecurityType struct {
+	basetypes.ObjectType
+}
+
+func (t GlueSecurityType) Equal(o attr.Type) bool {
+	other, ok := o.(GlueSecurityType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t GlueSecurityType) String() string {
+	return "GlueSecurityType"
+}
+
+func (t GlueSecurityType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	credentialsAttribute, ok := attributes["credentials"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`credentials is missing from object`)
+
+		return nil, diags
+	}
+
+	credentialsVal, ok := credentialsAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`credentials expected to be basetypes.ObjectValue, was: %T`, credentialsAttribute))
+	}
+
+	fromContextAttribute, ok := attributes["from_context"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`from_context is missing from object`)
+
+		return nil, diags
+	}
+
+	fromContextVal, ok := fromContextAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`from_context expected to be basetypes.ObjectValue, was: %T`, fromContextAttribute))
+	}
+
+	fromRoleAttribute, ok := attributes["from_role"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`from_role is missing from object`)
+
+		return nil, diags
+	}
+
+	fromRoleVal, ok := fromRoleAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`from_role expected to be basetypes.ObjectValue, was: %T`, fromRoleAttribute))
+	}
+
+	iamAnywhereAttribute, ok := attributes["iam_anywhere"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`iam_anywhere is missing from object`)
+
+		return nil, diags
+	}
+
+	iamAnywhereVal, ok := iamAnywhereAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`iam_anywhere expected to be basetypes.ObjectValue, was: %T`, iamAnywhereAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return GlueSecurityValue{
+		Credentials: credentialsVal,
+		FromContext: fromContextVal,
+		FromRole:    fromRoleVal,
+		IamAnywhere: iamAnywhereVal,
+		state:       attr.ValueStateKnown,
+	}, diags
+}
+
+func NewGlueSecurityValueNull() GlueSecurityValue {
+	return GlueSecurityValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewGlueSecurityValueUnknown() GlueSecurityValue {
+	return GlueSecurityValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewGlueSecurityValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (GlueSecurityValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing GlueSecurityValue Attribute Value",
+				"While creating a GlueSecurityValue value, a missing attribute value was detected. "+
+					"A GlueSecurityValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("GlueSecurityValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid GlueSecurityValue Attribute Type",
+				"While creating a GlueSecurityValue value, an invalid attribute value was detected. "+
+					"A GlueSecurityValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("GlueSecurityValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("GlueSecurityValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra GlueSecurityValue Attribute Value",
+				"While creating a GlueSecurityValue value, an extra attribute value was detected. "+
+					"A GlueSecurityValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra GlueSecurityValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewGlueSecurityValueUnknown(), diags
+	}
+
+	credentialsAttribute, ok := attributes["credentials"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`credentials is missing from object`)
+
+		return NewGlueSecurityValueUnknown(), diags
+	}
+
+	credentialsVal, ok := credentialsAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`credentials expected to be basetypes.ObjectValue, was: %T`, credentialsAttribute))
+	}
+
+	fromContextAttribute, ok := attributes["from_context"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`from_context is missing from object`)
+
+		return NewGlueSecurityValueUnknown(), diags
+	}
+
+	fromContextVal, ok := fromContextAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`from_context expected to be basetypes.ObjectValue, was: %T`, fromContextAttribute))
+	}
+
+	fromRoleAttribute, ok := attributes["from_role"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`from_role is missing from object`)
+
+		return NewGlueSecurityValueUnknown(), diags
+	}
+
+	fromRoleVal, ok := fromRoleAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`from_role expected to be basetypes.ObjectValue, was: %T`, fromRoleAttribute))
+	}
+
+	iamAnywhereAttribute, ok := attributes["iam_anywhere"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`iam_anywhere is missing from object`)
+
+		return NewGlueSecurityValueUnknown(), diags
+	}
+
+	iamAnywhereVal, ok := iamAnywhereAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`iam_anywhere expected to be basetypes.ObjectValue, was: %T`, iamAnywhereAttribute))
+	}
+
+	if diags.HasError() {
+		return NewGlueSecurityValueUnknown(), diags
+	}
+
+	return GlueSecurityValue{
+		Credentials: credentialsVal,
+		FromContext: fromContextVal,
+		FromRole:    fromRoleVal,
+		IamAnywhere: iamAnywhereVal,
+		state:       attr.ValueStateKnown,
+	}, diags
+}
+
+func NewGlueSecurityValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) GlueSecurityValue {
+	object, diags := NewGlueSecurityValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewGlueSecurityValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t GlueSecurityType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewGlueSecurityValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewGlueSecurityValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewGlueSecurityValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewGlueSecurityValueMust(GlueSecurityValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t GlueSecurityType) ValueType(ctx context.Context) attr.Value {
+	return GlueSecurityValue{}
+}
+
+var _ basetypes.ObjectValuable = GlueSecurityValue{}
+
+type GlueSecurityValue struct {
+	Credentials basetypes.ObjectValue `tfsdk:"credentials"`
+	FromContext basetypes.ObjectValue `tfsdk:"from_context"`
+	FromRole    basetypes.ObjectValue `tfsdk:"from_role"`
+	IamAnywhere basetypes.ObjectValue `tfsdk:"iam_anywhere"`
+	state       attr.ValueState
+}
+
+func (v GlueSecurityValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 4)
+
+	var val tftypes.Value
+	var err error
+
+	attrTypes["credentials"] = basetypes.ObjectType{
+		AttrTypes: CredentialsValue{}.AttributeTypes(ctx),
+	}.TerraformType(ctx)
+	attrTypes["from_context"] = basetypes.ObjectType{
+		AttrTypes: FromContextValue{}.AttributeTypes(ctx),
+	}.TerraformType(ctx)
+	attrTypes["from_role"] = basetypes.ObjectType{
+		AttrTypes: FromRoleValue{}.AttributeTypes(ctx),
+	}.TerraformType(ctx)
+	attrTypes["iam_anywhere"] = basetypes.ObjectType{
+		AttrTypes: IamAnywhereValue{}.AttributeTypes(ctx),
+	}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 4)
+
+		val, err = v.Credentials.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["credentials"] = val
+
+		val, err = v.FromContext.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["from_context"] = val
+
+		val, err = v.FromRole.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["from_role"] = val
+
+		val, err = v.IamAnywhere.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["iam_anywhere"] = val
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v GlueSecurityValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v GlueSecurityValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v GlueSecurityValue) String() string {
+	return "GlueSecurityValue"
+}
+
+func (v GlueSecurityValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	var credentials basetypes.ObjectValue
+
+	if v.Credentials.IsNull() {
+		credentials = types.ObjectNull(
+			CredentialsValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if v.Credentials.IsUnknown() {
+		credentials = types.ObjectUnknown(
+			CredentialsValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if !v.Credentials.IsNull() && !v.Credentials.IsUnknown() {
+		credentials = types.ObjectValueMust(
+			CredentialsValue{}.AttributeTypes(ctx),
+			v.Credentials.Attributes(),
+		)
+	}
+
+	var fromContext basetypes.ObjectValue
+
+	if v.FromContext.IsNull() {
+		fromContext = types.ObjectNull(
+			FromContextValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if v.FromContext.IsUnknown() {
+		fromContext = types.ObjectUnknown(
+			FromContextValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if !v.FromContext.IsNull() && !v.FromContext.IsUnknown() {
+		fromContext = types.ObjectValueMust(
+			FromContextValue{}.AttributeTypes(ctx),
+			v.FromContext.Attributes(),
+		)
+	}
+
+	var fromRole basetypes.ObjectValue
+
+	if v.FromRole.IsNull() {
+		fromRole = types.ObjectNull(
+			FromRoleValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if v.FromRole.IsUnknown() {
+		fromRole = types.ObjectUnknown(
+			FromRoleValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if !v.FromRole.IsNull() && !v.FromRole.IsUnknown() {
+		fromRole = types.ObjectValueMust(
+			FromRoleValue{}.AttributeTypes(ctx),
+			v.FromRole.Attributes(),
+		)
+	}
+
+	var iamAnywhere basetypes.ObjectValue
+
+	if v.IamAnywhere.IsNull() {
+		iamAnywhere = types.ObjectNull(
+			IamAnywhereValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if v.IamAnywhere.IsUnknown() {
+		iamAnywhere = types.ObjectUnknown(
+			IamAnywhereValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if !v.IamAnywhere.IsNull() && !v.IamAnywhere.IsUnknown() {
+		iamAnywhere = types.ObjectValueMust(
+			IamAnywhereValue{}.AttributeTypes(ctx),
+			v.IamAnywhere.Attributes(),
+		)
+	}
+
+	attributeTypes := map[string]attr.Type{
+		"credentials": basetypes.ObjectType{
+			AttrTypes: CredentialsValue{}.AttributeTypes(ctx),
+		},
+		"from_context": basetypes.ObjectType{
+			AttrTypes: FromContextValue{}.AttributeTypes(ctx),
+		},
+		"from_role": basetypes.ObjectType{
+			AttrTypes: FromRoleValue{}.AttributeTypes(ctx),
+		},
+		"iam_anywhere": basetypes.ObjectType{
+			AttrTypes: IamAnywhereValue{}.AttributeTypes(ctx),
+		},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{
+			"credentials":  credentials,
+			"from_context": fromContext,
+			"from_role":    fromRole,
+			"iam_anywhere": iamAnywhere,
+		})
+
+	return objVal, diags
+}
+
+func (v GlueSecurityValue) Equal(o attr.Value) bool {
+	other, ok := o.(GlueSecurityValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	if !v.Credentials.Equal(other.Credentials) {
+		return false
+	}
+
+	if !v.FromContext.Equal(other.FromContext) {
+		return false
+	}
+
+	if !v.FromRole.Equal(other.FromRole) {
+		return false
+	}
+
+	if !v.IamAnywhere.Equal(other.IamAnywhere) {
+		return false
+	}
+
+	return true
+}
+
+func (v GlueSecurityValue) Type(ctx context.Context) attr.Type {
+	return GlueSecurityType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v GlueSecurityValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"credentials": basetypes.ObjectType{
+			AttrTypes: CredentialsValue{}.AttributeTypes(ctx),
+		},
+		"from_context": basetypes.ObjectType{
+			AttrTypes: FromContextValue{}.AttributeTypes(ctx),
+		},
+		"from_role": basetypes.ObjectType{
+			AttrTypes: FromRoleValue{}.AttributeTypes(ctx),
+		},
+		"iam_anywhere": basetypes.ObjectType{
+			AttrTypes: IamAnywhereValue{}.AttributeTypes(ctx),
+		},
+	}
+}
+
+var _ basetypes.ObjectTypable = CredentialsType{}
+
+type CredentialsType struct {
+	basetypes.ObjectType
+}
+
+func (t CredentialsType) Equal(o attr.Type) bool {
+	other, ok := o.(CredentialsType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t CredentialsType) String() string {
+	return "CredentialsType"
+}
+
+func (t CredentialsType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	accessKeyIdAttribute, ok := attributes["access_key_id"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`access_key_id is missing from object`)
+
+		return nil, diags
+	}
+
+	accessKeyIdVal, ok := accessKeyIdAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`access_key_id expected to be basetypes.StringValue, was: %T`, accessKeyIdAttribute))
+	}
+
+	secretKeyAttribute, ok := attributes["secret_key"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`secret_key is missing from object`)
+
+		return nil, diags
+	}
+
+	secretKeyVal, ok := secretKeyAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`secret_key expected to be basetypes.StringValue, was: %T`, secretKeyAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return CredentialsValue{
+		AccessKeyId: accessKeyIdVal,
+		SecretKey:   secretKeyVal,
+		state:       attr.ValueStateKnown,
+	}, diags
+}
+
+func NewCredentialsValueNull() CredentialsValue {
+	return CredentialsValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewCredentialsValueUnknown() CredentialsValue {
+	return CredentialsValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewCredentialsValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (CredentialsValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing CredentialsValue Attribute Value",
+				"While creating a CredentialsValue value, a missing attribute value was detected. "+
+					"A CredentialsValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("CredentialsValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid CredentialsValue Attribute Type",
+				"While creating a CredentialsValue value, an invalid attribute value was detected. "+
+					"A CredentialsValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("CredentialsValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("CredentialsValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra CredentialsValue Attribute Value",
+				"While creating a CredentialsValue value, an extra attribute value was detected. "+
+					"A CredentialsValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra CredentialsValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewCredentialsValueUnknown(), diags
+	}
+
+	accessKeyIdAttribute, ok := attributes["access_key_id"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`access_key_id is missing from object`)
+
+		return NewCredentialsValueUnknown(), diags
+	}
+
+	accessKeyIdVal, ok := accessKeyIdAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`access_key_id expected to be basetypes.StringValue, was: %T`, accessKeyIdAttribute))
+	}
+
+	secretKeyAttribute, ok := attributes["secret_key"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`secret_key is missing from object`)
+
+		return NewCredentialsValueUnknown(), diags
+	}
+
+	secretKeyVal, ok := secretKeyAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`secret_key expected to be basetypes.StringValue, was: %T`, secretKeyAttribute))
+	}
+
+	if diags.HasError() {
+		return NewCredentialsValueUnknown(), diags
+	}
+
+	return CredentialsValue{
+		AccessKeyId: accessKeyIdVal,
+		SecretKey:   secretKeyVal,
+		state:       attr.ValueStateKnown,
+	}, diags
+}
+
+func NewCredentialsValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) CredentialsValue {
+	object, diags := NewCredentialsValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewCredentialsValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t CredentialsType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewCredentialsValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewCredentialsValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewCredentialsValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewCredentialsValueMust(CredentialsValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t CredentialsType) ValueType(ctx context.Context) attr.Value {
+	return CredentialsValue{}
+}
+
+var _ basetypes.ObjectValuable = CredentialsValue{}
+
+type CredentialsValue struct {
+	AccessKeyId basetypes.StringValue `tfsdk:"access_key_id"`
+	SecretKey   basetypes.StringValue `tfsdk:"secret_key"`
+	state       attr.ValueState
+}
+
+func (v CredentialsValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 2)
+
+	var val tftypes.Value
+	var err error
+
+	attrTypes["access_key_id"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["secret_key"] = basetypes.StringType{}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 2)
+
+		val, err = v.AccessKeyId.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["access_key_id"] = val
+
+		val, err = v.SecretKey.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["secret_key"] = val
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v CredentialsValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v CredentialsValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v CredentialsValue) String() string {
+	return "CredentialsValue"
+}
+
+func (v CredentialsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributeTypes := map[string]attr.Type{
+		"access_key_id": basetypes.StringType{},
+		"secret_key":    basetypes.StringType{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{
+			"access_key_id": v.AccessKeyId,
+			"secret_key":    v.SecretKey,
+		})
+
+	return objVal, diags
+}
+
+func (v CredentialsValue) Equal(o attr.Value) bool {
+	other, ok := o.(CredentialsValue)
 
 	if !ok {
 		return false
@@ -3806,19 +7209,1180 @@ func (v SecurityValue) Equal(o attr.Value) bool {
 		return false
 	}
 
+	if !v.SecretKey.Equal(other.SecretKey) {
+		return false
+	}
+
+	return true
+}
+
+func (v CredentialsValue) Type(ctx context.Context) attr.Type {
+	return CredentialsType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v CredentialsValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"access_key_id": basetypes.StringType{},
+		"secret_key":    basetypes.StringType{},
+	}
+}
+
+var _ basetypes.ObjectTypable = FromContextType{}
+
+type FromContextType struct {
+	basetypes.ObjectType
+}
+
+func (t FromContextType) Equal(o attr.Type) bool {
+	other, ok := o.(FromContextType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t FromContextType) String() string {
+	return "FromContextType"
+}
+
+func (t FromContextType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	profileAttribute, ok := attributes["profile"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`profile is missing from object`)
+
+		return nil, diags
+	}
+
+	profileVal, ok := profileAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`profile expected to be basetypes.StringValue, was: %T`, profileAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return FromContextValue{
+		Profile: profileVal,
+		state:   attr.ValueStateKnown,
+	}, diags
+}
+
+func NewFromContextValueNull() FromContextValue {
+	return FromContextValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewFromContextValueUnknown() FromContextValue {
+	return FromContextValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewFromContextValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (FromContextValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing FromContextValue Attribute Value",
+				"While creating a FromContextValue value, a missing attribute value was detected. "+
+					"A FromContextValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("FromContextValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid FromContextValue Attribute Type",
+				"While creating a FromContextValue value, an invalid attribute value was detected. "+
+					"A FromContextValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("FromContextValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("FromContextValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra FromContextValue Attribute Value",
+				"While creating a FromContextValue value, an extra attribute value was detected. "+
+					"A FromContextValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra FromContextValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewFromContextValueUnknown(), diags
+	}
+
+	profileAttribute, ok := attributes["profile"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`profile is missing from object`)
+
+		return NewFromContextValueUnknown(), diags
+	}
+
+	profileVal, ok := profileAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`profile expected to be basetypes.StringValue, was: %T`, profileAttribute))
+	}
+
+	if diags.HasError() {
+		return NewFromContextValueUnknown(), diags
+	}
+
+	return FromContextValue{
+		Profile: profileVal,
+		state:   attr.ValueStateKnown,
+	}, diags
+}
+
+func NewFromContextValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) FromContextValue {
+	object, diags := NewFromContextValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewFromContextValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t FromContextType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewFromContextValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewFromContextValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewFromContextValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewFromContextValueMust(FromContextValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t FromContextType) ValueType(ctx context.Context) attr.Value {
+	return FromContextValue{}
+}
+
+var _ basetypes.ObjectValuable = FromContextValue{}
+
+type FromContextValue struct {
+	Profile basetypes.StringValue `tfsdk:"profile"`
+	state   attr.ValueState
+}
+
+func (v FromContextValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 1)
+
+	var val tftypes.Value
+	var err error
+
+	attrTypes["profile"] = basetypes.StringType{}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 1)
+
+		val, err = v.Profile.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["profile"] = val
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v FromContextValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v FromContextValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v FromContextValue) String() string {
+	return "FromContextValue"
+}
+
+func (v FromContextValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributeTypes := map[string]attr.Type{
+		"profile": basetypes.StringType{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{
+			"profile": v.Profile,
+		})
+
+	return objVal, diags
+}
+
+func (v FromContextValue) Equal(o attr.Value) bool {
+	other, ok := o.(FromContextValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	if !v.Profile.Equal(other.Profile) {
+		return false
+	}
+
+	return true
+}
+
+func (v FromContextValue) Type(ctx context.Context) attr.Type {
+	return FromContextType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v FromContextValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"profile": basetypes.StringType{},
+	}
+}
+
+var _ basetypes.ObjectTypable = FromRoleType{}
+
+type FromRoleType struct {
+	basetypes.ObjectType
+}
+
+func (t FromRoleType) Equal(o attr.Type) bool {
+	other, ok := o.(FromRoleType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t FromRoleType) String() string {
+	return "FromRoleType"
+}
+
+func (t FromRoleType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	roleAttribute, ok := attributes["role"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`role is missing from object`)
+
+		return nil, diags
+	}
+
+	roleVal, ok := roleAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`role expected to be basetypes.StringValue, was: %T`, roleAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return FromRoleValue{
+		Role:  roleVal,
+		state: attr.ValueStateKnown,
+	}, diags
+}
+
+func NewFromRoleValueNull() FromRoleValue {
+	return FromRoleValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewFromRoleValueUnknown() FromRoleValue {
+	return FromRoleValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewFromRoleValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (FromRoleValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing FromRoleValue Attribute Value",
+				"While creating a FromRoleValue value, a missing attribute value was detected. "+
+					"A FromRoleValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("FromRoleValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid FromRoleValue Attribute Type",
+				"While creating a FromRoleValue value, an invalid attribute value was detected. "+
+					"A FromRoleValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("FromRoleValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("FromRoleValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra FromRoleValue Attribute Value",
+				"While creating a FromRoleValue value, an extra attribute value was detected. "+
+					"A FromRoleValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra FromRoleValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewFromRoleValueUnknown(), diags
+	}
+
+	roleAttribute, ok := attributes["role"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`role is missing from object`)
+
+		return NewFromRoleValueUnknown(), diags
+	}
+
+	roleVal, ok := roleAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`role expected to be basetypes.StringValue, was: %T`, roleAttribute))
+	}
+
+	if diags.HasError() {
+		return NewFromRoleValueUnknown(), diags
+	}
+
+	return FromRoleValue{
+		Role:  roleVal,
+		state: attr.ValueStateKnown,
+	}, diags
+}
+
+func NewFromRoleValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) FromRoleValue {
+	object, diags := NewFromRoleValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewFromRoleValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t FromRoleType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewFromRoleValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewFromRoleValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewFromRoleValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewFromRoleValueMust(FromRoleValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t FromRoleType) ValueType(ctx context.Context) attr.Value {
+	return FromRoleValue{}
+}
+
+var _ basetypes.ObjectValuable = FromRoleValue{}
+
+type FromRoleValue struct {
+	Role  basetypes.StringValue `tfsdk:"role"`
+	state attr.ValueState
+}
+
+func (v FromRoleValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 1)
+
+	var val tftypes.Value
+	var err error
+
+	attrTypes["role"] = basetypes.StringType{}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 1)
+
+		val, err = v.Role.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["role"] = val
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v FromRoleValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v FromRoleValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v FromRoleValue) String() string {
+	return "FromRoleValue"
+}
+
+func (v FromRoleValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributeTypes := map[string]attr.Type{
+		"role": basetypes.StringType{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{
+			"role": v.Role,
+		})
+
+	return objVal, diags
+}
+
+func (v FromRoleValue) Equal(o attr.Value) bool {
+	other, ok := o.(FromRoleValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	if !v.Role.Equal(other.Role) {
+		return false
+	}
+
+	return true
+}
+
+func (v FromRoleValue) Type(ctx context.Context) attr.Type {
+	return FromRoleType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v FromRoleValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"role": basetypes.StringType{},
+	}
+}
+
+var _ basetypes.ObjectTypable = IamAnywhereType{}
+
+type IamAnywhereType struct {
+	basetypes.ObjectType
+}
+
+func (t IamAnywhereType) Equal(o attr.Type) bool {
+	other, ok := o.(IamAnywhereType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t IamAnywhereType) String() string {
+	return "IamAnywhereType"
+}
+
+func (t IamAnywhereType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	certificateAttribute, ok := attributes["certificate"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`certificate is missing from object`)
+
+		return nil, diags
+	}
+
+	certificateVal, ok := certificateAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`certificate expected to be basetypes.StringValue, was: %T`, certificateAttribute))
+	}
+
+	privateKeyAttribute, ok := attributes["private_key"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`private_key is missing from object`)
+
+		return nil, diags
+	}
+
+	privateKeyVal, ok := privateKeyAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`private_key expected to be basetypes.StringValue, was: %T`, privateKeyAttribute))
+	}
+
+	profileArnAttribute, ok := attributes["profile_arn"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`profile_arn is missing from object`)
+
+		return nil, diags
+	}
+
+	profileArnVal, ok := profileArnAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`profile_arn expected to be basetypes.StringValue, was: %T`, profileArnAttribute))
+	}
+
+	roleArnAttribute, ok := attributes["role_arn"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`role_arn is missing from object`)
+
+		return nil, diags
+	}
+
+	roleArnVal, ok := roleArnAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`role_arn expected to be basetypes.StringValue, was: %T`, roleArnAttribute))
+	}
+
+	trustAnchorArnAttribute, ok := attributes["trust_anchor_arn"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`trust_anchor_arn is missing from object`)
+
+		return nil, diags
+	}
+
+	trustAnchorArnVal, ok := trustAnchorArnAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`trust_anchor_arn expected to be basetypes.StringValue, was: %T`, trustAnchorArnAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return IamAnywhereValue{
+		Certificate:    certificateVal,
+		PrivateKey:     privateKeyVal,
+		ProfileArn:     profileArnVal,
+		RoleArn:        roleArnVal,
+		TrustAnchorArn: trustAnchorArnVal,
+		state:          attr.ValueStateKnown,
+	}, diags
+}
+
+func NewIamAnywhereValueNull() IamAnywhereValue {
+	return IamAnywhereValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewIamAnywhereValueUnknown() IamAnywhereValue {
+	return IamAnywhereValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewIamAnywhereValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (IamAnywhereValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing IamAnywhereValue Attribute Value",
+				"While creating a IamAnywhereValue value, a missing attribute value was detected. "+
+					"A IamAnywhereValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("IamAnywhereValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid IamAnywhereValue Attribute Type",
+				"While creating a IamAnywhereValue value, an invalid attribute value was detected. "+
+					"A IamAnywhereValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("IamAnywhereValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("IamAnywhereValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra IamAnywhereValue Attribute Value",
+				"While creating a IamAnywhereValue value, an extra attribute value was detected. "+
+					"A IamAnywhereValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra IamAnywhereValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewIamAnywhereValueUnknown(), diags
+	}
+
+	certificateAttribute, ok := attributes["certificate"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`certificate is missing from object`)
+
+		return NewIamAnywhereValueUnknown(), diags
+	}
+
+	certificateVal, ok := certificateAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`certificate expected to be basetypes.StringValue, was: %T`, certificateAttribute))
+	}
+
+	privateKeyAttribute, ok := attributes["private_key"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`private_key is missing from object`)
+
+		return NewIamAnywhereValueUnknown(), diags
+	}
+
+	privateKeyVal, ok := privateKeyAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`private_key expected to be basetypes.StringValue, was: %T`, privateKeyAttribute))
+	}
+
+	profileArnAttribute, ok := attributes["profile_arn"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`profile_arn is missing from object`)
+
+		return NewIamAnywhereValueUnknown(), diags
+	}
+
+	profileArnVal, ok := profileArnAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`profile_arn expected to be basetypes.StringValue, was: %T`, profileArnAttribute))
+	}
+
+	roleArnAttribute, ok := attributes["role_arn"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`role_arn is missing from object`)
+
+		return NewIamAnywhereValueUnknown(), diags
+	}
+
+	roleArnVal, ok := roleArnAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`role_arn expected to be basetypes.StringValue, was: %T`, roleArnAttribute))
+	}
+
+	trustAnchorArnAttribute, ok := attributes["trust_anchor_arn"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`trust_anchor_arn is missing from object`)
+
+		return NewIamAnywhereValueUnknown(), diags
+	}
+
+	trustAnchorArnVal, ok := trustAnchorArnAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`trust_anchor_arn expected to be basetypes.StringValue, was: %T`, trustAnchorArnAttribute))
+	}
+
+	if diags.HasError() {
+		return NewIamAnywhereValueUnknown(), diags
+	}
+
+	return IamAnywhereValue{
+		Certificate:    certificateVal,
+		PrivateKey:     privateKeyVal,
+		ProfileArn:     profileArnVal,
+		RoleArn:        roleArnVal,
+		TrustAnchorArn: trustAnchorArnVal,
+		state:          attr.ValueStateKnown,
+	}, diags
+}
+
+func NewIamAnywhereValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) IamAnywhereValue {
+	object, diags := NewIamAnywhereValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewIamAnywhereValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t IamAnywhereType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewIamAnywhereValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewIamAnywhereValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewIamAnywhereValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewIamAnywhereValueMust(IamAnywhereValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t IamAnywhereType) ValueType(ctx context.Context) attr.Value {
+	return IamAnywhereValue{}
+}
+
+var _ basetypes.ObjectValuable = IamAnywhereValue{}
+
+type IamAnywhereValue struct {
+	Certificate    basetypes.StringValue `tfsdk:"certificate"`
+	PrivateKey     basetypes.StringValue `tfsdk:"private_key"`
+	ProfileArn     basetypes.StringValue `tfsdk:"profile_arn"`
+	RoleArn        basetypes.StringValue `tfsdk:"role_arn"`
+	TrustAnchorArn basetypes.StringValue `tfsdk:"trust_anchor_arn"`
+	state          attr.ValueState
+}
+
+func (v IamAnywhereValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 5)
+
+	var val tftypes.Value
+	var err error
+
+	attrTypes["certificate"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["private_key"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["profile_arn"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["role_arn"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["trust_anchor_arn"] = basetypes.StringType{}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 5)
+
+		val, err = v.Certificate.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["certificate"] = val
+
+		val, err = v.PrivateKey.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["private_key"] = val
+
+		val, err = v.ProfileArn.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["profile_arn"] = val
+
+		val, err = v.RoleArn.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["role_arn"] = val
+
+		val, err = v.TrustAnchorArn.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["trust_anchor_arn"] = val
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v IamAnywhereValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v IamAnywhereValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v IamAnywhereValue) String() string {
+	return "IamAnywhereValue"
+}
+
+func (v IamAnywhereValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributeTypes := map[string]attr.Type{
+		"certificate":      basetypes.StringType{},
+		"private_key":      basetypes.StringType{},
+		"profile_arn":      basetypes.StringType{},
+		"role_arn":         basetypes.StringType{},
+		"trust_anchor_arn": basetypes.StringType{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{
+			"certificate":      v.Certificate,
+			"private_key":      v.PrivateKey,
+			"profile_arn":      v.ProfileArn,
+			"role_arn":         v.RoleArn,
+			"trust_anchor_arn": v.TrustAnchorArn,
+		})
+
+	return objVal, diags
+}
+
+func (v IamAnywhereValue) Equal(o attr.Value) bool {
+	other, ok := o.(IamAnywhereValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
 	if !v.Certificate.Equal(other.Certificate) {
-		return false
-	}
-
-	if !v.CertificateChain.Equal(other.CertificateChain) {
-		return false
-	}
-
-	if !v.Key.Equal(other.Key) {
-		return false
-	}
-
-	if !v.Password.Equal(other.Password) {
 		return false
 	}
 
@@ -3826,15 +8390,7 @@ func (v SecurityValue) Equal(o attr.Value) bool {
 		return false
 	}
 
-	if !v.Profile.Equal(other.Profile) {
-		return false
-	}
-
 	if !v.ProfileArn.Equal(other.ProfileArn) {
-		return false
-	}
-
-	if !v.Role.Equal(other.Role) {
 		return false
 	}
 
@@ -3842,53 +8398,27 @@ func (v SecurityValue) Equal(o attr.Value) bool {
 		return false
 	}
 
-	if !v.SecretKey.Equal(other.SecretKey) {
-		return false
-	}
-
-	if !v.Token.Equal(other.Token) {
-		return false
-	}
-
 	if !v.TrustAnchorArn.Equal(other.TrustAnchorArn) {
-		return false
-	}
-
-	if !v.SecurityType.Equal(other.SecurityType) {
-		return false
-	}
-
-	if !v.Username.Equal(other.Username) {
 		return false
 	}
 
 	return true
 }
 
-func (v SecurityValue) Type(ctx context.Context) attr.Type {
-	return SecurityType{
+func (v IamAnywhereValue) Type(ctx context.Context) attr.Type {
+	return IamAnywhereType{
 		basetypes.ObjectType{
 			AttrTypes: v.AttributeTypes(ctx),
 		},
 	}
 }
 
-func (v SecurityValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+func (v IamAnywhereValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 	return map[string]attr.Type{
-		"access_key_id":     basetypes.StringType{},
-		"certificate":       basetypes.StringType{},
-		"certificate_chain": basetypes.StringType{},
-		"key":               basetypes.StringType{},
-		"password":          basetypes.StringType{},
-		"private_key":       basetypes.StringType{},
-		"profile":           basetypes.StringType{},
-		"profile_arn":       basetypes.StringType{},
-		"role":              basetypes.StringType{},
-		"role_arn":          basetypes.StringType{},
-		"secret_key":        basetypes.StringType{},
-		"token":             basetypes.StringType{},
-		"trust_anchor_arn":  basetypes.StringType{},
-		"type":              basetypes.StringType{},
-		"username":          basetypes.StringType{},
+		"certificate":      basetypes.StringType{},
+		"private_key":      basetypes.StringType{},
+		"profile_arn":      basetypes.StringType{},
+		"role_arn":         basetypes.StringType{},
+		"trust_anchor_arn": basetypes.StringType{},
 	}
 }

@@ -5,7 +5,6 @@ package resource_console_kafka_connect_v2
 import (
 	"context"
 	"fmt"
-	"github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -76,41 +75,69 @@ func ConsoleKafkaConnectV2ResourceSchema(ctx context.Context) schema.Schema {
 					},
 					"security": schema.SingleNestedAttribute{
 						Attributes: map[string]schema.Attribute{
-							"certificate_chain": schema.StringAttribute{
-								Optional:            true,
-								Description:         "Kafka connect server mTLS auth certificate chain PEM. Required if security type is `SSLAuth`",
-								MarkdownDescription: "Kafka connect server mTLS auth certificate chain PEM. Required if security type is `SSLAuth`",
-							},
-							"key": schema.StringAttribute{
-								Optional:            true,
-								Sensitive:           true,
-								Description:         "Kafka connect server mTLS auth private key PEM. Required if security type is `SSLAuth`",
-								MarkdownDescription: "Kafka connect server mTLS auth private key PEM. Required if security type is `SSLAuth`",
-							},
-							"password": schema.StringAttribute{
-								Optional:            true,
-								Sensitive:           true,
-								Description:         "Kafka connect server basic auth password. Required if security type is `BasicAuth`",
-								MarkdownDescription: "Kafka connect server basic auth password. Required if security type is `BasicAuth`",
-							},
-							"token": schema.StringAttribute{
-								Optional:            true,
-								Sensitive:           true,
-								Description:         "Kafka connect server bearer token. Required if security type is `BearerToken`",
-								MarkdownDescription: "Kafka connect server bearer token. Required if security type is `BearerToken`",
-							},
-							"type": schema.StringAttribute{
-								Required:            true,
-								Description:         "Kafka connect server security type. Either `BasicAuth`, `BearerToken`, `SSLAuth`\n\n More detail on our [documentation](https://docs.conduktor.io/platform/reference/resource-reference/console/#kafkaconnectcluster)",
-								MarkdownDescription: "Kafka connect server security type. Either `BasicAuth`, `BearerToken`, `SSLAuth`\n\n More detail on our [documentation](https://docs.conduktor.io/platform/reference/resource-reference/console/#kafkaconnectcluster)",
-								Validators: []validator.String{
-									stringvalidator.OneOf(validation.ValidKafkaConnectSecurityTypes...),
+							"basic_auth": schema.SingleNestedAttribute{
+								Attributes: map[string]schema.Attribute{
+									"password": schema.StringAttribute{
+										Required:            true,
+										Sensitive:           true,
+										Description:         "Kafka connect server basic auth password.",
+										MarkdownDescription: "Kafka connect server basic auth password.",
+									},
+									"username": schema.StringAttribute{
+										Required:            true,
+										Description:         "Kafka connect server basic auth username.",
+										MarkdownDescription: "Kafka connect server basic auth username.",
+									},
 								},
-							},
-							"username": schema.StringAttribute{
+								CustomType: BasicAuthType{
+									ObjectType: types.ObjectType{
+										AttrTypes: BasicAuthValue{}.AttributeTypes(ctx),
+									},
+								},
 								Optional:            true,
-								Description:         "Kafka connect server basic auth username. Required if security type is `BasicAuth`",
-								MarkdownDescription: "Kafka connect server basic auth username. Required if security type is `BasicAuth`",
+								Description:         "Basic auth for Kafka connect server security configuration.",
+								MarkdownDescription: "Basic auth for Kafka connect server security configuration.",
+							},
+							"bearer_token": schema.SingleNestedAttribute{
+								Attributes: map[string]schema.Attribute{
+									"token": schema.StringAttribute{
+										Required:            true,
+										Sensitive:           true,
+										Description:         "Kafka connect server bearer token.",
+										MarkdownDescription: "Kafka connect server bearer token.",
+									},
+								},
+								CustomType: BearerTokenType{
+									ObjectType: types.ObjectType{
+										AttrTypes: BearerTokenValue{}.AttributeTypes(ctx),
+									},
+								},
+								Optional:            true,
+								Description:         "Bearer token for Kafka connect server security configuration.",
+								MarkdownDescription: "Bearer token for Kafka connect server security configuration.",
+							},
+							"ssl_auth": schema.SingleNestedAttribute{
+								Attributes: map[string]schema.Attribute{
+									"certificate_chain": schema.StringAttribute{
+										Required:            true,
+										Description:         "Kafka connect server mTLS auth certificate chain PEM.",
+										MarkdownDescription: "Kafka connect server mTLS auth certificate chain PEM.",
+									},
+									"key": schema.StringAttribute{
+										Required:            true,
+										Sensitive:           true,
+										Description:         "Kafka connect server mTLS auth private key PEM.",
+										MarkdownDescription: "Kafka connect server mTLS auth private key PEM.",
+									},
+								},
+								CustomType: SslAuthType{
+									ObjectType: types.ObjectType{
+										AttrTypes: SslAuthValue{}.AttributeTypes(ctx),
+									},
+								},
+								Optional:            true,
+								Description:         "SSL auth (mTLS) for Kafka connect server security configuration.",
+								MarkdownDescription: "SSL auth (mTLS) for Kafka connect server security configuration.",
 							},
 						},
 						CustomType: SecurityType{
@@ -119,8 +146,8 @@ func ConsoleKafkaConnectV2ResourceSchema(ctx context.Context) schema.Schema {
 							},
 						},
 						Optional:            true,
-						Description:         "Kafka connect server security configuration. One of `BasicAuth`, `BearerToken`, `SSLAuth`",
-						MarkdownDescription: "Kafka connect server security configuration. One of `BasicAuth`, `BearerToken`, `SSLAuth`",
+						Description:         "Kafka connect server security configuration. One of `basic_auth`, `bearer_token`, `ssl_auth`",
+						MarkdownDescription: "Kafka connect server security configuration. One of `basic_auth`, `bearer_token`, `ssl_auth`",
 					},
 					"urls": schema.StringAttribute{
 						Required:            true,
@@ -776,112 +803,58 @@ func (t SecurityType) ValueFromObject(ctx context.Context, in basetypes.ObjectVa
 
 	attributes := in.Attributes()
 
-	certificateChainAttribute, ok := attributes["certificate_chain"]
+	basicAuthAttribute, ok := attributes["basic_auth"]
 
 	if !ok {
 		diags.AddError(
 			"Attribute Missing",
-			`certificate_chain is missing from object`)
+			`basic_auth is missing from object`)
 
 		return nil, diags
 	}
 
-	certificateChainVal, ok := certificateChainAttribute.(basetypes.StringValue)
+	basicAuthVal, ok := basicAuthAttribute.(basetypes.ObjectValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`certificate_chain expected to be basetypes.StringValue, was: %T`, certificateChainAttribute))
+			fmt.Sprintf(`basic_auth expected to be basetypes.ObjectValue, was: %T`, basicAuthAttribute))
 	}
 
-	keyAttribute, ok := attributes["key"]
+	bearerTokenAttribute, ok := attributes["bearer_token"]
 
 	if !ok {
 		diags.AddError(
 			"Attribute Missing",
-			`key is missing from object`)
+			`bearer_token is missing from object`)
 
 		return nil, diags
 	}
 
-	keyVal, ok := keyAttribute.(basetypes.StringValue)
+	bearerTokenVal, ok := bearerTokenAttribute.(basetypes.ObjectValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`key expected to be basetypes.StringValue, was: %T`, keyAttribute))
+			fmt.Sprintf(`bearer_token expected to be basetypes.ObjectValue, was: %T`, bearerTokenAttribute))
 	}
 
-	passwordAttribute, ok := attributes["password"]
+	sslAuthAttribute, ok := attributes["ssl_auth"]
 
 	if !ok {
 		diags.AddError(
 			"Attribute Missing",
-			`password is missing from object`)
+			`ssl_auth is missing from object`)
 
 		return nil, diags
 	}
 
-	passwordVal, ok := passwordAttribute.(basetypes.StringValue)
+	sslAuthVal, ok := sslAuthAttribute.(basetypes.ObjectValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`password expected to be basetypes.StringValue, was: %T`, passwordAttribute))
-	}
-
-	tokenAttribute, ok := attributes["token"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`token is missing from object`)
-
-		return nil, diags
-	}
-
-	tokenVal, ok := tokenAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`token expected to be basetypes.StringValue, was: %T`, tokenAttribute))
-	}
-
-	typeAttribute, ok := attributes["type"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`type is missing from object`)
-
-		return nil, diags
-	}
-
-	typeVal, ok := typeAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`type expected to be basetypes.StringValue, was: %T`, typeAttribute))
-	}
-
-	usernameAttribute, ok := attributes["username"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`username is missing from object`)
-
-		return nil, diags
-	}
-
-	usernameVal, ok := usernameAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`username expected to be basetypes.StringValue, was: %T`, usernameAttribute))
+			fmt.Sprintf(`ssl_auth expected to be basetypes.ObjectValue, was: %T`, sslAuthAttribute))
 	}
 
 	if diags.HasError() {
@@ -889,13 +862,10 @@ func (t SecurityType) ValueFromObject(ctx context.Context, in basetypes.ObjectVa
 	}
 
 	return SecurityValue{
-		CertificateChain: certificateChainVal,
-		Key:              keyVal,
-		Password:         passwordVal,
-		Token:            tokenVal,
-		SecurityType:     typeVal,
-		Username:         usernameVal,
-		state:            attr.ValueStateKnown,
+		BasicAuth:   basicAuthVal,
+		BearerToken: bearerTokenVal,
+		SslAuth:     sslAuthVal,
+		state:       attr.ValueStateKnown,
 	}, diags
 }
 
@@ -962,112 +932,58 @@ func NewSecurityValue(attributeTypes map[string]attr.Type, attributes map[string
 		return NewSecurityValueUnknown(), diags
 	}
 
-	certificateChainAttribute, ok := attributes["certificate_chain"]
+	basicAuthAttribute, ok := attributes["basic_auth"]
 
 	if !ok {
 		diags.AddError(
 			"Attribute Missing",
-			`certificate_chain is missing from object`)
+			`basic_auth is missing from object`)
 
 		return NewSecurityValueUnknown(), diags
 	}
 
-	certificateChainVal, ok := certificateChainAttribute.(basetypes.StringValue)
+	basicAuthVal, ok := basicAuthAttribute.(basetypes.ObjectValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`certificate_chain expected to be basetypes.StringValue, was: %T`, certificateChainAttribute))
+			fmt.Sprintf(`basic_auth expected to be basetypes.ObjectValue, was: %T`, basicAuthAttribute))
 	}
 
-	keyAttribute, ok := attributes["key"]
+	bearerTokenAttribute, ok := attributes["bearer_token"]
 
 	if !ok {
 		diags.AddError(
 			"Attribute Missing",
-			`key is missing from object`)
+			`bearer_token is missing from object`)
 
 		return NewSecurityValueUnknown(), diags
 	}
 
-	keyVal, ok := keyAttribute.(basetypes.StringValue)
+	bearerTokenVal, ok := bearerTokenAttribute.(basetypes.ObjectValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`key expected to be basetypes.StringValue, was: %T`, keyAttribute))
+			fmt.Sprintf(`bearer_token expected to be basetypes.ObjectValue, was: %T`, bearerTokenAttribute))
 	}
 
-	passwordAttribute, ok := attributes["password"]
+	sslAuthAttribute, ok := attributes["ssl_auth"]
 
 	if !ok {
 		diags.AddError(
 			"Attribute Missing",
-			`password is missing from object`)
+			`ssl_auth is missing from object`)
 
 		return NewSecurityValueUnknown(), diags
 	}
 
-	passwordVal, ok := passwordAttribute.(basetypes.StringValue)
+	sslAuthVal, ok := sslAuthAttribute.(basetypes.ObjectValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`password expected to be basetypes.StringValue, was: %T`, passwordAttribute))
-	}
-
-	tokenAttribute, ok := attributes["token"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`token is missing from object`)
-
-		return NewSecurityValueUnknown(), diags
-	}
-
-	tokenVal, ok := tokenAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`token expected to be basetypes.StringValue, was: %T`, tokenAttribute))
-	}
-
-	typeAttribute, ok := attributes["type"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`type is missing from object`)
-
-		return NewSecurityValueUnknown(), diags
-	}
-
-	typeVal, ok := typeAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`type expected to be basetypes.StringValue, was: %T`, typeAttribute))
-	}
-
-	usernameAttribute, ok := attributes["username"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`username is missing from object`)
-
-		return NewSecurityValueUnknown(), diags
-	}
-
-	usernameVal, ok := usernameAttribute.(basetypes.StringValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`username expected to be basetypes.StringValue, was: %T`, usernameAttribute))
+			fmt.Sprintf(`ssl_auth expected to be basetypes.ObjectValue, was: %T`, sslAuthAttribute))
 	}
 
 	if diags.HasError() {
@@ -1075,13 +991,10 @@ func NewSecurityValue(attributeTypes map[string]attr.Type, attributes map[string
 	}
 
 	return SecurityValue{
-		CertificateChain: certificateChainVal,
-		Key:              keyVal,
-		Password:         passwordVal,
-		Token:            tokenVal,
-		SecurityType:     typeVal,
-		Username:         usernameVal,
-		state:            attr.ValueStateKnown,
+		BasicAuth:   basicAuthVal,
+		BearerToken: bearerTokenVal,
+		SslAuth:     sslAuthVal,
+		state:       attr.ValueStateKnown,
 	}, diags
 }
 
@@ -1153,81 +1066,57 @@ func (t SecurityType) ValueType(ctx context.Context) attr.Value {
 var _ basetypes.ObjectValuable = SecurityValue{}
 
 type SecurityValue struct {
-	CertificateChain basetypes.StringValue `tfsdk:"certificate_chain"`
-	Key              basetypes.StringValue `tfsdk:"key"`
-	Password         basetypes.StringValue `tfsdk:"password"`
-	Token            basetypes.StringValue `tfsdk:"token"`
-	SecurityType     basetypes.StringValue `tfsdk:"type"`
-	Username         basetypes.StringValue `tfsdk:"username"`
-	state            attr.ValueState
+	BasicAuth   basetypes.ObjectValue `tfsdk:"basic_auth"`
+	BearerToken basetypes.ObjectValue `tfsdk:"bearer_token"`
+	SslAuth     basetypes.ObjectValue `tfsdk:"ssl_auth"`
+	state       attr.ValueState
 }
 
 func (v SecurityValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
-	attrTypes := make(map[string]tftypes.Type, 6)
+	attrTypes := make(map[string]tftypes.Type, 3)
 
 	var val tftypes.Value
 	var err error
 
-	attrTypes["certificate_chain"] = basetypes.StringType{}.TerraformType(ctx)
-	attrTypes["key"] = basetypes.StringType{}.TerraformType(ctx)
-	attrTypes["password"] = basetypes.StringType{}.TerraformType(ctx)
-	attrTypes["token"] = basetypes.StringType{}.TerraformType(ctx)
-	attrTypes["type"] = basetypes.StringType{}.TerraformType(ctx)
-	attrTypes["username"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["basic_auth"] = basetypes.ObjectType{
+		AttrTypes: BasicAuthValue{}.AttributeTypes(ctx),
+	}.TerraformType(ctx)
+	attrTypes["bearer_token"] = basetypes.ObjectType{
+		AttrTypes: BearerTokenValue{}.AttributeTypes(ctx),
+	}.TerraformType(ctx)
+	attrTypes["ssl_auth"] = basetypes.ObjectType{
+		AttrTypes: SslAuthValue{}.AttributeTypes(ctx),
+	}.TerraformType(ctx)
 
 	objectType := tftypes.Object{AttributeTypes: attrTypes}
 
 	switch v.state {
 	case attr.ValueStateKnown:
-		vals := make(map[string]tftypes.Value, 6)
+		vals := make(map[string]tftypes.Value, 3)
 
-		val, err = v.CertificateChain.ToTerraformValue(ctx)
-
-		if err != nil {
-			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
-		}
-
-		vals["certificate_chain"] = val
-
-		val, err = v.Key.ToTerraformValue(ctx)
+		val, err = v.BasicAuth.ToTerraformValue(ctx)
 
 		if err != nil {
 			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
 		}
 
-		vals["key"] = val
+		vals["basic_auth"] = val
 
-		val, err = v.Password.ToTerraformValue(ctx)
-
-		if err != nil {
-			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
-		}
-
-		vals["password"] = val
-
-		val, err = v.Token.ToTerraformValue(ctx)
+		val, err = v.BearerToken.ToTerraformValue(ctx)
 
 		if err != nil {
 			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
 		}
 
-		vals["token"] = val
+		vals["bearer_token"] = val
 
-		val, err = v.SecurityType.ToTerraformValue(ctx)
-
-		if err != nil {
-			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
-		}
-
-		vals["type"] = val
-
-		val, err = v.Username.ToTerraformValue(ctx)
+		val, err = v.SslAuth.ToTerraformValue(ctx)
 
 		if err != nil {
 			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
 		}
 
-		vals["username"] = val
+		vals["ssl_auth"] = val
 
 		if err := tftypes.ValidateValue(objectType, vals); err != nil {
 			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
@@ -1258,13 +1147,1173 @@ func (v SecurityValue) String() string {
 func (v SecurityValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
+	var basicAuth basetypes.ObjectValue
+
+	if v.BasicAuth.IsNull() {
+		basicAuth = types.ObjectNull(
+			BasicAuthValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if v.BasicAuth.IsUnknown() {
+		basicAuth = types.ObjectUnknown(
+			BasicAuthValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if !v.BasicAuth.IsNull() && !v.BasicAuth.IsUnknown() {
+		basicAuth = types.ObjectValueMust(
+			BasicAuthValue{}.AttributeTypes(ctx),
+			v.BasicAuth.Attributes(),
+		)
+	}
+
+	var bearerToken basetypes.ObjectValue
+
+	if v.BearerToken.IsNull() {
+		bearerToken = types.ObjectNull(
+			BearerTokenValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if v.BearerToken.IsUnknown() {
+		bearerToken = types.ObjectUnknown(
+			BearerTokenValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if !v.BearerToken.IsNull() && !v.BearerToken.IsUnknown() {
+		bearerToken = types.ObjectValueMust(
+			BearerTokenValue{}.AttributeTypes(ctx),
+			v.BearerToken.Attributes(),
+		)
+	}
+
+	var sslAuth basetypes.ObjectValue
+
+	if v.SslAuth.IsNull() {
+		sslAuth = types.ObjectNull(
+			SslAuthValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if v.SslAuth.IsUnknown() {
+		sslAuth = types.ObjectUnknown(
+			SslAuthValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if !v.SslAuth.IsNull() && !v.SslAuth.IsUnknown() {
+		sslAuth = types.ObjectValueMust(
+			SslAuthValue{}.AttributeTypes(ctx),
+			v.SslAuth.Attributes(),
+		)
+	}
+
+	attributeTypes := map[string]attr.Type{
+		"basic_auth": basetypes.ObjectType{
+			AttrTypes: BasicAuthValue{}.AttributeTypes(ctx),
+		},
+		"bearer_token": basetypes.ObjectType{
+			AttrTypes: BearerTokenValue{}.AttributeTypes(ctx),
+		},
+		"ssl_auth": basetypes.ObjectType{
+			AttrTypes: SslAuthValue{}.AttributeTypes(ctx),
+		},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{
+			"basic_auth":   basicAuth,
+			"bearer_token": bearerToken,
+			"ssl_auth":     sslAuth,
+		})
+
+	return objVal, diags
+}
+
+func (v SecurityValue) Equal(o attr.Value) bool {
+	other, ok := o.(SecurityValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	if !v.BasicAuth.Equal(other.BasicAuth) {
+		return false
+	}
+
+	if !v.BearerToken.Equal(other.BearerToken) {
+		return false
+	}
+
+	if !v.SslAuth.Equal(other.SslAuth) {
+		return false
+	}
+
+	return true
+}
+
+func (v SecurityValue) Type(ctx context.Context) attr.Type {
+	return SecurityType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v SecurityValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"basic_auth": basetypes.ObjectType{
+			AttrTypes: BasicAuthValue{}.AttributeTypes(ctx),
+		},
+		"bearer_token": basetypes.ObjectType{
+			AttrTypes: BearerTokenValue{}.AttributeTypes(ctx),
+		},
+		"ssl_auth": basetypes.ObjectType{
+			AttrTypes: SslAuthValue{}.AttributeTypes(ctx),
+		},
+	}
+}
+
+var _ basetypes.ObjectTypable = BasicAuthType{}
+
+type BasicAuthType struct {
+	basetypes.ObjectType
+}
+
+func (t BasicAuthType) Equal(o attr.Type) bool {
+	other, ok := o.(BasicAuthType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t BasicAuthType) String() string {
+	return "BasicAuthType"
+}
+
+func (t BasicAuthType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	passwordAttribute, ok := attributes["password"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`password is missing from object`)
+
+		return nil, diags
+	}
+
+	passwordVal, ok := passwordAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`password expected to be basetypes.StringValue, was: %T`, passwordAttribute))
+	}
+
+	usernameAttribute, ok := attributes["username"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`username is missing from object`)
+
+		return nil, diags
+	}
+
+	usernameVal, ok := usernameAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`username expected to be basetypes.StringValue, was: %T`, usernameAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return BasicAuthValue{
+		Password: passwordVal,
+		Username: usernameVal,
+		state:    attr.ValueStateKnown,
+	}, diags
+}
+
+func NewBasicAuthValueNull() BasicAuthValue {
+	return BasicAuthValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewBasicAuthValueUnknown() BasicAuthValue {
+	return BasicAuthValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewBasicAuthValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (BasicAuthValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing BasicAuthValue Attribute Value",
+				"While creating a BasicAuthValue value, a missing attribute value was detected. "+
+					"A BasicAuthValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("BasicAuthValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid BasicAuthValue Attribute Type",
+				"While creating a BasicAuthValue value, an invalid attribute value was detected. "+
+					"A BasicAuthValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("BasicAuthValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("BasicAuthValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra BasicAuthValue Attribute Value",
+				"While creating a BasicAuthValue value, an extra attribute value was detected. "+
+					"A BasicAuthValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra BasicAuthValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewBasicAuthValueUnknown(), diags
+	}
+
+	passwordAttribute, ok := attributes["password"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`password is missing from object`)
+
+		return NewBasicAuthValueUnknown(), diags
+	}
+
+	passwordVal, ok := passwordAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`password expected to be basetypes.StringValue, was: %T`, passwordAttribute))
+	}
+
+	usernameAttribute, ok := attributes["username"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`username is missing from object`)
+
+		return NewBasicAuthValueUnknown(), diags
+	}
+
+	usernameVal, ok := usernameAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`username expected to be basetypes.StringValue, was: %T`, usernameAttribute))
+	}
+
+	if diags.HasError() {
+		return NewBasicAuthValueUnknown(), diags
+	}
+
+	return BasicAuthValue{
+		Password: passwordVal,
+		Username: usernameVal,
+		state:    attr.ValueStateKnown,
+	}, diags
+}
+
+func NewBasicAuthValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) BasicAuthValue {
+	object, diags := NewBasicAuthValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewBasicAuthValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t BasicAuthType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewBasicAuthValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewBasicAuthValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewBasicAuthValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewBasicAuthValueMust(BasicAuthValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t BasicAuthType) ValueType(ctx context.Context) attr.Value {
+	return BasicAuthValue{}
+}
+
+var _ basetypes.ObjectValuable = BasicAuthValue{}
+
+type BasicAuthValue struct {
+	Password basetypes.StringValue `tfsdk:"password"`
+	Username basetypes.StringValue `tfsdk:"username"`
+	state    attr.ValueState
+}
+
+func (v BasicAuthValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 2)
+
+	var val tftypes.Value
+	var err error
+
+	attrTypes["password"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["username"] = basetypes.StringType{}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 2)
+
+		val, err = v.Password.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["password"] = val
+
+		val, err = v.Username.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["username"] = val
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v BasicAuthValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v BasicAuthValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v BasicAuthValue) String() string {
+	return "BasicAuthValue"
+}
+
+func (v BasicAuthValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributeTypes := map[string]attr.Type{
+		"password": basetypes.StringType{},
+		"username": basetypes.StringType{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{
+			"password": v.Password,
+			"username": v.Username,
+		})
+
+	return objVal, diags
+}
+
+func (v BasicAuthValue) Equal(o attr.Value) bool {
+	other, ok := o.(BasicAuthValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	if !v.Password.Equal(other.Password) {
+		return false
+	}
+
+	if !v.Username.Equal(other.Username) {
+		return false
+	}
+
+	return true
+}
+
+func (v BasicAuthValue) Type(ctx context.Context) attr.Type {
+	return BasicAuthType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v BasicAuthValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"password": basetypes.StringType{},
+		"username": basetypes.StringType{},
+	}
+}
+
+var _ basetypes.ObjectTypable = BearerTokenType{}
+
+type BearerTokenType struct {
+	basetypes.ObjectType
+}
+
+func (t BearerTokenType) Equal(o attr.Type) bool {
+	other, ok := o.(BearerTokenType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t BearerTokenType) String() string {
+	return "BearerTokenType"
+}
+
+func (t BearerTokenType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	tokenAttribute, ok := attributes["token"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`token is missing from object`)
+
+		return nil, diags
+	}
+
+	tokenVal, ok := tokenAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`token expected to be basetypes.StringValue, was: %T`, tokenAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return BearerTokenValue{
+		Token: tokenVal,
+		state: attr.ValueStateKnown,
+	}, diags
+}
+
+func NewBearerTokenValueNull() BearerTokenValue {
+	return BearerTokenValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewBearerTokenValueUnknown() BearerTokenValue {
+	return BearerTokenValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewBearerTokenValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (BearerTokenValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing BearerTokenValue Attribute Value",
+				"While creating a BearerTokenValue value, a missing attribute value was detected. "+
+					"A BearerTokenValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("BearerTokenValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid BearerTokenValue Attribute Type",
+				"While creating a BearerTokenValue value, an invalid attribute value was detected. "+
+					"A BearerTokenValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("BearerTokenValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("BearerTokenValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra BearerTokenValue Attribute Value",
+				"While creating a BearerTokenValue value, an extra attribute value was detected. "+
+					"A BearerTokenValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra BearerTokenValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewBearerTokenValueUnknown(), diags
+	}
+
+	tokenAttribute, ok := attributes["token"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`token is missing from object`)
+
+		return NewBearerTokenValueUnknown(), diags
+	}
+
+	tokenVal, ok := tokenAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`token expected to be basetypes.StringValue, was: %T`, tokenAttribute))
+	}
+
+	if diags.HasError() {
+		return NewBearerTokenValueUnknown(), diags
+	}
+
+	return BearerTokenValue{
+		Token: tokenVal,
+		state: attr.ValueStateKnown,
+	}, diags
+}
+
+func NewBearerTokenValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) BearerTokenValue {
+	object, diags := NewBearerTokenValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewBearerTokenValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t BearerTokenType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewBearerTokenValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewBearerTokenValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewBearerTokenValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewBearerTokenValueMust(BearerTokenValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t BearerTokenType) ValueType(ctx context.Context) attr.Value {
+	return BearerTokenValue{}
+}
+
+var _ basetypes.ObjectValuable = BearerTokenValue{}
+
+type BearerTokenValue struct {
+	Token basetypes.StringValue `tfsdk:"token"`
+	state attr.ValueState
+}
+
+func (v BearerTokenValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 1)
+
+	var val tftypes.Value
+	var err error
+
+	attrTypes["token"] = basetypes.StringType{}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 1)
+
+		val, err = v.Token.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["token"] = val
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v BearerTokenValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v BearerTokenValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v BearerTokenValue) String() string {
+	return "BearerTokenValue"
+}
+
+func (v BearerTokenValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributeTypes := map[string]attr.Type{
+		"token": basetypes.StringType{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{
+			"token": v.Token,
+		})
+
+	return objVal, diags
+}
+
+func (v BearerTokenValue) Equal(o attr.Value) bool {
+	other, ok := o.(BearerTokenValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	if !v.Token.Equal(other.Token) {
+		return false
+	}
+
+	return true
+}
+
+func (v BearerTokenValue) Type(ctx context.Context) attr.Type {
+	return BearerTokenType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v BearerTokenValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"token": basetypes.StringType{},
+	}
+}
+
+var _ basetypes.ObjectTypable = SslAuthType{}
+
+type SslAuthType struct {
+	basetypes.ObjectType
+}
+
+func (t SslAuthType) Equal(o attr.Type) bool {
+	other, ok := o.(SslAuthType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t SslAuthType) String() string {
+	return "SslAuthType"
+}
+
+func (t SslAuthType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	certificateChainAttribute, ok := attributes["certificate_chain"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`certificate_chain is missing from object`)
+
+		return nil, diags
+	}
+
+	certificateChainVal, ok := certificateChainAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`certificate_chain expected to be basetypes.StringValue, was: %T`, certificateChainAttribute))
+	}
+
+	keyAttribute, ok := attributes["key"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`key is missing from object`)
+
+		return nil, diags
+	}
+
+	keyVal, ok := keyAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`key expected to be basetypes.StringValue, was: %T`, keyAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return SslAuthValue{
+		CertificateChain: certificateChainVal,
+		Key:              keyVal,
+		state:            attr.ValueStateKnown,
+	}, diags
+}
+
+func NewSslAuthValueNull() SslAuthValue {
+	return SslAuthValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewSslAuthValueUnknown() SslAuthValue {
+	return SslAuthValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewSslAuthValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (SslAuthValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing SslAuthValue Attribute Value",
+				"While creating a SslAuthValue value, a missing attribute value was detected. "+
+					"A SslAuthValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("SslAuthValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid SslAuthValue Attribute Type",
+				"While creating a SslAuthValue value, an invalid attribute value was detected. "+
+					"A SslAuthValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("SslAuthValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("SslAuthValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra SslAuthValue Attribute Value",
+				"While creating a SslAuthValue value, an extra attribute value was detected. "+
+					"A SslAuthValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra SslAuthValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewSslAuthValueUnknown(), diags
+	}
+
+	certificateChainAttribute, ok := attributes["certificate_chain"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`certificate_chain is missing from object`)
+
+		return NewSslAuthValueUnknown(), diags
+	}
+
+	certificateChainVal, ok := certificateChainAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`certificate_chain expected to be basetypes.StringValue, was: %T`, certificateChainAttribute))
+	}
+
+	keyAttribute, ok := attributes["key"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`key is missing from object`)
+
+		return NewSslAuthValueUnknown(), diags
+	}
+
+	keyVal, ok := keyAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`key expected to be basetypes.StringValue, was: %T`, keyAttribute))
+	}
+
+	if diags.HasError() {
+		return NewSslAuthValueUnknown(), diags
+	}
+
+	return SslAuthValue{
+		CertificateChain: certificateChainVal,
+		Key:              keyVal,
+		state:            attr.ValueStateKnown,
+	}, diags
+}
+
+func NewSslAuthValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) SslAuthValue {
+	object, diags := NewSslAuthValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewSslAuthValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t SslAuthType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewSslAuthValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewSslAuthValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewSslAuthValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewSslAuthValueMust(SslAuthValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t SslAuthType) ValueType(ctx context.Context) attr.Value {
+	return SslAuthValue{}
+}
+
+var _ basetypes.ObjectValuable = SslAuthValue{}
+
+type SslAuthValue struct {
+	CertificateChain basetypes.StringValue `tfsdk:"certificate_chain"`
+	Key              basetypes.StringValue `tfsdk:"key"`
+	state            attr.ValueState
+}
+
+func (v SslAuthValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 2)
+
+	var val tftypes.Value
+	var err error
+
+	attrTypes["certificate_chain"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["key"] = basetypes.StringType{}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 2)
+
+		val, err = v.CertificateChain.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["certificate_chain"] = val
+
+		val, err = v.Key.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["key"] = val
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v SslAuthValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v SslAuthValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v SslAuthValue) String() string {
+	return "SslAuthValue"
+}
+
+func (v SslAuthValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
 	attributeTypes := map[string]attr.Type{
 		"certificate_chain": basetypes.StringType{},
 		"key":               basetypes.StringType{},
-		"password":          basetypes.StringType{},
-		"token":             basetypes.StringType{},
-		"type":              basetypes.StringType{},
-		"username":          basetypes.StringType{},
 	}
 
 	if v.IsNull() {
@@ -1280,17 +2329,13 @@ func (v SecurityValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue
 		map[string]attr.Value{
 			"certificate_chain": v.CertificateChain,
 			"key":               v.Key,
-			"password":          v.Password,
-			"token":             v.Token,
-			"type":              v.SecurityType,
-			"username":          v.Username,
 		})
 
 	return objVal, diags
 }
 
-func (v SecurityValue) Equal(o attr.Value) bool {
-	other, ok := o.(SecurityValue)
+func (v SslAuthValue) Equal(o attr.Value) bool {
+	other, ok := o.(SslAuthValue)
 
 	if !ok {
 		return false
@@ -1312,40 +2357,20 @@ func (v SecurityValue) Equal(o attr.Value) bool {
 		return false
 	}
 
-	if !v.Password.Equal(other.Password) {
-		return false
-	}
-
-	if !v.Token.Equal(other.Token) {
-		return false
-	}
-
-	if !v.SecurityType.Equal(other.SecurityType) {
-		return false
-	}
-
-	if !v.Username.Equal(other.Username) {
-		return false
-	}
-
 	return true
 }
 
-func (v SecurityValue) Type(ctx context.Context) attr.Type {
-	return SecurityType{
+func (v SslAuthValue) Type(ctx context.Context) attr.Type {
+	return SslAuthType{
 		basetypes.ObjectType{
 			AttrTypes: v.AttributeTypes(ctx),
 		},
 	}
 }
 
-func (v SecurityValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+func (v SslAuthValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 	return map[string]attr.Type{
 		"certificate_chain": basetypes.StringType{},
 		"key":               basetypes.StringType{},
-		"password":          basetypes.StringType{},
-		"token":             basetypes.StringType{},
-		"type":              basetypes.StringType{},
-		"username":          basetypes.StringType{},
 	}
 }

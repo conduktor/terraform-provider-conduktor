@@ -2,12 +2,10 @@ package console_kafka_connect_v2
 
 import (
 	"context"
-	"fmt"
 	mapper "github.com/conduktor/terraform-provider-conduktor/internal/mapper"
 	console "github.com/conduktor/terraform-provider-conduktor/internal/model/console"
 	schemaUtils "github.com/conduktor/terraform-provider-conduktor/internal/schema"
 	schema "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_console_kafka_connect_v2"
-	"github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
 )
 
 func TFToInternalModel(ctx context.Context, r *schema.ConsoleKafkaConnectV2Model) (console.KafkaConnectResource, error) {
@@ -58,37 +56,55 @@ func specTFToInternalModel(ctx context.Context, r *schema.SpecValue) (console.Ka
 	}, nil
 }
 
-func securityTFToInternalModel(_ context.Context, r *schema.SecurityValue) (*console.KafkaConnectSecurity, error) {
+func securityTFToInternalModel(ctx context.Context, r *schema.SecurityValue) (*console.KafkaConnectSecurity, error) {
 	if r.IsNull() {
 		return nil, nil
 	}
 
-	securityType := r.SecurityType.ValueString()
-	switch securityType {
-	case validation.BasicAuthKafkaConnectSecurity:
-		return &console.KafkaConnectSecurity{
-			BasicAuth: &console.KafkaConnectBasicAuth{
-				Type:     securityType,
-				Username: r.Username.ValueString(),
-				Password: r.Password.ValueString(),
-			},
-		}, nil
-	case validation.BearerTokenKafkaConnectSecurity:
-		return &console.KafkaConnectSecurity{
-			BearerToken: &console.KafkaConnectBearerToken{
-				Type:  securityType,
-				Token: r.Token.ValueString(),
-			},
-		}, nil
-	case validation.SSLAuthKafkaConnectSecurity:
-		return &console.KafkaConnectSecurity{
-			SSLAuth: &console.KafkaConnectSSLAuth{
-				Type:             securityType,
-				Key:              r.Key.ValueString(),
-				CertificateChain: r.CertificateChain.ValueString(),
-			},
-		}, nil
-	default:
-		return &console.KafkaConnectSecurity{}, mapper.WrapError(fmt.Errorf("unsupported SecurityType: %s", securityType), "security", mapper.FromTerraform)
+	var basicAuth *console.KafkaConnectBasicAuth = nil
+	if schemaUtils.AttrIsSet(r.BasicAuth) {
+		basicAuthValue, diag := schema.NewBasicAuthValue(r.BasicAuth.AttributeTypes(ctx), r.BasicAuth.Attributes())
+		if diag.HasError() {
+			return nil, mapper.WrapDiagError(diag, "security.basic_auth", mapper.FromTerraform)
+		}
+
+		basicAuth = &console.KafkaConnectBasicAuth{
+			Type:     "BasicAuth",
+			Username: basicAuthValue.Username.ValueString(),
+			Password: basicAuthValue.Password.ValueString(),
+		}
 	}
+
+	var bearerToken *console.KafkaConnectBearerToken = nil
+	if schemaUtils.AttrIsSet(r.BearerToken) {
+		bearerTokenValue, diag := schema.NewBearerTokenValue(r.BearerToken.AttributeTypes(ctx), r.BearerToken.Attributes())
+		if diag.HasError() {
+			return nil, mapper.WrapDiagError(diag, "security.bearer_token", mapper.FromTerraform)
+		}
+
+		bearerToken = &console.KafkaConnectBearerToken{
+			Type:  "BearerToken",
+			Token: bearerTokenValue.Token.ValueString(),
+		}
+	}
+
+	var sslAuth *console.KafkaConnectSSLAuth = nil
+	if schemaUtils.AttrIsSet(r.SslAuth) {
+		sslAUthValue, diag := schema.NewSslAuthValue(r.SslAuth.AttributeTypes(ctx), r.SslAuth.Attributes())
+		if diag.HasError() {
+			return nil, mapper.WrapDiagError(diag, "security.ssl_auth", mapper.FromTerraform)
+		}
+
+		sslAuth = &console.KafkaConnectSSLAuth{
+			Type:             "SSLAuth",
+			CertificateChain: sslAUthValue.CertificateChain.ValueString(),
+			Key:              sslAUthValue.Key.ValueString(),
+		}
+	}
+
+	return &console.KafkaConnectSecurity{
+		BasicAuth:   basicAuth,
+		BearerToken: bearerToken,
+		SSLAuth:     sslAuth,
+	}, nil
 }

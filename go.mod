@@ -22,6 +22,12 @@ require (
 	github.com/stretchr/testify v1.10.0
 )
 
+// Use fork of terraform-plugin-codegen-frameworkon branch https://github.com/conduktor/terraform-plugin-codegen-framework/tree/cdk-fix-model-name-conflicts
+replace github.com/hashicorp/terraform-plugin-codegen-framework => github.com/conduktor/terraform-plugin-codegen-framework v0.0.0-20250213135010-1480ff9d60f2
+
+// Use fork of terraform-plugin-codegen-spec on branch cdk-add-single_nested-custom_type_name-override
+replace github.com/hashicorp/terraform-plugin-codegen-spec => github.com/conduktor/terraform-plugin-codegen-spec v0.0.0-20250213112457-5b5117af3e12
+
 require (
 	github.com/BurntSushi/toml v1.2.1 // indirect
 	github.com/Jeffail/gabs/v2 v2.7.0 // indirect
@@ -43,7 +49,7 @@ require (
 	github.com/fatih/color v1.17.0 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/uuid v1.6.0 // indirect
-	github.com/hashicorp/cli v1.1.6 // indirect
+	github.com/hashicorp/cli v1.1.7 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-checkpoint v0.5.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
@@ -67,7 +73,7 @@ require (
 	github.com/huandu/xstrings v1.4.0 // indirect
 	github.com/imdario/mergo v0.3.16 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
-	github.com/mattn/go-colorable v0.1.13 // indirect
+	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect

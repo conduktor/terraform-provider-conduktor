@@ -17,7 +17,7 @@ func TestKafkaConnectV2ModelMapping(t *testing.T) {
 
 	ctx := context.Background()
 
-	jsonKafkaConnectV2Resource := []byte(test.TestAccTestdata(t, "console_kafka_connect_v2_api.json"))
+	jsonKafkaConnectV2Resource := []byte(test.TestAccTestdata(t, "console/kafka_connect_v2/api.json"))
 
 	ctlResource := ctlresource.Resource{}
 	err := ctlResource.UnmarshalJSON(jsonKafkaConnectV2Resource)

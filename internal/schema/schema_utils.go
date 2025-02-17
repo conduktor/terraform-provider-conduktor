@@ -255,3 +255,7 @@ func ValueMapFromTypes(ctx context.Context, types map[string]attr.Type) map[stri
 	}
 	return result
 }
+
+func AttrIsSet(attr attr.Value) bool {
+	return !attr.IsNull() && !attr.IsUnknown()
+}

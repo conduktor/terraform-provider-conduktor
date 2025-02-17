@@ -48,32 +48,35 @@ resource "conduktor_console_kafka_cluster_v2" "confluent" {
     icon                         = "kafka"
     ignore_untrusted_certificate = false
     kafka_flavor = {
-      type                     = "Confluent"
-      key                      = "yourApiKey123456"
-      secret                   = "yourApiSecret123456"
-      confluent_environment_id = "env-12345"
-      confluent_cluster_id     = "lkc-67890"
+      confluent = {
+        key                      = "yourApiKey123456"
+        secret                   = "yourApiSecret123456"
+        confluent_environment_id = "env-12345"
+        confluent_cluster_id     = "lkc-67890"
+      }
     }
     schema_registry = {
-      type                         = "ConfluentLike"
-      url                          = "https://bbb-bbbb.us-west4.gcp.confluent.cloud:8081"
-      ignore_untrusted_certificate = false
-      security = {
-        type              = "SSLAuth"
-        key               = <<EOT
+      confluent_like = {
+        url                          = "https://bbb-bbbb.us-west4.gcp.confluent.cloud:8081"
+        ignore_untrusted_certificate = false
+        security = {
+          ssl_auth = {
+            key               = <<EOT
 -----BEGIN PRIVATE KEY-----
 MIIOXzCCDUegAwIBAgIRAPRytMVYJNUgCbhnA+eYumgwDQYJKoZIhvcNAQELBQAw
 ...
 IFyCs+xkcgvHFtBjjel4pnIET0agtbGJbGDEQBNxX+i4MDA=
 -----END PRIVATE KEY-----
 EOT
-        certificate_chain = <<EOT
+            certificate_chain = <<EOT
 -----BEGIN CERTIFICATE-----
 MIIOXzCCDUegAwIBAgIRAPRytMVYJNUgCbhnA+eYumgwDQYJKoZIhvcNAQELBQAw
 ...
 IFyCs+xkcgvHFtBjjel4pnIET0agtbGJbGDEQBNxX+i4MDA=
 -----END CERTIFICATE-----
 EOT
+          }
+        }
       }
     }
   }
@@ -100,19 +103,22 @@ resource "conduktor_console_kafka_cluster_v2" "aiven" {
     icon                         = "crab"
     ignore_untrusted_certificate = true
     kafka_flavor = {
-      type         = "Aiven"
-      api_token    = "a1b2c3d4e5f6g7h8i9j0"
-      project      = "my-kafka-project"
-      service_name = "my-kafka-service"
+      aiven = {
+        api_token    = "a1b2c3d4e5f6g7h8i9j0"
+        project      = "my-kafka-project"
+        service_name = "my-kafka-service"
+      }
     }
     schema_registry = {
-      type                         = "ConfluentLike"
-      url                          = "https://sr.aiven.io:8081"
-      ignore_untrusted_certificate = false
-      security = {
-        type     = "BasicAuth"
-        username = "uuuuuuu"
-        password = "ppppppp"
+      confluent_like = {
+        url                          = "https://sr.aiven.io:8081"
+        ignore_untrusted_certificate = false
+        security = {
+          basic_auth = {
+            username = "uuuuuuu"
+            password = "ppppppp"
+          }
+        }
       }
     }
   }
@@ -140,13 +146,15 @@ resource "conduktor_console_kafka_cluster_v2" "aws_msk" {
     color                        = "#FF0000"
     ignore_untrusted_certificate = true
     schema_registry = {
-      type          = "Glue"
-      region        = "eu-west-1"
-      registry_name = "default"
-      security = {
-        type          = "Credentials"
-        access_key_id = "accessKey"
-        secret_key    = "secretKey"
+      glue = {
+        region        = "eu-west-1"
+        registry_name = "default"
+        security = {
+          credentials = {
+            access_key_id = "accessKey"
+            secret_key    = "secretKey"
+          }
+        }
       }
     }
   }
@@ -173,20 +181,23 @@ resource "conduktor_console_kafka_cluster_v2" "gateway" {
     icon                         = "shield-blank"
     ignore_untrusted_certificate = true
     kafka_flavor = {
-      type                         = "Gateway"
-      url                          = "http://gateway:8888"
-      user                         = "admin"
-      password                     = "admin"
-      virtual_cluster              = "passthrough"
-      ignore_untrusted_certificate = true
+      gateway = {
+        url                          = "http://gateway:8888"
+        user                         = "admin"
+        password                     = "admin"
+        virtual_cluster              = "passthrough"
+        ignore_untrusted_certificate = true
+      }
     }
     schema_registry = {
-      type                         = "ConfluentLike"
-      url                          = "http://localhost:8081"
-      ignore_untrusted_certificate = true
-      security = {
-        type  = "BearerToken"
-        token = "auth-token"
+      confluent_like = {
+        url                          = "http://localhost:8081"
+        ignore_untrusted_certificate = true
+        security = {
+          bearer_token = {
+            token = "auth-token"
+          }
+        }
       }
     }
   }
@@ -218,82 +229,170 @@ Optional:
 - `color` (String) Kafka cluster icon color in hexadecimal format like `#FF0000`
 - `icon` (String) Kafka cluster icon. List of available icons can be found [here](https://docs.conduktor.io/platform/reference/resource-reference/console/#icon-sets)
 - `ignore_untrusted_certificate` (Boolean) Ignore untrusted certificate for Kafka cluster
-- `kafka_flavor` (Attributes) Schema registry configuration (see [below for nested schema](#nestedatt--spec--kafka_flavor))
+- `kafka_flavor` (Attributes) Kafka flavor configuration. One of `confluent`, `aiven`, `gateway` (see [below for nested schema](#nestedatt--spec--kafka_flavor))
 - `properties` (Map of String) Kafka cluster properties
-- `schema_registry` (Attributes) Schema registry configuration (see [below for nested schema](#nestedatt--spec--schema_registry))
+- `schema_registry` (Attributes) Schema registry configuration. One of `confluent_like`, `glue` (see [below for nested schema](#nestedatt--spec--schema_registry))
 
 <a id="nestedatt--spec--kafka_flavor"></a>
 ### Nested Schema for `spec.kafka_flavor`
 
+Optional:
+
+- `aiven` (Attributes) Aiven Kafka flavor configuration (see [below for nested schema](#nestedatt--spec--kafka_flavor--aiven))
+- `confluent` (Attributes) Confluent Kafka flavor configuration (see [below for nested schema](#nestedatt--spec--kafka_flavor--confluent))
+- `gateway` (Attributes) Conduktor Gateway Kafka flavor configuration (see [below for nested schema](#nestedatt--spec--kafka_flavor--gateway))
+
+<a id="nestedatt--spec--kafka_flavor--aiven"></a>
+### Nested Schema for `spec.kafka_flavor.aiven`
+
 Required:
 
-- `type` (String) Kafka provider type : `Confluent`, `Aiven`, `Gateway`. More detail on our [documentation](https://docs.conduktor.io/platform/reference/resource-reference/console/#kafka-provider)
+- `api_token` (String, Sensitive) Aiven API token.
+- `project` (String) Aiven project name.
+- `service_name` (String) Aiven service name.
+
+
+<a id="nestedatt--spec--kafka_flavor--confluent"></a>
+### Nested Schema for `spec.kafka_flavor.confluent`
+
+Required:
+
+- `confluent_cluster_id` (String) Confluent cluster identifier.
+- `confluent_environment_id` (String) Confluent environment identifier.
+- `key` (String, Sensitive) Confluent API key.
+- `secret` (String, Sensitive) Confluent API secret.
+
+
+<a id="nestedatt--spec--kafka_flavor--gateway"></a>
+### Nested Schema for `spec.kafka_flavor.gateway`
+
+Required:
+
+- `password` (String, Sensitive) Conduktor Gateway Admin password.
+- `url` (String) Conduktor Gateway Admin API URL.
+- `user` (String) Conduktor Gateway Admin user.
 
 Optional:
 
-- `api_token` (String, Sensitive) Aiven API token. Required if type is `Aiven`
-- `confluent_cluster_id` (String) Confluent cluster identifier. Required if type is `Confluent`
-- `confluent_environment_id` (String) Confluent environment identifier. Required if type is `Confluent`
-- `ignore_untrusted_certificate` (Boolean) Ignore untrusted certificate for Gateway Admin API. Only used if type is `Gateway`
-- `key` (String, Sensitive) Confluent API key. Required if type is `Confluent`
-- `password` (String, Sensitive) Conduktor Gateway Admin password. Required if type is `Gateway`
-- `project` (String) Aiven project name. Required if type is `Aiven`
-- `secret` (String, Sensitive) Confluent API secret. Required if type is `Confluent`
-- `service_name` (String) Aiven service name. Required if type is `Aiven`
-- `url` (String) Conduktor Gateway Admin API URL. Required if type is `Gateway`
-- `user` (String) Conduktor Gateway Admin user. Required if type is `Gateway`
-- `virtual_cluster` (String) Conduktor Gateway Virtual cluster name (default `passthrough`). Only used if type is `Gateway`
+- `ignore_untrusted_certificate` (Boolean) Ignore untrusted certificate for Gateway Admin API.
+- `virtual_cluster` (String) Conduktor Gateway Virtual cluster name (default `passthrough`).
+
 
 
 <a id="nestedatt--spec--schema_registry"></a>
 ### Nested Schema for `spec.schema_registry`
 
-Required:
+Optional:
 
-- `security` (Attributes) Schema registry configuration. Required if type is `ConfluentLike` or `Glue` (see [below for nested schema](#nestedatt--spec--schema_registry--security))
-- `type` (String) Schema registry type valid values are: `ConfluentLike`, `Glue`
+- `confluent_like` (Attributes) Confluent like schema registry configuration (see [below for nested schema](#nestedatt--spec--schema_registry--confluent_like))
+- `glue` (Attributes) AWS Glue schema registry configuration (see [below for nested schema](#nestedatt--spec--schema_registry--glue))
 
-More detail on our [documentation](https://docs.conduktor.io/platform/reference/resource-reference/console/#schema-registry)
+<a id="nestedatt--spec--schema_registry--confluent_like"></a>
+### Nested Schema for `spec.schema_registry.confluent_like`
 
 Optional:
 
 - `ignore_untrusted_certificate` (Boolean) Ignore untrusted certificate for schema registry. Only used if type is `ConfluentLike`
 - `properties` (String) Schema registry properties. Only used if type is `ConfluentLike`
-- `region` (String) Glue Schema registry AWS region. Required if type is `Glue`
-- `registry_name` (String) Glue Schema registry name. Only used if type is `Glue`
+- `security` (Attributes) Confluent Schema registry security configuration. One of `basic_auth`, `bearer_token`, `ssl_auth`. If none provided, no security is used. (see [below for nested schema](#nestedatt--spec--schema_registry--confluent_like--security))
 - `url` (String) Schema registry URL. Required if type is `ConfluentLike`
 
-<a id="nestedatt--spec--schema_registry--security"></a>
-### Nested Schema for `spec.schema_registry.security`
-
-Required:
-
-- `type` (String) Schema registry security type. Required if type is `ConfluentLike` or `Glue`.
-
-Valid values are:
-
-- For **ConfluentLike** : `NoSecurity`, `BasicAuth`, `BearerToken`, `SSLAuth` 
-
-- For **Glue** : `Credentials`, `FromContext`, `FromRole`, `IAMAnywhere`
-
- More detail on our [documentation](https://docs.conduktor.io/platform/reference/resource-reference/console/#schema-registry)
+<a id="nestedatt--spec--schema_registry--confluent_like--security"></a>
+### Nested Schema for `spec.schema_registry.confluent_like.security`
 
 Optional:
 
-- `access_key_id` (String, Sensitive) Glue Schema registry AWS access key ID. Required if type is Glue with security `Credentials`
-- `certificate` (String) Glue Schema registry AWS certificate. Required if type is Glue with security `IAMAnywhere`
-- `certificate_chain` (String) Schema registry SSL auth certificate chain PEM. Required if security type is `SSLAuth`
-- `key` (String, Sensitive) Schema registry SSL auth private key PEM. Required if security type is `SSLAuth`
-- `password` (String, Sensitive) Schema registry basic auth password. Required if security type is `BasicAuth`
-- `private_key` (String) Glue Schema registry AWS private key. Required if type is Glue with security `IAMAnywhere`
-- `profile` (String) Glue Schema registry AWS profile name. Required if type is Glue with security `FromContext`
-- `profile_arn` (String) Glue Schema registry AWS profile ARN. Required if type is Glue with security `IAMAnywhere`
-- `role` (String) Glue Schema registry AWS role ARN. Required if type is Glue with security `FromRole`
-- `role_arn` (String) Glue Schema registry AWS role ARN. Required if type is Glue with security `IAMAnywhere`
-- `secret_key` (String, Sensitive) Glue Schema registry AWS secret key. Required if type is Glue with security `Credentials`
-- `token` (String, Sensitive) Schema registry bearer token. Required if security type is `BearerToken`
-- `trust_anchor_arn` (String) Glue Schema registry AWS trust anchor ARN. Required if type is Glue with security `IAMAnywhere`
-- `username` (String) Schema registry basic auth username. Required if security type is `BasicAuth`
+- `basic_auth` (Attributes) Basic auth schema registry security configuration. (see [below for nested schema](#nestedatt--spec--schema_registry--confluent_like--security--basic_auth))
+- `bearer_token` (Attributes) Bearer token schema registry security configuration. (see [below for nested schema](#nestedatt--spec--schema_registry--confluent_like--security--bearer_token))
+- `ssl_auth` (Attributes) SSL auth (mTLS) schema registry security configuration. (see [below for nested schema](#nestedatt--spec--schema_registry--confluent_like--security--ssl_auth))
+
+<a id="nestedatt--spec--schema_registry--confluent_like--security--basic_auth"></a>
+### Nested Schema for `spec.schema_registry.confluent_like.security.basic_auth`
+
+Required:
+
+- `password` (String, Sensitive) Schema registry basic auth password.
+- `username` (String) Schema registry basic auth username.
+
+
+<a id="nestedatt--spec--schema_registry--confluent_like--security--bearer_token"></a>
+### Nested Schema for `spec.schema_registry.confluent_like.security.bearer_token`
+
+Required:
+
+- `token` (String, Sensitive) Schema registry bearer token.
+
+
+<a id="nestedatt--spec--schema_registry--confluent_like--security--ssl_auth"></a>
+### Nested Schema for `spec.schema_registry.confluent_like.security.ssl_auth`
+
+Required:
+
+- `certificate_chain` (String) Schema registry SSL auth certificate chain PEM.
+- `key` (String, Sensitive) Schema registry SSL auth private key PEM.
+
+
+
+
+<a id="nestedatt--spec--schema_registry--glue"></a>
+### Nested Schema for `spec.schema_registry.glue`
+
+Required:
+
+- `security` (Attributes) Schema registry configuration. One of `credentials`, `from_context`, `from_role`, `iam_anywhere` (see [below for nested schema](#nestedatt--spec--schema_registry--glue--security))
+
+Optional:
+
+- `region` (String) Glue Schema registry AWS region
+- `registry_name` (String) Glue Schema registry name
+
+<a id="nestedatt--spec--schema_registry--glue--security"></a>
+### Nested Schema for `spec.schema_registry.glue.security`
+
+Optional:
+
+- `credentials` (Attributes) AWS credentials GLUE schema registry security configuration. (see [below for nested schema](#nestedatt--spec--schema_registry--glue--security--credentials))
+- `from_context` (Attributes) AWS context GLUE schema registry security configuration. (see [below for nested schema](#nestedatt--spec--schema_registry--glue--security--from_context))
+- `from_role` (Attributes) AWS role GLUE schema registry security configuration. (see [below for nested schema](#nestedatt--spec--schema_registry--glue--security--from_role))
+- `iam_anywhere` (Attributes) AWS IAM Anywhere GLUE schema registry security configuration. (see [below for nested schema](#nestedatt--spec--schema_registry--glue--security--iam_anywhere))
+
+<a id="nestedatt--spec--schema_registry--glue--security--credentials"></a>
+### Nested Schema for `spec.schema_registry.glue.security.credentials`
+
+Required:
+
+- `access_key_id` (String, Sensitive) Glue Schema registry AWS access key ID.
+- `secret_key` (String, Sensitive) Glue Schema registry AWS secret key.
+
+
+<a id="nestedatt--spec--schema_registry--glue--security--from_context"></a>
+### Nested Schema for `spec.schema_registry.glue.security.from_context`
+
+Required:
+
+- `profile` (String) Glue Schema registry AWS profile name.
+
+
+<a id="nestedatt--spec--schema_registry--glue--security--from_role"></a>
+### Nested Schema for `spec.schema_registry.glue.security.from_role`
+
+Required:
+
+- `role` (String) Glue Schema registry AWS role ARN.
+
+
+<a id="nestedatt--spec--schema_registry--glue--security--iam_anywhere"></a>
+### Nested Schema for `spec.schema_registry.glue.security.iam_anywhere`
+
+Required:
+
+- `certificate` (String) Glue Schema registry AWS certificate.
+- `private_key` (String) Glue Schema registry AWS private key.
+- `profile_arn` (String) Glue Schema registry AWS profile ARN.
+- `role_arn` (String) Glue Schema registry AWS role ARN.
+- `trust_anchor_arn` (String) Glue Schema registry AWS trust anchor ARN.
+
+
 
 
 
