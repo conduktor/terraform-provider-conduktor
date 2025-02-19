@@ -12,6 +12,16 @@ spec:
   color: '#FF0000'
   icon: icon
 ---
+apiVersion: v2
+kind: KafkaConnectCluster
+metadata:
+    name: kafka-connect
+    cluster: kafka-cluster
+spec:
+    displayName: My kafka connect
+    urls: http://localhost:8083
+    ignoreUntrustedCertificate: true
+---
 apiVersion: v1
 kind: Application
 metadata:
@@ -19,3 +29,16 @@ metadata:
 spec:
   title: My Application
   owner: admin
+---
+apiVersion: v1
+kind: TopicPolicy
+metadata:
+  name: topic-policy
+spec:
+  policies:
+    my-policy:
+      constraint: OneOf
+      optional: true
+      values:
+        - value1
+        - value2
