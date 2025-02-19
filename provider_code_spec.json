@@ -278,7 +278,7 @@
                   "name": "application_managed_service_account",
                   "bool": {
                     "description": "If set to true, the service account ACLs will be managed by the Application owners directly instead of being synchrornized by the ApplicationInstance component. See [documentation](https://docs.conduktor.io/platform/reference/resource-reference/self-service/#application-managed-service-account) for more information.",
-                    "computed_optional_required": "optional"
+                    "computed_optional_required": "computed_optional"
                   }
                 },
                 {

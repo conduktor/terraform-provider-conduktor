@@ -53,7 +53,6 @@ func TestAccApplicationInstanceV1Resource(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceRef, "spec.resources.1.name", "mytopic2"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.resources.1.pattern_type", "LITERAL"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.application_managed_service_account", "true"),
-					// resource.TestCheckResourceAttr(resourceRef, "spec.service_account", "my-service-account"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -61,61 +60,79 @@ func TestAccApplicationInstanceV1Resource(t *testing.T) {
 	})
 }
 
-// func TestAccApplicationInstanceV1Minimal(t *testing.T) {
-// 	test.CheckEnterpriseEnabled(t)
-// 	resource.Test(t, resource.TestCase{
-// 		PreCheck:                 func() { test.TestAccPreCheck(t) },
-// 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
-// 		Steps: []resource.TestStep{
-// 			// Create and Read from minimal example
-// 			{
-// 				Config: providerConfigConsole + test.TestAccTestdata(t, "console/application_instance_v1/resource_minimal.tf"),
-// 				Check: resource.ComposeAggregateTestCheckFunc(
-// 					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.minimal", "name", "minimal"),
-// 					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.minimal", "application", "myapp"),
-// 					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.minimal", "spec.cluster", "kafka-cluster"),
-// 				),
-// 			},
-// 			// Delete testing automatically occurs in TestCase
-// 		},
-// 	})
-// }
+func TestAccApplicationInstanceV1Minimal(t *testing.T) {
+	test.CheckEnterpriseEnabled(t)
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { test.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read from minimal example
+			{
+				Config: providerConfigConsole + test.TestAccTestdata(t, "console/application_instance_v1/resource_minimal.tf"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.minimal", "name", "minimal"),
+					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.minimal", "application", "myapp"),
+					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.minimal", "spec.cluster", "kafka-cluster"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
 
-// func TestAccApplicationInstanceV1ExampleResource(t *testing.T) {
-// 	test.CheckEnterpriseEnabled(t)
-// 	resource.Test(t, resource.TestCase{
-// 		PreCheck:                 func() { test.TestAccPreCheck(t) },
-// 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
-//
-// 		Steps: []resource.TestStep{
-// 			// Create and Read from simple example
-// 			{
-// 				Config: providerConfigConsole + test.TestAccExample(t, "resources", "conduktor_console_application_instance_v1", "simple.tf"),
-// 				Check: resource.ComposeAggregateTestCheckFunc(
-// 					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.example", "name", "simple-group"),
-// 					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.example", "spec.display_name", "Simple Group"),
-// 					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.example", "spec.description", "Simple group description"),
-// 					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.example", "spec.external_groups.#", "0"),
-// 					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.example", "spec.members.#", "0"),
-// 					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.example", "spec.members_from_external_groups.#", "0"),
-// 					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.example", "spec.permissions.#", "0"),
-// 				),
-// 			},
-// 			// Create and Read from complex example
-// 			{
-// 				Config: providerConfigConsole + test.TestAccExample(t, "resources", "conduktor_console_application_instance_v1", "complex.tf"),
-// 				Check: resource.ComposeAggregateTestCheckFunc(
-// 					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.example", "name", "complex-group"),
-// 					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.example", "spec.display_name", "Complex group"),
-// 					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.example", "spec.description", "Complex group description"),
-// 					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.example", "spec.external_groups.#", "1"),
-// 					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.example", "spec.external_groups.0", "sso-group1"),
-// 					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.example", "spec.members.#", "1"),
-// 					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.example", "spec.members.0", "user1@company.com"),
-// 					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.example", "spec.members_from_external_groups.#", "0"),
-// 					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.example", "spec.permissions.#", "2"),
-// 				),
-// 			},
-// 		},
-// 	})
-// }
+func TestAccApplicationInstanceV1ExampleResource(t *testing.T) {
+	test.CheckEnterpriseEnabled(t)
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { test.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+
+		Steps: []resource.TestStep{
+			// Create and Read from simple example
+			{
+				Config: providerConfigConsole + test.TestAccExample(t, "resources", "conduktor_console_application_instance_v1", "simple.tf"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.simple", "name", "simple"),
+					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.simple", "application", "myapp"),
+					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.simple", "spec.cluster", "kafka-cluster"),
+					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.simple", "spec.resources.#", "1"),
+					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.simple", "spec.resources.0.type", "TOPIC"),
+					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.simple", "spec.resources.0.name", "topic"),
+					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.simple", "spec.resources.0.pattern_type", "PREFIXED"),
+					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.simple", "spec.application_managed_service_account", "false"),
+				),
+			},
+			// Create and Read from complex example
+			{
+				Config: providerConfigConsole + test.TestAccExample(t, "resources", "conduktor_console_application_instance_v1", "complex.tf"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.complex", "name", "complex"),
+					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.complex", "application", "myapp"),
+					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.complex", "spec.cluster", "kafka-cluster"),
+					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.complex", "spec.service_account", "my-service-account"),
+					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.complex", "spec.topic_policy_ref.#", "1"),
+					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.complex", "spec.topic_policy_ref.0", "topic-policy"),
+					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.complex", "spec.default_catalog_visibility", "PUBLIC"),
+					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.complex", "spec.resources.#", "5"),
+					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.complex", "spec.resources.0.type", "CONNECTOR"),
+					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.complex", "spec.resources.0.connect_cluster", "kafka-connect"),
+					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.complex", "spec.resources.0.name", "click."),
+					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.complex", "spec.resources.0.pattern_type", "PREFIXED"),
+					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.complex", "spec.resources.1.type", "CONSUMER_GROUP"),
+					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.complex", "spec.resources.1.name", "click."),
+					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.complex", "spec.resources.1.pattern_type", "PREFIXED"),
+					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.complex", "spec.resources.2.type", "SUBJECT"),
+					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.complex", "spec.resources.2.name", "click."),
+					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.complex", "spec.resources.2.pattern_type", "PREFIXED"),
+					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.complex", "spec.resources.3.type", "TOPIC"),
+					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.complex", "spec.resources.3.name", "click."),
+					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.complex", "spec.resources.3.pattern_type", "PREFIXED"),
+					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.complex", "spec.resources.4.type", "TOPIC"),
+					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.complex", "spec.resources.4.name", "legacy-click."),
+					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.complex", "spec.resources.4.pattern_type", "PREFIXED"),
+					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.complex", "spec.resources.4.ownership_mode", "LIMITED"),
+					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.complex", "spec.application_managed_service_account", "false"),
+				),
+			},
+		},
+	})
+}

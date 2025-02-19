@@ -47,6 +47,7 @@ func ConsoleApplicationInstanceV1ResourceSchema(ctx context.Context) schema.Sche
 				Attributes: map[string]schema.Attribute{
 					"application_managed_service_account": schema.BoolAttribute{
 						Optional:            true,
+						Computed:            true,
 						Description:         "If set to true, the service account ACLs will be managed by the Application owners directly instead of being synchrornized by the ApplicationInstance component. See [documentation](https://docs.conduktor.io/platform/reference/resource-reference/self-service/#application-managed-service-account) for more information.",
 						MarkdownDescription: "If set to true, the service account ACLs will be managed by the Application owners directly instead of being synchrornized by the ApplicationInstance component. See [documentation](https://docs.conduktor.io/platform/reference/resource-reference/self-service/#application-managed-service-account) for more information.",
 					},

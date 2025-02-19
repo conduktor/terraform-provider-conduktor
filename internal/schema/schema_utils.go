@@ -267,7 +267,7 @@ func ResourceArrayToSetValue(ctx context.Context, arr []model.ResourceWithOwners
 	return resourcesList, nil
 }
 
-// Parse a Set into an array of Resources
+// Parse a Set into an array of Resources.
 func SetValueToResourceArray(ctx context.Context, set basetypes.SetValue) ([]model.ResourceWithOwnership, error) {
 	resources := make([]model.ResourceWithOwnership, 0)
 	var diag diag.Diagnostics
