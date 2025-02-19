@@ -11,7 +11,7 @@ resource "conduktor_console_application_instance_v1" "test" {
         pattern_type = "LITERAL"
       }
     ]
-    application_managed_service_account = true
+    application_managed_service_account = false
     service_account                     = "my-service-account"
   }
 }

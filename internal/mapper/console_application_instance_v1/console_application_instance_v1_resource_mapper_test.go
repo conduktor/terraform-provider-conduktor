@@ -30,7 +30,7 @@ func TestApplicationInstanceV1ModelMapping(t *testing.T) {
 	assert.Equal(t, "ApplicationInstance", ctlResource.Kind)
 	assert.Equal(t, "v1", ctlResource.Version)
 	assert.Equal(t, "appinstance", ctlResource.Name)
-	assert.Equal(t, map[string]interface{}{"name": "appinstance"}, ctlResource.Metadata)
+	assert.Equal(t, map[string]interface{}{"name": "appinstance", "application": "app"}, ctlResource.Metadata)
 	assert.Equal(t, jsonApplicationInstanceV1Resource, ctlResource.Json)
 
 	// convert into internal model
@@ -42,6 +42,7 @@ func TestApplicationInstanceV1ModelMapping(t *testing.T) {
 	assert.Equal(t, "ApplicationInstance", internal.Kind)
 	assert.Equal(t, "v1", internal.ApiVersion)
 	assert.Equal(t, "appinstance", internal.Metadata.Name)
+	assert.Equal(t, "app", internal.Metadata.Application)
 	assert.Equal(t, "cluster", internal.Spec.Cluster)
 	assert.Equal(t, []string{"ref2", "ref1"}, internal.Spec.TopicPolicyRef)
 	assert.Equal(t, false, internal.Spec.ApplicationManagedServiceAccount)
@@ -73,6 +74,7 @@ func TestApplicationInstanceV1ModelMapping(t *testing.T) {
 	}
 	topicPolicyRef, _ := schema.StringArrayToSetValue([]string{"ref2", "ref1"})
 	assert.Equal(t, types.StringValue("appinstance"), tfModel.Name)
+	assert.Equal(t, types.StringValue("app"), tfModel.Application)
 	assert.Equal(t, types.StringValue("cluster"), tfModel.Spec.Cluster)
 	assert.Equal(t, topicPolicyRef, tfModel.Spec.TopicPolicyRef)
 	assert.Equal(t, types.BoolValue(false), tfModel.Spec.ApplicationManagedServiceAccount)
@@ -89,6 +91,7 @@ func TestApplicationInstanceV1ModelMapping(t *testing.T) {
 	assert.Equal(t, "ApplicationInstance", internal2.Kind)
 	assert.Equal(t, "v1", internal2.ApiVersion)
 	assert.Equal(t, "appinstance", internal2.Metadata.Name)
+	assert.Equal(t, "app", internal2.Metadata.Application)
 	assert.Equal(t, "cluster", internal2.Spec.Cluster)
 	assert.Equal(t, []string{"ref2", "ref1"}, internal2.Spec.TopicPolicyRef)
 	assert.Equal(t, false, internal2.Spec.ApplicationManagedServiceAccount)

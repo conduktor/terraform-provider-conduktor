@@ -17,7 +17,6 @@ resource "conduktor_console_application_instance_v1" "test" {
       }
     ]
     application_managed_service_account = true
-    service_account                     = "my-service-account"
   }
 }
 
