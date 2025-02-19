@@ -14,7 +14,7 @@ import (
 	jsoniter "github.com/json-iterator/go"
 )
 
-const applicationInstanceV1ApiPath = "/public/iam/v1/applicationInstance"
+const applicationInstanceV1ApiPath = "/public/self-serve/v1/application-instance"
 
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &ApplicationInstanceV1Resource{}

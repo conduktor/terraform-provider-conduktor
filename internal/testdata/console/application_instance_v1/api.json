@@ -2,7 +2,8 @@
   "kind": "ApplicationInstance",
   "apiVersion": "v1",
   "metadata": {
-    "name": "appinstance"
+    "name": "appinstance",
+    "application": "app"
   },
   "spec": {
     "cluster": "cluster",

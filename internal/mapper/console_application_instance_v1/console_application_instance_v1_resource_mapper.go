@@ -8,7 +8,7 @@ import (
 	schema "github.com/conduktor/terraform-provider-conduktor/internal/schema"
 	appinstance "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_console_application_instance_v1"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
-	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
@@ -24,6 +24,7 @@ func TFToInternalModel(ctx context.Context, r *appinstance.ConsoleApplicationIns
 
 	return console.NewApplicationInstanceConsoleResource(
 		r.Name.ValueString(),
+		r.Application.ValueString(),
 		console.ApplicationInstanceConsoleSpec{
 			Cluster:                          r.Spec.Cluster.ValueString(),
 			TopicPolicyRef:                   topicPolicyRef,
@@ -36,10 +37,17 @@ func TFToInternalModel(ctx context.Context, r *appinstance.ConsoleApplicationIns
 }
 
 func InternalModelToTerraform(ctx context.Context, r *console.ApplicationInstanceConsoleResource) (appinstance.ConsoleApplicationInstanceV1Model, error) {
-	topicPolicyRef, diag := schema.StringArrayToSetValue(r.Spec.TopicPolicyRef)
-	if diag.HasError() {
-		return appinstance.ConsoleApplicationInstanceV1Model{}, mapper.WrapDiagError(diag, "topic_policy_ref", mapper.FromTerraform)
+	var diag diag.Diagnostics
+	// Ideally StringArrayToSetValue() would return a SetNull if needed.
+	// However as of now it would make tests to fail for other resources.
+	topicPolicyRef := basetypes.NewSetNull(basetypes.StringType{})
+	if r.Spec.TopicPolicyRef != nil {
+		topicPolicyRef, diag = schema.StringArrayToSetValue(r.Spec.TopicPolicyRef)
+		if diag.HasError() {
+			return appinstance.ConsoleApplicationInstanceV1Model{}, mapper.WrapDiagError(diag, "topic_policy_ref", mapper.FromTerraform)
+		}
 	}
+
 	resourcesSet, err := schema.ResourceArrayToSetValue(ctx, r.Spec.Resources)
 	if err != nil {
 		return appinstance.ConsoleApplicationInstanceV1Model{}, err
@@ -68,7 +76,8 @@ func InternalModelToTerraform(ctx context.Context, r *console.ApplicationInstanc
 	}
 
 	return appinstance.ConsoleApplicationInstanceV1Model{
-		Name: types.StringValue(r.Metadata.Name),
-		Spec: specValue,
+		Name:        schema.NewStringValue(r.Metadata.Name),
+		Application: schema.NewStringValue(r.Metadata.Application),
+		Spec:        specValue,
 	}, nil
 }

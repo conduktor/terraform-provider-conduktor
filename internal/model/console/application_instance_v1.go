@@ -13,7 +13,8 @@ const ApplicationInstanceV1Kind = "ApplicationInstance"
 const ApplicationInstanceV1ApiVersion = "v1"
 
 type ApplicationInstanceConsoleMetadata struct {
-	Name string `json:"name"`
+	Name        string `json:"name"`
+	Application string `json:"application"`
 }
 
 func (r ApplicationInstanceConsoleMetadata) String() string {
@@ -36,12 +37,13 @@ type ApplicationInstanceConsoleResource struct {
 	Spec       ApplicationInstanceConsoleSpec     `json:"spec"`
 }
 
-func NewApplicationInstanceConsoleResource(name string, spec ApplicationInstanceConsoleSpec) ApplicationInstanceConsoleResource {
+func NewApplicationInstanceConsoleResource(name string, app string, spec ApplicationInstanceConsoleSpec) ApplicationInstanceConsoleResource {
 	return ApplicationInstanceConsoleResource{
 		Kind:       ApplicationInstanceV1Kind,
 		ApiVersion: ApplicationInstanceV1ApiVersion,
 		Metadata: ApplicationInstanceConsoleMetadata{
-			Name: name,
+			Name:        name,
+			Application: app,
 		},
 		Spec: spec,
 	}
