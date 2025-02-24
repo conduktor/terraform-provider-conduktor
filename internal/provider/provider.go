@@ -158,6 +158,7 @@ func (p *ConduktorProvider) PreFlightChecks(mode string, input schema.ConduktorM
 
 func (p *ConduktorProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
+		NewApplicationV1Resource,
 		NewUserV2Resource,
 		NewGroupV2Resource,
 		NewGenericResource,

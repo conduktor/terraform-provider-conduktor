@@ -77,6 +77,10 @@ This repository contains the Conduktor Terraform provider, which defines Condukt
 - [Gateway Service Account](./docs/resources/gateway_service_account_v2.md)
 - [Gateway Interceptor](./docs/resources/gateway_interceptor_v2.md)
 
+### Self-service resources
+
+- [Console application](./docs/resources/console_application_v1.md)
+
 ### Generic resource
 
 - [Generic](./docs/resources/generic.md) :warning: This resource is experimental and should be used with care.
@@ -347,7 +351,6 @@ We are currently reviewing the following resources:
   - [Subject](https://docs.conduktor.io/platform/reference/resource-reference/kafka/#subject)
   - [Connector](https://docs.conduktor.io/platform/reference/resource-reference/kafka/#connector)
 3. Self-service resources:
-  - [Application](https://docs.conduktor.io/platform/reference/resource-reference/self-service/#application)
   - [ApplicationInstance](https://docs.conduktor.io/platform/reference/resource-reference/self-service/#application-instance)
   - [TopicPolicy](https://docs.conduktor.io/platform/reference/resource-reference/self-service/#topic-policy)
   - [ApplicationInstancePermission](https://docs.conduktor.io/platform/reference/resource-reference/self-service/#application-instance-permissions)

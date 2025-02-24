@@ -1,0 +1,12 @@
+{
+  "kind": "Application",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "application"
+  },
+  "spec": {
+    "title": "application title",
+    "description": "application description",
+    "owner": "application owner"
+  }
+}

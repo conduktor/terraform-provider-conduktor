@@ -89,6 +89,77 @@
   "datasources": [],
   "resources": [
     {
+      "name": "console_application_v1",
+      "schema": {
+        "attributes": [
+          {
+            "name": "name",
+            "string": {
+              "description": "Application name, must be unique, acts as an ID for import",
+              "computed_optional_required": "required",
+              "plan_modifiers": [
+                {
+                  "custom": {
+                    "imports": [
+                      {
+                        "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+                      }
+                    ],
+                    "schema_definition": "stringplanmodifier.RequiresReplace()"
+                  }
+                }
+              ],
+              "validators": [
+                {
+                  "custom": {
+                    "imports": [
+                      {
+                        "path": "regexp"
+                      },
+                      {
+                        "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                      }
+                    ],
+                    "schema_definition": "stringvalidator.RegexMatches(regexp.MustCompile(\"^[0-9a-z\\\\_\\\\-]+$\"), \"\")"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "spec",
+            "single_nested": {
+              "computed_optional_required": "required",
+              "description": "Application specification",
+              "attributes": [
+                {
+                  "name": "title",
+                  "string": {
+                    "description": "Application title",
+                    "computed_optional_required": "required"
+                  }
+                },
+                {
+                  "name": "description",
+                  "string": {
+                    "description": "Application description",
+                    "computed_optional_required": "optional"
+                  }
+                },
+                {
+                  "name": "owner",
+                  "string": {
+                    "description": "Application owner, must be a valid Console Group id",
+                    "computed_optional_required": "required"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "console_group_v2",
       "schema": {
         "attributes": [
@@ -1629,7 +1700,6 @@
                     {
                       "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/objectdefault"
                     },
-
                     {
                       "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/default"
                     }
