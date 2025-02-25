@@ -12,7 +12,6 @@ import (
 )
 
 func TestAccGatewayTokenV2Resource(t *testing.T) {
-	test.CheckEnterpriseEnabled(t)
 	resourceRef := "conduktor_gateway_token_v2.test"
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { test.TestAccPreCheck(t) },
@@ -42,7 +41,6 @@ func TestAccGatewayTokenV2Resource(t *testing.T) {
 }
 
 func TestAccGatewayTokenV2Minimal(t *testing.T) {
-	test.CheckEnterpriseEnabled(t)
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { test.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
@@ -62,7 +60,6 @@ func TestAccGatewayTokenV2Minimal(t *testing.T) {
 }
 
 func TestAccGatewayTokenV2ExampleResource(t *testing.T) {
-	test.CheckEnterpriseEnabled(t)
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { test.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,

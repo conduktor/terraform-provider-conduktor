@@ -15,6 +15,7 @@ import (
 )
 
 const applicationInstanceV1ApiPath = "/public/self-serve/v1/application-instance"
+const appInstanceMininumVersion = "v1.31.0"
 
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &ApplicationInstanceV1Resource{}
