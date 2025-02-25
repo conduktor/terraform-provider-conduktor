@@ -160,6 +160,234 @@
       }
     },
     {
+      "name": "console_application_instance_v1",
+      "schema": {
+        "attributes": [
+          {
+            "name": "name",
+            "string": {
+              "description": "Application Instance name, must be unique, acts as an ID for import",
+              "computed_optional_required": "required",
+              "plan_modifiers": [
+                {
+                  "custom": {
+                    "imports": [
+                      {
+                        "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+                      }
+                    ],
+                    "schema_definition": "stringplanmodifier.RequiresReplace()"
+                  }
+                }
+              ],
+              "validators": [
+                {
+                  "custom": {
+                    "imports": [
+                      {
+                        "path": "regexp"
+                      },
+                      {
+                        "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                      }
+                    ],
+                    "schema_definition": "stringvalidator.RegexMatches(regexp.MustCompile(\"^[0-9a-z\\\\_\\\\-]+$\"), \"\")"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "application",
+            "string": {
+              "description": "Reference to the application this instance belongs to",
+              "computed_optional_required": "required",
+              "validators": [
+                {
+                  "custom": {
+                    "imports": [
+                      {
+                        "path": "regexp"
+                      },
+                      {
+                        "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                      }
+                    ],
+                    "schema_definition": "stringvalidator.RegexMatches(regexp.MustCompile(\"^[0-9a-z\\\\_\\\\-]+$\"), \"\")"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "spec",
+            "single_nested": {
+              "computed_optional_required": "required",
+              "description": "Application Instance specification",
+              "attributes": [
+                {
+                  "name": "cluster",
+                  "string": {
+                    "description": "Valid Console Cluster. It's immutable (update will require the resource to be recreated).",
+                    "computed_optional_required": "required",
+                    "plan_modifiers": [
+                      {
+                        "custom": {
+                          "imports": [
+                            {
+                              "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+                            }
+                          ],
+                          "schema_definition": "stringplanmodifier.RequiresReplace()"
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "topic_policy_ref",
+                  "set": {
+                    "description": "Reference to the topic policy to apply to this instance",
+                    "computed_optional_required": "optional",
+                    "element_type": {
+                      "string": {}
+                    }
+                  }
+                },
+                {
+                  "name": "resources",
+                  "set_nested": {
+                    "description": "Set of all resources associated with this application instance",
+                    "computed_optional_required": "computed_optional",
+                    "nested_object": {
+                      "attributes": [
+                        {
+                          "name": "type",
+                          "string": {
+                            "description": "Type of the resource, valid values are: TOPIC, CONSUMER_GROUP, SUBJECT, CONNECTOR",
+                            "computed_optional_required": "required",
+                            "validators": [
+                              {
+                                "custom": {
+                                  "imports": [
+                                    {
+                                      "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                    },
+                                    {
+                                      "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
+                                    }
+                                  ],
+                                  "schema_definition": "stringvalidator.OneOf(validation.ValidResourceTypes...)"
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "name": "name",
+                          "string": {
+                            "description": "Name of the resource",
+                            "computed_optional_required": "required"
+                          }
+                        },
+                        {
+                          "name": "pattern_type",
+                          "string": {
+                            "description": "Pattern type for the resource, valid values are: LITERAL, PREFIXED",
+                            "computed_optional_required": "required",
+                            "validators": [
+                              {
+                                "custom": {
+                                  "imports": [
+                                    {
+                                      "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                    },
+                                    {
+                                      "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
+                                    }
+                                  ],
+                                  "schema_definition": "stringvalidator.OneOf(validation.ValidPatternTypes...)"
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "name": "connect_cluster",
+                          "string": {
+                            "description": "Valid Connect Cluster linked to the Kafka Cluster `spec.cluster`. Only mandatory when type is CONNECTOR",
+                            "computed_optional_required": "optional"
+                          }
+                        },
+                        {
+                          "name": "ownership_mode",
+                          "string": {
+                            "description": "Ownership mode for the resource",
+                            "computed_optional_required": "optional",
+                            "validators": [
+                              {
+                                "custom": {
+                                  "imports": [
+                                    {
+                                      "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                    },
+                                    {
+                                      "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
+                                    }
+                                  ],
+                                  "schema_definition": "stringvalidator.OneOf(validation.ValidOwnershipModes...)"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "application_managed_service_account",
+                  "bool": {
+                    "description": "If set to true, the service account ACLs will be managed by the Application owners directly instead of being synchrornized by the ApplicationInstance component. See [documentation](https://docs.conduktor.io/platform/reference/resource-reference/self-service/#application-managed-service-account) for more information.",
+                    "computed_optional_required": "computed_optional"
+                  }
+                },
+                {
+                  "name": "service_account",
+                  "string": {
+                    "description": "Service account associated with this application instance",
+                    "computed_optional_required": "optional"
+                  }
+                },
+                {
+                  "name": "default_catalog_visibility",
+                  "string": {
+                    "description": "Default catalog visibility for the application instance, valid values are: PRIVATE, PUBLIC",
+                    "computed_optional_required": "optional",
+                    "validators": [
+                      {
+                        "custom": {
+                          "imports": [
+                            {
+                              "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                            },
+                            {
+                              "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
+                            }
+                          ],
+                          "schema_definition": "stringvalidator.OneOf(validation.ValidCatalogVisibilities...)"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "console_group_v2",
       "schema": {
         "attributes": [

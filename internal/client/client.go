@@ -262,3 +262,29 @@ func (client *Client) Delete(ctx context.Context, mode Mode, path string, resour
 
 	return nil
 }
+
+func (client *Client) GetConsoleVersion(ctx context.Context) (string, error) {
+	path := "/versions"
+	url := client.BaseUrl + path
+	resp, err := client.Client.R().Get(url)
+	if err != nil {
+		return "", err
+	} else if resp.IsError() {
+		return "", fmt.Errorf("%s", ExtractApiError(resp))
+	}
+	tflog.Trace(ctx, fmt.Sprintf("GET %s response : %s", path, string(resp.Body())))
+
+	var result map[string]any
+	err = json.Unmarshal(resp.Body(), &result)
+	if err != nil {
+		return "", err
+	}
+	v := result["platform"]
+	version, ok := v.(string)
+	if !ok {
+		return "", err
+	}
+
+	// semver requires version to start with v.
+	return "v" + version, nil
+}
