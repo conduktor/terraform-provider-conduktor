@@ -7,7 +7,6 @@ import (
 
 	mapper "github.com/conduktor/terraform-provider-conduktor/internal/mapper"
 	"github.com/conduktor/terraform-provider-conduktor/internal/model"
-	appinstances "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_console_application_instance_v1"
 	groups "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_console_group_v2"
 	users "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_console_user_v2"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -228,69 +227,6 @@ func SetValueToPermissionArray(ctx context.Context, resource Resource, set baset
 		}
 	}
 	return permissions, nil
-}
-
-// Parse a Resources Array into a Set.
-func ResourceArrayToSetValue(ctx context.Context, arr []model.ResourceWithOwnership) (basetypes.SetValue, error) {
-	var tfResources []attr.Value
-	var diag diag.Diagnostics
-
-	for _, p := range arr {
-		types := map[string]attr.Type{
-			"type":            basetypes.StringType{},
-			"name":            basetypes.StringType{},
-			"pattern_type":    basetypes.StringType{},
-			"connect_cluster": basetypes.StringType{},
-			"ownership_mode":  basetypes.StringType{},
-		}
-		values := map[string]attr.Value{
-			"type":            NewStringValue(p.Type),
-			"name":            NewStringValue(p.Name),
-			"pattern_type":    NewStringValue(p.PatternType),
-			"connect_cluster": NewStringValue(p.ConnectCluster),
-			"ownership_mode":  NewStringValue(p.OwnershipMode),
-		}
-
-		permObj, diag := appinstances.NewResourcesValue(types, values)
-		if diag.HasError() {
-			return basetypes.SetValue{}, mapper.WrapDiagError(diag, "resources", mapper.FromTerraform)
-		}
-		tfResources = append(tfResources, permObj)
-
-	}
-
-	resourcesList, diag := types.SetValue(appinstances.ResourcesValue{}.Type(ctx), tfResources)
-	if diag.HasError() {
-		return basetypes.SetValue{}, mapper.WrapDiagError(diag, "resources", mapper.FromTerraform)
-	}
-
-	return resourcesList, nil
-}
-
-// Parse a Set into an array of Resources.
-func SetValueToResourceArray(ctx context.Context, set basetypes.SetValue) ([]model.ResourceWithOwnership, error) {
-	resources := make([]model.ResourceWithOwnership, 0)
-	var diag diag.Diagnostics
-
-	if !set.IsNull() && !set.IsUnknown() {
-		var tfResources []appinstances.ResourcesValue
-		diag = set.ElementsAs(ctx, &tfResources, false)
-		if diag.HasError() {
-			return nil, mapper.WrapDiagError(diag, "resources", mapper.FromTerraform)
-		}
-
-		for _, p := range tfResources {
-			resources = append(resources, model.ResourceWithOwnership{
-				Type:           p.ResourcesType.ValueString(),
-				Name:           p.Name.ValueString(),
-				PatternType:    p.PatternType.ValueString(),
-				ConnectCluster: p.ConnectCluster.ValueString(),
-				OwnershipMode:  p.OwnershipMode.ValueString(),
-			})
-		}
-
-	}
-	return resources, nil
 }
 
 // MapValueToStringMap Convert a MapValue to a map[string]string.

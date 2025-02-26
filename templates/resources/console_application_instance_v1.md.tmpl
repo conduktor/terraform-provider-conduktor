@@ -11,6 +11,10 @@ description: |-
 Resource for managing Conduktor application instances.
 This resource allows you to create, read, update and delete application instances in Conduktor.
 
+> [!WARNING]
+> - This resource is officially supported from Conduktor Console `1.31.0` and newer.
+> - Usage of this resource with older Console version might result in unexpected behavior.
+
 ## Example Usage
 
 ### Simple application instance

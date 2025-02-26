@@ -9,6 +9,14 @@ import (
 	jsoniter "github.com/json-iterator/go"
 )
 
+type ResourceWithOwnership struct {
+	Type           string `json:"type"`
+	Name           string `json:"name"`
+	PatternType    string `json:"patternType"`
+	ConnectCluster string `json:"connectCluster,omitempty"`
+	OwnershipMode  string `json:"ownershipMode,omitempty"`
+}
+
 const ApplicationInstanceV1Kind = "ApplicationInstance"
 const ApplicationInstanceV1ApiVersion = "v1"
 
@@ -22,12 +30,12 @@ func (r ApplicationInstanceConsoleMetadata) String() string {
 }
 
 type ApplicationInstanceConsoleSpec struct {
-	Cluster                          string                        `json:"cluster"`
-	TopicPolicyRef                   []string                      `json:"topicPolicyRef,omitempty"`
-	Resources                        []model.ResourceWithOwnership `json:"resources,omitempty"`
-	ApplicationManagedServiceAccount bool                          `json:"applicationManagedServiceAccount"`
-	ServiceAccount                   string                        `json:"serviceAccount,omitempty"`
-	DefaultCatalogVisibility         string                        `json:"defaultCatalogVisibility,omitempty"`
+	Cluster                          string                  `json:"cluster"`
+	TopicPolicyRef                   []string                `json:"topicPolicyRef,omitempty"`
+	Resources                        []ResourceWithOwnership `json:"resources,omitempty"`
+	ApplicationManagedServiceAccount bool                    `json:"applicationManagedServiceAccount"`
+	ServiceAccount                   string                  `json:"serviceAccount,omitempty"`
+	DefaultCatalogVisibility         string                  `json:"defaultCatalogVisibility,omitempty"`
 }
 
 type ApplicationInstanceConsoleResource struct {

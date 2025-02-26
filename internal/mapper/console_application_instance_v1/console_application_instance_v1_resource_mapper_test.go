@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	ctlresource "github.com/conduktor/ctl/resource"
-	"github.com/conduktor/terraform-provider-conduktor/internal/model"
 	console "github.com/conduktor/terraform-provider-conduktor/internal/model/console"
 	"github.com/conduktor/terraform-provider-conduktor/internal/schema"
 	"github.com/conduktor/terraform-provider-conduktor/internal/test"
@@ -48,7 +47,7 @@ func TestApplicationInstanceV1ModelMapping(t *testing.T) {
 	assert.Equal(t, false, internal.Spec.ApplicationManagedServiceAccount)
 	assert.Equal(t, "serviceaccount", internal.Spec.ServiceAccount)
 	assert.Equal(t, "PRIVATE", internal.Spec.DefaultCatalogVisibility)
-	expectedInternalResources := []model.ResourceWithOwnership{
+	expectedInternalResources := []console.ResourceWithOwnership{
 		{
 			Type:           "CONSUMER_GROUP",
 			Name:           "resource-2",
@@ -80,7 +79,8 @@ func TestApplicationInstanceV1ModelMapping(t *testing.T) {
 	assert.Equal(t, types.BoolValue(false), tfModel.Spec.ApplicationManagedServiceAccount)
 	assert.Equal(t, types.StringValue("serviceaccount"), tfModel.Spec.ServiceAccount)
 	assert.Equal(t, types.StringValue("PRIVATE"), tfModel.Spec.DefaultCatalogVisibility)
-	// do not test Resources as it's a pain to parse ListValue
+	assert.Equal(t, false, tfModel.Spec.Resources.IsNull())
+	assert.Equal(t, false, tfModel.Spec.Resources.IsUnknown())
 
 	// convert back to internal model
 	internal2, err := TFToInternalModel(ctx, &tfModel)
