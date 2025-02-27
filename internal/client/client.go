@@ -285,6 +285,6 @@ func (client *Client) GetConsoleVersion(ctx context.Context) (string, error) {
 		return "", err
 	}
 
-	// semver requires version to start with v.
+	// Go module semver requires version to start with v.
 	return "v" + version, nil
 }

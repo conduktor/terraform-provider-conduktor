@@ -37,3 +37,26 @@ func testClient(mode client.Mode) (*client.Client, error) {
 	var apiParameter = client.LoadConfig(schema.ConduktorModel{}, mode)
 	return client.Make(context.Background(), mode, apiParameter, "test")
 }
+
+// Fetch current client version based on the mode.
+// Used for version checks in acceptance tests.
+func fetchClientVersion(mode client.Mode) (string, error) {
+	var version string
+
+	testClient, err := testClient(mode)
+	if err != nil {
+		return "", err
+	}
+
+	if mode == client.CONSOLE {
+		version, err = testClient.GetConsoleVersion(context.Background())
+		if err != nil {
+			return "", err
+		}
+	} else if mode == client.GATEWAY {
+		// TODO
+		return "", nil
+	}
+
+	return version, nil
+}

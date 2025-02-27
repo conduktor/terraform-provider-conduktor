@@ -9,6 +9,7 @@ import (
 )
 
 func TestAccGatewayServiceAccountV2Resource(t *testing.T) {
+	test.CheckEnterpriseEnabled(t)
 	resourceRef := "conduktor_gateway_service_account_v2.test"
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { test.TestAccPreCheck(t) },
@@ -50,6 +51,7 @@ func TestAccGatewayServiceAccountV2Resource(t *testing.T) {
 }
 
 func TestAccGatewayServiceAccountV2Minimal(t *testing.T) {
+	test.CheckEnterpriseEnabled(t)
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { test.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
@@ -69,6 +71,7 @@ func TestAccGatewayServiceAccountV2Minimal(t *testing.T) {
 }
 
 func TestAccGatewayServiceAccountV2ExampleResource(t *testing.T) {
+	test.CheckEnterpriseEnabled(t)
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { test.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,

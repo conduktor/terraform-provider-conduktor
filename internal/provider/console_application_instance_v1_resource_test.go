@@ -1,7 +1,6 @@
 package provider
 
 import (
-	"context"
 	"testing"
 
 	"github.com/conduktor/terraform-provider-conduktor/internal/client"
@@ -11,7 +10,7 @@ import (
 )
 
 func TestAccApplicationInstanceV1Resource(t *testing.T) {
-	v, err := fetchCurrentVersion()
+	v, err := fetchClientVersion(client.CONSOLE)
 	if err != nil {
 		t.Fatalf("Error fetching current version: %s", err)
 	}
@@ -68,7 +67,7 @@ func TestAccApplicationInstanceV1Resource(t *testing.T) {
 }
 
 func TestAccApplicationInstanceV1Minimal(t *testing.T) {
-	v, err := fetchCurrentVersion()
+	v, err := fetchClientVersion(client.CONSOLE)
 	if err != nil {
 		t.Fatalf("Error fetching current version: %s", err)
 	}
@@ -92,7 +91,7 @@ func TestAccApplicationInstanceV1Minimal(t *testing.T) {
 }
 
 func TestAccApplicationInstanceV1ExampleResource(t *testing.T) {
-	v, err := fetchCurrentVersion()
+	v, err := fetchClientVersion(client.CONSOLE)
 	if err != nil {
 		t.Fatalf("Error fetching current version: %s", err)
 	}
@@ -150,18 +149,4 @@ func TestAccApplicationInstanceV1ExampleResource(t *testing.T) {
 			},
 		},
 	})
-}
-
-func fetchCurrentVersion() (string, error) {
-	consoleClient, err := testClient(client.CONSOLE)
-	if err != nil {
-		return "", err
-	}
-
-	version, err := consoleClient.GetConsoleVersion(context.Background())
-	if err != nil {
-		return "", err
-	}
-
-	return version, nil
 }
