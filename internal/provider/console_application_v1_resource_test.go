@@ -9,7 +9,6 @@ import (
 )
 
 func TestAccApplicationV1Resource(t *testing.T) {
-	test.CheckEnterpriseEnabled(t)
 	resourceRef := "conduktor_console_application_v1.test"
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { test.TestAccPreCheck(t) },
@@ -49,7 +48,6 @@ func TestAccApplicationV1Resource(t *testing.T) {
 }
 
 func TestAccApplicationV1ExampleResource(t *testing.T) {
-	test.CheckEnterpriseEnabled(t)
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { test.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,

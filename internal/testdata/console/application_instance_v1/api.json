@@ -1,0 +1,34 @@
+{
+  "kind": "ApplicationInstance",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "appinstance",
+    "application": "app"
+  },
+  "spec": {
+    "cluster": "cluster",
+    "topicPolicyRef": [
+      "ref2",
+      "ref1"
+    ],
+    "resources": [
+      {
+        "type": "CONSUMER_GROUP",
+        "name": "resource-2",
+        "patternType": "PREFIXED",
+        "connectCluster": "connectCluster",
+        "ownershipMode": "LIMITED"
+      },
+      {
+        "type": "TOPIC",
+        "name": "resource-1",
+        "patternType": "LITERAL",
+        "connectCluster": "connectCluster",
+        "ownershipMode": "ALL"
+      }
+    ],
+    "applicationManagedServiceAccount": false,
+    "serviceAccount": "serviceaccount",
+    "defaultCatalogVisibility": "PRIVATE"
+  }
+}

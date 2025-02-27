@@ -1,2 +1,44 @@
 # Init manifests are used to initialize Console with the necessary resources using CLI.
-
+---
+apiVersion: v2
+kind: KafkaCluster
+metadata:
+  name: kafka-cluster
+spec:
+  displayName: local-redpanda
+  bootstrapServers: redpanda:9092
+  # properties:
+  #   sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="admin" password="admin-secret";
+  color: '#FF0000'
+  icon: icon
+---
+apiVersion: v2
+kind: KafkaConnectCluster
+metadata:
+    name: kafka-connect
+    cluster: kafka-cluster
+spec:
+    displayName: My kafka connect
+    urls: http://localhost:8083
+    ignoreUntrustedCertificate: true
+---
+apiVersion: v1
+kind: Application
+metadata:
+  name: myapp
+spec:
+  title: My Application
+  owner: admin
+---
+apiVersion: v1
+kind: TopicPolicy
+metadata:
+  name: topic-policy
+spec:
+  policies:
+    my-policy:
+      constraint: OneOf
+      optional: true
+      values:
+        - value1
+        - value2

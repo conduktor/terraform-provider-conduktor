@@ -7,6 +7,8 @@ import (
 	"runtime"
 	"strings"
 	"testing"
+
+	"golang.org/x/mod/semver"
 )
 
 // Helper to read testdata files into string.
@@ -56,7 +58,17 @@ func TestCheckResourceAttrContainsStringsFunc(expected ...string) func(value str
 // Check if license is setup in env to enable some tests behind license.
 func CheckEnterpriseEnabled(t *testing.T) {
 	if !(os.Getenv("CDK_LICENSE") != "") {
-		t.Skip("Skipping TestAccGroupV2Resource tests in free mode as it requires a license set on CDK_LICENSE env var")
+		t.Skip("Skipping tests in free mode as it requires a license set on CDK_LICENSE env var")
+	}
+}
+
+// Check if version meets minimum requirement.
+// NOTE: Version has to start with v, e.g. "v1.2.3".
+func CheckMinimumVersionRequirement(t *testing.T, version string, minimumVersion string) {
+	// If version is not valid we assume it's an unreleased version. (e.g. main-xxxxxx)
+	// In this case we assume it's a newer API, so we don't need to skip the tests.
+	if semver.IsValid(version) && semver.Compare(version, minimumVersion) < 0 {
+		t.Skip("Skipping tests as API doesn't meet mininum version requirements")
 	}
 }
 
