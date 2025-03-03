@@ -7,7 +7,8 @@ import (
 )
 
 type Discriminable struct {
-	Type string `json:"type"`
+	Type       string `json:"type"`
+	Constraint string `json:"constraint"`
 }
 
 func ToClientResource(o interface{}) (ctlresource.Resource, error) {
