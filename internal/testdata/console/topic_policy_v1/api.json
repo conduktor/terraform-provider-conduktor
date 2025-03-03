@@ -1,0 +1,10 @@
+{
+  "kind": "TopicPolicy",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "topicPolicy"
+  },
+  "spec": {
+    "policies": null
+  }
+}
