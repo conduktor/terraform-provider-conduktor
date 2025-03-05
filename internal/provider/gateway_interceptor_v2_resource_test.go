@@ -2,12 +2,13 @@ package provider
 
 import (
 	"context"
+	"testing"
+	"time"
+
 	"github.com/conduktor/terraform-provider-conduktor/internal/client"
 	"github.com/conduktor/terraform-provider-conduktor/internal/model/gateway"
 	"github.com/conduktor/terraform-provider-conduktor/internal/test"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
-	"testing"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
@@ -31,7 +32,7 @@ func TestAccGatewayInterceptorV2Resource(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read testing
 			{
-				Config: providerConfigGateway + test.TestAccTestdata(t, "gateway_interceptor_v2/resource_create.tf"),
+				Config: providerConfigGateway + test.TestAccTestdata(t, "gateway/interceptor_v2/resource_create.tf"),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PostApplyPostRefresh: []plancheck.PlanCheck{
 						plancheck.ExpectEmptyPlan(),
@@ -112,7 +113,7 @@ func TestAccGatewayInterceptorV2Resource(t *testing.T) {
 						t.Fatalf("Error externally deleting interceptor: %s", err)
 					}
 				},
-				Config:             providerConfigGateway + test.TestAccTestdata(t, "gateway_interceptor_v2/resource_create.tf"),
+				Config:             providerConfigGateway + test.TestAccTestdata(t, "gateway/interceptor_v2/resource_create.tf"),
 				PlanOnly:           true,
 				ExpectNonEmptyPlan: true,
 				ConfigPlanChecks: resource.ConfigPlanChecks{
@@ -123,7 +124,7 @@ func TestAccGatewayInterceptorV2Resource(t *testing.T) {
 			},
 			//Update and Read testing
 			{
-				Config: providerConfigGateway + test.TestAccTestdata(t, "gateway_interceptor_v2/resource_update.tf"),
+				Config: providerConfigGateway + test.TestAccTestdata(t, "gateway/interceptor_v2/resource_update.tf"),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PostApplyPostRefresh: []plancheck.PlanCheck{
 						plancheck.ExpectEmptyPlan(),

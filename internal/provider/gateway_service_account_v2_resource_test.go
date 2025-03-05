@@ -17,7 +17,7 @@ func TestAccGatewayServiceAccountV2Resource(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read testing
 			{
-				Config: providerConfigGateway + test.TestAccTestdata(t, "gateway_service_account_v2_resource_create.tf"),
+				Config: providerConfigGateway + test.TestAccTestdata(t, "gateway/service_account_v2/resource_create.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceRef, "name", "user1"),
 					resource.TestCheckResourceAttr(resourceRef, "vcluster", "vcluster_sa"),
@@ -36,7 +36,7 @@ func TestAccGatewayServiceAccountV2Resource(t *testing.T) {
 			},
 			// Update and Read testing
 			{
-				Config: providerConfigGateway + test.TestAccTestdata(t, "gateway_service_account_v2_resource_update.tf"),
+				Config: providerConfigGateway + test.TestAccTestdata(t, "gateway/service_account_v2/resource_update.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceRef, "name", "user1"),
 					resource.TestCheckResourceAttr(resourceRef, "vcluster", "vcluster_sa"),
@@ -58,7 +58,7 @@ func TestAccGatewayServiceAccountV2Minimal(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read from minimal example
 			{
-				Config: providerConfigGateway + test.TestAccTestdata(t, "gateway_service_account_v2_resource_minimal.tf"),
+				Config: providerConfigGateway + test.TestAccTestdata(t, "gateway/service_account_v2/resource_minimal.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("conduktor_gateway_service_account_v2.minimal", "name", "minimal"),
 					resource.TestCheckResourceAttr("conduktor_gateway_service_account_v2.minimal", "vcluster", "passthrough"),

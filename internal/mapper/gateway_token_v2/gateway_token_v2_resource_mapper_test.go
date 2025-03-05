@@ -15,7 +15,7 @@ func TestGatewayTokenV2ModelMapping(t *testing.T) {
 
 	ctx := context.Background()
 
-	jsonTokenV2Resource := []byte(test.TestAccTestdata(t, "gateway_token_v2_api.json"))
+	jsonTokenV2Resource := []byte(test.TestAccTestdata(t, "gateway/token_v2/api.json"))
 
 	token := gateway.GatewayTokenResource{}
 	err := token.FromRawJson(jsonTokenV2Resource)
