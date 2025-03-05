@@ -56,8 +56,8 @@ func ConsoleTopicPolicyV1ResourceSchema(ctx context.Context) schema.Schema {
 										},
 									},
 									Optional:            true,
-									Description:         "Match policy",
-									MarkdownDescription: "Match policy",
+									Description:         "Validates using Regular Expression",
+									MarkdownDescription: "Validates using Regular Expression",
 								},
 								"none_of": schema.SingleNestedAttribute{
 									Attributes: map[string]schema.Attribute{
@@ -76,7 +76,9 @@ func ConsoleTopicPolicyV1ResourceSchema(ctx context.Context) schema.Schema {
 											AttrTypes: NoneOfValue{}.AttributeTypes(ctx),
 										},
 									},
-									Optional: true,
+									Optional:            true,
+									Description:         "Validates against a list of predefined options",
+									MarkdownDescription: "Validates against a list of predefined options",
 								},
 								"one_of": schema.SingleNestedAttribute{
 									Attributes: map[string]schema.Attribute{
@@ -95,7 +97,32 @@ func ConsoleTopicPolicyV1ResourceSchema(ctx context.Context) schema.Schema {
 											AttrTypes: OneOfValue{}.AttributeTypes(ctx),
 										},
 									},
-									Optional: true,
+									Optional:            true,
+									Description:         "Validates against a list of predefined options",
+									MarkdownDescription: "Validates against a list of predefined options",
+								},
+								"range": schema.SingleNestedAttribute{
+									Attributes: map[string]schema.Attribute{
+										"max": schema.Int64Attribute{
+											Required: true,
+										},
+										"min": schema.Int64Attribute{
+											Required: true,
+										},
+										"optional": schema.BoolAttribute{
+											Optional:            true,
+											Description:         "If set to true, the policy is optional",
+											MarkdownDescription: "If set to true, the policy is optional",
+										},
+									},
+									CustomType: RangeType{
+										ObjectType: types.ObjectType{
+											AttrTypes: RangeValue{}.AttributeTypes(ctx),
+										},
+									},
+									Optional:            true,
+									Description:         "Validates a range of numbers",
+									MarkdownDescription: "Validates a range of numbers",
 								},
 							},
 							CustomType: PoliciesType{
@@ -565,6 +592,24 @@ func (t PoliciesType) ValueFromObject(ctx context.Context, in basetypes.ObjectVa
 			fmt.Sprintf(`one_of expected to be basetypes.ObjectValue, was: %T`, oneOfAttribute))
 	}
 
+	rangeAttribute, ok := attributes["range"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`range is missing from object`)
+
+		return nil, diags
+	}
+
+	rangeVal, ok := rangeAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`range expected to be basetypes.ObjectValue, was: %T`, rangeAttribute))
+	}
+
 	if diags.HasError() {
 		return nil, diags
 	}
@@ -573,6 +618,7 @@ func (t PoliciesType) ValueFromObject(ctx context.Context, in basetypes.ObjectVa
 		Match:  matchVal,
 		NoneOf: noneOfVal,
 		OneOf:  oneOfVal,
+		Range:  rangeVal,
 		state:  attr.ValueStateKnown,
 	}, diags
 }
@@ -694,6 +740,24 @@ func NewPoliciesValue(attributeTypes map[string]attr.Type, attributes map[string
 			fmt.Sprintf(`one_of expected to be basetypes.ObjectValue, was: %T`, oneOfAttribute))
 	}
 
+	rangeAttribute, ok := attributes["range"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`range is missing from object`)
+
+		return NewPoliciesValueUnknown(), diags
+	}
+
+	rangeVal, ok := rangeAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`range expected to be basetypes.ObjectValue, was: %T`, rangeAttribute))
+	}
+
 	if diags.HasError() {
 		return NewPoliciesValueUnknown(), diags
 	}
@@ -702,6 +766,7 @@ func NewPoliciesValue(attributeTypes map[string]attr.Type, attributes map[string
 		Match:  matchVal,
 		NoneOf: noneOfVal,
 		OneOf:  oneOfVal,
+		Range:  rangeVal,
 		state:  attr.ValueStateKnown,
 	}, diags
 }
@@ -777,11 +842,12 @@ type PoliciesValue struct {
 	Match  basetypes.ObjectValue `tfsdk:"match"`
 	NoneOf basetypes.ObjectValue `tfsdk:"none_of"`
 	OneOf  basetypes.ObjectValue `tfsdk:"one_of"`
+	Range  basetypes.ObjectValue `tfsdk:"range"`
 	state  attr.ValueState
 }
 
 func (v PoliciesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
-	attrTypes := make(map[string]tftypes.Type, 3)
+	attrTypes := make(map[string]tftypes.Type, 4)
 
 	var val tftypes.Value
 	var err error
@@ -795,12 +861,15 @@ func (v PoliciesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, err
 	attrTypes["one_of"] = basetypes.ObjectType{
 		AttrTypes: OneOfValue{}.AttributeTypes(ctx),
 	}.TerraformType(ctx)
+	attrTypes["range"] = basetypes.ObjectType{
+		AttrTypes: RangeValue{}.AttributeTypes(ctx),
+	}.TerraformType(ctx)
 
 	objectType := tftypes.Object{AttributeTypes: attrTypes}
 
 	switch v.state {
 	case attr.ValueStateKnown:
-		vals := make(map[string]tftypes.Value, 3)
+		vals := make(map[string]tftypes.Value, 4)
 
 		val, err = v.Match.ToTerraformValue(ctx)
 
@@ -825,6 +894,14 @@ func (v PoliciesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, err
 		}
 
 		vals["one_of"] = val
+
+		val, err = v.Range.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["range"] = val
 
 		if err := tftypes.ValidateValue(objectType, vals); err != nil {
 			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
@@ -855,66 +932,87 @@ func (v PoliciesValue) String() string {
 func (v PoliciesValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	var match basetypes.ObjectValue
+	var matchVal basetypes.ObjectValue
 
 	if v.Match.IsNull() {
-		match = types.ObjectNull(
+		matchVal = types.ObjectNull(
 			MatchValue{}.AttributeTypes(ctx),
 		)
 	}
 
 	if v.Match.IsUnknown() {
-		match = types.ObjectUnknown(
+		matchVal = types.ObjectUnknown(
 			MatchValue{}.AttributeTypes(ctx),
 		)
 	}
 
 	if !v.Match.IsNull() && !v.Match.IsUnknown() {
-		match = types.ObjectValueMust(
+		matchVal = types.ObjectValueMust(
 			MatchValue{}.AttributeTypes(ctx),
 			v.Match.Attributes(),
 		)
 	}
 
-	var noneOf basetypes.ObjectValue
+	var noneOfVal basetypes.ObjectValue
 
 	if v.NoneOf.IsNull() {
-		noneOf = types.ObjectNull(
+		noneOfVal = types.ObjectNull(
 			NoneOfValue{}.AttributeTypes(ctx),
 		)
 	}
 
 	if v.NoneOf.IsUnknown() {
-		noneOf = types.ObjectUnknown(
+		noneOfVal = types.ObjectUnknown(
 			NoneOfValue{}.AttributeTypes(ctx),
 		)
 	}
 
 	if !v.NoneOf.IsNull() && !v.NoneOf.IsUnknown() {
-		noneOf = types.ObjectValueMust(
+		noneOfVal = types.ObjectValueMust(
 			NoneOfValue{}.AttributeTypes(ctx),
 			v.NoneOf.Attributes(),
 		)
 	}
 
-	var oneOf basetypes.ObjectValue
+	var oneOfVal basetypes.ObjectValue
 
 	if v.OneOf.IsNull() {
-		oneOf = types.ObjectNull(
+		oneOfVal = types.ObjectNull(
 			OneOfValue{}.AttributeTypes(ctx),
 		)
 	}
 
 	if v.OneOf.IsUnknown() {
-		oneOf = types.ObjectUnknown(
+		oneOfVal = types.ObjectUnknown(
 			OneOfValue{}.AttributeTypes(ctx),
 		)
 	}
 
 	if !v.OneOf.IsNull() && !v.OneOf.IsUnknown() {
-		oneOf = types.ObjectValueMust(
+		oneOfVal = types.ObjectValueMust(
 			OneOfValue{}.AttributeTypes(ctx),
 			v.OneOf.Attributes(),
+		)
+	}
+
+	var rangeVal basetypes.ObjectValue
+
+	if v.Range.IsNull() {
+		rangeVal = types.ObjectNull(
+			RangeValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if v.Range.IsUnknown() {
+		rangeVal = types.ObjectUnknown(
+			RangeValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if !v.Range.IsNull() && !v.Range.IsUnknown() {
+		rangeVal = types.ObjectValueMust(
+			RangeValue{}.AttributeTypes(ctx),
+			v.Range.Attributes(),
 		)
 	}
 
@@ -927,6 +1025,9 @@ func (v PoliciesValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue
 		},
 		"one_of": basetypes.ObjectType{
 			AttrTypes: OneOfValue{}.AttributeTypes(ctx),
+		},
+		"range": basetypes.ObjectType{
+			AttrTypes: RangeValue{}.AttributeTypes(ctx),
 		},
 	}
 
@@ -941,9 +1042,10 @@ func (v PoliciesValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue
 	objVal, diags := types.ObjectValue(
 		attributeTypes,
 		map[string]attr.Value{
-			"match":   match,
-			"none_of": noneOf,
-			"one_of":  oneOf,
+			"match":   matchVal,
+			"none_of": noneOfVal,
+			"one_of":  oneOfVal,
+			"range":   rangeVal,
 		})
 
 	return objVal, diags
@@ -976,6 +1078,10 @@ func (v PoliciesValue) Equal(o attr.Value) bool {
 		return false
 	}
 
+	if !v.Range.Equal(other.Range) {
+		return false
+	}
+
 	return true
 }
 
@@ -997,6 +1103,9 @@ func (v PoliciesValue) AttributeTypes(ctx context.Context) map[string]attr.Type 
 		},
 		"one_of": basetypes.ObjectType{
 			AttrTypes: OneOfValue{}.AttributeTypes(ctx),
+		},
+		"range": basetypes.ObjectType{
+			AttrTypes: RangeValue{}.AttributeTypes(ctx),
 		},
 	}
 }
@@ -2189,5 +2298,439 @@ func (v OneOfValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 		"values": basetypes.SetType{
 			ElemType: types.StringType,
 		},
+	}
+}
+
+var _ basetypes.ObjectTypable = RangeType{}
+
+type RangeType struct {
+	basetypes.ObjectType
+}
+
+func (t RangeType) Equal(o attr.Type) bool {
+	other, ok := o.(RangeType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t RangeType) String() string {
+	return "RangeType"
+}
+
+func (t RangeType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	maxAttribute, ok := attributes["max"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`max is missing from object`)
+
+		return nil, diags
+	}
+
+	maxVal, ok := maxAttribute.(basetypes.Int64Value)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`max expected to be basetypes.Int64Value, was: %T`, maxAttribute))
+	}
+
+	minAttribute, ok := attributes["min"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`min is missing from object`)
+
+		return nil, diags
+	}
+
+	minVal, ok := minAttribute.(basetypes.Int64Value)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`min expected to be basetypes.Int64Value, was: %T`, minAttribute))
+	}
+
+	optionalAttribute, ok := attributes["optional"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`optional is missing from object`)
+
+		return nil, diags
+	}
+
+	optionalVal, ok := optionalAttribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`optional expected to be basetypes.BoolValue, was: %T`, optionalAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return RangeValue{
+		Max:      maxVal,
+		Min:      minVal,
+		Optional: optionalVal,
+		state:    attr.ValueStateKnown,
+	}, diags
+}
+
+func NewRangeValueNull() RangeValue {
+	return RangeValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewRangeValueUnknown() RangeValue {
+	return RangeValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewRangeValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (RangeValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing RangeValue Attribute Value",
+				"While creating a RangeValue value, a missing attribute value was detected. "+
+					"A RangeValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("RangeValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid RangeValue Attribute Type",
+				"While creating a RangeValue value, an invalid attribute value was detected. "+
+					"A RangeValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("RangeValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("RangeValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra RangeValue Attribute Value",
+				"While creating a RangeValue value, an extra attribute value was detected. "+
+					"A RangeValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra RangeValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewRangeValueUnknown(), diags
+	}
+
+	maxAttribute, ok := attributes["max"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`max is missing from object`)
+
+		return NewRangeValueUnknown(), diags
+	}
+
+	maxVal, ok := maxAttribute.(basetypes.Int64Value)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`max expected to be basetypes.Int64Value, was: %T`, maxAttribute))
+	}
+
+	minAttribute, ok := attributes["min"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`min is missing from object`)
+
+		return NewRangeValueUnknown(), diags
+	}
+
+	minVal, ok := minAttribute.(basetypes.Int64Value)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`min expected to be basetypes.Int64Value, was: %T`, minAttribute))
+	}
+
+	optionalAttribute, ok := attributes["optional"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`optional is missing from object`)
+
+		return NewRangeValueUnknown(), diags
+	}
+
+	optionalVal, ok := optionalAttribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`optional expected to be basetypes.BoolValue, was: %T`, optionalAttribute))
+	}
+
+	if diags.HasError() {
+		return NewRangeValueUnknown(), diags
+	}
+
+	return RangeValue{
+		Max:      maxVal,
+		Min:      minVal,
+		Optional: optionalVal,
+		state:    attr.ValueStateKnown,
+	}, diags
+}
+
+func NewRangeValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) RangeValue {
+	object, diags := NewRangeValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewRangeValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t RangeType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewRangeValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewRangeValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewRangeValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewRangeValueMust(RangeValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t RangeType) ValueType(ctx context.Context) attr.Value {
+	return RangeValue{}
+}
+
+var _ basetypes.ObjectValuable = RangeValue{}
+
+type RangeValue struct {
+	Max      basetypes.Int64Value `tfsdk:"max"`
+	Min      basetypes.Int64Value `tfsdk:"min"`
+	Optional basetypes.BoolValue  `tfsdk:"optional"`
+	state    attr.ValueState
+}
+
+func (v RangeValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 3)
+
+	var val tftypes.Value
+	var err error
+
+	attrTypes["max"] = basetypes.Int64Type{}.TerraformType(ctx)
+	attrTypes["min"] = basetypes.Int64Type{}.TerraformType(ctx)
+	attrTypes["optional"] = basetypes.BoolType{}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 3)
+
+		val, err = v.Max.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["max"] = val
+
+		val, err = v.Min.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["min"] = val
+
+		val, err = v.Optional.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["optional"] = val
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v RangeValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v RangeValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v RangeValue) String() string {
+	return "RangeValue"
+}
+
+func (v RangeValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributeTypes := map[string]attr.Type{
+		"max":      basetypes.Int64Type{},
+		"min":      basetypes.Int64Type{},
+		"optional": basetypes.BoolType{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{
+			"max":      v.Max,
+			"min":      v.Min,
+			"optional": v.Optional,
+		})
+
+	return objVal, diags
+}
+
+func (v RangeValue) Equal(o attr.Value) bool {
+	other, ok := o.(RangeValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	if !v.Max.Equal(other.Max) {
+		return false
+	}
+
+	if !v.Min.Equal(other.Min) {
+		return false
+	}
+
+	if !v.Optional.Equal(other.Optional) {
+		return false
+	}
+
+	return true
+}
+
+func (v RangeValue) Type(ctx context.Context) attr.Type {
+	return RangeType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v RangeValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"max":      basetypes.Int64Type{},
+		"min":      basetypes.Int64Type{},
+		"optional": basetypes.BoolType{},
 	}
 }

@@ -1409,7 +1409,7 @@
                         {
                           "name": "match",
                           "single_nested": {
-                            "description": "Match policy",
+                            "description": "Validates using Regular Expression",
                             "computed_optional_required": "optional",
                             "attributes": [
                               {
@@ -1431,6 +1431,7 @@
                         {
                           "name": "none_of",
                           "single_nested": {
+                            "description": "Validates against a list of predefined options",
                             "computed_optional_required": "optional",
                             "attributes": [
                               {
@@ -1455,6 +1456,7 @@
                         {
                           "name": "one_of",
                           "single_nested": {
+                            "description": "Validates against a list of predefined options",
                             "computed_optional_required": "optional",
                             "attributes": [
                               {
@@ -1471,6 +1473,34 @@
                                   "element_type": {
                                     "string": {}
                                   }
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "name": "range",
+                          "single_nested": {
+                            "description": "Validates a range of numbers",
+                            "computed_optional_required": "optional",
+                            "attributes": [
+                              {
+                                "name": "optional",
+                                "bool": {
+                                  "description": "If set to true, the policy is optional",
+                                  "computed_optional_required": "optional"
+                                }
+                              },
+                              {
+                                "name": "min",
+                                "int64": {
+                                  "computed_optional_required": "required"
+                                }
+                              },
+                              {
+                                "name": "max",
+                                "int64": {
+                                  "computed_optional_required": "required"
                                 }
                               }
                             ]

@@ -41,8 +41,8 @@ github.com/cloudflare/circl v1.3.7 h1:qlCDlTPz2n9fu58M0Nh1J/JzcFpfgkFHHX3O35r5vc
 github.com/cloudflare/circl v1.3.7/go.mod h1:sRTcRWXGLrKw6yIGJ+l7amYJFfAXbZG0kBSc8r4zxgA=
 github.com/conduktor/ctl v0.4.0 h1:xyPWUCes79eAeP/GLwLQ351Oy4Mrkb3MADUZdszATpU=
 github.com/conduktor/ctl v0.4.0/go.mod h1:vqtutWjFaXu8Dg/oojsGIvNjcv4Ig8wkepLvpbzN+GY=
-github.com/conduktor/terraform-plugin-codegen-framework v0.0.0-20250213135010-1480ff9d60f2 h1:iolRAlDR/TrupuvGWIPxy5vRWInn8vgccHUxbQm3nwg=
-github.com/conduktor/terraform-plugin-codegen-framework v0.0.0-20250213135010-1480ff9d60f2/go.mod h1:1kTvWWgdbLsDf/N7VnRT5dIjdIqaZIHMfLrqucPpOQU=
+github.com/conduktor/terraform-plugin-codegen-framework v0.0.0-20250305143449-8d9a145a512a h1:tMunkm5PU1DFJSUiP12Z/Ns0W8+fsHKG5igIbtXDyfM=
+github.com/conduktor/terraform-plugin-codegen-framework v0.0.0-20250305143449-8d9a145a512a/go.mod h1:1kTvWWgdbLsDf/N7VnRT5dIjdIqaZIHMfLrqucPpOQU=
 github.com/conduktor/terraform-plugin-codegen-spec v0.0.0-20250213112457-5b5117af3e12 h1:qMI/AOw4aX8+MThf+hW9bCquklE64CV2xvKGddDWsTg=
 github.com/conduktor/terraform-plugin-codegen-spec v0.0.0-20250213112457-5b5117af3e12/go.mod h1:fywrEKpordQypmAjz/HIfm2LuNVmyJ6KDe8XT9GdJxQ=
 github.com/cyphar/filepath-securejoin v0.2.5 h1:6iR5tXJ/e6tJZzzdMc1km3Sa7RRIVBKAK32O2s7AYfo=
