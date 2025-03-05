@@ -638,22 +638,22 @@ func (v SpecValue) String() string {
 func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	var security basetypes.ObjectValue
+	var securityVal basetypes.ObjectValue
 
 	if v.Security.IsNull() {
-		security = types.ObjectNull(
+		securityVal = types.ObjectNull(
 			SecurityValue{}.AttributeTypes(ctx),
 		)
 	}
 
 	if v.Security.IsUnknown() {
-		security = types.ObjectUnknown(
+		securityVal = types.ObjectUnknown(
 			SecurityValue{}.AttributeTypes(ctx),
 		)
 	}
 
 	if !v.Security.IsNull() && !v.Security.IsUnknown() {
-		security = types.ObjectValueMust(
+		securityVal = types.ObjectValueMust(
 			SecurityValue{}.AttributeTypes(ctx),
 			v.Security.Attributes(),
 		)
@@ -711,7 +711,7 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 			"display_name":                 v.DisplayName,
 			"headers":                      headersVal,
 			"ignore_untrusted_certificate": v.IgnoreUntrustedCertificate,
-			"security":                     security,
+			"security":                     securityVal,
 			"urls":                         v.Urls,
 		})
 
@@ -1147,64 +1147,64 @@ func (v SecurityValue) String() string {
 func (v SecurityValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	var basicAuth basetypes.ObjectValue
+	var basicAuthVal basetypes.ObjectValue
 
 	if v.BasicAuth.IsNull() {
-		basicAuth = types.ObjectNull(
+		basicAuthVal = types.ObjectNull(
 			BasicAuthValue{}.AttributeTypes(ctx),
 		)
 	}
 
 	if v.BasicAuth.IsUnknown() {
-		basicAuth = types.ObjectUnknown(
+		basicAuthVal = types.ObjectUnknown(
 			BasicAuthValue{}.AttributeTypes(ctx),
 		)
 	}
 
 	if !v.BasicAuth.IsNull() && !v.BasicAuth.IsUnknown() {
-		basicAuth = types.ObjectValueMust(
+		basicAuthVal = types.ObjectValueMust(
 			BasicAuthValue{}.AttributeTypes(ctx),
 			v.BasicAuth.Attributes(),
 		)
 	}
 
-	var bearerToken basetypes.ObjectValue
+	var bearerTokenVal basetypes.ObjectValue
 
 	if v.BearerToken.IsNull() {
-		bearerToken = types.ObjectNull(
+		bearerTokenVal = types.ObjectNull(
 			BearerTokenValue{}.AttributeTypes(ctx),
 		)
 	}
 
 	if v.BearerToken.IsUnknown() {
-		bearerToken = types.ObjectUnknown(
+		bearerTokenVal = types.ObjectUnknown(
 			BearerTokenValue{}.AttributeTypes(ctx),
 		)
 	}
 
 	if !v.BearerToken.IsNull() && !v.BearerToken.IsUnknown() {
-		bearerToken = types.ObjectValueMust(
+		bearerTokenVal = types.ObjectValueMust(
 			BearerTokenValue{}.AttributeTypes(ctx),
 			v.BearerToken.Attributes(),
 		)
 	}
 
-	var sslAuth basetypes.ObjectValue
+	var sslAuthVal basetypes.ObjectValue
 
 	if v.SslAuth.IsNull() {
-		sslAuth = types.ObjectNull(
+		sslAuthVal = types.ObjectNull(
 			SslAuthValue{}.AttributeTypes(ctx),
 		)
 	}
 
 	if v.SslAuth.IsUnknown() {
-		sslAuth = types.ObjectUnknown(
+		sslAuthVal = types.ObjectUnknown(
 			SslAuthValue{}.AttributeTypes(ctx),
 		)
 	}
 
 	if !v.SslAuth.IsNull() && !v.SslAuth.IsUnknown() {
-		sslAuth = types.ObjectValueMust(
+		sslAuthVal = types.ObjectValueMust(
 			SslAuthValue{}.AttributeTypes(ctx),
 			v.SslAuth.Attributes(),
 		)
@@ -1233,9 +1233,9 @@ func (v SecurityValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue
 	objVal, diags := types.ObjectValue(
 		attributeTypes,
 		map[string]attr.Value{
-			"basic_auth":   basicAuth,
-			"bearer_token": bearerToken,
-			"ssl_auth":     sslAuth,
+			"basic_auth":   basicAuthVal,
+			"bearer_token": bearerTokenVal,
+			"ssl_auth":     sslAuthVal,
 		})
 
 	return objVal, diags

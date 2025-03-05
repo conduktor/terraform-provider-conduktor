@@ -1075,43 +1075,43 @@ func (v SpecValue) String() string {
 func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	var kafkaFlavor basetypes.ObjectValue
+	var kafkaFlavorVal basetypes.ObjectValue
 
 	if v.KafkaFlavor.IsNull() {
-		kafkaFlavor = types.ObjectNull(
+		kafkaFlavorVal = types.ObjectNull(
 			KafkaFlavorValue{}.AttributeTypes(ctx),
 		)
 	}
 
 	if v.KafkaFlavor.IsUnknown() {
-		kafkaFlavor = types.ObjectUnknown(
+		kafkaFlavorVal = types.ObjectUnknown(
 			KafkaFlavorValue{}.AttributeTypes(ctx),
 		)
 	}
 
 	if !v.KafkaFlavor.IsNull() && !v.KafkaFlavor.IsUnknown() {
-		kafkaFlavor = types.ObjectValueMust(
+		kafkaFlavorVal = types.ObjectValueMust(
 			KafkaFlavorValue{}.AttributeTypes(ctx),
 			v.KafkaFlavor.Attributes(),
 		)
 	}
 
-	var schemaRegistry basetypes.ObjectValue
+	var schemaRegistryVal basetypes.ObjectValue
 
 	if v.SchemaRegistry.IsNull() {
-		schemaRegistry = types.ObjectNull(
+		schemaRegistryVal = types.ObjectNull(
 			SchemaRegistryValue{}.AttributeTypes(ctx),
 		)
 	}
 
 	if v.SchemaRegistry.IsUnknown() {
-		schemaRegistry = types.ObjectUnknown(
+		schemaRegistryVal = types.ObjectUnknown(
 			SchemaRegistryValue{}.AttributeTypes(ctx),
 		)
 	}
 
 	if !v.SchemaRegistry.IsNull() && !v.SchemaRegistry.IsUnknown() {
-		schemaRegistry = types.ObjectValueMust(
+		schemaRegistryVal = types.ObjectValueMust(
 			SchemaRegistryValue{}.AttributeTypes(ctx),
 			v.SchemaRegistry.Attributes(),
 		)
@@ -1181,9 +1181,9 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 			"display_name":                 v.DisplayName,
 			"icon":                         v.Icon,
 			"ignore_untrusted_certificate": v.IgnoreUntrustedCertificate,
-			"kafka_flavor":                 kafkaFlavor,
+			"kafka_flavor":                 kafkaFlavorVal,
 			"properties":                   propertiesVal,
-			"schema_registry":              schemaRegistry,
+			"schema_registry":              schemaRegistryVal,
 		})
 
 	return objVal, diags
@@ -1635,64 +1635,64 @@ func (v KafkaFlavorValue) String() string {
 func (v KafkaFlavorValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	var aiven basetypes.ObjectValue
+	var aivenVal basetypes.ObjectValue
 
 	if v.Aiven.IsNull() {
-		aiven = types.ObjectNull(
+		aivenVal = types.ObjectNull(
 			AivenValue{}.AttributeTypes(ctx),
 		)
 	}
 
 	if v.Aiven.IsUnknown() {
-		aiven = types.ObjectUnknown(
+		aivenVal = types.ObjectUnknown(
 			AivenValue{}.AttributeTypes(ctx),
 		)
 	}
 
 	if !v.Aiven.IsNull() && !v.Aiven.IsUnknown() {
-		aiven = types.ObjectValueMust(
+		aivenVal = types.ObjectValueMust(
 			AivenValue{}.AttributeTypes(ctx),
 			v.Aiven.Attributes(),
 		)
 	}
 
-	var confluent basetypes.ObjectValue
+	var confluentVal basetypes.ObjectValue
 
 	if v.Confluent.IsNull() {
-		confluent = types.ObjectNull(
+		confluentVal = types.ObjectNull(
 			ConfluentValue{}.AttributeTypes(ctx),
 		)
 	}
 
 	if v.Confluent.IsUnknown() {
-		confluent = types.ObjectUnknown(
+		confluentVal = types.ObjectUnknown(
 			ConfluentValue{}.AttributeTypes(ctx),
 		)
 	}
 
 	if !v.Confluent.IsNull() && !v.Confluent.IsUnknown() {
-		confluent = types.ObjectValueMust(
+		confluentVal = types.ObjectValueMust(
 			ConfluentValue{}.AttributeTypes(ctx),
 			v.Confluent.Attributes(),
 		)
 	}
 
-	var gateway basetypes.ObjectValue
+	var gatewayVal basetypes.ObjectValue
 
 	if v.Gateway.IsNull() {
-		gateway = types.ObjectNull(
+		gatewayVal = types.ObjectNull(
 			GatewayValue{}.AttributeTypes(ctx),
 		)
 	}
 
 	if v.Gateway.IsUnknown() {
-		gateway = types.ObjectUnknown(
+		gatewayVal = types.ObjectUnknown(
 			GatewayValue{}.AttributeTypes(ctx),
 		)
 	}
 
 	if !v.Gateway.IsNull() && !v.Gateway.IsUnknown() {
-		gateway = types.ObjectValueMust(
+		gatewayVal = types.ObjectValueMust(
 			GatewayValue{}.AttributeTypes(ctx),
 			v.Gateway.Attributes(),
 		)
@@ -1721,9 +1721,9 @@ func (v KafkaFlavorValue) ToObjectValue(ctx context.Context) (basetypes.ObjectVa
 	objVal, diags := types.ObjectValue(
 		attributeTypes,
 		map[string]attr.Value{
-			"aiven":     aiven,
-			"confluent": confluent,
-			"gateway":   gateway,
+			"aiven":     aivenVal,
+			"confluent": confluentVal,
+			"gateway":   gatewayVal,
 		})
 
 	return objVal, diags
@@ -3567,43 +3567,43 @@ func (v SchemaRegistryValue) String() string {
 func (v SchemaRegistryValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	var confluentLike basetypes.ObjectValue
+	var confluentLikeVal basetypes.ObjectValue
 
 	if v.ConfluentLike.IsNull() {
-		confluentLike = types.ObjectNull(
+		confluentLikeVal = types.ObjectNull(
 			ConfluentLikeValue{}.AttributeTypes(ctx),
 		)
 	}
 
 	if v.ConfluentLike.IsUnknown() {
-		confluentLike = types.ObjectUnknown(
+		confluentLikeVal = types.ObjectUnknown(
 			ConfluentLikeValue{}.AttributeTypes(ctx),
 		)
 	}
 
 	if !v.ConfluentLike.IsNull() && !v.ConfluentLike.IsUnknown() {
-		confluentLike = types.ObjectValueMust(
+		confluentLikeVal = types.ObjectValueMust(
 			ConfluentLikeValue{}.AttributeTypes(ctx),
 			v.ConfluentLike.Attributes(),
 		)
 	}
 
-	var glue basetypes.ObjectValue
+	var glueVal basetypes.ObjectValue
 
 	if v.Glue.IsNull() {
-		glue = types.ObjectNull(
+		glueVal = types.ObjectNull(
 			GlueValue{}.AttributeTypes(ctx),
 		)
 	}
 
 	if v.Glue.IsUnknown() {
-		glue = types.ObjectUnknown(
+		glueVal = types.ObjectUnknown(
 			GlueValue{}.AttributeTypes(ctx),
 		)
 	}
 
 	if !v.Glue.IsNull() && !v.Glue.IsUnknown() {
-		glue = types.ObjectValueMust(
+		glueVal = types.ObjectValueMust(
 			GlueValue{}.AttributeTypes(ctx),
 			v.Glue.Attributes(),
 		)
@@ -3629,8 +3629,8 @@ func (v SchemaRegistryValue) ToObjectValue(ctx context.Context) (basetypes.Objec
 	objVal, diags := types.ObjectValue(
 		attributeTypes,
 		map[string]attr.Value{
-			"confluent_like": confluentLike,
-			"glue":           glue,
+			"confluent_like": confluentLikeVal,
+			"glue":           glueVal,
 		})
 
 	return objVal, diags
@@ -4094,22 +4094,22 @@ func (v ConfluentLikeValue) String() string {
 func (v ConfluentLikeValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	var security basetypes.ObjectValue
+	var securityVal basetypes.ObjectValue
 
 	if v.Security.IsNull() {
-		security = types.ObjectNull(
+		securityVal = types.ObjectNull(
 			ConfluentSecurityValue{}.AttributeTypes(ctx),
 		)
 	}
 
 	if v.Security.IsUnknown() {
-		security = types.ObjectUnknown(
+		securityVal = types.ObjectUnknown(
 			ConfluentSecurityValue{}.AttributeTypes(ctx),
 		)
 	}
 
 	if !v.Security.IsNull() && !v.Security.IsUnknown() {
-		security = types.ObjectValueMust(
+		securityVal = types.ObjectValueMust(
 			ConfluentSecurityValue{}.AttributeTypes(ctx),
 			v.Security.Attributes(),
 		)
@@ -4137,7 +4137,7 @@ func (v ConfluentLikeValue) ToObjectValue(ctx context.Context) (basetypes.Object
 		map[string]attr.Value{
 			"ignore_untrusted_certificate": v.IgnoreUntrustedCertificate,
 			"properties":                   v.Properties,
-			"security":                     security,
+			"security":                     securityVal,
 			"url":                          v.Url,
 		})
 
@@ -4566,64 +4566,64 @@ func (v ConfluentSecurityValue) String() string {
 func (v ConfluentSecurityValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	var basicAuth basetypes.ObjectValue
+	var basicAuthVal basetypes.ObjectValue
 
 	if v.BasicAuth.IsNull() {
-		basicAuth = types.ObjectNull(
+		basicAuthVal = types.ObjectNull(
 			BasicAuthValue{}.AttributeTypes(ctx),
 		)
 	}
 
 	if v.BasicAuth.IsUnknown() {
-		basicAuth = types.ObjectUnknown(
+		basicAuthVal = types.ObjectUnknown(
 			BasicAuthValue{}.AttributeTypes(ctx),
 		)
 	}
 
 	if !v.BasicAuth.IsNull() && !v.BasicAuth.IsUnknown() {
-		basicAuth = types.ObjectValueMust(
+		basicAuthVal = types.ObjectValueMust(
 			BasicAuthValue{}.AttributeTypes(ctx),
 			v.BasicAuth.Attributes(),
 		)
 	}
 
-	var bearerToken basetypes.ObjectValue
+	var bearerTokenVal basetypes.ObjectValue
 
 	if v.BearerToken.IsNull() {
-		bearerToken = types.ObjectNull(
+		bearerTokenVal = types.ObjectNull(
 			BearerTokenValue{}.AttributeTypes(ctx),
 		)
 	}
 
 	if v.BearerToken.IsUnknown() {
-		bearerToken = types.ObjectUnknown(
+		bearerTokenVal = types.ObjectUnknown(
 			BearerTokenValue{}.AttributeTypes(ctx),
 		)
 	}
 
 	if !v.BearerToken.IsNull() && !v.BearerToken.IsUnknown() {
-		bearerToken = types.ObjectValueMust(
+		bearerTokenVal = types.ObjectValueMust(
 			BearerTokenValue{}.AttributeTypes(ctx),
 			v.BearerToken.Attributes(),
 		)
 	}
 
-	var sslAuth basetypes.ObjectValue
+	var sslAuthVal basetypes.ObjectValue
 
 	if v.SslAuth.IsNull() {
-		sslAuth = types.ObjectNull(
+		sslAuthVal = types.ObjectNull(
 			SslAuthValue{}.AttributeTypes(ctx),
 		)
 	}
 
 	if v.SslAuth.IsUnknown() {
-		sslAuth = types.ObjectUnknown(
+		sslAuthVal = types.ObjectUnknown(
 			SslAuthValue{}.AttributeTypes(ctx),
 		)
 	}
 
 	if !v.SslAuth.IsNull() && !v.SslAuth.IsUnknown() {
-		sslAuth = types.ObjectValueMust(
+		sslAuthVal = types.ObjectValueMust(
 			SslAuthValue{}.AttributeTypes(ctx),
 			v.SslAuth.Attributes(),
 		)
@@ -4652,9 +4652,9 @@ func (v ConfluentSecurityValue) ToObjectValue(ctx context.Context) (basetypes.Ob
 	objVal, diags := types.ObjectValue(
 		attributeTypes,
 		map[string]attr.Value{
-			"basic_auth":   basicAuth,
-			"bearer_token": bearerToken,
-			"ssl_auth":     sslAuth,
+			"basic_auth":   basicAuthVal,
+			"bearer_token": bearerTokenVal,
+			"ssl_auth":     sslAuthVal,
 		})
 
 	return objVal, diags
@@ -6159,22 +6159,22 @@ func (v GlueValue) String() string {
 func (v GlueValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	var security basetypes.ObjectValue
+	var securityVal basetypes.ObjectValue
 
 	if v.Security.IsNull() {
-		security = types.ObjectNull(
+		securityVal = types.ObjectNull(
 			GlueSecurityValue{}.AttributeTypes(ctx),
 		)
 	}
 
 	if v.Security.IsUnknown() {
-		security = types.ObjectUnknown(
+		securityVal = types.ObjectUnknown(
 			GlueSecurityValue{}.AttributeTypes(ctx),
 		)
 	}
 
 	if !v.Security.IsNull() && !v.Security.IsUnknown() {
-		security = types.ObjectValueMust(
+		securityVal = types.ObjectValueMust(
 			GlueSecurityValue{}.AttributeTypes(ctx),
 			v.Security.Attributes(),
 		)
@@ -6201,7 +6201,7 @@ func (v GlueValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 		map[string]attr.Value{
 			"region":        v.Region,
 			"registry_name": v.RegistryName,
-			"security":      security,
+			"security":      securityVal,
 		})
 
 	return objVal, diags
@@ -6674,85 +6674,85 @@ func (v GlueSecurityValue) String() string {
 func (v GlueSecurityValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	var credentials basetypes.ObjectValue
+	var credentialsVal basetypes.ObjectValue
 
 	if v.Credentials.IsNull() {
-		credentials = types.ObjectNull(
+		credentialsVal = types.ObjectNull(
 			CredentialsValue{}.AttributeTypes(ctx),
 		)
 	}
 
 	if v.Credentials.IsUnknown() {
-		credentials = types.ObjectUnknown(
+		credentialsVal = types.ObjectUnknown(
 			CredentialsValue{}.AttributeTypes(ctx),
 		)
 	}
 
 	if !v.Credentials.IsNull() && !v.Credentials.IsUnknown() {
-		credentials = types.ObjectValueMust(
+		credentialsVal = types.ObjectValueMust(
 			CredentialsValue{}.AttributeTypes(ctx),
 			v.Credentials.Attributes(),
 		)
 	}
 
-	var fromContext basetypes.ObjectValue
+	var fromContextVal basetypes.ObjectValue
 
 	if v.FromContext.IsNull() {
-		fromContext = types.ObjectNull(
+		fromContextVal = types.ObjectNull(
 			FromContextValue{}.AttributeTypes(ctx),
 		)
 	}
 
 	if v.FromContext.IsUnknown() {
-		fromContext = types.ObjectUnknown(
+		fromContextVal = types.ObjectUnknown(
 			FromContextValue{}.AttributeTypes(ctx),
 		)
 	}
 
 	if !v.FromContext.IsNull() && !v.FromContext.IsUnknown() {
-		fromContext = types.ObjectValueMust(
+		fromContextVal = types.ObjectValueMust(
 			FromContextValue{}.AttributeTypes(ctx),
 			v.FromContext.Attributes(),
 		)
 	}
 
-	var fromRole basetypes.ObjectValue
+	var fromRoleVal basetypes.ObjectValue
 
 	if v.FromRole.IsNull() {
-		fromRole = types.ObjectNull(
+		fromRoleVal = types.ObjectNull(
 			FromRoleValue{}.AttributeTypes(ctx),
 		)
 	}
 
 	if v.FromRole.IsUnknown() {
-		fromRole = types.ObjectUnknown(
+		fromRoleVal = types.ObjectUnknown(
 			FromRoleValue{}.AttributeTypes(ctx),
 		)
 	}
 
 	if !v.FromRole.IsNull() && !v.FromRole.IsUnknown() {
-		fromRole = types.ObjectValueMust(
+		fromRoleVal = types.ObjectValueMust(
 			FromRoleValue{}.AttributeTypes(ctx),
 			v.FromRole.Attributes(),
 		)
 	}
 
-	var iamAnywhere basetypes.ObjectValue
+	var iamAnywhereVal basetypes.ObjectValue
 
 	if v.IamAnywhere.IsNull() {
-		iamAnywhere = types.ObjectNull(
+		iamAnywhereVal = types.ObjectNull(
 			IamAnywhereValue{}.AttributeTypes(ctx),
 		)
 	}
 
 	if v.IamAnywhere.IsUnknown() {
-		iamAnywhere = types.ObjectUnknown(
+		iamAnywhereVal = types.ObjectUnknown(
 			IamAnywhereValue{}.AttributeTypes(ctx),
 		)
 	}
 
 	if !v.IamAnywhere.IsNull() && !v.IamAnywhere.IsUnknown() {
-		iamAnywhere = types.ObjectValueMust(
+		iamAnywhereVal = types.ObjectValueMust(
 			IamAnywhereValue{}.AttributeTypes(ctx),
 			v.IamAnywhere.Attributes(),
 		)
@@ -6784,10 +6784,10 @@ func (v GlueSecurityValue) ToObjectValue(ctx context.Context) (basetypes.ObjectV
 	objVal, diags := types.ObjectValue(
 		attributeTypes,
 		map[string]attr.Value{
-			"credentials":  credentials,
-			"from_context": fromContext,
-			"from_role":    fromRole,
-			"iam_anywhere": iamAnywhere,
+			"credentials":  credentialsVal,
+			"from_context": fromContextVal,
+			"from_role":    fromRoleVal,
+			"iam_anywhere": iamAnywhereVal,
 		})
 
 	return objVal, diags
