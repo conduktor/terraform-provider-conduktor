@@ -23,6 +23,7 @@ type Constraint struct {
 	Match  *Match
 	NoneOf *NoneOf
 	OneOf  *OneOf
+	Range  *Range
 }
 
 func (dst *Constraint) UnmarshalJSON(data []byte) error {
@@ -54,6 +55,13 @@ func (dst *Constraint) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		dst.OneOf = &oneOf
+	case "Range":
+		var rangeVal Range
+		err = json.Unmarshal(data, &rangeVal)
+		if err != nil {
+			return err
+		}
+		dst.Range = &rangeVal
 	default:
 		return fmt.Errorf("unknown constraint type %s", disc.Constraint)
 	}
@@ -67,24 +75,32 @@ func (src *Constraint) MarshalJSON() ([]byte, error) {
 		return json.Marshal(src.NoneOf)
 	} else if src.OneOf != nil {
 		return json.Marshal(src.OneOf)
+	} else if src.Range != nil {
+		return json.Marshal(src.Range)
 	} else {
 		return nil, fmt.Errorf("unknown constraint type")
 	}
 }
 
 type Match struct {
-	Optional bool   `json:"optional"`
+	Optional bool   `json:"optional,omitempty"`
 	Pattern  string `json:"pattern"`
 }
 
 type NoneOf struct {
-	Optional bool     `json:"optional"`
+	Optional bool     `json:"optional,omitempty"`
 	Values   []string `json:"values"`
 }
 
 type OneOf struct {
-	Optional bool     `json:"optional"`
+	Optional bool     `json:"optional,omitempty"`
 	Values   []string `json:"values"`
+}
+
+type Range struct {
+	Optional bool  `json:"optional,omitempty"`
+	Min      int64 `json:"min"`
+	Max      int64 `json:"max"`
 }
 
 type TopicPolicySpec struct {
