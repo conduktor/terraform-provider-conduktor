@@ -38,13 +38,13 @@ func InternalModelToTerraform(ctx context.Context, r *console.TopicPolicyResourc
 }
 
 // Parse a Resources Array into a Set.
-func policiesMapToPoliciesValue(ctx context.Context, m map[string]console.Constraint) (basetypes.MapValue, error) {
-	var tfPolicies map[string]attr.Value
+func policiesMapToPoliciesValue(ctx context.Context, m map[string]*console.Constraint) (basetypes.MapValue, error) {
+	var tfPolicies = make(map[string]attr.Value)
 	var diag diag.Diagnostics
 
 	for k, v := range m {
 
-		permObj, err := constraintInternalModelToTerraform(ctx, &v)
+		permObj, err := constraintInternalModelToTerraform(ctx, v)
 		if err != nil {
 			return basetypes.MapValue{}, err
 		}
@@ -119,7 +119,7 @@ func constraintInternalModelToTerraform(ctx context.Context, r *console.Constrai
 	if r.Range != nil {
 		var rangeTypesMap = topicPolicy.NewRangeValueNull().AttributeTypes(ctx)
 		var rangeValuesMap = schema.ValueMapFromTypes(ctx, rangeTypesMap)
-		rangeValuesMap["optional"] = basetypes.NewBoolValue(r.OneOf.Optional)
+		rangeValuesMap["optional"] = basetypes.NewBoolValue(r.Range.Optional)
 		rangeValuesMap["min"] = schema.NewInt64Value(r.Range.Min)
 		rangeValuesMap["max"] = schema.NewInt64Value(r.Range.Max)
 

@@ -40,6 +40,13 @@ func TestTopicPolicyV1ModelMapping(t *testing.T) {
 	assert.Equal(t, "TopicPolicy", internal.Kind)
 	assert.Equal(t, "v1", internal.ApiVersion)
 	assert.Equal(t, "topicPolicy", internal.Metadata.Name)
+	assert.Equal(t, "OneOf", internal.Spec.Policies["metadata.labels.data-criticality"].OneOf.Constraint)
+	assert.Equal(t, []string{"C0", "C1", "C2"}, internal.Spec.Policies["metadata.labels.data-criticality"].OneOf.Values)
+	assert.Equal(t, "Range", internal.Spec.Policies["spec.configs.retention.ms"].Range.Constraint)
+	assert.Equal(t, int64(60000), internal.Spec.Policies["spec.configs.retention.ms"].Range.Min)
+	assert.Equal(t, int64(3600000), internal.Spec.Policies["spec.configs.retention.ms"].Range.Max)
+	assert.Equal(t, "Match", internal.Spec.Policies["metadata.name"].Match.Constraint)
+	assert.Equal(t, "^click\\.(?<event>[a-z0-9-]+)\\.(avro|json)$", internal.Spec.Policies["metadata.name"].Match.Pattern)
 
 	// convert to terraform model
 	tfModel, err := InternalModelToTerraform(ctx, &internal)
@@ -48,8 +55,7 @@ func TestTopicPolicyV1ModelMapping(t *testing.T) {
 		return
 	}
 	assert.Equal(t, types.StringValue("topicPolicy"), tfModel.Name)
-	// TODO
-	assert.Equal(t, true, tfModel.Spec.Policies.IsNull())
+	assert.Equal(t, false, tfModel.Spec.Policies.IsNull())
 	assert.Equal(t, false, tfModel.Spec.Policies.IsUnknown())
 
 	// convert back to internal model
@@ -62,6 +68,13 @@ func TestTopicPolicyV1ModelMapping(t *testing.T) {
 	assert.Equal(t, "v1", internal2.ApiVersion)
 	assert.Equal(t, "topicPolicy", internal2.Metadata.Name)
 	assert.Equal(t, internal, internal2)
+	assert.Equal(t, "OneOf", internal2.Spec.Policies["metadata.labels.data-criticality"].OneOf.Constraint)
+	assert.Equal(t, []string{"C0", "C1", "C2"}, internal2.Spec.Policies["metadata.labels.data-criticality"].OneOf.Values)
+	assert.Equal(t, "Range", internal2.Spec.Policies["spec.configs.retention.ms"].Range.Constraint)
+	assert.Equal(t, int64(60000), internal2.Spec.Policies["spec.configs.retention.ms"].Range.Min)
+	assert.Equal(t, int64(3600000), internal2.Spec.Policies["spec.configs.retention.ms"].Range.Max)
+	assert.Equal(t, "Match", internal2.Spec.Policies["metadata.name"].Match.Constraint)
+	assert.Equal(t, "^click\\.(?<event>[a-z0-9-]+)\\.(avro|json)$", internal2.Spec.Policies["metadata.name"].Match.Pattern)
 
 	// convert back to ctl model
 	ctlResource2, err := internal2.ToClientResource()

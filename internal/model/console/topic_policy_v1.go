@@ -83,28 +83,32 @@ func (src *Constraint) MarshalJSON() ([]byte, error) {
 }
 
 type Match struct {
-	Optional bool   `json:"optional,omitempty"`
-	Pattern  string `json:"pattern"`
+	Constraint string `json:"constraint"`
+	Optional   bool   `json:"optional,omitempty"`
+	Pattern    string `json:"pattern"`
 }
 
 type NoneOf struct {
-	Optional bool     `json:"optional,omitempty"`
-	Values   []string `json:"values"`
+	Constraint string   `json:"constraint"`
+	Optional   bool     `json:"optional,omitempty"`
+	Values     []string `json:"values"`
 }
 
 type OneOf struct {
-	Optional bool     `json:"optional,omitempty"`
-	Values   []string `json:"values"`
+	Constraint string   `json:"constraint"`
+	Optional   bool     `json:"optional,omitempty"`
+	Values     []string `json:"values"`
 }
 
 type Range struct {
-	Optional bool  `json:"optional,omitempty"`
-	Min      int64 `json:"min"`
-	Max      int64 `json:"max"`
+	Constraint string `json:"constraint"`
+	Optional   bool   `json:"optional,omitempty"`
+	Min        int64  `json:"min"`
+	Max        int64  `json:"max"`
 }
 
 type TopicPolicySpec struct {
-	Policies map[string]Constraint `json:"policies"`
+	Policies map[string]*Constraint `json:"policies"`
 }
 
 type TopicPolicyResource struct {

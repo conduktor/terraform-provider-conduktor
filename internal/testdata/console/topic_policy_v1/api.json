@@ -5,6 +5,24 @@
     "name": "topicPolicy"
   },
   "spec": {
-    "policies": null
+    "policies": {
+      "metadata.labels.data-criticality": {
+        "constraint": "OneOf",
+        "values": [
+          "C0",
+          "C1",
+          "C2"
+        ]
+      },
+      "spec.configs.retention.ms": {
+        "constraint": "Range",
+        "max": 3600000,
+        "min": 60000
+      },
+      "metadata.name": {
+        "constraint": "Match",
+        "pattern": "^click\\.(?<event>[a-z0-9-]+)\\.(avro|json)$"
+      }
+    }
   }
 }
