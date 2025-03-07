@@ -17,7 +17,7 @@ func TestAccUserV2Resource(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read testing
 			{
-				Config: providerConfigConsole + test.TestAccTestdata(t, "console_user_v2_resource_create.tf"),
+				Config: providerConfigConsole + test.TestAccTestdata(t, "console/user_v2/resource_create.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceRef, "name", "pam.beesly@dunder.mifflin.com"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.firstname", "Pam"),
@@ -40,7 +40,7 @@ func TestAccUserV2Resource(t *testing.T) {
 			},
 			// Update and Read testing
 			{
-				Config: providerConfigConsole + test.TestAccTestdata(t, "console_user_v2_resource_update.tf"),
+				Config: providerConfigConsole + test.TestAccTestdata(t, "console/user_v2/resource_update.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceRef, "name", "pam.beesly@dunder.mifflin.com"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.firstname", "Pam"),
@@ -67,7 +67,7 @@ func TestAccUserV2Minimal(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read from minimal example
 			{
-				Config: providerConfigConsole + test.TestAccTestdata(t, "console_user_v2_resource_minimal.tf"),
+				Config: providerConfigConsole + test.TestAccTestdata(t, "console/user_v2/resource_minimal.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("conduktor_console_user_v2.minimal", "name", "angela.martin@dunder-mifflin.com"),
 					resource.TestCheckResourceAttr("conduktor_console_user_v2.minimal", "spec.permissions.#", "0"),
