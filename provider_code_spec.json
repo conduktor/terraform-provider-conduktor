@@ -1416,7 +1416,7 @@
                                 "name": "optional",
                                 "bool": {
                                   "description": "If set to true, the policy is optional",
-                                  "computed_optional_required": "optional"
+                                  "computed_optional_required": "computed_optional"
                                 }
                               },
                               {
@@ -1438,7 +1438,7 @@
                                 "name": "optional",
                                 "bool": {
                                   "description": "If set to true, the policy is optional",
-                                  "computed_optional_required": "optional"
+                                  "computed_optional_required": "computed_optional"
                                 }
                               },
                               {
@@ -1463,7 +1463,7 @@
                                 "name": "optional",
                                 "bool": {
                                   "description": "If set to true, the policy is optional",
-                                  "computed_optional_required": "optional"
+                                  "computed_optional_required": "computed_optional"
                                 }
                               },
                               {
@@ -1488,7 +1488,7 @@
                                 "name": "optional",
                                 "bool": {
                                   "description": "If set to true, the policy is optional",
-                                  "computed_optional_required": "optional"
+                                  "computed_optional_required": "computed_optional"
                                 }
                               },
                               {

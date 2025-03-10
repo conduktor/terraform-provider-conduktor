@@ -2,7 +2,6 @@ package console_topic_policy_v1
 
 import (
 	"context"
-	"fmt"
 
 	mapper "github.com/conduktor/terraform-provider-conduktor/internal/mapper"
 	console "github.com/conduktor/terraform-provider-conduktor/internal/model/console"
@@ -50,19 +49,21 @@ func mapValueToPoliciesMap(ctx context.Context, m basetypes.MapValue) (map[strin
 }
 
 func policiesValueToConstraint(ctx context.Context, key string, policy topicPolicy.PoliciesValue) (*console.Constraint, error) {
+	var Match *console.Match = nil
 	if schema.AttrIsSet(policy.Match) {
 		matchValue, diag := topicPolicy.NewMatchValue(policy.Match.AttributeTypes(ctx), policy.Match.Attributes())
 		if diag.HasError() {
 			return nil, mapper.WrapDiagError(diag, "policies."+key, mapper.FromTerraform)
 		}
-		Match := &console.Match{
+		Match = &console.Match{
 			Constraint: "Match",
 			Optional:   matchValue.Optional.ValueBool(),
 			Pattern:    matchValue.Pattern.ValueString(),
 		}
-		return &console.Constraint{Match: Match}, nil
+		// return &console.Constraint{Match: Match}, nil
 	}
 
+	var NoneOf *console.NoneOf = nil
 	if schema.AttrIsSet(policy.NoneOf) {
 		noneOfValue, diag := topicPolicy.NewNoneOfValue(policy.NoneOf.AttributeTypes(ctx), policy.NoneOf.Attributes())
 		if diag.HasError() {
@@ -72,14 +73,15 @@ func policiesValueToConstraint(ctx context.Context, key string, policy topicPoli
 		if diag.HasError() {
 			return nil, mapper.WrapDiagError(diag, "policies."+key+".values", mapper.FromTerraform)
 		}
-		NoneOf := &console.NoneOf{
+		NoneOf = &console.NoneOf{
 			Constraint: "NoneOf",
 			Optional:   noneOfValue.Optional.ValueBool(),
 			Values:     values,
 		}
-		return &console.Constraint{NoneOf: NoneOf}, nil
+		// return &console.Constraint{NoneOf: NoneOf}, nil
 	}
 
+	var OneOf *console.OneOf = nil
 	if schema.AttrIsSet(policy.OneOf) {
 		oneOfValue, diag := topicPolicy.NewNoneOfValue(policy.OneOf.AttributeTypes(ctx), policy.OneOf.Attributes())
 		if diag.HasError() {
@@ -89,28 +91,33 @@ func policiesValueToConstraint(ctx context.Context, key string, policy topicPoli
 		if diag.HasError() {
 			return nil, mapper.WrapDiagError(diag, "policies."+key+".values", mapper.FromTerraform)
 		}
-		OneOf := &console.OneOf{
+		OneOf = &console.OneOf{
 			Constraint: "OneOf",
 			Optional:   oneOfValue.Optional.ValueBool(),
 			Values:     values,
 		}
-		return &console.Constraint{OneOf: OneOf}, nil
+		// return &console.Constraint{OneOf: OneOf}, nil
 	}
 
+	var Range *console.Range = nil
 	if schema.AttrIsSet(policy.Range) {
 		rangeValue, diag := topicPolicy.NewRangeValue(policy.Range.AttributeTypes(ctx), policy.Range.Attributes())
 		if diag.HasError() {
 			return nil, mapper.WrapDiagError(diag, "policies."+key, mapper.FromTerraform)
 		}
-		Range := &console.Range{
+		Range = &console.Range{
 			Constraint: "Range",
 			Optional:   rangeValue.Optional.ValueBool(),
 			Min:        rangeValue.Min.ValueInt64(),
 			Max:        rangeValue.Max.ValueInt64(),
 		}
-		return &console.Constraint{Range: Range}, nil
+		// return &console.Constraint{Range: Range}, nil
 	}
 
-	// Should never get here.
-	return nil, fmt.Errorf("Unknown constraint type")
+	return &console.Constraint{
+		Match:  Match,
+		NoneOf: NoneOf,
+		OneOf:  OneOf,
+		Range:  Range,
+	}, nil
 }

@@ -55,6 +55,8 @@ func TestTopicPolicyV1ModelMapping(t *testing.T) {
 		return
 	}
 	assert.Equal(t, types.StringValue("topicPolicy"), tfModel.Name)
+	assert.Equal(t, false, tfModel.Spec.IsNull())
+	assert.Equal(t, false, tfModel.Spec.IsUnknown())
 	assert.Equal(t, false, tfModel.Spec.Policies.IsNull())
 	assert.Equal(t, false, tfModel.Spec.Policies.IsUnknown())
 

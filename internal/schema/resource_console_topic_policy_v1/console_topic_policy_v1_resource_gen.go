@@ -43,6 +43,7 @@ func ConsoleTopicPolicyV1ResourceSchema(ctx context.Context) schema.Schema {
 									Attributes: map[string]schema.Attribute{
 										"optional": schema.BoolAttribute{
 											Optional:            true,
+											Computed:            true,
 											Description:         "If set to true, the policy is optional",
 											MarkdownDescription: "If set to true, the policy is optional",
 										},
@@ -63,6 +64,7 @@ func ConsoleTopicPolicyV1ResourceSchema(ctx context.Context) schema.Schema {
 									Attributes: map[string]schema.Attribute{
 										"optional": schema.BoolAttribute{
 											Optional:            true,
+											Computed:            true,
 											Description:         "If set to true, the policy is optional",
 											MarkdownDescription: "If set to true, the policy is optional",
 										},
@@ -84,6 +86,7 @@ func ConsoleTopicPolicyV1ResourceSchema(ctx context.Context) schema.Schema {
 									Attributes: map[string]schema.Attribute{
 										"optional": schema.BoolAttribute{
 											Optional:            true,
+											Computed:            true,
 											Description:         "If set to true, the policy is optional",
 											MarkdownDescription: "If set to true, the policy is optional",
 										},
@@ -111,6 +114,7 @@ func ConsoleTopicPolicyV1ResourceSchema(ctx context.Context) schema.Schema {
 										},
 										"optional": schema.BoolAttribute{
 											Optional:            true,
+											Computed:            true,
 											Description:         "If set to true, the policy is optional",
 											MarkdownDescription: "If set to true, the policy is optional",
 										},
