@@ -17,7 +17,7 @@ func TestAccGroupV2Resource(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read testing
 			{
-				Config: providerConfigConsole + test.TestAccTestdata(t, "console_group_v2_resource_create.tf"),
+				Config: providerConfigConsole + test.TestAccTestdata(t, "console/group_v2/resource_create.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceRef, "name", "sales"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.display_name", "Sales Department"),
@@ -41,7 +41,7 @@ func TestAccGroupV2Resource(t *testing.T) {
 			},
 			// Update and Read testing
 			{
-				Config: providerConfigConsole + test.TestAccTestdata(t, "console_group_v2_resource_update.tf"),
+				Config: providerConfigConsole + test.TestAccTestdata(t, "console/group_v2/resource_update.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceRef, "name", "sales"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.display_name", "New Sales Department"),
@@ -75,7 +75,7 @@ func TestAccGroupV2Minimal(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read from minimal example
 			{
-				Config: providerConfigConsole + test.TestAccTestdata(t, "console_group_v2_resource_minimal.tf"),
+				Config: providerConfigConsole + test.TestAccTestdata(t, "console/group_v2/resource_minimal.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("conduktor_console_group_v2.minimal", "name", "minimal"),
 					resource.TestCheckResourceAttr("conduktor_console_group_v2.minimal", "spec.display_name", "Minimal"),

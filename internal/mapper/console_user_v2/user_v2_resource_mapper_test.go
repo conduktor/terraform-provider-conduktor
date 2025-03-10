@@ -18,7 +18,7 @@ func TestUserV2ModelMapping(t *testing.T) {
 
 	ctx := context.Background()
 
-	jsonUserV2Resource := []byte(test.TestAccTestdata(t, "console_user_v2_api.json"))
+	jsonUserV2Resource := []byte(test.TestAccTestdata(t, "console/user_v2/api.json"))
 
 	ctlResource := ctlresource.Resource{}
 	err := ctlResource.UnmarshalJSON(jsonUserV2Resource)

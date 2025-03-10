@@ -18,7 +18,7 @@ func TestGroupV2ModelMapping(t *testing.T) {
 
 	ctx := context.Background()
 
-	jsonGroupV2Resource := []byte(test.TestAccTestdata(t, "console_group_v2_api.json"))
+	jsonGroupV2Resource := []byte(test.TestAccTestdata(t, "console/group_v2/api.json"))
 
 	ctlResource := ctlresource.Resource{}
 	err := ctlResource.UnmarshalJSON(jsonGroupV2Resource)

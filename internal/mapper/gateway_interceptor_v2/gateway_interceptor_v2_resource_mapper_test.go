@@ -2,6 +2,8 @@ package gateway_interceptor_v2
 
 import (
 	"context"
+	"testing"
+
 	ctlresource "github.com/conduktor/ctl/resource"
 	"github.com/conduktor/terraform-provider-conduktor/internal/model/gateway"
 	"github.com/conduktor/terraform-provider-conduktor/internal/test"
@@ -9,14 +11,13 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestGatewayInterceptorV2ModelMapping(t *testing.T) {
 
 	ctx := context.Background()
 
-	jsonInterceptorV2Resource := []byte(test.TestAccTestdata(t, "gateway_interceptor_v2/api.json"))
+	jsonInterceptorV2Resource := []byte(test.TestAccTestdata(t, "gateway/interceptor_v2/api.json"))
 
 	ctlResource := ctlresource.Resource{}
 	err := ctlResource.UnmarshalJSON(jsonInterceptorV2Resource)

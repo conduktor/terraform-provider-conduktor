@@ -17,7 +17,7 @@ func TestGatewayServiceAccountV2ModelMapping(t *testing.T) {
 
 	ctx := context.Background()
 
-	jsonServiceAccountV2Resource := []byte(test.TestAccTestdata(t, "gateway_service_account_v2_api.json"))
+	jsonServiceAccountV2Resource := []byte(test.TestAccTestdata(t, "gateway/service_account_v2/api.json"))
 
 	ctlResource := ctlresource.Resource{}
 	err := ctlResource.UnmarshalJSON(jsonServiceAccountV2Resource)
