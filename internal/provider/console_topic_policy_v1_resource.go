@@ -17,6 +17,7 @@ import (
 )
 
 const topicPolicyV1ApiPath = "/public/self-serve/v1/topic-policy"
+const topicPolicyMininumVersion = "v1.30.0"
 
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &TopicPolicyV1Resource{}

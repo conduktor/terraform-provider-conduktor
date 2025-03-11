@@ -4,6 +4,7 @@ import (
 	"regexp"
 	"testing"
 
+	"github.com/conduktor/terraform-provider-conduktor/internal/client"
 	"github.com/conduktor/terraform-provider-conduktor/internal/test"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -84,6 +85,12 @@ func TestAccTopicPolicyV1Constraints(t *testing.T) {
 }
 
 func TestAccTopicPolicyV1ExampleResource(t *testing.T) {
+	v, err := fetchClientVersion(client.CONSOLE)
+	if err != nil {
+		t.Fatalf("Error fetching current version: %s", err)
+	}
+
+	test.CheckMinimumVersionRequirement(t, v, topicPolicyMininumVersion)
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { test.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
