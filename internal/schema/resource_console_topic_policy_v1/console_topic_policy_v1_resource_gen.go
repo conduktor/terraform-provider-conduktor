@@ -39,6 +39,28 @@ func ConsoleTopicPolicyV1ResourceSchema(ctx context.Context) schema.Schema {
 					"policies": schema.MapNestedAttribute{
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
+								"allowed_keys": schema.SingleNestedAttribute{
+									Attributes: map[string]schema.Attribute{
+										"keys": schema.SetAttribute{
+											ElementType: types.StringType,
+											Required:    true,
+										},
+										"optional": schema.BoolAttribute{
+											Optional:            true,
+											Computed:            true,
+											Description:         "If set to true, the policy is optional",
+											MarkdownDescription: "If set to true, the policy is optional",
+										},
+									},
+									CustomType: AllowedKeysType{
+										ObjectType: types.ObjectType{
+											AttrTypes: AllowedKeysValue{}.AttributeTypes(ctx),
+										},
+									},
+									Optional:            true,
+									Description:         "Validates the keys are within an allowed key list",
+									MarkdownDescription: "Validates the keys are within an allowed key list",
+								},
 								"match": schema.SingleNestedAttribute{
 									Attributes: map[string]schema.Attribute{
 										"optional": schema.BoolAttribute{
@@ -542,6 +564,24 @@ func (t PoliciesType) ValueFromObject(ctx context.Context, in basetypes.ObjectVa
 
 	attributes := in.Attributes()
 
+	allowedKeysAttribute, ok := attributes["allowed_keys"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`allowed_keys is missing from object`)
+
+		return nil, diags
+	}
+
+	allowedKeysVal, ok := allowedKeysAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`allowed_keys expected to be basetypes.ObjectValue, was: %T`, allowedKeysAttribute))
+	}
+
 	matchAttribute, ok := attributes["match"]
 
 	if !ok {
@@ -619,11 +659,12 @@ func (t PoliciesType) ValueFromObject(ctx context.Context, in basetypes.ObjectVa
 	}
 
 	return PoliciesValue{
-		Match:  matchVal,
-		NoneOf: noneOfVal,
-		OneOf:  oneOfVal,
-		Range:  rangeVal,
-		state:  attr.ValueStateKnown,
+		AllowedKeys: allowedKeysVal,
+		Match:       matchVal,
+		NoneOf:      noneOfVal,
+		OneOf:       oneOfVal,
+		Range:       rangeVal,
+		state:       attr.ValueStateKnown,
 	}, diags
 }
 
@@ -690,6 +731,24 @@ func NewPoliciesValue(attributeTypes map[string]attr.Type, attributes map[string
 		return NewPoliciesValueUnknown(), diags
 	}
 
+	allowedKeysAttribute, ok := attributes["allowed_keys"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`allowed_keys is missing from object`)
+
+		return NewPoliciesValueUnknown(), diags
+	}
+
+	allowedKeysVal, ok := allowedKeysAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`allowed_keys expected to be basetypes.ObjectValue, was: %T`, allowedKeysAttribute))
+	}
+
 	matchAttribute, ok := attributes["match"]
 
 	if !ok {
@@ -767,11 +826,12 @@ func NewPoliciesValue(attributeTypes map[string]attr.Type, attributes map[string
 	}
 
 	return PoliciesValue{
-		Match:  matchVal,
-		NoneOf: noneOfVal,
-		OneOf:  oneOfVal,
-		Range:  rangeVal,
-		state:  attr.ValueStateKnown,
+		AllowedKeys: allowedKeysVal,
+		Match:       matchVal,
+		NoneOf:      noneOfVal,
+		OneOf:       oneOfVal,
+		Range:       rangeVal,
+		state:       attr.ValueStateKnown,
 	}, diags
 }
 
@@ -843,19 +903,23 @@ func (t PoliciesType) ValueType(ctx context.Context) attr.Value {
 var _ basetypes.ObjectValuable = PoliciesValue{}
 
 type PoliciesValue struct {
-	Match  basetypes.ObjectValue `tfsdk:"match"`
-	NoneOf basetypes.ObjectValue `tfsdk:"none_of"`
-	OneOf  basetypes.ObjectValue `tfsdk:"one_of"`
-	Range  basetypes.ObjectValue `tfsdk:"range"`
-	state  attr.ValueState
+	AllowedKeys basetypes.ObjectValue `tfsdk:"allowed_keys"`
+	Match       basetypes.ObjectValue `tfsdk:"match"`
+	NoneOf      basetypes.ObjectValue `tfsdk:"none_of"`
+	OneOf       basetypes.ObjectValue `tfsdk:"one_of"`
+	Range       basetypes.ObjectValue `tfsdk:"range"`
+	state       attr.ValueState
 }
 
 func (v PoliciesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
-	attrTypes := make(map[string]tftypes.Type, 4)
+	attrTypes := make(map[string]tftypes.Type, 5)
 
 	var val tftypes.Value
 	var err error
 
+	attrTypes["allowed_keys"] = basetypes.ObjectType{
+		AttrTypes: AllowedKeysValue{}.AttributeTypes(ctx),
+	}.TerraformType(ctx)
 	attrTypes["match"] = basetypes.ObjectType{
 		AttrTypes: MatchValue{}.AttributeTypes(ctx),
 	}.TerraformType(ctx)
@@ -873,7 +937,15 @@ func (v PoliciesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, err
 
 	switch v.state {
 	case attr.ValueStateKnown:
-		vals := make(map[string]tftypes.Value, 4)
+		vals := make(map[string]tftypes.Value, 5)
+
+		val, err = v.AllowedKeys.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["allowed_keys"] = val
 
 		val, err = v.Match.ToTerraformValue(ctx)
 
@@ -935,6 +1007,27 @@ func (v PoliciesValue) String() string {
 
 func (v PoliciesValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
+
+	var allowedKeysVal basetypes.ObjectValue
+
+	if v.AllowedKeys.IsNull() {
+		allowedKeysVal = types.ObjectNull(
+			AllowedKeysValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if v.AllowedKeys.IsUnknown() {
+		allowedKeysVal = types.ObjectUnknown(
+			AllowedKeysValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if !v.AllowedKeys.IsNull() && !v.AllowedKeys.IsUnknown() {
+		allowedKeysVal = types.ObjectValueMust(
+			AllowedKeysValue{}.AttributeTypes(ctx),
+			v.AllowedKeys.Attributes(),
+		)
+	}
 
 	var matchVal basetypes.ObjectValue
 
@@ -1021,6 +1114,9 @@ func (v PoliciesValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue
 	}
 
 	attributeTypes := map[string]attr.Type{
+		"allowed_keys": basetypes.ObjectType{
+			AttrTypes: AllowedKeysValue{}.AttributeTypes(ctx),
+		},
 		"match": basetypes.ObjectType{
 			AttrTypes: MatchValue{}.AttributeTypes(ctx),
 		},
@@ -1046,10 +1142,11 @@ func (v PoliciesValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue
 	objVal, diags := types.ObjectValue(
 		attributeTypes,
 		map[string]attr.Value{
-			"match":   matchVal,
-			"none_of": noneOfVal,
-			"one_of":  oneOfVal,
-			"range":   rangeVal,
+			"allowed_keys": allowedKeysVal,
+			"match":        matchVal,
+			"none_of":      noneOfVal,
+			"one_of":       oneOfVal,
+			"range":        rangeVal,
 		})
 
 	return objVal, diags
@@ -1068,6 +1165,10 @@ func (v PoliciesValue) Equal(o attr.Value) bool {
 
 	if v.state != attr.ValueStateKnown {
 		return true
+	}
+
+	if !v.AllowedKeys.Equal(other.AllowedKeys) {
+		return false
 	}
 
 	if !v.Match.Equal(other.Match) {
@@ -1099,6 +1200,9 @@ func (v PoliciesValue) Type(ctx context.Context) attr.Type {
 
 func (v PoliciesValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 	return map[string]attr.Type{
+		"allowed_keys": basetypes.ObjectType{
+			AttrTypes: AllowedKeysValue{}.AttributeTypes(ctx),
+		},
 		"match": basetypes.ObjectType{
 			AttrTypes: MatchValue{}.AttributeTypes(ctx),
 		},
@@ -1111,6 +1215,412 @@ func (v PoliciesValue) AttributeTypes(ctx context.Context) map[string]attr.Type 
 		"range": basetypes.ObjectType{
 			AttrTypes: RangeValue{}.AttributeTypes(ctx),
 		},
+	}
+}
+
+var _ basetypes.ObjectTypable = AllowedKeysType{}
+
+type AllowedKeysType struct {
+	basetypes.ObjectType
+}
+
+func (t AllowedKeysType) Equal(o attr.Type) bool {
+	other, ok := o.(AllowedKeysType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t AllowedKeysType) String() string {
+	return "AllowedKeysType"
+}
+
+func (t AllowedKeysType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	keysAttribute, ok := attributes["keys"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`keys is missing from object`)
+
+		return nil, diags
+	}
+
+	keysVal, ok := keysAttribute.(basetypes.SetValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`keys expected to be basetypes.SetValue, was: %T`, keysAttribute))
+	}
+
+	optionalAttribute, ok := attributes["optional"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`optional is missing from object`)
+
+		return nil, diags
+	}
+
+	optionalVal, ok := optionalAttribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`optional expected to be basetypes.BoolValue, was: %T`, optionalAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return AllowedKeysValue{
+		Keys:     keysVal,
+		Optional: optionalVal,
+		state:    attr.ValueStateKnown,
+	}, diags
+}
+
+func NewAllowedKeysValueNull() AllowedKeysValue {
+	return AllowedKeysValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewAllowedKeysValueUnknown() AllowedKeysValue {
+	return AllowedKeysValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewAllowedKeysValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (AllowedKeysValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing AllowedKeysValue Attribute Value",
+				"While creating a AllowedKeysValue value, a missing attribute value was detected. "+
+					"A AllowedKeysValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("AllowedKeysValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid AllowedKeysValue Attribute Type",
+				"While creating a AllowedKeysValue value, an invalid attribute value was detected. "+
+					"A AllowedKeysValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("AllowedKeysValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("AllowedKeysValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra AllowedKeysValue Attribute Value",
+				"While creating a AllowedKeysValue value, an extra attribute value was detected. "+
+					"A AllowedKeysValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra AllowedKeysValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewAllowedKeysValueUnknown(), diags
+	}
+
+	keysAttribute, ok := attributes["keys"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`keys is missing from object`)
+
+		return NewAllowedKeysValueUnknown(), diags
+	}
+
+	keysVal, ok := keysAttribute.(basetypes.SetValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`keys expected to be basetypes.SetValue, was: %T`, keysAttribute))
+	}
+
+	optionalAttribute, ok := attributes["optional"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`optional is missing from object`)
+
+		return NewAllowedKeysValueUnknown(), diags
+	}
+
+	optionalVal, ok := optionalAttribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`optional expected to be basetypes.BoolValue, was: %T`, optionalAttribute))
+	}
+
+	if diags.HasError() {
+		return NewAllowedKeysValueUnknown(), diags
+	}
+
+	return AllowedKeysValue{
+		Keys:     keysVal,
+		Optional: optionalVal,
+		state:    attr.ValueStateKnown,
+	}, diags
+}
+
+func NewAllowedKeysValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) AllowedKeysValue {
+	object, diags := NewAllowedKeysValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewAllowedKeysValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t AllowedKeysType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewAllowedKeysValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewAllowedKeysValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewAllowedKeysValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewAllowedKeysValueMust(AllowedKeysValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t AllowedKeysType) ValueType(ctx context.Context) attr.Value {
+	return AllowedKeysValue{}
+}
+
+var _ basetypes.ObjectValuable = AllowedKeysValue{}
+
+type AllowedKeysValue struct {
+	Keys     basetypes.SetValue  `tfsdk:"keys"`
+	Optional basetypes.BoolValue `tfsdk:"optional"`
+	state    attr.ValueState
+}
+
+func (v AllowedKeysValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 2)
+
+	var val tftypes.Value
+	var err error
+
+	attrTypes["keys"] = basetypes.SetType{
+		ElemType: types.StringType,
+	}.TerraformType(ctx)
+	attrTypes["optional"] = basetypes.BoolType{}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 2)
+
+		val, err = v.Keys.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["keys"] = val
+
+		val, err = v.Optional.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["optional"] = val
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v AllowedKeysValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v AllowedKeysValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v AllowedKeysValue) String() string {
+	return "AllowedKeysValue"
+}
+
+func (v AllowedKeysValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	var keysVal basetypes.SetValue
+	switch {
+	case v.Keys.IsUnknown():
+		keysVal = types.SetUnknown(types.StringType)
+	case v.Keys.IsNull():
+		keysVal = types.SetNull(types.StringType)
+	default:
+		var d diag.Diagnostics
+		keysVal, d = types.SetValue(types.StringType, v.Keys.Elements())
+		diags.Append(d...)
+	}
+
+	if diags.HasError() {
+		return types.ObjectUnknown(map[string]attr.Type{
+			"keys": basetypes.SetType{
+				ElemType: types.StringType,
+			},
+			"optional": basetypes.BoolType{},
+		}), diags
+	}
+
+	attributeTypes := map[string]attr.Type{
+		"keys": basetypes.SetType{
+			ElemType: types.StringType,
+		},
+		"optional": basetypes.BoolType{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{
+			"keys":     keysVal,
+			"optional": v.Optional,
+		})
+
+	return objVal, diags
+}
+
+func (v AllowedKeysValue) Equal(o attr.Value) bool {
+	other, ok := o.(AllowedKeysValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	if !v.Keys.Equal(other.Keys) {
+		return false
+	}
+
+	if !v.Optional.Equal(other.Optional) {
+		return false
+	}
+
+	return true
+}
+
+func (v AllowedKeysValue) Type(ctx context.Context) attr.Type {
+	return AllowedKeysType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v AllowedKeysValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"keys": basetypes.SetType{
+			ElemType: types.StringType,
+		},
+		"optional": basetypes.BoolType{},
 	}
 }
 

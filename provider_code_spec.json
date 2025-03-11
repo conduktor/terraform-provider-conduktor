@@ -1407,6 +1407,31 @@
                     "nested_object": {
                       "attributes": [
                         {
+                          "name": "allowed_keys",
+                          "single_nested": {
+                            "description": "Validates the keys are within an allowed key list",
+                            "computed_optional_required": "optional",
+                            "attributes": [
+                              {
+                                "name": "optional",
+                                "bool": {
+                                  "description": "If set to true, the policy is optional",
+                                  "computed_optional_required": "computed_optional"
+                                }
+                              },
+                              {
+                                "name": "keys",
+                                "set": {
+                                  "computed_optional_required": "required",
+                                  "element_type": {
+                                    "string": {}
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
                           "name": "match",
                           "single_nested": {
                             "description": "Validates using Regular Expression",

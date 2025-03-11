@@ -61,7 +61,7 @@ func policiesMapToPoliciesValue(ctx context.Context, m map[string]*console.Const
 }
 
 func constraintInternalModelToTerraform(ctx context.Context, r *console.Constraint) (topicPolicy.PoliciesValue, error) {
-	if r == nil || (r.Match == nil && r.NoneOf == nil && r.OneOf == nil && r.Range == nil) {
+	if r == nil || (r.AllowedKeys == nil && r.Match == nil && r.NoneOf == nil && r.OneOf == nil && r.Range == nil) {
 		return topicPolicy.NewPoliciesValueNull(), nil
 	}
 
@@ -71,6 +71,22 @@ func constraintInternalModelToTerraform(ctx context.Context, r *console.Constrai
 	}
 	var typesMap = unknownConstraintObjectValue.AttributeTypes(ctx)
 	var valuesMap = schema.ValueMapFromTypes(ctx, typesMap)
+
+	if r.AllowedKeys != nil {
+		var allowedKeysTypesMap = topicPolicy.NewAllowedKeysValueNull().AttributeTypes(ctx)
+		var allowedKeysValuesMap = schema.ValueMapFromTypes(ctx, allowedKeysTypesMap)
+		allowedKeysValuesMap["optional"] = basetypes.NewBoolValue(r.AllowedKeys.Optional)
+		keysList, diag := schema.StringArrayToSetValue(r.AllowedKeys.Keys)
+		if diag.HasError() {
+			return topicPolicy.PoliciesValue{}, mapper.WrapDiagError(diag, "policies", mapper.IntoTerraform)
+		}
+		allowedKeysValuesMap["keys"] = keysList
+
+		valuesMap["allowed_keys"], diag = types.ObjectValue(allowedKeysTypesMap, allowedKeysValuesMap)
+		if diag.HasError() {
+			return topicPolicy.PoliciesValue{}, mapper.WrapDiagError(diag, "policies", mapper.IntoTerraform)
+		}
+	}
 
 	if r.Match != nil {
 		var matchTypesMap = topicPolicy.NewMatchValueNull().AttributeTypes(ctx)

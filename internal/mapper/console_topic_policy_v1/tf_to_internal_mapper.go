@@ -49,6 +49,23 @@ func mapValueToPoliciesMap(ctx context.Context, m basetypes.MapValue) (map[strin
 }
 
 func policiesValueToConstraint(ctx context.Context, key string, policy topicPolicy.PoliciesValue) (*console.Constraint, error) {
+	var AllowedKeys *console.AllowedKeys = nil
+	if schema.AttrIsSet(policy.AllowedKeys) {
+		allowedKeysfValue, diag := topicPolicy.NewAllowedKeysValue(policy.AllowedKeys.AttributeTypes(ctx), policy.AllowedKeys.Attributes())
+		if diag.HasError() {
+			return nil, mapper.WrapDiagError(diag, "policies."+key, mapper.FromTerraform)
+		}
+		keys, diag := schema.SetValueToStringArray(ctx, allowedKeysfValue.Keys)
+		if diag.HasError() {
+			return nil, mapper.WrapDiagError(diag, "policies."+key+".values", mapper.FromTerraform)
+		}
+		AllowedKeys = &console.AllowedKeys{
+			Constraint: "AllowedKeys",
+			Optional:   allowedKeysfValue.Optional.ValueBool(),
+			Keys:       keys,
+		}
+	}
+
 	var Match *console.Match = nil
 	if schema.AttrIsSet(policy.Match) {
 		matchValue, diag := topicPolicy.NewMatchValue(policy.Match.AttributeTypes(ctx), policy.Match.Attributes())
@@ -60,7 +77,6 @@ func policiesValueToConstraint(ctx context.Context, key string, policy topicPoli
 			Optional:   matchValue.Optional.ValueBool(),
 			Pattern:    matchValue.Pattern.ValueString(),
 		}
-		// return &console.Constraint{Match: Match}, nil
 	}
 
 	var NoneOf *console.NoneOf = nil
@@ -78,7 +94,6 @@ func policiesValueToConstraint(ctx context.Context, key string, policy topicPoli
 			Optional:   noneOfValue.Optional.ValueBool(),
 			Values:     values,
 		}
-		// return &console.Constraint{NoneOf: NoneOf}, nil
 	}
 
 	var OneOf *console.OneOf = nil
@@ -96,7 +111,6 @@ func policiesValueToConstraint(ctx context.Context, key string, policy topicPoli
 			Optional:   oneOfValue.Optional.ValueBool(),
 			Values:     values,
 		}
-		// return &console.Constraint{OneOf: OneOf}, nil
 	}
 
 	var Range *console.Range = nil
@@ -111,13 +125,13 @@ func policiesValueToConstraint(ctx context.Context, key string, policy topicPoli
 			Min:        rangeValue.Min.ValueInt64(),
 			Max:        rangeValue.Max.ValueInt64(),
 		}
-		// return &console.Constraint{Range: Range}, nil
 	}
 
 	return &console.Constraint{
-		Match:  Match,
-		NoneOf: NoneOf,
-		OneOf:  OneOf,
-		Range:  Range,
+		AllowedKeys: AllowedKeys,
+		Match:       Match,
+		NoneOf:      NoneOf,
+		OneOf:       OneOf,
+		Range:       Range,
 	}, nil
 }

@@ -85,28 +85,40 @@ func (r *TopicPolicyV1Resource) ValidateConfig(ctx context.Context, req resource
 	}
 
 	for k, v := range tfPolicies {
-		if schemaUtils.AttrIsSet(v.Match) && (schemaUtils.AttrIsSet(v.OneOf) || schemaUtils.AttrIsSet(v.NoneOf) || schemaUtils.AttrIsSet(v.Range)) {
+		if !schemaUtils.AttrIsSet(v.AllowedKeys) && !schemaUtils.AttrIsSet(v.Match) && !schemaUtils.AttrIsSet(v.OneOf) && !schemaUtils.AttrIsSet(v.NoneOf) && !schemaUtils.AttrIsSet(v.Range) {
 			resp.Diagnostics.AddError(
-				"Invalid Attribute Combination",
-				"Policy '"+k+"' can only have one of the following constraints: match, one_of, none_of, range",
+				"Invalid Attribute Configuration",
+				"Policy '"+k+"' must have one of the following constraints: allowed_keys, match, one_of, none_of, range",
 			)
 		}
-		if schemaUtils.AttrIsSet(v.OneOf) && (schemaUtils.AttrIsSet(v.Match) || schemaUtils.AttrIsSet(v.NoneOf) || schemaUtils.AttrIsSet(v.Range)) {
+		if schemaUtils.AttrIsSet(v.AllowedKeys) && (schemaUtils.AttrIsSet(v.Match) || schemaUtils.AttrIsSet(v.OneOf) || schemaUtils.AttrIsSet(v.NoneOf) || schemaUtils.AttrIsSet(v.Range)) {
 			resp.Diagnostics.AddError(
 				"Invalid Attribute Combination",
-				"Policy '"+k+"' can only have one of the following constraints: match, one_of, none_of, range",
+				"Policy '"+k+"' can only have one of the following constraints: allowed_keys, match, one_of, none_of, range",
 			)
 		}
-		if schemaUtils.AttrIsSet(v.NoneOf) && (schemaUtils.AttrIsSet(v.Match) || schemaUtils.AttrIsSet(v.OneOf) || schemaUtils.AttrIsSet(v.Range)) {
+		if schemaUtils.AttrIsSet(v.Match) && (schemaUtils.AttrIsSet(v.AllowedKeys) || schemaUtils.AttrIsSet(v.OneOf) || schemaUtils.AttrIsSet(v.NoneOf) || schemaUtils.AttrIsSet(v.Range)) {
 			resp.Diagnostics.AddError(
 				"Invalid Attribute Combination",
-				"Policy '"+k+"' can only have one of the following constraints: match, one_of, none_of, range",
+				"Policy '"+k+"' can only have one of the following constraints: allowed_keys, match, one_of, none_of, range",
 			)
 		}
-		if schemaUtils.AttrIsSet(v.Range) && (schemaUtils.AttrIsSet(v.Match) || schemaUtils.AttrIsSet(v.OneOf) || schemaUtils.AttrIsSet(v.NoneOf)) {
+		if schemaUtils.AttrIsSet(v.OneOf) && (schemaUtils.AttrIsSet(v.AllowedKeys) || schemaUtils.AttrIsSet(v.Match) || schemaUtils.AttrIsSet(v.NoneOf) || schemaUtils.AttrIsSet(v.Range)) {
 			resp.Diagnostics.AddError(
 				"Invalid Attribute Combination",
-				"Policy '"+k+"' can only have one of the following constraints: match, one_of, none_of, range",
+				"Policy '"+k+"' can only have one of the following constraints: allowed_keys, match, one_of, none_of, range",
+			)
+		}
+		if schemaUtils.AttrIsSet(v.NoneOf) && (schemaUtils.AttrIsSet(v.AllowedKeys) || schemaUtils.AttrIsSet(v.Match) || schemaUtils.AttrIsSet(v.OneOf) || schemaUtils.AttrIsSet(v.Range)) {
+			resp.Diagnostics.AddError(
+				"Invalid Attribute Combination",
+				"Policy '"+k+"' can only have one of the following constraints: allowed_keys, match, one_of, none_of, range",
+			)
+		}
+		if schemaUtils.AttrIsSet(v.Range) && (schemaUtils.AttrIsSet(v.AllowedKeys) || schemaUtils.AttrIsSet(v.Match) || schemaUtils.AttrIsSet(v.OneOf) || schemaUtils.AttrIsSet(v.NoneOf)) {
+			resp.Diagnostics.AddError(
+				"Invalid Attribute Combination",
+				"Policy '"+k+"' can only have one of the following constraints: allowed_keys, match, one_of, none_of, range",
 			)
 		}
 	}

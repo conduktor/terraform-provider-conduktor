@@ -20,10 +20,11 @@ func (r TopicPolicyMetadata) String() string {
 }
 
 type Constraint struct {
-	Match  *Match
-	NoneOf *NoneOf
-	OneOf  *OneOf
-	Range  *Range
+	AllowedKeys *AllowedKeys
+	Match       *Match
+	NoneOf      *NoneOf
+	OneOf       *OneOf
+	Range       *Range
 }
 
 func (dst *Constraint) UnmarshalJSON(data []byte) error {
@@ -34,6 +35,13 @@ func (dst *Constraint) UnmarshalJSON(data []byte) error {
 	}
 
 	switch disc.Constraint {
+	case "AllowedKeys":
+		var allowedKeys AllowedKeys
+		err = json.Unmarshal(data, &allowedKeys)
+		if err != nil {
+			return err
+		}
+		dst.AllowedKeys = &allowedKeys
 	case "Match":
 		var match Match
 		err = json.Unmarshal(data, &match)
@@ -69,7 +77,9 @@ func (dst *Constraint) UnmarshalJSON(data []byte) error {
 }
 
 func (src *Constraint) MarshalJSON() ([]byte, error) {
-	if src.Match != nil {
+	if src.AllowedKeys != nil {
+		return json.Marshal(src.AllowedKeys)
+	} else if src.Match != nil {
 		return json.Marshal(src.Match)
 	} else if src.NoneOf != nil {
 		return json.Marshal(src.NoneOf)
@@ -80,6 +90,12 @@ func (src *Constraint) MarshalJSON() ([]byte, error) {
 	} else {
 		return nil, fmt.Errorf("unknown constraint type")
 	}
+}
+
+type AllowedKeys struct {
+	Constraint string   `json:"constraint"`
+	Optional   bool     `json:"optional,omitempty"`
+	Keys       []string `json:"keys"`
 }
 
 type Match struct {

@@ -7,6 +7,7 @@ import (
 	ctlresource "github.com/conduktor/ctl/resource"
 	console "github.com/conduktor/terraform-provider-conduktor/internal/model/console"
 	"github.com/conduktor/terraform-provider-conduktor/internal/test"
+
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -47,6 +48,8 @@ func TestTopicPolicyV1ModelMapping(t *testing.T) {
 	assert.Equal(t, int64(3600000), internal.Spec.Policies["spec.configs.retention.ms"].Range.Max)
 	assert.Equal(t, "Match", internal.Spec.Policies["metadata.name"].Match.Constraint)
 	assert.Equal(t, "^click\\.(?<event>[a-z0-9-]+)\\.(avro|json)$", internal.Spec.Policies["metadata.name"].Match.Pattern)
+	assert.Equal(t, "AllowedKeys", internal.Spec.Policies["spec.name"].AllowedKeys.Constraint)
+	assert.Equal(t, []string{"k1", "k2"}, internal.Spec.Policies["spec.name"].AllowedKeys.Keys)
 
 	// convert to terraform model
 	tfModel, err := InternalModelToTerraform(ctx, &internal)
@@ -77,6 +80,8 @@ func TestTopicPolicyV1ModelMapping(t *testing.T) {
 	assert.Equal(t, int64(3600000), internal2.Spec.Policies["spec.configs.retention.ms"].Range.Max)
 	assert.Equal(t, "Match", internal2.Spec.Policies["metadata.name"].Match.Constraint)
 	assert.Equal(t, "^click\\.(?<event>[a-z0-9-]+)\\.(avro|json)$", internal2.Spec.Policies["metadata.name"].Match.Pattern)
+	assert.Equal(t, "AllowedKeys", internal2.Spec.Policies["spec.name"].AllowedKeys.Constraint)
+	assert.Equal(t, []string{"k1", "k2"}, internal2.Spec.Policies["spec.name"].AllowedKeys.Keys)
 
 	// convert back to ctl model
 	ctlResource2, err := internal2.ToClientResource()

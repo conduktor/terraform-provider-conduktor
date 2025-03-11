@@ -31,6 +31,14 @@ resource "conduktor_console_topic_policy_v1" "complex" {
         match = {
           pattern = "^click.(?<event>[a-z0-9-]+).(avro|json)$"
         }
+      },
+      "spec.configs" = {
+        allowed_keys = {
+          keys = [
+            "retention.ms",
+            "cleanup.policy"
+          ]
+        }
       }
     }
   }

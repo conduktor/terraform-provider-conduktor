@@ -65,6 +65,14 @@ resource "conduktor_console_topic_policy_v1" "complex" {
         match = {
           pattern = "^click.(?<event>[a-z0-9-]+).(avro|json)$"
         }
+      },
+      "spec.configs" = {
+        allowed_keys = {
+          keys = [
+            "retention.ms",
+            "cleanup.policy"
+          ]
+        }
       }
     }
   }
@@ -92,10 +100,23 @@ Required:
 
 Optional:
 
+- `allowed_keys` (Attributes) Validates the keys are within an allowed key list (see [below for nested schema](#nestedatt--spec--policies--allowed_keys))
 - `match` (Attributes) Validates using Regular Expression (see [below for nested schema](#nestedatt--spec--policies--match))
 - `none_of` (Attributes) Validates against a list of predefined options (see [below for nested schema](#nestedatt--spec--policies--none_of))
 - `one_of` (Attributes) Validates against a list of predefined options (see [below for nested schema](#nestedatt--spec--policies--one_of))
 - `range` (Attributes) Validates a range of numbers (see [below for nested schema](#nestedatt--spec--policies--range))
+
+<a id="nestedatt--spec--policies--allowed_keys"></a>
+### Nested Schema for `spec.policies.allowed_keys`
+
+Required:
+
+- `keys` (Set of String)
+
+Optional:
+
+- `optional` (Boolean) If set to true, the policy is optional
+
 
 <a id="nestedatt--spec--policies--match"></a>
 ### Nested Schema for `spec.policies.match`
