@@ -10,6 +10,7 @@ import (
 	schemaUtils "github.com/conduktor/terraform-provider-conduktor/internal/schema"
 	schema "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_console_topic_policy_v1"
 	topicPolicy "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_console_topic_policy_v1"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -86,37 +87,21 @@ func (r *TopicPolicyV1Resource) ValidateConfig(ctx context.Context, req resource
 	}
 
 	for k, v := range tfPolicies {
-		if !schemaUtils.AttrIsSet(v.AllowedKeys) && !schemaUtils.AttrIsSet(v.Match) && !schemaUtils.AttrIsSet(v.OneOf) && !schemaUtils.AttrIsSet(v.NoneOf) && !schemaUtils.AttrIsSet(v.Range) {
+		constraints := []attr.Value{v.AllowedKeys, v.Match, v.OneOf, v.NoneOf, v.Range}
+		setConstraints := 0
+
+		for _, constraint := range constraints {
+			if schemaUtils.AttrIsSet(constraint) {
+				setConstraints++
+			}
+		}
+
+		if setConstraints == 0 {
 			resp.Diagnostics.AddError(
 				"Invalid Attribute Configuration",
 				"Policy '"+k+"' must have one of the following constraints: allowed_keys, match, one_of, none_of, range",
 			)
-		}
-		if schemaUtils.AttrIsSet(v.AllowedKeys) && (schemaUtils.AttrIsSet(v.Match) || schemaUtils.AttrIsSet(v.OneOf) || schemaUtils.AttrIsSet(v.NoneOf) || schemaUtils.AttrIsSet(v.Range)) {
-			resp.Diagnostics.AddError(
-				"Invalid Attribute Combination",
-				"Policy '"+k+"' can only have one of the following constraints: allowed_keys, match, one_of, none_of, range",
-			)
-		}
-		if schemaUtils.AttrIsSet(v.Match) && (schemaUtils.AttrIsSet(v.AllowedKeys) || schemaUtils.AttrIsSet(v.OneOf) || schemaUtils.AttrIsSet(v.NoneOf) || schemaUtils.AttrIsSet(v.Range)) {
-			resp.Diagnostics.AddError(
-				"Invalid Attribute Combination",
-				"Policy '"+k+"' can only have one of the following constraints: allowed_keys, match, one_of, none_of, range",
-			)
-		}
-		if schemaUtils.AttrIsSet(v.OneOf) && (schemaUtils.AttrIsSet(v.AllowedKeys) || schemaUtils.AttrIsSet(v.Match) || schemaUtils.AttrIsSet(v.NoneOf) || schemaUtils.AttrIsSet(v.Range)) {
-			resp.Diagnostics.AddError(
-				"Invalid Attribute Combination",
-				"Policy '"+k+"' can only have one of the following constraints: allowed_keys, match, one_of, none_of, range",
-			)
-		}
-		if schemaUtils.AttrIsSet(v.NoneOf) && (schemaUtils.AttrIsSet(v.AllowedKeys) || schemaUtils.AttrIsSet(v.Match) || schemaUtils.AttrIsSet(v.OneOf) || schemaUtils.AttrIsSet(v.Range)) {
-			resp.Diagnostics.AddError(
-				"Invalid Attribute Combination",
-				"Policy '"+k+"' can only have one of the following constraints: allowed_keys, match, one_of, none_of, range",
-			)
-		}
-		if schemaUtils.AttrIsSet(v.Range) && (schemaUtils.AttrIsSet(v.AllowedKeys) || schemaUtils.AttrIsSet(v.Match) || schemaUtils.AttrIsSet(v.OneOf) || schemaUtils.AttrIsSet(v.NoneOf)) {
+		} else if setConstraints > 1 {
 			resp.Diagnostics.AddError(
 				"Invalid Attribute Combination",
 				"Policy '"+k+"' can only have one of the following constraints: allowed_keys, match, one_of, none_of, range",
