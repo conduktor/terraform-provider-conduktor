@@ -1356,6 +1356,192 @@
       }
     },
     {
+      "name": "console_topic_policy_v1",
+      "schema": {
+        "attributes": [
+          {
+            "name": "name",
+            "string": {
+              "description": "Topic Policy name, must be unique, acts as an ID for import",
+              "computed_optional_required": "required",
+              "plan_modifiers": [
+                {
+                  "custom": {
+                    "imports": [
+                      {
+                        "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+                      }
+                    ],
+                    "schema_definition": "stringplanmodifier.RequiresReplace()"
+                  }
+                }
+              ],
+              "validators": [
+                {
+                  "custom": {
+                    "imports": [
+                      {
+                        "path": "regexp"
+                      },
+                      {
+                        "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                      }
+                    ],
+                    "schema_definition": "stringvalidator.RegexMatches(regexp.MustCompile(\"^[0-9a-z\\\\_\\\\-]+$\"), \"\")"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "spec",
+            "single_nested": {
+              "computed_optional_required": "required",
+              "description": "Topic Policy specification",
+              "attributes": [
+                {
+                  "name": "policies",
+                  "map_nested": {
+                    "description": "Map of policies",
+                    "computed_optional_required": "required",
+                    "nested_object": {
+                      "attributes": [
+                        {
+                          "name": "allowed_keys",
+                          "single_nested": {
+                            "description": "Validates the keys are within an allowed key list",
+                            "computed_optional_required": "optional",
+                            "attributes": [
+                              {
+                                "name": "optional",
+                                "bool": {
+                                  "description": "If set to true, the policy is optional",
+                                  "computed_optional_required": "computed_optional"
+                                }
+                              },
+                              {
+                                "name": "keys",
+                                "set": {
+                                  "computed_optional_required": "required",
+                                  "element_type": {
+                                    "string": {}
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "name": "match",
+                          "single_nested": {
+                            "description": "Validates using Regular Expression",
+                            "computed_optional_required": "optional",
+                            "attributes": [
+                              {
+                                "name": "optional",
+                                "bool": {
+                                  "description": "If set to true, the policy is optional",
+                                  "computed_optional_required": "computed_optional"
+                                }
+                              },
+                              {
+                                "name": "pattern",
+                                "string": {
+                                  "computed_optional_required": "required"
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "name": "none_of",
+                          "single_nested": {
+                            "description": "Validates against a list of predefined options",
+                            "computed_optional_required": "optional",
+                            "attributes": [
+                              {
+                                "name": "optional",
+                                "bool": {
+                                  "description": "If set to true, the policy is optional",
+                                  "computed_optional_required": "computed_optional"
+                                }
+                              },
+                              {
+                                "name": "values",
+                                "set": {
+                                  "computed_optional_required": "required",
+                                  "element_type": {
+                                    "string": {}
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "name": "one_of",
+                          "single_nested": {
+                            "description": "Validates against a list of predefined options",
+                            "computed_optional_required": "optional",
+                            "attributes": [
+                              {
+                                "name": "optional",
+                                "bool": {
+                                  "description": "If set to true, the policy is optional",
+                                  "computed_optional_required": "computed_optional"
+                                }
+                              },
+                              {
+                                "name": "values",
+                                "set": {
+                                  "computed_optional_required": "required",
+                                  "element_type": {
+                                    "string": {}
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "name": "range",
+                          "single_nested": {
+                            "description": "Validates a range of numbers",
+                            "computed_optional_required": "optional",
+                            "attributes": [
+                              {
+                                "name": "optional",
+                                "bool": {
+                                  "description": "If set to true, the policy is optional",
+                                  "computed_optional_required": "computed_optional"
+                                }
+                              },
+                              {
+                                "name": "min",
+                                "int64": {
+                                  "computed_optional_required": "required"
+                                }
+                              },
+                              {
+                                "name": "max",
+                                "int64": {
+                                  "computed_optional_required": "required"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "console_user_v2",
       "schema": {
         "attributes": [

@@ -25,7 +25,7 @@ require (
 )
 
 // Use fork of terraform-plugin-codegen-frameworkon branch https://github.com/conduktor/terraform-plugin-codegen-framework/tree/cdk-fix-model-name-conflicts
-replace github.com/hashicorp/terraform-plugin-codegen-framework => github.com/conduktor/terraform-plugin-codegen-framework v0.0.0-20250213135010-1480ff9d60f2
+replace github.com/hashicorp/terraform-plugin-codegen-framework => github.com/conduktor/terraform-plugin-codegen-framework v0.0.0-20250305143449-8d9a145a512a
 
 // Use fork of terraform-plugin-codegen-spec on branch cdk-add-single_nested-custom_type_name-override
 replace github.com/hashicorp/terraform-plugin-codegen-spec => github.com/conduktor/terraform-plugin-codegen-spec v0.0.0-20250213112457-5b5117af3e12

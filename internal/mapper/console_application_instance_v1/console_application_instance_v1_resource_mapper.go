@@ -7,7 +7,6 @@ import (
 	console "github.com/conduktor/terraform-provider-conduktor/internal/model/console"
 	schema "github.com/conduktor/terraform-provider-conduktor/internal/schema"
 	appinstance "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_console_application_instance_v1"
-	appinstances "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_console_application_instance_v1"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -105,7 +104,7 @@ func resourceArrayToSetValue(ctx context.Context, arr []console.ResourceWithOwne
 			"ownership_mode":  schema.NewStringValue(p.OwnershipMode),
 		}
 
-		permObj, diag := appinstances.NewResourcesValue(types, values)
+		permObj, diag := appinstance.NewResourcesValue(types, values)
 		if diag.HasError() {
 			return basetypes.SetValue{}, mapper.WrapDiagError(diag, "resources", mapper.FromTerraform)
 		}
@@ -113,7 +112,7 @@ func resourceArrayToSetValue(ctx context.Context, arr []console.ResourceWithOwne
 
 	}
 
-	resourcesList, diag := types.SetValue(appinstances.ResourcesValue{}.Type(ctx), tfResources)
+	resourcesList, diag := types.SetValue(appinstance.ResourcesValue{}.Type(ctx), tfResources)
 	if diag.HasError() {
 		return basetypes.SetValue{}, mapper.WrapDiagError(diag, "resources", mapper.FromTerraform)
 	}
@@ -127,7 +126,7 @@ func setValueToResourceArray(ctx context.Context, set basetypes.SetValue) ([]con
 	var diag diag.Diagnostics
 
 	if !set.IsNull() && !set.IsUnknown() {
-		var tfResources []appinstances.ResourcesValue
+		var tfResources []appinstance.ResourcesValue
 		diag = set.ElementsAs(ctx, &tfResources, false)
 		if diag.HasError() {
 			return nil, mapper.WrapDiagError(diag, "resources", mapper.FromTerraform)
