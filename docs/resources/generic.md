@@ -22,15 +22,15 @@ This resource allows you to create, read, update and delete any resource support
 resource "conduktor_generic" "embedded" {
   kind    = "User"
   version = "v2"
-  name    = "bob@company.io"
+  name    = "martin@company.io"
   manifest = yamlencode({
     apiVersion = "v2"
     kind       = "User"
     metadata = {
-      name = "bob@company.io"
+      name = "martin@company.io"
     }
     spec = {
-      firstName = "Bob"
+      firstName = "Martin"
       lastName  = "Smith"
       permissions = [
         {
@@ -63,15 +63,15 @@ resource "conduktor_generic" "embedded" {
 resource "conduktor_generic" "raw_yaml" {
   kind    = "User"
   version = "v2"
-  name    = "bob@company.io"
+  name    = "alice@company.io"
   manifest = yamlencode(yamldecode(<<EOF
       apiVersion: v2
       kind: User
       metadata:
-        name: "bob@company.io"
+        name: "alice@company.io"
       spec:
-        firstName: "Bob"
-        lastName: Smith
+        firstName: "Alice"
+        lastName: "Smith"
         permissions:
           - resourceType: PLATFORM
             permissions: ["userView", "datamaskingView", "auditLogView"]

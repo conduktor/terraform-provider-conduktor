@@ -1,15 +1,15 @@
 resource "conduktor_generic" "raw_yaml" {
   kind    = "User"
   version = "v2"
-  name    = "bob@company.io"
+  name    = "alice@company.io"
   manifest = yamlencode(yamldecode(<<EOF
       apiVersion: v2
       kind: User
       metadata:
-        name: "bob@company.io"
+        name: "alice@company.io"
       spec:
-        firstName: "Bob"
-        lastName: Smith
+        firstName: "Alice"
+        lastName: "Smith"
         permissions:
           - resourceType: PLATFORM
             permissions: ["userView", "datamaskingView", "auditLogView"]
