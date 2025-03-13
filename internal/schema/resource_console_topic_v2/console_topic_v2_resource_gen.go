@@ -120,7 +120,6 @@ func ConsoleTopicV2ResourceSchema(ctx context.Context) schema.Schema {
 				Attributes: map[string]schema.Attribute{
 					"enabled": schema.BoolAttribute{
 						Optional: true,
-						Computed: true,
 					},
 					"retention_time_in_second": schema.Int64Attribute{
 						Required: true,

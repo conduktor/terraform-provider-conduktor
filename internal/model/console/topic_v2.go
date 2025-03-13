@@ -24,7 +24,7 @@ type TopicConsoleMetadata struct {
 	CatalogVisibility     string            `json:"catalogVisibility,omitempty"`
 	DescriptionIsEditable bool              `json:"descriptionIsEditable,omitempty"`
 	Description           string            `json:"description,omitempty"`
-	SqlStorage            TopicSqlStorage   `json:"sqlStorage,omitempty"`
+	SqlStorage            *TopicSqlStorage  `json:"sqlStorage,omitempty"`
 }
 
 func (r TopicConsoleMetadata) String() string {

@@ -1509,7 +1509,7 @@
                 {
                   "name": "enabled",
                   "bool": {
-                    "computed_optional_required": "computed_optional"
+                    "computed_optional_required": "optional"
                   }
                 }
               ]

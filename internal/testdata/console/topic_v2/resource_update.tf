@@ -1,12 +1,12 @@
 
 resource "conduktor_console_topic_v2" "test" {
-  name    = "topic"
-  cluster = "cluster"
+  name    = "topic-test"
+  cluster = "kafka-cluster"
   labels = {
-    key  = "value"
+    key1 = "value1"
     key2 = "value2"
   }
-  catalog_visibility      = "PUBLIC"
+  catalog_visibility      = "PRIVATE"
   description_is_editable = false
   description             = "new description"
   sql_storage = {
@@ -15,7 +15,7 @@ resource "conduktor_console_topic_v2" "test" {
   }
   spec = {
     partitions         = 10
-    replication_factor = 3
+    replication_factor = 1
     configs = {
       "cleanup.policy" = "delete"
       "retention.ms"   = "60000"

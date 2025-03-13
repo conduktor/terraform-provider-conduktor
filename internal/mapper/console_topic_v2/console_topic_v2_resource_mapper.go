@@ -30,7 +30,7 @@ func TFToInternalModel(ctx context.Context, r *topic.ConsoleTopicV2Model) (conso
 			CatalogVisibility:     r.CatalogVisibility.ValueString(),
 			DescriptionIsEditable: r.DescriptionIsEditable.ValueBool(),
 			Description:           r.Description.ValueString(),
-			SqlStorage: console.TopicSqlStorage{
+			SqlStorage: &console.TopicSqlStorage{
 				RetentionTimeInSecond: r.SqlStorage.RetentionTimeInSecond.ValueInt64(),
 				Enabled:               r.SqlStorage.Enabled.ValueBool(),
 			},
