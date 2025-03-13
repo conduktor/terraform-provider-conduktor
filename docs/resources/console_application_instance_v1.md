@@ -97,11 +97,11 @@ resource "conduktor_console_application_instance_v1" "complex" {
 
 Required:
 
-- `cluster` (String) Valid Console Cluster. It's immutable (update will require the resource to be recreated).
+- `cluster` (String) Valid Console Cluster. It's immutable (update will require the resource to be recreated)
 
 Optional:
 
-- `application_managed_service_account` (Boolean) If set to true, the service account ACLs will be managed by the Application owners directly instead of being synchrornized by the ApplicationInstance component. See [documentation](https://docs.conduktor.io/platform/reference/resource-reference/self-service/#application-managed-service-account) for more information.
+- `application_managed_service_account` (Boolean) If set to true, the service account ACLs will be managed by the Application owners directly instead of being synchronized by the ApplicationInstance component. See [documentation](https://docs.conduktor.io/platform/reference/resource-reference/self-service/#application-managed-service-account) for more information
 - `default_catalog_visibility` (String) Default catalog visibility for the application instance, valid values are: PRIVATE, PUBLIC
 - `resources` (Attributes Set) Set of all resources associated with this application instance (see [below for nested schema](#nestedatt--spec--resources))
 - `service_account` (String) Service account associated with this application instance

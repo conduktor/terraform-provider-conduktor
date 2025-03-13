@@ -48,13 +48,13 @@ func ConsoleApplicationInstanceV1ResourceSchema(ctx context.Context) schema.Sche
 					"application_managed_service_account": schema.BoolAttribute{
 						Optional:            true,
 						Computed:            true,
-						Description:         "If set to true, the service account ACLs will be managed by the Application owners directly instead of being synchrornized by the ApplicationInstance component. See [documentation](https://docs.conduktor.io/platform/reference/resource-reference/self-service/#application-managed-service-account) for more information.",
-						MarkdownDescription: "If set to true, the service account ACLs will be managed by the Application owners directly instead of being synchrornized by the ApplicationInstance component. See [documentation](https://docs.conduktor.io/platform/reference/resource-reference/self-service/#application-managed-service-account) for more information.",
+						Description:         "If set to true, the service account ACLs will be managed by the Application owners directly instead of being synchronized by the ApplicationInstance component. See [documentation](https://docs.conduktor.io/platform/reference/resource-reference/self-service/#application-managed-service-account) for more information",
+						MarkdownDescription: "If set to true, the service account ACLs will be managed by the Application owners directly instead of being synchronized by the ApplicationInstance component. See [documentation](https://docs.conduktor.io/platform/reference/resource-reference/self-service/#application-managed-service-account) for more information",
 					},
 					"cluster": schema.StringAttribute{
 						Required:            true,
-						Description:         "Valid Console Cluster. It's immutable (update will require the resource to be recreated).",
-						MarkdownDescription: "Valid Console Cluster. It's immutable (update will require the resource to be recreated).",
+						Description:         "Valid Console Cluster. It's immutable (update will require the resource to be recreated)",
+						MarkdownDescription: "Valid Console Cluster. It's immutable (update will require the resource to be recreated)",
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.RequiresReplace(),
 						},

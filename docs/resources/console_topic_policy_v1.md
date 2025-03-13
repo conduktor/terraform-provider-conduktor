@@ -12,8 +12,8 @@ Resource for managing Conduktor topic policies.
 This resource allows you to create, read, update and delete topic policies in Conduktor.
 
 > [!NOTE]
-> - This resource is officially supported from Conduktor Console `1.30.0` and newer.
-> - Usage of this resource with older Console version might produce errors since the API might not support all types of constraints.
+> - This resource is officially supported from Conduktor Console `1.30.0` and newer
+> - Usage of this resource with older Console version might produce errors since the API might not support all types of constraints
 
 ## Example Usage
 
@@ -53,21 +53,22 @@ resource "conduktor_console_topic_policy_v1" "complex" {
       "spec.configs.retention.ms" = {
         range = {
           optional = false
-          max      = 3600000
-          min      = 60000
+          max      = 604800000
+          min      = 3600000
         }
       },
       "spec.replicationFactor" = {
         none_of = {
           optional = true
           values = [
-            "3",
+            "1",
+            "2"
           ]
         }
       },
       "metadata.name" = {
         match = {
-          pattern = "^click.(?<event>[a-z0-9-]+).(avro|json)$"
+          pattern = "^website-analytics.(?<event>[a-z0-9-]+).(avro|json)$"
         }
       },
       "spec.configs" = {
