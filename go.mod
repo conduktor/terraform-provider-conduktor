@@ -1,9 +1,6 @@
 module github.com/conduktor/terraform-provider-conduktor
 
 go 1.23
-
-toolchain go1.23.0
-
 require (
 	github.com/conduktor/ctl v0.4.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
@@ -20,7 +17,7 @@ require (
 	github.com/hashicorp/terraform-plugin-testing v1.11.0
 	github.com/json-iterator/go v1.1.12
 	github.com/stretchr/testify v1.10.0
-	golang.org/x/mod v0.22.0
+	golang.org/x/mod v0.24.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
