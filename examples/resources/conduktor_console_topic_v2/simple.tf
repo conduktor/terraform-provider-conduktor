@@ -3,19 +3,14 @@ resource "conduktor_console_topic_v2" "simple" {
   name    = "simple"
   cluster = "kafka-cluster"
   labels = {
-    domain  = "clickstream"
-    appcode = "clk"
+    domain = "clickstream"
   }
-  catalog_visibility      = "PUBLIC"
-  description_is_editable = false
-  description             = "# Event Stream from Click Application"
+  description = "# Simple kafka topic"
   spec = {
     partitions         = 3
     replication_factor = 1
     configs = {
-      "min.insync.replicas" = "2",
-      "cleanup.policy"      = "delete",
-      "retention.ms"        = "60000"
+      "cleanup.policy" = "delete"
     }
   }
 }

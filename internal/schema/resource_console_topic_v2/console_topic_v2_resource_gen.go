@@ -81,6 +81,7 @@ func ConsoleTopicV2ResourceSchema(ctx context.Context) schema.Schema {
 					"configs": schema.MapAttribute{
 						ElementType:         types.StringType,
 						Optional:            true,
+						Computed:            true,
 						Description:         "Must be valid Kafka Topic configs",
 						MarkdownDescription: "Must be valid Kafka Topic configs",
 					},

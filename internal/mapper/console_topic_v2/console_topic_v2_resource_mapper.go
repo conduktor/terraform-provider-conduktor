@@ -22,6 +22,14 @@ func TFToInternalModel(ctx context.Context, r *topic.ConsoleTopicV2Model) (conso
 		return console.TopicConsoleResource{}, mapper.WrapDiagError(diag, "spec.configs", mapper.FromTerraform)
 	}
 
+	var sqlStorage *console.TopicSqlStorage = nil
+	if schema.AttrIsSet(r.SqlStorage) {
+		sqlStorage = &console.TopicSqlStorage{
+			RetentionTimeInSecond: r.SqlStorage.RetentionTimeInSecond.ValueInt64(),
+			Enabled:               r.SqlStorage.Enabled.ValueBool(),
+		}
+	}
+
 	return console.NewTopicConsoleResource(
 		console.TopicConsoleMetadata{
 			Name:                  r.Name.ValueString(),
@@ -30,10 +38,7 @@ func TFToInternalModel(ctx context.Context, r *topic.ConsoleTopicV2Model) (conso
 			CatalogVisibility:     r.CatalogVisibility.ValueString(),
 			DescriptionIsEditable: r.DescriptionIsEditable.ValueBool(),
 			Description:           r.Description.ValueString(),
-			SqlStorage: &console.TopicSqlStorage{
-				RetentionTimeInSecond: r.SqlStorage.RetentionTimeInSecond.ValueInt64(),
-				Enabled:               r.SqlStorage.Enabled.ValueBool(),
-			},
+			SqlStorage:            sqlStorage,
 		},
 		console.TopicConsoleSpec{
 			Partitions:        r.Spec.Partitions.ValueInt64(),
@@ -54,16 +59,10 @@ func InternalModelToTerraform(ctx context.Context, r *console.TopicConsoleResour
 		return topic.ConsoleTopicV2Model{}, mapper.WrapDiagError(diag, "spec.configs", mapper.IntoTerraform)
 	}
 
-	sqlStorage, diag := topic.NewSqlStorageValue(
-		map[string]attr.Type{
-			"retention_time_in_second": basetypes.Int64Type{},
-			"enabled":                  basetypes.BoolType{},
-		},
-		map[string]attr.Value{
-			"retention_time_in_second": schema.NewInt64Value(r.Metadata.SqlStorage.RetentionTimeInSecond),
-			"enabled":                  basetypes.NewBoolValue(r.Metadata.SqlStorage.Enabled),
-		},
-	)
+	sqlStorage, err := sqlStorageInternalToTerraform(r.Metadata.SqlStorage)
+	if err != nil {
+		return topic.ConsoleTopicV2Model{}, err
+	}
 
 	specValue, diag := topic.NewSpecValue(
 		map[string]attr.Type{
@@ -91,4 +90,26 @@ func InternalModelToTerraform(ctx context.Context, r *console.TopicConsoleResour
 		SqlStorage:            sqlStorage,
 		Spec:                  specValue,
 	}, nil
+}
+
+func sqlStorageInternalToTerraform(r *console.TopicSqlStorage) (topic.SqlStorageValue, error) {
+	if r == nil {
+		return topic.NewSqlStorageValueNull(), nil
+	}
+
+	sqlStorage, diag := topic.NewSqlStorageValue(
+		map[string]attr.Type{
+			"retention_time_in_second": basetypes.Int64Type{},
+			"enabled":                  basetypes.BoolType{},
+		},
+		map[string]attr.Value{
+			"retention_time_in_second": schema.NewInt64Value(r.RetentionTimeInSecond),
+			"enabled":                  basetypes.NewBoolValue(r.Enabled),
+		},
+	)
+	if diag.HasError() {
+		return topic.SqlStorageValue{}, mapper.WrapDiagError(diag, "sql_storage", mapper.IntoTerraform)
+	}
+
+	return sqlStorage, nil
 }

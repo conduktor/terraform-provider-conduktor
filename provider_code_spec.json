@@ -1593,7 +1593,7 @@
                   "name": "configs",
                   "map": {
                     "description": "Must be valid Kafka Topic configs",
-                    "computed_optional_required": "optional",
+                    "computed_optional_required": "computed_optional",
                     "element_type": {
                       "string": {}
                     }

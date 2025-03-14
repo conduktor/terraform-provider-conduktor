@@ -53,18 +53,6 @@ func NewTopicConsoleResource(meta TopicConsoleMetadata, spec TopicConsoleSpec) T
 	}
 }
 
-//	func NewTopicConsoleMetadata(name string, cluster string, labels map[string]string, cVisibility string, dEditable bool, desc string, sql TopicSqlStorage) TopicConsoleMetadata {
-//		return TopicConsoleMetadata{
-//			Name:                  name,
-//			Cluster:               cluster,
-//			Labels:                labels,
-//			CatalogVisibility:     cVisibility,
-//			DescriptionIsEditable: dEditable,
-//			Description:           desc,
-//			SqlStorage:            sql,
-//		}
-//	}
-
 func (r *TopicConsoleResource) ToClientResource() (ctlresource.Resource, error) {
 	return model.ToClientResource(r)
 }
