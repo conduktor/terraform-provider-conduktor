@@ -11,14 +11,15 @@ description: |-
 Resource for managing Kafka topics.
 This resource allows you to create, read, update and delete kafka topics in Conduktor.
 
+> [!NOTE]
+> - It is recommended to set `lifecycle { prevent_destroy = true }` on production instances to prevent accidental topic deletion.
+> - This setting rejects plans that would destroy or recreate the topic, such as attempting to change uneditable attributes.
+> - Read more about it in the [Terraform docs](https://www.terraform.io/language/meta-arguments/lifecycle#prevent_destroy).
+
 > [!WARNING]
 > - This resource is officially supported from Conduktor Console `1.30.0` and newer.
 > - Usage of this resource with older Console version might result in unexpected behavior.
 > - e.g. `sql_storage` has been made available from Conduktor Console `1.30.0`.
-
-> [!NOTE]
-> - Updating one of the following fields will cause a topic to be recreated:
-> - `name` | `cluster` | `spec.partitions` | `spec.replication_factor`
 
 ## Example Usage
 
@@ -41,7 +42,7 @@ resource "conduktor_console_topic_v2" "simple" {
 }
 ```
 
-### Complex policy
+### Complex topic
 ```terraform
 resource "conduktor_console_topic_v2" "complex" {
   name    = "complex"
@@ -64,6 +65,22 @@ resource "conduktor_console_topic_v2" "complex" {
       "cleanup.policy" = "delete",
       "retention.ms"   = "60000"
     }
+  }
+}
+```
+
+### Topic with prevent_destroy
+```terraform
+resource "conduktor_console_topic_v2" "production_topic" {
+  name    = "production-topic"
+  cluster = "kafka-cluster"
+  spec = {
+    partitions         = 10
+    replication_factor = 1
+  }
+
+  lifecycle {
+    prevent_destroy = true
   }
 }
 ```

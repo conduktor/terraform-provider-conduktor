@@ -1497,7 +1497,7 @@
                 {
                   "name": "enabled",
                   "bool": {
-                    "computed_optional_required": "optional"
+                    "computed_optional_required": "computed_optional"
                   }
                 }
               ]
