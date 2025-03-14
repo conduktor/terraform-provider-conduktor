@@ -121,11 +121,11 @@ Optional:
 
 Required:
 
-- `retention_time_in_second` (Number)
+- `retention_time_in_second` (Number) When storing a topic's data for Conduktor SQL search, how long to retain the topic data in the database
 
 Optional:
 
-- `enabled` (Boolean)
+- `enabled` (Boolean) Whether to store topic data in the database, to enable Conduktor SQL search of a topic
 
 
 

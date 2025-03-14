@@ -1491,12 +1491,14 @@
                 {
                   "name": "retention_time_in_second",
                   "int64": {
+                    "description": "When storing a topic's data for Conduktor SQL search, how long to retain the topic data in the database",
                     "computed_optional_required": "required"
                   }
                 },
                 {
                   "name": "enabled",
                   "bool": {
+                    "description": "Whether to store topic data in the database, to enable Conduktor SQL search of a topic",
                     "computed_optional_required": "optional"
                   }
                 }

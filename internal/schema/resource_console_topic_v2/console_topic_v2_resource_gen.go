@@ -120,10 +120,14 @@ func ConsoleTopicV2ResourceSchema(ctx context.Context) schema.Schema {
 			"sql_storage": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"enabled": schema.BoolAttribute{
-						Optional: true,
+						Optional:            true,
+						Description:         "Whether to store topic data in the database, to enable Conduktor SQL search of a topic",
+						MarkdownDescription: "Whether to store topic data in the database, to enable Conduktor SQL search of a topic",
 					},
 					"retention_time_in_second": schema.Int64Attribute{
-						Required: true,
+						Required:            true,
+						Description:         "When storing a topic's data for Conduktor SQL search, how long to retain the topic data in the database",
+						MarkdownDescription: "When storing a topic's data for Conduktor SQL search, how long to retain the topic data in the database",
 					},
 				},
 				CustomType: SqlStorageType{
