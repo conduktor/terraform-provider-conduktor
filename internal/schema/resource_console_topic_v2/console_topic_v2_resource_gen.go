@@ -124,9 +124,6 @@ func ConsoleTopicV2ResourceSchema(ctx context.Context) schema.Schema {
 					},
 					"retention_time_in_second": schema.Int64Attribute{
 						Required: true,
-						PlanModifiers: []planmodifier.Int64{
-							int64planmodifier.RequiresReplace(),
-						},
 					},
 				},
 				CustomType: SqlStorageType{

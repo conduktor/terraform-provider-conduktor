@@ -18,7 +18,7 @@ This resource allows you to create, read, update and delete kafka topics in Cond
 
 > [!NOTE]
 > - Updating one of the following fields will cause a topic to be recreated:
-> - `name` | `cluster` | `sql_storage.retention_time_in_second` | `spec.partitions` | `spec.replication_factor`
+> - `name` | `cluster` | `spec.partitions` | `spec.replication_factor`
 
 ## Example Usage
 
