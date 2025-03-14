@@ -26,8 +26,8 @@ func ConsoleKafkaConnectV2ResourceSchema(ctx context.Context) schema.Schema {
 		Attributes: map[string]schema.Attribute{
 			"cluster": schema.StringAttribute{
 				Required:            true,
-				Description:         "Kafka cluster name linked with Kafka current connect server. Must exist in Conduktor Console",
-				MarkdownDescription: "Kafka cluster name linked with Kafka current connect server. Must exist in Conduktor Console",
+				Description:         "Kafka cluster name linked with the current Kafka connect server. Must already exist in Conduktor Console",
+				MarkdownDescription: "Kafka cluster name linked with the current Kafka connect server. Must already exist in Conduktor Console",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},

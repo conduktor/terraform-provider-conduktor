@@ -161,7 +161,7 @@ EOT
 
 ### Required
 
-- `cluster` (String) Kafka cluster name linked with Kafka current connect server. Must exist in Conduktor Console
+- `cluster` (String) Kafka cluster name linked with the current Kafka connect server. Must already exist in Conduktor Console
 - `name` (String) Kafka connect server name, must be unique, acts as an ID for import
 - `spec` (Attributes) Kafka connect server specification (see [below for nested schema](#nestedatt--spec))
 

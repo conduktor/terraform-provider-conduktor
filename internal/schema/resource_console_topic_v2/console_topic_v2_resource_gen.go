@@ -37,8 +37,8 @@ func ConsoleTopicV2ResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"cluster": schema.StringAttribute{
 				Required:            true,
-				Description:         "Kafka cluster name linked with Kafka topic. Must exist in Conduktor Console",
-				MarkdownDescription: "Kafka cluster name linked with Kafka topic. Must exist in Conduktor Console",
+				Description:         "Kafka cluster name linked with Kafka topic. Must already exist in Conduktor Console. Any change will require the Topic to be destroyed and re-created",
+				MarkdownDescription: "Kafka cluster name linked with Kafka topic. Must already exist in Conduktor Console. Any change will require the Topic to be destroyed and re-created",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
@@ -62,13 +62,13 @@ func ConsoleTopicV2ResourceSchema(ctx context.Context) schema.Schema {
 				ElementType:         types.StringType,
 				Optional:            true,
 				Computed:            true,
-				Description:         "Topic labels",
-				MarkdownDescription: "Topic labels",
+				Description:         "Custom labels for the topic resource. Used in Conduktor's topic catalog and UI",
+				MarkdownDescription: "Custom labels for the topic resource. Used in Conduktor's topic catalog and UI",
 			},
 			"name": schema.StringAttribute{
 				Required:            true,
-				Description:         "Topic name, must be unique, acts as an ID for import",
-				MarkdownDescription: "Topic name, must be unique, acts as an ID for import",
+				Description:         "Topic name, must be unique, acts as an ID for import. Any change will require the Topic to be destroyed and re-created",
+				MarkdownDescription: "Topic name, must be unique, acts as an ID for import. Any change will require the Topic to be destroyed and re-created",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
@@ -87,8 +87,8 @@ func ConsoleTopicV2ResourceSchema(ctx context.Context) schema.Schema {
 					},
 					"partitions": schema.Int64Attribute{
 						Required:            true,
-						Description:         "Immutable field. Any change will require the Topic to be destroyed and re created",
-						MarkdownDescription: "Immutable field. Any change will require the Topic to be destroyed and re created",
+						Description:         "Immutable field. Any change will require the Topic to be destroyed and re-created",
+						MarkdownDescription: "Immutable field. Any change will require the Topic to be destroyed and re-created",
 						PlanModifiers: []planmodifier.Int64{
 							int64planmodifier.RequiresReplace(),
 						},
@@ -98,8 +98,8 @@ func ConsoleTopicV2ResourceSchema(ctx context.Context) schema.Schema {
 					},
 					"replication_factor": schema.Int64Attribute{
 						Required:            true,
-						Description:         "Immutable field. Any change will require the Topic to be destroyed and re created",
-						MarkdownDescription: "Immutable field. Any change will require the Topic to be destroyed and re created",
+						Description:         "Immutable field. Any change will require the Topic to be destroyed and re-created",
+						MarkdownDescription: "Immutable field. Any change will require the Topic to be destroyed and re-created",
 						PlanModifiers: []planmodifier.Int64{
 							int64planmodifier.RequiresReplace(),
 						},
