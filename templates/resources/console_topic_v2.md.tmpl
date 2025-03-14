@@ -11,6 +11,11 @@ description: |-
 Resource for managing Kafka topics.
 This resource allows you to create, read, update and delete kafka topics in Conduktor.
 
+> [!WARNING]
+> - This resource is officially supported from Conduktor Console `1.30.0` and newer.
+> - Usage of this resource with older Console version might result in unexpected behavior.
+> - e.g. `sql_storage` has been made available from Conduktor Console `1.30.0`.
+
 ## Example Usage
 
 ### Simple topic

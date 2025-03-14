@@ -23,6 +23,8 @@ func topicV2ApiGetPath(cluster string, topicName string) string {
 	return fmt.Sprintf("/public/kafka/v2/cluster/%s/topic/%s", cluster, topicName)
 }
 
+const topicMininumVersion = "v1.30.0"
+
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &TopicV2Resource{}
 var _ resource.ResourceWithImportState = &TopicV2Resource{}
