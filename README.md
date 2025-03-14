@@ -348,11 +348,9 @@ We are currently reviewing the following resources:
   - [KsqlDBCluster](https://docs.conduktor.io/platform/reference/resource-reference/console/#ksqldbcluster)
   - [Alert](https://docs.conduktor.io/platform/reference/resource-reference/console/#alert)
 2. Kafka resources:
-  - [Topic](https://docs.conduktor.io/platform/reference/resource-reference/kafka/#topic)
   - [Subject](https://docs.conduktor.io/platform/reference/resource-reference/kafka/#subject)
   - [Connector](https://docs.conduktor.io/platform/reference/resource-reference/kafka/#connector)
 3. Self-service resources:
-  - [TopicPolicy](https://docs.conduktor.io/platform/reference/resource-reference/self-service/#topic-policy)
   - [ApplicationInstancePermission](https://docs.conduktor.io/platform/reference/resource-reference/self-service/#application-instance-permissions)
   - [ApplicationGroup](https://docs.conduktor.io/platform/reference/resource-reference/self-service/#application-group)
 4. Gateway resources:

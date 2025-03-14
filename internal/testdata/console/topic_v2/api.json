@@ -1,0 +1,27 @@
+{
+  "kind": "Topic",
+  "apiVersion": "v2",
+  "metadata": {
+    "name": "topic",
+    "cluster": "cluster",
+    "labels": {
+      "kind": "topic"
+    },
+    "catalogVisibility": "PRIVATE",
+    "descriptionIsEditable": true,
+    "description": "This is a topic",
+    "sqlStorage": {
+      "retentionTimeInSecond": 86400,
+      "enabled": true
+    }
+  },
+  "spec": {
+    "partitions": 1,
+    "replicationFactor": 1,
+    "configs": {
+      "min.insync.replicas": "2",
+      "cleanup.policy": "delete",
+      "retention.ms": "60000"
+    }
+  }
+}
