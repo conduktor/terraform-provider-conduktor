@@ -52,28 +52,27 @@ func TestAccGenericExample2Resource(t *testing.T) {
 			{
 				Config: providerConfigConsole + test.TestAccExample(t, "resources", "conduktor_generic", "embedded.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("conduktor_generic.embedded", "name", "bob@company.io"),
+					resource.TestCheckResourceAttr("conduktor_generic.embedded", "name", "martin@company.io"),
 					resource.TestCheckResourceAttrWith("conduktor_generic.embedded", "manifest",
 						test.TestCheckResourceAttrContainsStringsFunc(
-							"\"name\": \"bob@company.io\"",
-							"\"firstName\": \"Bob\"",
+							"\"name\": \"martin@company.io\"",
+							"\"firstName\": \"Martin\"",
 							"\"lastName\": \"Smith\"",
 						)),
 				),
 			},
-			// Commenting out for now as it makes tests fail
-			// {
-			// 	Config: providerConfigConsole + test.TestAccExample(t, "resources", "conduktor_generic", "raw_yaml.tf"),
-			// 	Check: resource.ComposeAggregateTestCheckFunc(
-			// 		resource.TestCheckResourceAttr("conduktor_generic.raw_yaml", "name", "bob@company.io"),
-			// 		resource.TestCheckResourceAttrWith("conduktor_generic.raw_yaml", "manifest",
-			// 			test.TestCheckResourceAttrContainsStringsFunc(
-			// 				"\"name\": \"bob@company.io\"",
-			// 				"\"firstName\": \"Bob\"",
-			// 				"\"lastName\": \"Smith\"",
-			// 			)),
-			// 	),
-			// },
+			{
+				Config: providerConfigConsole + test.TestAccExample(t, "resources", "conduktor_generic", "raw_yaml.tf"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("conduktor_generic.raw_yaml", "name", "alice@company.io"),
+					resource.TestCheckResourceAttrWith("conduktor_generic.raw_yaml", "manifest",
+						test.TestCheckResourceAttrContainsStringsFunc(
+							"\"name\": \"alice@company.io\"",
+							"\"firstName\": \"Alice\"",
+							"\"lastName\": \"Smith\"",
+						)),
+				),
+			},
 		},
 	})
 }

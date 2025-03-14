@@ -1,0 +1,27 @@
+---
+page_title: "Conduktor : conduktor_console_topic_policy_v1 "
+subcategory: "self-serve/v1"
+description: |-
+    Resource for managing Conduktor Console self service topic policies.
+    This resource allows you to create, read, update and delete topic policies in Conduktor.
+---
+
+# {{ .Name }}
+
+Resource for managing Conduktor topic policies.
+This resource allows you to create, read, update and delete topic policies in Conduktor.
+
+> [!NOTE]
+> - This resource is officially supported from Conduktor Console `1.30.0` and newer.
+> - Usage of this resource with older Console version might produce errors since the API might not support all types of constraints.
+
+## Example Usage
+
+### Simple topic policy
+{{tffile "examples/resources/conduktor_console_topic_policy_v1/simple.tf"}}
+
+### Complex topic policy
+{{tffile "examples/resources/conduktor_console_topic_policy_v1/complex.tf"}}
+
+
+{{ .SchemaMarkdown }}

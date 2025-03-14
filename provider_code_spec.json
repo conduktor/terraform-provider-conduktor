@@ -1187,7 +1187,7 @@
           {
             "name": "cluster",
             "string": {
-              "description": "Kafka cluster name linked with Kafka current connect server. Must exist in Conduktor Console",
+              "description": "Kafka cluster name linked with the current Kafka connect server. Must already exist in Conduktor Console",
               "computed_optional_required": "required",
               "plan_modifiers": [
                 {
@@ -1356,6 +1356,432 @@
       }
     },
     {
+      "name": "console_topic_v2",
+      "schema": {
+        "attributes": [
+          {
+            "name": "name",
+            "string": {
+              "description": "Topic name, must be unique, acts as an ID for import. Any change will require the Topic to be destroyed and re-created",
+              "computed_optional_required": "required",
+              "plan_modifiers": [
+                {
+                  "custom": {
+                    "imports": [
+                      {
+                        "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+                      }
+                    ],
+                    "schema_definition": "stringplanmodifier.RequiresReplace()"
+                  }
+                }
+              ],
+              "validators": [
+                {
+                  "custom": {
+                    "imports": [
+                      {
+                        "path": "regexp"
+                      },
+                      {
+                        "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                      }
+                    ],
+                    "schema_definition": "stringvalidator.RegexMatches(regexp.MustCompile(\"^[0-9a-z\\\\_\\\\-.]+$\"), \"\")"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "cluster",
+            "string": {
+              "description": "Kafka cluster name linked with Kafka topic. Must already exist in Conduktor Console. Any change will require the Topic to be destroyed and re-created",
+              "computed_optional_required": "required",
+              "plan_modifiers": [
+                {
+                  "custom": {
+                    "imports": [
+                      {
+                        "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+                      }
+                    ],
+                    "schema_definition": "stringplanmodifier.RequiresReplace()"
+                  }
+                }
+              ],
+              "validators": [
+                {
+                  "custom": {
+                    "imports": [
+                      {
+                        "path": "regexp"
+                      },
+                      {
+                        "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                      }
+                    ],
+                    "schema_definition": "stringvalidator.RegexMatches(regexp.MustCompile(\"^[0-9a-z\\\\_\\\\-.]+$\"), \"\")"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "labels",
+            "map": {
+              "description": "Custom labels for the topic resource. Used in Conduktor's topic catalog and UI",
+              "computed_optional_required": "computed_optional",
+              "element_type": {
+                "string": {}
+              }
+            }
+          },
+          {
+            "name": "catalog_visibility",
+            "string": {
+              "description": "Catalog visibility for the topic, valid values are: PRIVATE, PUBLIC",
+              "computed_optional_required": "optional",
+              "validators": [
+                {
+                  "custom": {
+                    "imports": [
+                      {
+                        "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                      },
+                      {
+                        "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
+                      }
+                    ],
+                    "schema_definition": "stringvalidator.OneOf(validation.ValidCatalogVisibilities...)"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "description_is_editable",
+            "bool": {
+              "description": "is optional (defaults 'true'). Defines whether the description can be updated in the UI",
+              "computed_optional_required": "computed_optional",
+              "default": {
+                "custom": {
+                  "imports": [
+                    {
+                      "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+                    }
+                  ],
+                  "schema_definition": "booldefault.StaticBool(true)"
+                }
+              }
+            }
+          },
+          {
+            "name": "description",
+            "string": {
+              "description": "Topic description",
+              "computed_optional_required": "optional"
+            }
+          },
+          {
+            "name": "sql_storage",
+            "single_nested": {
+              "computed_optional_required": "optional",
+              "attributes": [
+                {
+                  "name": "retention_time_in_second",
+                  "int64": {
+                    "description": "When storing a topic's data for Conduktor SQL search, how long to retain the topic data in the database",
+                    "computed_optional_required": "required"
+                  }
+                },
+                {
+                  "name": "enabled",
+                  "bool": {
+                    "description": "Whether to store topic data in the database, to enable Conduktor SQL search of a topic",
+                    "computed_optional_required": "computed_optional"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "spec",
+            "single_nested": {
+              "computed_optional_required": "required",
+              "description": "Topic specification",
+              "attributes": [
+                {
+                  "name": "partitions",
+                  "int64": {
+                    "description": "Immutable field. Any change will require the Topic to be destroyed and re-created",
+                    "computed_optional_required": "required",
+                    "validators": [
+                      {
+                        "custom": {
+                          "imports": [
+                            {
+                              "path": "regexp"
+                            },
+                            {
+                              "path": "github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+                            }
+                          ],
+                          "schema_definition": "int64validator.Between(1,2147483647)"
+                        }
+                      }
+                    ],
+                    "plan_modifiers": [
+                      {
+                        "custom": {
+                          "imports": [
+                            {
+                              "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+                            }
+                          ],
+                          "schema_definition": "int64planmodifier.RequiresReplace()"
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "replication_factor",
+                  "int64": {
+                    "description": "Immutable field. Any change will require the Topic to be destroyed and re-created",
+                    "computed_optional_required": "required",
+                    "validators": [
+                      {
+                        "custom": {
+                          "imports": [
+                            {
+                              "path": "regexp"
+                            },
+                            {
+                              "path": "github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+                            }
+                          ],
+                          "schema_definition": "int64validator.Between(1,2147483647)"
+                        }
+                      }
+                    ],
+                    "plan_modifiers": [
+                      {
+                        "custom": {
+                          "imports": [
+                            {
+                              "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+                            }
+                          ],
+                          "schema_definition": "int64planmodifier.RequiresReplace()"
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "configs",
+                  "map": {
+                    "description": "Must be valid Kafka Topic configs",
+                    "computed_optional_required": "computed_optional",
+                    "element_type": {
+                      "string": {}
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "console_topic_policy_v1",
+      "schema": {
+        "attributes": [
+          {
+            "name": "name",
+            "string": {
+              "description": "Topic Policy name, must be unique, acts as an ID for import",
+              "computed_optional_required": "required",
+              "plan_modifiers": [
+                {
+                  "custom": {
+                    "imports": [
+                      {
+                        "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+                      }
+                    ],
+                    "schema_definition": "stringplanmodifier.RequiresReplace()"
+                  }
+                }
+              ],
+              "validators": [
+                {
+                  "custom": {
+                    "imports": [
+                      {
+                        "path": "regexp"
+                      },
+                      {
+                        "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                      }
+                    ],
+                    "schema_definition": "stringvalidator.RegexMatches(regexp.MustCompile(\"^[0-9a-z\\\\_\\\\-]+$\"), \"\")"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "spec",
+            "single_nested": {
+              "computed_optional_required": "required",
+              "description": "Topic Policy specification",
+              "attributes": [
+                {
+                  "name": "policies",
+                  "map_nested": {
+                    "description": "Map of policies",
+                    "computed_optional_required": "required",
+                    "nested_object": {
+                      "attributes": [
+                        {
+                          "name": "allowed_keys",
+                          "single_nested": {
+                            "description": "Validates the keys are within an allowed key list",
+                            "computed_optional_required": "optional",
+                            "attributes": [
+                              {
+                                "name": "optional",
+                                "bool": {
+                                  "description": "If set to true, the policy is optional",
+                                  "computed_optional_required": "computed_optional"
+                                }
+                              },
+                              {
+                                "name": "keys",
+                                "set": {
+                                  "computed_optional_required": "required",
+                                  "element_type": {
+                                    "string": {}
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "name": "match",
+                          "single_nested": {
+                            "description": "Validates using Regular Expression",
+                            "computed_optional_required": "optional",
+                            "attributes": [
+                              {
+                                "name": "optional",
+                                "bool": {
+                                  "description": "If set to true, the policy is optional",
+                                  "computed_optional_required": "computed_optional"
+                                }
+                              },
+                              {
+                                "name": "pattern",
+                                "string": {
+                                  "computed_optional_required": "required"
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "name": "none_of",
+                          "single_nested": {
+                            "description": "Validates against a list of predefined options",
+                            "computed_optional_required": "optional",
+                            "attributes": [
+                              {
+                                "name": "optional",
+                                "bool": {
+                                  "description": "If set to true, the policy is optional",
+                                  "computed_optional_required": "computed_optional"
+                                }
+                              },
+                              {
+                                "name": "values",
+                                "set": {
+                                  "computed_optional_required": "required",
+                                  "element_type": {
+                                    "string": {}
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "name": "one_of",
+                          "single_nested": {
+                            "description": "Validates against a list of predefined options",
+                            "computed_optional_required": "optional",
+                            "attributes": [
+                              {
+                                "name": "optional",
+                                "bool": {
+                                  "description": "If set to true, the policy is optional",
+                                  "computed_optional_required": "computed_optional"
+                                }
+                              },
+                              {
+                                "name": "values",
+                                "set": {
+                                  "computed_optional_required": "required",
+                                  "element_type": {
+                                    "string": {}
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "name": "range",
+                          "single_nested": {
+                            "description": "Validates a range of numbers",
+                            "computed_optional_required": "optional",
+                            "attributes": [
+                              {
+                                "name": "optional",
+                                "bool": {
+                                  "description": "If set to true, the policy is optional",
+                                  "computed_optional_required": "computed_optional"
+                                }
+                              },
+                              {
+                                "name": "min",
+                                "int64": {
+                                  "computed_optional_required": "required"
+                                }
+                              },
+                              {
+                                "name": "max",
+                                "int64": {
+                                  "computed_optional_required": "required"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "console_user_v2",
       "schema": {
         "attributes": [
@@ -1423,7 +1849,7 @@
                         {
                           "name": "name",
                           "string": {
-                            "description": "Name of the resource to apply permission could be a topic, a cluster, a consumer group, etc. depending on resource_type",
+                            "description": "Name of the resource to apply permission to could be a topic, a cluster, a consumer group, etc. depending on resource_type",
                             "computed_optional_required": "optional"
                           }
                         },

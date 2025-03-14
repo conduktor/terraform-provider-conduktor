@@ -1,15 +1,15 @@
 resource "conduktor_generic" "embedded" {
   kind    = "User"
   version = "v2"
-  name    = "bob@company.io"
+  name    = "martin@company.io"
   manifest = yamlencode({
     apiVersion = "v2"
     kind       = "User"
     metadata = {
-      name = "bob@company.io"
+      name = "martin@company.io"
     }
     spec = {
-      firstName = "Bob"
+      firstName = "Martin"
       lastName  = "Smith"
       permissions = [
         {

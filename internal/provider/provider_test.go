@@ -38,6 +38,10 @@ func testClient(mode client.Mode) (*client.Client, error) {
 	return client.Make(context.Background(), mode, apiParameter, "test")
 }
 
+// Temporary fix for linteger error: `fetchClientVersion` - `mode` always receives `client.CONSOLE` (`"Console"`).
+// TODO: to remove once the fetchClientVersion will be used by a Gateway resource.
+var _, _ = fetchClientVersion(client.GATEWAY)
+
 // Fetch current client version based on the mode.
 // Used for version checks in acceptance tests.
 func fetchClientVersion(mode client.Mode) (string, error) {
