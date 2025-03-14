@@ -121,7 +121,7 @@ func ConsoleTopicV2ResourceSchema(ctx context.Context) schema.Schema {
 				Attributes: map[string]schema.Attribute{
 					"enabled": schema.BoolAttribute{
 						Optional:            true,
-						Computed: true,
+						Computed:            true,
 						Description:         "Whether to store topic data in the database, to enable Conduktor SQL search of a topic",
 						MarkdownDescription: "Whether to store topic data in the database, to enable Conduktor SQL search of a topic",
 					},
