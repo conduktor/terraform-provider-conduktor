@@ -26,3 +26,17 @@ This resource allows you to create, read, update and delete kafka topics in Cond
 
 
 {{ .SchemaMarkdown }}
+
+## Import
+
+In order to import a Kafka topics into Conduktor, you need to know the Kafka cluster ID and the Kafka Topic ID.
+
+The import ID is constructed as follows: `< cluster_id >/< topic_id >`.
+
+For example, using an [`import` block](https://developer.hashicorp.com/terraform/language/import) :
+{{tffile "examples/resources/conduktor_console_kafka_connect_v2/import.tf"}}
+
+Using the `terraform import` command:
+```shell
+terraform import conduktor_console_kafka_connect_v2.example mini-cluster/import-connect
+```

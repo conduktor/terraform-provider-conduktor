@@ -108,3 +108,22 @@ Optional:
 
 
 
+
+## Import
+
+In order to import a Kafka topics into Conduktor, you need to know the Kafka cluster ID and the Kafka Topic ID.
+
+The import ID is constructed as follows: `< cluster_id >/< topic_id >`.
+
+For example, using an [`import` block](https://developer.hashicorp.com/terraform/language/import) :
+```terraform
+import {
+  to = conduktor_console_kafka_connect_v2.example
+  id = "mini-cluster/import-connect" # Import "import-connect" Connect server for "mini-cluster" Kafka cluster
+}
+```
+
+Using the `terraform import` command:
+```shell
+terraform import conduktor_console_kafka_connect_v2.example mini-cluster/import-connect
+```
