@@ -12,9 +12,10 @@ Resource for managing Kafka topics.
 This resource allows you to create, read, update and delete kafka topics in Conduktor.
 
 > [!NOTE]
-> - It is recommended to set `lifecycle { prevent_destroy = true }` on production instances to prevent accidental topic deletion.
+> - It is essential to set `lifecycle { prevent_destroy = true }` on production instances to prevent accidental topic deletion and data loss.
 > - This setting rejects plans that would destroy or recreate the topic, such as attempting to change uneditable attributes.
 > - Read more about it in the [Terraform docs](https://www.terraform.io/language/meta-arguments/lifecycle#prevent_destroy).
+> - Some providers may set default configs that will appear after the initial apply. In these cases resource definitions may need to be updated e.g. "cleanup.policy" = "delete" after creating a Redpanda topic
 
 > [!WARNING]
 > - This resource is officially supported from Conduktor Console `1.30.0` and newer.
