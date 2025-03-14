@@ -15,21 +15,22 @@ resource "conduktor_console_topic_policy_v1" "complex" {
       "spec.configs.retention.ms" = {
         range = {
           optional = false
-          max      = 3600000
-          min      = 60000
+          max      = 604800000
+          min      = 3600000
         }
       },
       "spec.replicationFactor" = {
         none_of = {
           optional = true
           values = [
-            "3",
+            "1",
+            "2"
           ]
         }
       },
       "metadata.name" = {
         match = {
-          pattern = "^click.(?<event>[a-z0-9-]+).(avro|json)$"
+          pattern = "^website-analytics.(?<event>[a-z0-9-]+).(avro|json)$"
         }
       },
       "spec.configs" = {
@@ -43,5 +44,3 @@ resource "conduktor_console_topic_policy_v1" "complex" {
     }
   }
 }
-
-

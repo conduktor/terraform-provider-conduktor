@@ -69,18 +69,22 @@ This repository contains the Conduktor Terraform provider, which defines Condukt
 
 - [Console user](./docs/resources/console_user_v2.md)
 - [Console group](./docs/resources/console_group_v2.md)
-- [Kafka Clusters with Schema Registry](./docs/resources/console_kafka_cluster_v2.md)
-- [Kafka Connect Server](./docs/resources/console_kafka_connect_v2.md)
+- [Kafka clusters with schema registry](./docs/resources/console_kafka_cluster_v2.md)
+- [Kafka connect server](./docs/resources/console_kafka_connect_v2.md)
 
 ### Gateway resources
 
-- [Gateway Service Account](./docs/resources/gateway_service_account_v2.md)
-- [Gateway Interceptor](./docs/resources/gateway_interceptor_v2.md)
+- [Gateway service account](./docs/resources/gateway_service_account_v2.md)
+- [Gateway interceptor](./docs/resources/gateway_interceptor_v2.md)
 
 ### Self-service resources
 
 - [Console application](./docs/resources/console_application_v1.md)
 - [Console application instance](./docs/resources/console_application_instance_v1.md)
+- [Topic policy](./docs/resources/console_topic_policy_v1.md)
+
+### Kafka resources
+- [Topic](./docs/resources/console_topic_v2.md)
 
 ### Generic resource
 
