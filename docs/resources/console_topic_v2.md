@@ -16,6 +16,10 @@ This resource allows you to create, read, update and delete kafka topics in Cond
 > - Usage of this resource with older Console version might result in unexpected behavior.
 > - e.g. `sql_storage` has been made available from Conduktor Console `1.30.0`.
 
+> [!NOTE]
+> - Updating one of the following fields will cause a topic to be recreated:
+> - `name` | `cluster` | `sql_storage.retention_time_in_second` | `spec.partitions` | `spec.replication_factor`
+
 ## Example Usage
 
 ### Simple topic
@@ -118,12 +122,12 @@ The import ID is constructed as follows: `< cluster_id >/< topic_id >`.
 For example, using an [`import` block](https://developer.hashicorp.com/terraform/language/import) :
 ```terraform
 import {
-  to = conduktor_console_kafka_connect_v2.example
-  id = "mini-cluster/import-connect" # Import "import-connect" Connect server for "mini-cluster" Kafka cluster
+  to = conduktor_console_topic_v2.example
+  id = "my-cluster/my-topic" # Import "my-topic" Topic for "my-cluster" Kafka cluster
 }
 ```
 
 Using the `terraform import` command:
 ```shell
-terraform import conduktor_console_kafka_connect_v2.example mini-cluster/import-connect
+terraform import conduktor_console_topic_v2.example my-cluster/my-topic
 ```

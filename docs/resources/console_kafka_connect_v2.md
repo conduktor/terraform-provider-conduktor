@@ -238,5 +238,5 @@ import {
 
 Using the `terraform import` command:
 ```shell
-terraform import conduktor_console_topic_v2.example my-cluster/my-topic
+terraform import conduktor_console_kafka_connect_v2.example mini-cluster/import-connect
 ```
