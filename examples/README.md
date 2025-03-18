@@ -9,3 +9,5 @@ The document generation tool looks for files in the following locations by defau
 * **provider/multi_provider.tf** example file for the provider index page in multi client configuration
 * **data-sources/`full data source name`/data-source.tf** example file for the named data source page
 * **resources/`full resource name`/resource.tf** example file for the named data source page
+
+In addition to individual resources a working project structure is provided to see all resources working together.
