@@ -3,7 +3,6 @@ resource "conduktor_console_application_instance_v1" "website-analytics-dev" {
   name        = "website-analytics-dev"
   application = "website-analytics"
   spec = {
-    # cluster = "local-kafka-cluster"
     cluster = "my-cluster"
     resources = [
       {
@@ -20,20 +19,7 @@ resource "conduktor_console_application_instance_v1" "website-analytics-dev" {
         type         = "CONSUMER_GROUP"
         name         = "website-analytics."
         pattern_type = "PREFIXED"
-      },
-      #   {
-      #   type         = "CONNECTOR"
-      #   connect_cluster = "kafka-connect"
-      #   name         = "website-analytics."
-      #   pattern_type = "PREFIXED"
-      #  }
-      # {
-      #   type = "CONNECTOR"
-      #   # connect_cluster = "local-connect"
-      #   connect_cluster = "kafka-connect"
-      #   name            = "website-analytics."
-      #   pattern_type    = "PREFIXED"
-      # }
+      }
     ]
     topic_policy_ref = [
       "generic-dev-topic-policy"

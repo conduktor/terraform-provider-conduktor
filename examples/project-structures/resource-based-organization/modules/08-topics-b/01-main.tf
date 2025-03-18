@@ -4,7 +4,7 @@ resource "conduktor_console_topic_v2" "website-analytics-admin-json" {
   labels = {
     data-criticality                    = "",
     replication                         = "none",
-    url                                 = "http:stu.com",
+    url                                 = "https://stu.com",
     "conduktor.io/application"          = "website-analytics"
     "conduktor.io/application-instance" = "website-analytics-dev"
   }
