@@ -21,12 +21,11 @@ func (r GroupConsoleMetadata) String() string {
 }
 
 type GroupConsoleSpec struct {
-	Description               string             `json:"description,omitempty"`
-	DisplayName               string             `json:"displayName"`
-	ExternalGroups            []string           `json:"externalGroups"`
-	Members                   []string           `json:"members"`
-	MembersFromExternalGroups []string           `json:"membersFromExternalGroups"`
-	Permissions               []model.Permission `json:"permissions"`
+	Description    string             `json:"description,omitempty"`
+	DisplayName    string             `json:"displayName"`
+	ExternalGroups []string           `json:"externalGroups"`
+	Members        []string           `json:"members"`
+	Permissions    []model.Permission `json:"permissions"`
 }
 
 type GroupConsoleResource struct {
