@@ -65,13 +65,6 @@ func ConsoleGroupV2ResourceSchema(ctx context.Context) schema.Schema {
 						MarkdownDescription: "Set of members of the group",
 						Default:             setdefault.StaticValue(basetypes.NewSetValueMust(types.StringType, []attr.Value{})),
 					},
-					"members_from_external_groups": schema.SetAttribute{
-						ElementType:         types.StringType,
-						Computed:            true,
-						Description:         "Set of members of the group",
-						MarkdownDescription: "Set of members of the group",
-						Default:             setdefault.StaticValue(basetypes.NewSetValueMust(types.StringType, []attr.Value{})),
-					},
 					"permissions": schema.SetNestedAttribute{
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
@@ -243,24 +236,6 @@ func (t SpecType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue)
 			fmt.Sprintf(`members expected to be basetypes.SetValue, was: %T`, membersAttribute))
 	}
 
-	membersFromExternalGroupsAttribute, ok := attributes["members_from_external_groups"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`members_from_external_groups is missing from object`)
-
-		return nil, diags
-	}
-
-	membersFromExternalGroupsVal, ok := membersFromExternalGroupsAttribute.(basetypes.SetValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`members_from_external_groups expected to be basetypes.SetValue, was: %T`, membersFromExternalGroupsAttribute))
-	}
-
 	permissionsAttribute, ok := attributes["permissions"]
 
 	if !ok {
@@ -284,13 +259,12 @@ func (t SpecType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue)
 	}
 
 	return SpecValue{
-		Description:               descriptionVal,
-		DisplayName:               displayNameVal,
-		ExternalGroups:            externalGroupsVal,
-		Members:                   membersVal,
-		MembersFromExternalGroups: membersFromExternalGroupsVal,
-		Permissions:               permissionsVal,
-		state:                     attr.ValueStateKnown,
+		Description:    descriptionVal,
+		DisplayName:    displayNameVal,
+		ExternalGroups: externalGroupsVal,
+		Members:        membersVal,
+		Permissions:    permissionsVal,
+		state:          attr.ValueStateKnown,
 	}, diags
 }
 
@@ -429,24 +403,6 @@ func NewSpecValue(attributeTypes map[string]attr.Type, attributes map[string]att
 			fmt.Sprintf(`members expected to be basetypes.SetValue, was: %T`, membersAttribute))
 	}
 
-	membersFromExternalGroupsAttribute, ok := attributes["members_from_external_groups"]
-
-	if !ok {
-		diags.AddError(
-			"Attribute Missing",
-			`members_from_external_groups is missing from object`)
-
-		return NewSpecValueUnknown(), diags
-	}
-
-	membersFromExternalGroupsVal, ok := membersFromExternalGroupsAttribute.(basetypes.SetValue)
-
-	if !ok {
-		diags.AddError(
-			"Attribute Wrong Type",
-			fmt.Sprintf(`members_from_external_groups expected to be basetypes.SetValue, was: %T`, membersFromExternalGroupsAttribute))
-	}
-
 	permissionsAttribute, ok := attributes["permissions"]
 
 	if !ok {
@@ -470,13 +426,12 @@ func NewSpecValue(attributeTypes map[string]attr.Type, attributes map[string]att
 	}
 
 	return SpecValue{
-		Description:               descriptionVal,
-		DisplayName:               displayNameVal,
-		ExternalGroups:            externalGroupsVal,
-		Members:                   membersVal,
-		MembersFromExternalGroups: membersFromExternalGroupsVal,
-		Permissions:               permissionsVal,
-		state:                     attr.ValueStateKnown,
+		Description:    descriptionVal,
+		DisplayName:    displayNameVal,
+		ExternalGroups: externalGroupsVal,
+		Members:        membersVal,
+		Permissions:    permissionsVal,
+		state:          attr.ValueStateKnown,
 	}, diags
 }
 
@@ -548,17 +503,16 @@ func (t SpecType) ValueType(ctx context.Context) attr.Value {
 var _ basetypes.ObjectValuable = SpecValue{}
 
 type SpecValue struct {
-	Description               basetypes.StringValue `tfsdk:"description"`
-	DisplayName               basetypes.StringValue `tfsdk:"display_name"`
-	ExternalGroups            basetypes.SetValue    `tfsdk:"external_groups"`
-	Members                   basetypes.SetValue    `tfsdk:"members"`
-	MembersFromExternalGroups basetypes.SetValue    `tfsdk:"members_from_external_groups"`
-	Permissions               basetypes.SetValue    `tfsdk:"permissions"`
-	state                     attr.ValueState
+	Description    basetypes.StringValue `tfsdk:"description"`
+	DisplayName    basetypes.StringValue `tfsdk:"display_name"`
+	ExternalGroups basetypes.SetValue    `tfsdk:"external_groups"`
+	Members        basetypes.SetValue    `tfsdk:"members"`
+	Permissions    basetypes.SetValue    `tfsdk:"permissions"`
+	state          attr.ValueState
 }
 
 func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
-	attrTypes := make(map[string]tftypes.Type, 6)
+	attrTypes := make(map[string]tftypes.Type, 5)
 
 	var val tftypes.Value
 	var err error
@@ -571,9 +525,6 @@ func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) 
 	attrTypes["members"] = basetypes.SetType{
 		ElemType: types.StringType,
 	}.TerraformType(ctx)
-	attrTypes["members_from_external_groups"] = basetypes.SetType{
-		ElemType: types.StringType,
-	}.TerraformType(ctx)
 	attrTypes["permissions"] = basetypes.SetType{
 		ElemType: PermissionsValue{}.Type(ctx),
 	}.TerraformType(ctx)
@@ -582,7 +533,7 @@ func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) 
 
 	switch v.state {
 	case attr.ValueStateKnown:
-		vals := make(map[string]tftypes.Value, 6)
+		vals := make(map[string]tftypes.Value, 5)
 
 		val, err = v.Description.ToTerraformValue(ctx)
 
@@ -615,14 +566,6 @@ func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) 
 		}
 
 		vals["members"] = val
-
-		val, err = v.MembersFromExternalGroups.ToTerraformValue(ctx)
-
-		if err != nil {
-			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
-		}
-
-		vals["members_from_external_groups"] = val
 
 		val, err = v.Permissions.ToTerraformValue(ctx)
 
@@ -712,9 +655,6 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 			"members": basetypes.SetType{
 				ElemType: types.StringType,
 			},
-			"members_from_external_groups": basetypes.SetType{
-				ElemType: types.StringType,
-			},
 			"permissions": basetypes.SetType{
 				ElemType: PermissionsValue{}.Type(ctx),
 			},
@@ -743,40 +683,6 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 			"members": basetypes.SetType{
 				ElemType: types.StringType,
 			},
-			"members_from_external_groups": basetypes.SetType{
-				ElemType: types.StringType,
-			},
-			"permissions": basetypes.SetType{
-				ElemType: PermissionsValue{}.Type(ctx),
-			},
-		}), diags
-	}
-
-	var membersFromExternalGroupsVal basetypes.SetValue
-	switch {
-	case v.MembersFromExternalGroups.IsUnknown():
-		membersFromExternalGroupsVal = types.SetUnknown(types.StringType)
-	case v.MembersFromExternalGroups.IsNull():
-		membersFromExternalGroupsVal = types.SetNull(types.StringType)
-	default:
-		var d diag.Diagnostics
-		membersFromExternalGroupsVal, d = types.SetValue(types.StringType, v.MembersFromExternalGroups.Elements())
-		diags.Append(d...)
-	}
-
-	if diags.HasError() {
-		return types.ObjectUnknown(map[string]attr.Type{
-			"description":  basetypes.StringType{},
-			"display_name": basetypes.StringType{},
-			"external_groups": basetypes.SetType{
-				ElemType: types.StringType,
-			},
-			"members": basetypes.SetType{
-				ElemType: types.StringType,
-			},
-			"members_from_external_groups": basetypes.SetType{
-				ElemType: types.StringType,
-			},
 			"permissions": basetypes.SetType{
 				ElemType: PermissionsValue{}.Type(ctx),
 			},
@@ -790,9 +696,6 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 			ElemType: types.StringType,
 		},
 		"members": basetypes.SetType{
-			ElemType: types.StringType,
-		},
-		"members_from_external_groups": basetypes.SetType{
 			ElemType: types.StringType,
 		},
 		"permissions": basetypes.SetType{
@@ -811,12 +714,11 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 	objVal, diags := types.ObjectValue(
 		attributeTypes,
 		map[string]attr.Value{
-			"description":                  v.Description,
-			"display_name":                 v.DisplayName,
-			"external_groups":              externalGroupsVal,
-			"members":                      membersVal,
-			"members_from_external_groups": membersFromExternalGroupsVal,
-			"permissions":                  permissions,
+			"description":     v.Description,
+			"display_name":    v.DisplayName,
+			"external_groups": externalGroupsVal,
+			"members":         membersVal,
+			"permissions":     permissions,
 		})
 
 	return objVal, diags
@@ -853,10 +755,6 @@ func (v SpecValue) Equal(o attr.Value) bool {
 		return false
 	}
 
-	if !v.MembersFromExternalGroups.Equal(other.MembersFromExternalGroups) {
-		return false
-	}
-
 	if !v.Permissions.Equal(other.Permissions) {
 		return false
 	}
@@ -880,9 +778,6 @@ func (v SpecValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 			ElemType: types.StringType,
 		},
 		"members": basetypes.SetType{
-			ElemType: types.StringType,
-		},
-		"members_from_external_groups": basetypes.SetType{
 			ElemType: types.StringType,
 		},
 		"permissions": basetypes.SetType{

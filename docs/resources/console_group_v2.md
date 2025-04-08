@@ -82,10 +82,6 @@ Optional:
 - `members` (Set of String) Set of members of the group
 - `permissions` (Attributes Set) Set of all group permissions (see [below for nested schema](#nestedatt--spec--permissions))
 
-Read-Only:
-
-- `members_from_external_groups` (Set of String) Set of members of the group
-
 <a id="nestedatt--spec--permissions"></a>
 ### Nested Schema for `spec.permissions`
 
