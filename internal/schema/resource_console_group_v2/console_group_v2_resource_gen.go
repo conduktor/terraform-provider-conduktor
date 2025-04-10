@@ -5,6 +5,7 @@ package resource_console_group_v2
 import (
 	"context"
 	"fmt"
+	"github.com/conduktor/terraform-provider-conduktor/internal/planmodifiers"
 	"github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -73,6 +74,7 @@ func ConsoleGroupV2ResourceSchema(ctx context.Context) schema.Schema {
 						MarkdownDescription: "Set of members of the group (managed by backend, not tracked by Terraform)",
 						PlanModifiers: []planmodifier.Set{
 							setplanmodifier.UseStateForUnknown(),
+							planmodifiers.AlwaysUseStateForSet(),
 						},
 						Default: setdefault.StaticValue(basetypes.NewSetValueMust(types.StringType, []attr.Value{})),
 					},

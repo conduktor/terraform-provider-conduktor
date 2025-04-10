@@ -144,19 +144,10 @@ func (r *GroupV2Resource) Read(ctx context.Context, req resource.ReadRequest, re
 	}
 	tflog.Debug(ctx, fmt.Sprintf("New group state : %+v", consoleRes))
 
-	// Store the current value of members_from_external_groups
-	currentMembersFromExternalGroups := data.Spec.MembersFromExternalGroups
-
 	data, err = mapper.InternalModelToTerraform(ctx, &consoleRes)
 	if err != nil {
 		resp.Diagnostics.AddError("Model Error", fmt.Sprintf("Unable to read group, got error: %s", err))
 		return
-	}
-
-	// Use the current value for members_from_external_groups to prevent unnecessary state changes
-	// Only use the backend value if this is the first read (currentMembersFromExternalGroups is empty)
-	if !currentMembersFromExternalGroups.IsNull() && !currentMembersFromExternalGroups.IsUnknown() {
-		data.Spec.MembersFromExternalGroups = currentMembersFromExternalGroups
 	}
 
 	// Save updated data into Terraform state
@@ -165,21 +156,13 @@ func (r *GroupV2Resource) Read(ctx context.Context, req resource.ReadRequest, re
 
 func (r *GroupV2Resource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data schema.ConsoleGroupV2Model
-	var state schema.ConsoleGroupV2Model
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 
-	// Read the current state to get the current value of members_from_external_groups
-	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
-
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
-	// Use the state value for members_from_external_groups instead of the plan value
-	// This effectively ignores any changes to this field during planning
-	data.Spec.MembersFromExternalGroups = state.Spec.MembersFromExternalGroups
 
 	tflog.Info(ctx, fmt.Sprintf("Updating group named %s", data.Name.String()))
 	tflog.Trace(ctx, fmt.Sprintf("Update group with TF data: %+v", data))

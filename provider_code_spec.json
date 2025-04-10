@@ -515,6 +515,16 @@
                           ],
                           "schema_definition": "setplanmodifier.UseStateForUnknown()"
                         }
+                      },
+                      {
+                        "custom": {
+                          "imports": [
+                            {
+                              "path": "github.com/conduktor/terraform-provider-conduktor/internal/planmodifiers"
+                            }
+                          ],
+                          "schema_definition": "planmodifiers.AlwaysUseStateForSet()"
+                        }
                       }
                     ]
                   }
