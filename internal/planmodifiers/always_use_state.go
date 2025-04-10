@@ -6,14 +6,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 )
 
+// alwaysUseStateForSetModifier implements the plan modifier.
+type alwaysUseStateForSetModifier struct{}
+
 // AlwaysUseStateForSet returns a plan modifier that always uses the state value for a set attribute.
 // This effectively ignores any changes to the attribute during planning.
 func AlwaysUseStateForSet() planmodifier.Set {
 	return &alwaysUseStateForSetModifier{}
 }
-
-// alwaysUseStateForSetModifier implements the plan modifier.
-type alwaysUseStateForSetModifier struct{}
 
 // Description returns a human-readable description of the plan modifier.
 func (m *alwaysUseStateForSetModifier) Description(ctx context.Context) string {

@@ -489,7 +489,7 @@
                 {
                   "name": "members_from_external_groups",
                   "set": {
-                    "description": "Set of members of the group (managed by backend, not tracked by Terraform)",
+                    "description": "Set of members of the group (managed by backend, ReadOnly in Terraform",
                     "computed_optional_required": "computed",
                     "element_type": {
                       "string": {}

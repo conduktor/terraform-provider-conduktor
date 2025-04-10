@@ -69,8 +69,8 @@ func ConsoleGroupV2ResourceSchema(ctx context.Context) schema.Schema {
 					"members_from_external_groups": schema.SetAttribute{
 						ElementType:         types.StringType,
 						Computed:            true,
-						Description:         "Set of members of the group (managed by backend, not tracked by Terraform)",
-						MarkdownDescription: "Set of members of the group (managed by backend, not tracked by Terraform)",
+						Description:         "Set of members of the group (managed by backend, ReadOnly in Terraform",
+						MarkdownDescription: "Set of members of the group (managed by backend, ReadOnly in Terraform",
 						PlanModifiers: []planmodifier.Set{
 							planmodifiers.AlwaysUseStateForSet(),
 						},
