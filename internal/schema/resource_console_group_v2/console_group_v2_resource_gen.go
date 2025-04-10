@@ -5,6 +5,7 @@ package resource_console_group_v2
 import (
 	"context"
 	"fmt"
+	"github.com/conduktor/terraform-provider-conduktor/internal/planmodifiers"
 	"github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -68,9 +69,12 @@ func ConsoleGroupV2ResourceSchema(ctx context.Context) schema.Schema {
 					"members_from_external_groups": schema.SetAttribute{
 						ElementType:         types.StringType,
 						Computed:            true,
-						Description:         "Set of members of the group",
-						MarkdownDescription: "Set of members of the group",
-						Default:             setdefault.StaticValue(basetypes.NewSetValueMust(types.StringType, []attr.Value{})),
+						Description:         "Set of members of the group (managed by backend, ReadOnly in Terraform",
+						MarkdownDescription: "Set of members of the group (managed by backend, ReadOnly in Terraform",
+						PlanModifiers: []planmodifier.Set{
+							planmodifiers.AlwaysUseStateForSet(),
+						},
+						Default: setdefault.StaticValue(basetypes.NewSetValueMust(types.StringType, []attr.Value{})),
 					},
 					"permissions": schema.SetNestedAttribute{
 						NestedObject: schema.NestedAttributeObject{

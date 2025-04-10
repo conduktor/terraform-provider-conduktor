@@ -489,7 +489,7 @@
                 {
                   "name": "members_from_external_groups",
                   "set": {
-                    "description": "Set of members of the group",
+                    "description": "Set of members of the group (managed by backend, ReadOnly in Terraform",
                     "computed_optional_required": "computed",
                     "element_type": {
                       "string": {}
@@ -504,7 +504,19 @@
                         "schema_definition": "setdefault.StaticValue(basetypes.NewSetValueMust(types.StringType, []attr.Value{}))"
                       }
                     },
-                    "validators": []
+                    "validators": [],
+                    "plan_modifiers": [
+                      {
+                        "custom": {
+                          "imports": [
+                            {
+                              "path": "github.com/conduktor/terraform-provider-conduktor/internal/planmodifiers"
+                            }
+                          ],
+                          "schema_definition": "planmodifiers.AlwaysUseStateForSet()"
+                        }
+                      }
+                    ]
                   }
                 },
                 {

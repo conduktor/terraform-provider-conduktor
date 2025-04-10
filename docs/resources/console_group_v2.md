@@ -84,7 +84,7 @@ Optional:
 
 Read-Only:
 
-- `members_from_external_groups` (Set of String) Set of members of the group
+- `members_from_external_groups` (Set of String) Set of members of the group (managed by backend, ReadOnly in Terraform
 
 <a id="nestedatt--spec--permissions"></a>
 ### Nested Schema for `spec.permissions`
