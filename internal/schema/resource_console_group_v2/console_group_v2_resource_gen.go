@@ -13,7 +13,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -73,7 +72,6 @@ func ConsoleGroupV2ResourceSchema(ctx context.Context) schema.Schema {
 						Description:         "Set of members of the group (managed by backend, not tracked by Terraform)",
 						MarkdownDescription: "Set of members of the group (managed by backend, not tracked by Terraform)",
 						PlanModifiers: []planmodifier.Set{
-							setplanmodifier.UseStateForUnknown(),
 							planmodifiers.AlwaysUseStateForSet(),
 						},
 						Default: setdefault.StaticValue(basetypes.NewSetValueMust(types.StringType, []attr.Value{})),
