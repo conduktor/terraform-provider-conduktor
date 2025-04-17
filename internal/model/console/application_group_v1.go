@@ -73,7 +73,7 @@ func (r *ApplicationGroupConsoleResource) FromRawJsonInterface(jsonInterface int
 	return nil
 }
 
-func NewApplicationGroupConsoleResourceFromRawJsonInterface(cliResource ctlresource.Resource) (ApplicationGroupConsoleResource, error) {
+func NewApplicationGroupConsoleResourceFromClientResource(cliResource ctlresource.Resource) (ApplicationGroupConsoleResource, error) {
 	var consoleResource ApplicationGroupConsoleResource
 	err := consoleResource.FromClientResource(cliResource)
 	if err != nil {
