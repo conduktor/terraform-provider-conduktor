@@ -21,13 +21,22 @@ func (r ApplicationGroupMetadata) String() string {
 	return fmt.Sprintf(`name: %s`, r.Name)
 }
 
+type ApplicationGroupPermission struct {
+	AppInstance    string   `json:"appInstance"`
+	PatternType    string   `json:"patternType"`
+	ConnectCluster string   `json:"connectCluster,omitempty"`
+	ResourceType   string   `json:"resourceType"`
+	Name           string   `json:"name"`
+	Permissions    []string `json:"permissions"`
+}
+
 type ApplicationGroupSpec struct {
-	DisplayName           string                             `json:"display_name"`
-	Description           string                             `json:"description"`
-	Permissions           []model.ApplicationGroupPermission `json:"permissions,omitempty"`
-	Members               []string                           `json:"members,omitempty"`
-	ExternalGroups        []string                           `json:"external_groups,omitempty"`
-	ExternalGroupMemebers []string                           `json:"members_from_external_groups,omitempty"`
+	DisplayName               string                       `json:"displayName"`
+	Description               string                       `json:"description"`
+	Permissions               []ApplicationGroupPermission `json:"permissions"`
+	Members                   []string                     `json:"members"`
+	ExternalGroups            []string                     `json:"externalGroups"`
+	MembersFromExternalGroups []string                     `json:"membersFromExternalGroups"`
 }
 
 type ApplicationGroupConsoleResource struct {

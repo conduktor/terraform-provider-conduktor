@@ -7,6 +7,7 @@ import (
 
 	mapper "github.com/conduktor/terraform-provider-conduktor/internal/mapper"
 	"github.com/conduktor/terraform-provider-conduktor/internal/model"
+	"github.com/conduktor/terraform-provider-conduktor/internal/model/console"
 	applicationGroup "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_console_application_group_v1"
 	groups "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_console_group_v2"
 	users "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_console_user_v2"
@@ -231,7 +232,7 @@ func SetValueToPermissionArray(ctx context.Context, resource Resource, set baset
 }
 
 // Parse a ApplicationGroupPermissions Array into a Set.
-func ApplicationGroupPermissionArrayToSetValue(ctx context.Context, arr []model.ApplicationGroupPermission) (basetypes.SetValue, error) {
+func ApplicationGroupPermissionArrayToSetValue(ctx context.Context, arr []console.ApplicationGroupPermission) (basetypes.SetValue, error) {
 	var permissionsList basetypes.SetValue
 	var tfPermissions []attr.Value
 	var diag diag.Diagnostics
@@ -280,8 +281,8 @@ func ApplicationGroupPermissionArrayToSetValue(ctx context.Context, arr []model.
 }
 
 // Parse a Set into an array of ApplicationGroupPermissions.
-func SetValueToApplicationGroupPermissionArray(ctx context.Context, set basetypes.SetValue) ([]model.ApplicationGroupPermission, error) {
-	permission := make([]model.ApplicationGroupPermission, 0)
+func SetValueToApplicationGroupPermissionArray(ctx context.Context, set basetypes.SetValue) ([]console.ApplicationGroupPermission, error) {
+	permission := make([]console.ApplicationGroupPermission, 0)
 	var diag diag.Diagnostics
 
 	if !set.IsNull() && !set.IsUnknown() {
@@ -296,7 +297,7 @@ func SetValueToApplicationGroupPermissionArray(ctx context.Context, set basetype
 				return nil, mapper.WrapDiagError(diag, "permissions.permissions", mapper.FromTerraform)
 			}
 
-			permission = append(permission, model.ApplicationGroupPermission{
+			permission = append(permission, console.ApplicationGroupPermission{
 				AppInstance:    p.AppInstance.ValueString(),
 				ResourceType:   p.ResourceType.ValueString(),
 				Name:           p.Name.ValueString(),

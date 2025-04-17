@@ -40,12 +40,12 @@ func TFToInternalModel(ctx context.Context, r *appinstance.ConsoleApplicationGro
 		r.Name.ValueString(),
 		r.Application.ValueString(),
 		console.ApplicationGroupSpec{
-			DisplayName:           r.Spec.DisplayName.ValueString(),
-			Description:           r.Spec.Description.ValueString(),
-			ExternalGroups:        externalGroups,
-			Members:               members,
-			ExternalGroupMemebers: membersFromExternalGroups,
-			Permissions:           permissions,
+			DisplayName:               r.Spec.DisplayName.ValueString(),
+			Description:               r.Spec.Description.ValueString(),
+			ExternalGroups:            externalGroups,
+			Members:                   members,
+			MembersFromExternalGroups: membersFromExternalGroups,
+			Permissions:               permissions,
 		},
 	), nil
 
@@ -62,7 +62,7 @@ func InternalModelToTerraform(ctx context.Context, r *console.ApplicationGroupCo
 		return appinstance.ConsoleApplicationGroupV1Model{}, mapper.WrapDiagError(diag, "members", mapper.IntoTerraform)
 	}
 
-	membersFromExternalGroupsList, diag := schema.StringArrayToSetValue(r.Spec.ExternalGroupMemebers)
+	membersFromExternalGroupsList, diag := schema.StringArrayToSetValue(r.Spec.MembersFromExternalGroups)
 	if diag.HasError() {
 		return appinstance.ConsoleApplicationGroupV1Model{}, mapper.WrapDiagError(diag, "members_from_external_groups", mapper.IntoTerraform)
 	}

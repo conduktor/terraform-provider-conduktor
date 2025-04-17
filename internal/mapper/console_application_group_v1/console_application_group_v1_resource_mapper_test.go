@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	ctlresource "github.com/conduktor/ctl/resource"
-	model "github.com/conduktor/terraform-provider-conduktor/internal/model"
 	console "github.com/conduktor/terraform-provider-conduktor/internal/model/console"
 	"github.com/conduktor/terraform-provider-conduktor/internal/test"
 	"github.com/stretchr/testify/assert"
@@ -41,7 +40,7 @@ func TestApplicationGroupV1ModelMapping(t *testing.T) {
 	assert.Equal(t, "A great test application group", internal.Spec.Description)
 	assert.Equal(t, []string{"COMPANY-SUPPORT"}, internal.Spec.ExternalGroups)
 	assert.Equal(t, []string{"tatum@conduktor.io"}, internal.Spec.Members)
-	expectedInternalResources := []model.ApplicationGroupPermission{
+	expectedInternalResources := []console.ApplicationGroupPermission{
 		{
 			AppInstance:    "test-application-dev",
 			PatternType:    "LITERAL",

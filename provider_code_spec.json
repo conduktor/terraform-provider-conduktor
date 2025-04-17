@@ -387,12 +387,12 @@
         ]
       }
     },
-        {
-          "name": "console_application_group_v1",
-          "schema": {
-            "attributes": [
-              {
-                "name": "name",
+    {
+      "name": "console_application_group_v1",
+      "schema": {
+        "attributes": [
+          {
+            "name": "name",
                 "string": {
                   "description": "Application Instance name, must be unique, acts as an ID for import",
                   "computed_optional_required": "required",
@@ -665,7 +665,7 @@
               }
             ]
           }
-        },
+    },
     {
       "name": "console_group_v2",
       "schema": {
