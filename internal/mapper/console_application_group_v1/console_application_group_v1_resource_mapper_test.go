@@ -1,16 +1,18 @@
 package console_application_group_v1
 
 import (
+	"context"
 	"testing"
 
 	ctlresource "github.com/conduktor/ctl/resource"
 	console "github.com/conduktor/terraform-provider-conduktor/internal/model/console"
 	"github.com/conduktor/terraform-provider-conduktor/internal/test"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestApplicationGroupV1ModelMapping(t *testing.T) {
-	// ctx := context.Background()
+	ctx := context.Background()
 
 	jsonApplicationGroupV1Resource := []byte(test.TestAccTestdata(t, "console/application_group_v1/api.json"))
 
@@ -66,4 +68,49 @@ func TestApplicationGroupV1ModelMapping(t *testing.T) {
 	}
 	assert.Equal(t, expectedInternalResources, internal.Spec.Permissions)
 
+	// convert to terraform model
+	tfModel, err := InternalModelToTerraform(ctx, &internal)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	externalGroups := []string{}
+	tfModel.Spec.ExternalGroups.ElementsAs(ctx, &externalGroups, false)
+	members := []string{}
+	tfModel.Spec.Members.ElementsAs(ctx, &members, false)
+
+	assert.Equal(t, types.StringValue("test-application-group"), tfModel.Name)
+	assert.Equal(t, types.StringValue("test-application"), tfModel.Application)
+	assert.Equal(t, types.StringValue("Test Application Group"), tfModel.Spec.DisplayName)
+	assert.Equal(t, types.StringValue("A great test application group"), tfModel.Spec.Description)
+	assert.Equal(t, []string{"COMPANY-SUPPORT"}, externalGroups)
+	assert.Equal(t, []string{"tatum@conduktor.io"}, members)
+
+	// convert back to internal model
+	internal2, err := TFToInternalModel(ctx, &tfModel)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	assert.Equal(t, "ApplicationGroup", internal2.Kind)
+	assert.Equal(t, "v1", internal2.ApiVersion)
+	assert.Equal(t, "test-application-group", internal2.Metadata.Name)
+	assert.Equal(t, "test-application", internal2.Metadata.Application)
+	assert.Equal(t, "Test Application Group", internal2.Spec.DisplayName)
+	assert.Equal(t, "A great test application group", internal2.Spec.Description)
+	assert.Equal(t, []string{"COMPANY-SUPPORT"}, internal2.Spec.ExternalGroups)
+	assert.Equal(t, []string{"tatum@conduktor.io"}, internal2.Spec.Members)
+	// assert.Equal(t, expectedInternalResources, internal2.Spec.Permissions)
+	// assert.Equal(t, internal, internal2)
+
+	// // convert back to ctl model
+	// ctlResource2, err := internal2.ToClientResource()
+	// if err != nil {
+	// 	t.Fatal(err)
+	// 	return
+	// }
+	// // compare without json
+	// if !cmp.Equal(ctlResource, ctlResource2, cmpopts.IgnoreFields(ctlresource.Resource{}, "Json")) {
+	// 	t.Errorf("expected %+v, got %+v", ctlResource, ctlResource2)
+	// }
 }
