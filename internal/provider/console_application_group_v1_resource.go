@@ -21,10 +21,10 @@ var _ resource.Resource = &ApplicationGroupV1Resource{}
 var _ resource.ResourceWithImportState = &ApplicationGroupV1Resource{}
 
 func NewApplicationGroupV1Resource() resource.Resource {
-	return &GroupV2Resource{}
+	return &ApplicationGroupV1Resource{}
 }
 
-// GroupV2Resource defines the resource implementation.
+// ApplicationGroupV1Resource defines the resource implementation.
 type ApplicationGroupV1Resource struct {
 	apiClient *client.Client
 }
