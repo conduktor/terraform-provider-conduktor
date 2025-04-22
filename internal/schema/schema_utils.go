@@ -267,12 +267,7 @@ func ApplicationGroupPermissionArrayToSetValue(ctx context.Context, arr []consol
 		tfPermissions = append(tfPermissions, appPermObj)
 	}
 
-	if permissionsList.IsNull() || permissionsList.IsUnknown() {
-		return types.SetNull(types.StringType), nil
-	}
-
 	permissionsList, diag = types.SetValue(applicationGroup.PermissionsValue{}.Type(ctx), tfPermissions)
-
 	if diag.HasError() {
 		return basetypes.SetValue{}, mapper.WrapDiagError(diag, "permissions", mapper.FromTerraform)
 	}

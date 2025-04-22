@@ -7,6 +7,8 @@ import (
 	ctlresource "github.com/conduktor/ctl/resource"
 	console "github.com/conduktor/terraform-provider-conduktor/internal/model/console"
 	"github.com/conduktor/terraform-provider-conduktor/internal/test"
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/stretchr/testify/assert"
 )
@@ -100,17 +102,17 @@ func TestApplicationGroupV1ModelMapping(t *testing.T) {
 	assert.Equal(t, "A great test application group", internal2.Spec.Description)
 	assert.Equal(t, []string{"COMPANY-SUPPORT"}, internal2.Spec.ExternalGroups)
 	assert.Equal(t, []string{"tatum@conduktor.io"}, internal2.Spec.Members)
-	// assert.Equal(t, expectedInternalResources, internal2.Spec.Permissions)
-	// assert.Equal(t, internal, internal2)
+	assert.Equal(t, expectedInternalResources, internal2.Spec.Permissions)
+	assert.Equal(t, internal, internal2)
 
-	// // convert back to ctl model
-	// ctlResource2, err := internal2.ToClientResource()
-	// if err != nil {
-	// 	t.Fatal(err)
-	// 	return
-	// }
-	// // compare without json
-	// if !cmp.Equal(ctlResource, ctlResource2, cmpopts.IgnoreFields(ctlresource.Resource{}, "Json")) {
-	// 	t.Errorf("expected %+v, got %+v", ctlResource, ctlResource2)
-	// }
+	// convert back to ctl model
+	ctlResource2, err := internal2.ToClientResource()
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	// compare without json
+	if !cmp.Equal(ctlResource, ctlResource2, cmpopts.IgnoreFields(ctlresource.Resource{}, "Json")) {
+		t.Errorf("expected %+v, got %+v", ctlResource, ctlResource2)
+	}
 }
