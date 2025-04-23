@@ -622,7 +622,7 @@
                                           "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
                                         }
                                       ],
-                                      "schema_definition": "stringvalidator.OneOf(validation.ValidPermissionTypes...)"
+                                      "schema_definition": "stringvalidator.OneOf(validation.ValidAppGroupPermissionTypes...)"
                                     }
                                   }
                                 ]

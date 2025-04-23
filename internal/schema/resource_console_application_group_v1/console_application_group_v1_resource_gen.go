@@ -127,7 +127,7 @@ func ConsoleApplicationGroupV1ResourceSchema(ctx context.Context) schema.Schema 
 									Description:         "Type of the resource to apply permission on valid values are: CONNECTOR, CONSUMER_GROUP, SUBJECT, TOPIC",
 									MarkdownDescription: "Type of the resource to apply permission on valid values are: CONNECTOR, CONSUMER_GROUP, SUBJECT, TOPIC",
 									Validators: []validator.String{
-										stringvalidator.OneOf(validation.ValidPermissionTypes...),
+										stringvalidator.OneOf(validation.ValidAppGroupPermissionTypes...),
 									},
 								},
 							},
