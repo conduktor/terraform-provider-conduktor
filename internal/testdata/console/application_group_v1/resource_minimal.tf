@@ -1,7 +1,9 @@
+
 resource "conduktor_console_application_group_v1" "minimal" {
-  name        = "test-application-group-minimal"
-  application = "test-application"
+  name        = "minimalappgroup"
+  application = "myapp"
   spec = {
-    display_name = "Test Application Group Minimal"
+    display_name = "Minimal Application Group"
   }
 }
+

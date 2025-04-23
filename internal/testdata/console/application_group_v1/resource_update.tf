@@ -1,57 +1,29 @@
-resource "conduktor_console_application_group_v1" "test" {
-  name        = "test-application-group"
-  application = "test-application"
+resource "conduktor_console_user_v2" "coworkers1" {
+  name = "uriel.septim@tamriel.com"
   spec = {
-    display_name   = "Test Application Group"
-    description    = "A great test application group"
-    members        = "tatum@conduktor.io"
-    external_group = "COMPANY-SUPPORT"
+    firstname   = "Uriel"
+    lastname    = "Septim"
+    permissions = []
+  }
+}
+
+resource "conduktor_console_application_group_v1" "test" {
+  name        = "myappgroup"
+  application = "myapp"
+  spec = {
+    display_name    = "My Application Group"
+    description     = "test"
+    external_groups = ["mygroup"]
+    members         = ["uriel.septim@tamriel.com"]
     permissions = [
       {
-        app_instance    = "test-application-dev"
-        pattern_type    = "LITERAL"
-        connect_cluster = "kafka-connect"
-        name            = "*"
-        permissions = [
-          "kafkaConnectPauseResume",
-          "kafkaConnectRestart",
-          "kafkaConnectorStatus",
-          "kafkaConnectorViewConfig"
-        ]
-        resource_type = "CONNECTOR"
-      },
-      {
-        app_instance    = "test-application-dev"
-        pattern_type    = "LITERAL"
-        connect_cluster = "kafka-connect"
-        name            = "*"
-        permissions = [
-          "consumerGroupCreate",
-          "consumerGroupDelete",
-          "consumerGroupReset",
-          "consumerGroupView"
-        ]
-        resource_type = "CONSUMER_GROUP"
-      },
-      {
-        app_instance = "test-application-dev"
-        pattern_type = "LITERAL"
-        name         = "*"
-        permissions = [
-          "topicConsume",
-          "topicViewConfig"
-        ]
+        app_instance  = "website-analytics-prod"
         resource_type = "TOPIC"
+        pattern_type  = "LITERAL"
+        name          = "*"
+        permissions   = ["topicViewConfig"]
       },
-      {
-        app_instance = "test-application-dev"
-        pattern_type = "LITERAL"
-        name         = "*"
-        permissions = [
-          "subjectEditCompatibility"
-        ]
-        resource_type = "SUBJECT"
-      }
     ]
   }
+  depends_on = [conduktor_console_user_v2.coworkers1]
 }
