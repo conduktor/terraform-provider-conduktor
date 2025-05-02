@@ -14,7 +14,13 @@ resource "conduktor_console_user_v2" "example" {
         cluster       = "*"
         pattern_type  = "LITERAL"
         permissions   = ["topicViewConfig", "topicConsume", "topicProduce"]
-      }
+      },
+      {
+        resource_type = "KSQLDB"
+        cluster       = "*"
+        ksqldb        = "*"
+        permissions   = ["ksqldbAccess"]
+      },
     ]
   }
 }
