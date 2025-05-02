@@ -98,6 +98,7 @@ Optional:
 
 - `cluster` (String) Name of the cluster to apply permission, only required if resource_type is TOPIC, SUBJECT, CONSUMER_GROUP, KAFKA_CONNECT, KSQLDB
 - `kafka_connect` (String) Name of the Kafka Connect to apply permission, only required if resource_type is KAFKA_CONNECT
+- `ksqldb` (String) Name of a valid Kafka Connect cluster, only required if resource_type is KSQLDB
 - `name` (String) Name of the resource to apply permission could be a topic, a cluster, a consumer group, etc. depending on resource_type
 - `pattern_type` (String) Type of the pattern to apply permission on valid values are: LITERAL, PREFIXED
 
