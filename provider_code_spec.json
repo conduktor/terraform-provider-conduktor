@@ -618,6 +618,13 @@
                               }
                             ]
                           }
+                        },
+                        {
+                          "name": "ksqldb",
+                          "string": {
+                            "description": "Name of a valid Kafka Connect cluster, only required if resource_type is KSQLDB",
+                            "computed_optional_required": "optional"
+                          }
                         }
                       ]
                     }
@@ -1949,6 +1956,13 @@
                                 }
                               }
                             ]
+                          }
+                        },
+                        {
+                          "name": "ksqldb",
+                          "string": {
+                            "description": "Name of a valid Kafka Connect cluster, only required if resource_type is KSQLDB",
+                            "computed_optional_required": "optional"
                           }
                         }
                       ]
