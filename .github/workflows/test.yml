@@ -134,7 +134,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: api-logs-CDK-${{ matrix.console }}-${{ matrix.terraform.name }}
+          name: api-logs-CDK-${{ matrix.console }}-GW-${{ matrix.gateway }}-${{ matrix.terraform.name }}
           path: ./logs/
           if-no-files-found: error
           retention-days: 1
