@@ -27,7 +27,6 @@ var ValidPermissions = []string{
 	"datamaskingView",
 	"userView",
 	"datamaskingManage",
-	"notificationChannelView",
 	"subjectCreateUpdate",
 	"subjectEditCompatibility",
 	"subjectDelete",
