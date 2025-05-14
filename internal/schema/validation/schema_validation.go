@@ -39,6 +39,8 @@ var ValidPermissions = []string{
 	"topicCreate",
 	"topicAddPartition",
 	"topicDelete",
+	"chargebackManage",
+	"sqlManage",
 }
 
 // Provider modes.
