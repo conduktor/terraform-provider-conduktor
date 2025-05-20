@@ -26,10 +26,7 @@ var ValidPermissions = []string{
 	"notificationChannelManage",
 	"datamaskingView",
 	"userView",
-	"testingView",
 	"datamaskingManage",
-	"taasManage",
-	"notificationChannelView",
 	"subjectCreateUpdate",
 	"subjectEditCompatibility",
 	"subjectDelete",
@@ -42,6 +39,8 @@ var ValidPermissions = []string{
 	"topicCreate",
 	"topicAddPartition",
 	"topicDelete",
+	"chargebackManage",
+	"sqlManage",
 }
 
 // Provider modes.

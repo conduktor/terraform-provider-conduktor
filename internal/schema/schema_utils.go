@@ -132,6 +132,7 @@ func PermissionArrayToSetValue(ctx context.Context, resource Resource, arr []mod
 			"pattern_type":  basetypes.StringType{},
 			"cluster":       basetypes.StringType{},
 			"kafka_connect": basetypes.StringType{},
+			"ksqldb":        basetypes.StringType{},
 		}
 		values := map[string]attr.Value{
 			"name":          NewStringValue(p.Name),
@@ -140,6 +141,7 @@ func PermissionArrayToSetValue(ctx context.Context, resource Resource, arr []mod
 			"pattern_type":  NewStringValue(p.PatternType),
 			"cluster":       NewStringValue(p.Cluster),
 			"kafka_connect": NewStringValue(p.KafkaConnect),
+			"ksqldb":        NewStringValue(p.KsqlDB),
 		}
 
 		if resource == GROUPS {
@@ -200,6 +202,7 @@ func SetValueToPermissionArray(ctx context.Context, resource Resource, set baset
 					PatternType:  p.PatternType.ValueString(),
 					Cluster:      p.Cluster.ValueString(),
 					KafkaConnect: p.KafkaConnect.ValueString(),
+					KsqlDB:       p.Ksqldb.ValueString(),
 				})
 			}
 
@@ -224,6 +227,7 @@ func SetValueToPermissionArray(ctx context.Context, resource Resource, set baset
 					PatternType:  p.PatternType.ValueString(),
 					Cluster:      p.Cluster.ValueString(),
 					KafkaConnect: p.KafkaConnect.ValueString(),
+					KsqlDB:       p.Ksqldb.ValueString(),
 				})
 			}
 		}

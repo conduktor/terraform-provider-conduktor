@@ -89,6 +89,11 @@ func ConsoleGroupV2ResourceSchema(ctx context.Context) schema.Schema {
 									Description:         "Name of the Kafka Connect to apply permission, only required if resource_type is KAFKA_CONNECT",
 									MarkdownDescription: "Name of the Kafka Connect to apply permission, only required if resource_type is KAFKA_CONNECT",
 								},
+								"ksqldb": schema.StringAttribute{
+									Optional:            true,
+									Description:         "Name of a valid Kafka Connect cluster, only required if resource_type is KSQLDB",
+									MarkdownDescription: "Name of a valid Kafka Connect cluster, only required if resource_type is KSQLDB",
+								},
 								"name": schema.StringAttribute{
 									Optional:            true,
 									Description:         "Name of the resource to apply permission could be a topic, a cluster, a consumer group, etc. depending on resource_type",
@@ -956,6 +961,24 @@ func (t PermissionsType) ValueFromObject(ctx context.Context, in basetypes.Objec
 			fmt.Sprintf(`kafka_connect expected to be basetypes.StringValue, was: %T`, kafkaConnectAttribute))
 	}
 
+	ksqldbAttribute, ok := attributes["ksqldb"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`ksqldb is missing from object`)
+
+		return nil, diags
+	}
+
+	ksqldbVal, ok := ksqldbAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`ksqldb expected to be basetypes.StringValue, was: %T`, ksqldbAttribute))
+	}
+
 	nameAttribute, ok := attributes["name"]
 
 	if !ok {
@@ -1035,6 +1058,7 @@ func (t PermissionsType) ValueFromObject(ctx context.Context, in basetypes.Objec
 	return PermissionsValue{
 		Cluster:      clusterVal,
 		KafkaConnect: kafkaConnectVal,
+		Ksqldb:       ksqldbVal,
 		Name:         nameVal,
 		PatternType:  patternTypeVal,
 		Permissions:  permissionsVal,
@@ -1142,6 +1166,24 @@ func NewPermissionsValue(attributeTypes map[string]attr.Type, attributes map[str
 			fmt.Sprintf(`kafka_connect expected to be basetypes.StringValue, was: %T`, kafkaConnectAttribute))
 	}
 
+	ksqldbAttribute, ok := attributes["ksqldb"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`ksqldb is missing from object`)
+
+		return NewPermissionsValueUnknown(), diags
+	}
+
+	ksqldbVal, ok := ksqldbAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`ksqldb expected to be basetypes.StringValue, was: %T`, ksqldbAttribute))
+	}
+
 	nameAttribute, ok := attributes["name"]
 
 	if !ok {
@@ -1221,6 +1263,7 @@ func NewPermissionsValue(attributeTypes map[string]attr.Type, attributes map[str
 	return PermissionsValue{
 		Cluster:      clusterVal,
 		KafkaConnect: kafkaConnectVal,
+		Ksqldb:       ksqldbVal,
 		Name:         nameVal,
 		PatternType:  patternTypeVal,
 		Permissions:  permissionsVal,
@@ -1299,6 +1342,7 @@ var _ basetypes.ObjectValuable = PermissionsValue{}
 type PermissionsValue struct {
 	Cluster      basetypes.StringValue `tfsdk:"cluster"`
 	KafkaConnect basetypes.StringValue `tfsdk:"kafka_connect"`
+	Ksqldb       basetypes.StringValue `tfsdk:"ksqldb"`
 	Name         basetypes.StringValue `tfsdk:"name"`
 	PatternType  basetypes.StringValue `tfsdk:"pattern_type"`
 	Permissions  basetypes.SetValue    `tfsdk:"permissions"`
@@ -1307,13 +1351,14 @@ type PermissionsValue struct {
 }
 
 func (v PermissionsValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
-	attrTypes := make(map[string]tftypes.Type, 6)
+	attrTypes := make(map[string]tftypes.Type, 7)
 
 	var val tftypes.Value
 	var err error
 
 	attrTypes["cluster"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["kafka_connect"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["ksqldb"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["name"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["pattern_type"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["permissions"] = basetypes.SetType{
@@ -1325,7 +1370,7 @@ func (v PermissionsValue) ToTerraformValue(ctx context.Context) (tftypes.Value, 
 
 	switch v.state {
 	case attr.ValueStateKnown:
-		vals := make(map[string]tftypes.Value, 6)
+		vals := make(map[string]tftypes.Value, 7)
 
 		val, err = v.Cluster.ToTerraformValue(ctx)
 
@@ -1342,6 +1387,14 @@ func (v PermissionsValue) ToTerraformValue(ctx context.Context) (tftypes.Value, 
 		}
 
 		vals["kafka_connect"] = val
+
+		val, err = v.Ksqldb.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["ksqldb"] = val
 
 		val, err = v.Name.ToTerraformValue(ctx)
 
@@ -1420,6 +1473,7 @@ func (v PermissionsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectVa
 		return types.ObjectUnknown(map[string]attr.Type{
 			"cluster":       basetypes.StringType{},
 			"kafka_connect": basetypes.StringType{},
+			"ksqldb":        basetypes.StringType{},
 			"name":          basetypes.StringType{},
 			"pattern_type":  basetypes.StringType{},
 			"permissions": basetypes.SetType{
@@ -1432,6 +1486,7 @@ func (v PermissionsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectVa
 	attributeTypes := map[string]attr.Type{
 		"cluster":       basetypes.StringType{},
 		"kafka_connect": basetypes.StringType{},
+		"ksqldb":        basetypes.StringType{},
 		"name":          basetypes.StringType{},
 		"pattern_type":  basetypes.StringType{},
 		"permissions": basetypes.SetType{
@@ -1453,6 +1508,7 @@ func (v PermissionsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectVa
 		map[string]attr.Value{
 			"cluster":       v.Cluster,
 			"kafka_connect": v.KafkaConnect,
+			"ksqldb":        v.Ksqldb,
 			"name":          v.Name,
 			"pattern_type":  v.PatternType,
 			"permissions":   permissionsVal,
@@ -1482,6 +1538,10 @@ func (v PermissionsValue) Equal(o attr.Value) bool {
 	}
 
 	if !v.KafkaConnect.Equal(other.KafkaConnect) {
+		return false
+	}
+
+	if !v.Ksqldb.Equal(other.Ksqldb) {
 		return false
 	}
 
@@ -1516,6 +1576,7 @@ func (v PermissionsValue) AttributeTypes(ctx context.Context) map[string]attr.Ty
 	return map[string]attr.Type{
 		"cluster":       basetypes.StringType{},
 		"kafka_connect": basetypes.StringType{},
+		"ksqldb":        basetypes.StringType{},
 		"name":          basetypes.StringType{},
 		"pattern_type":  basetypes.StringType{},
 		"permissions": basetypes.SetType{
