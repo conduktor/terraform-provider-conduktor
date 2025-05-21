@@ -3,7 +3,7 @@ module github.com/conduktor/terraform-provider-conduktor
 go 1.23.0
 
 require (
-	github.com/conduktor/ctl v0.5.0
+	github.com/conduktor/ctl v0.5.1
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-resty/resty/v2 v2.16.5
