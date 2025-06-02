@@ -6,4 +6,3 @@ resource "conduktor_console_application_group_v1" "minimal" {
     display_name = "Minimal Application Group"
   }
 }
-
