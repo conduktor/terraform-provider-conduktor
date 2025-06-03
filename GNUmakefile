@@ -1,18 +1,16 @@
-export SHELL := /bin/bash
-export SHELLOPTS := $(if $(SHELLOPTS),$(SHELLOPTS):)pipefail:errexit
+export SHELL := /bin/sh
+export SHELLOPTS:=$(if $(SHELLOPTS),$(SHELLOPTS):)pipefail:errexit
 
 .ONESHELL:
 
 # Include .env file
-ifneq (,$(wildcard .env))
-  include .env
-  export $$(grep -v '^#' .env | sed 's/=.*//' | xargs)
-endif
+include .env
+export $(shell sed 's/=.*//' .env)
 
 # Include .envrc file if it exists
 ifneq (,$(wildcard .envrc))
   include .envrc
-  export $$(grep -v '^#' .envrc | sed 's/export //' | xargs)
+  export $(shell grep -v '^#' .envrc | sed 's/export //')
 endif
 
 default: testacc

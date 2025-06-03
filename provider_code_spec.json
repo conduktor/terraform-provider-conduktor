@@ -393,278 +393,278 @@
         "attributes": [
           {
             "name": "name",
-                "string": {
-                  "description": "Application Instance name, must be unique, acts as an ID for import",
-                  "computed_optional_required": "required",
-                  "plan_modifiers": [
-                    {
-                      "custom": {
-                        "imports": [
-                          {
-                            "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
-                          }
-                        ],
-                        "schema_definition": "stringplanmodifier.RequiresReplace()"
+            "string": {
+              "description": "Application Instance name, must be unique, acts as an ID for import",
+              "computed_optional_required": "required",
+              "plan_modifiers": [
+                {
+                  "custom": {
+                    "imports": [
+                      {
+                        "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
                       }
-                    }
-                  ],
-                  "validators": [
-                    {
-                      "custom": {
-                        "imports": [
-                          {
-                            "path": "regexp"
-                          },
-                          {
-                            "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-                          }
-                        ],
-                        "schema_definition": "stringvalidator.RegexMatches(regexp.MustCompile(\"^[0-9a-z\\\\_\\\\-]+$\"), \"\")"
-                      }
-                    }
-                  ]
+                    ],
+                    "schema_definition": "stringplanmodifier.RequiresReplace()"
+                  }
                 }
-              },
-              {
-                "name": "application",
-                "string": {
-                  "description": "Reference to the application this instance belongs to",
-                  "computed_optional_required": "required",
-                  "validators": [
-                    {
+              ],
+              "validators": [
+                {
+                  "custom": {
+                    "imports": [
+                      {
+                        "path": "regexp"
+                      },
+                      {
+                        "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                      }
+                    ],
+                    "schema_definition": "stringvalidator.RegexMatches(regexp.MustCompile(\"^[0-9a-z\\\\_\\\\-]+$\"), \"\")"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "application",
+            "string": {
+              "description": "Reference to the application this instance belongs to",
+              "computed_optional_required": "required",
+              "validators": [
+                {
+                  "custom": {
+                    "imports": [
+                      {
+                        "path": "regexp"
+                      },
+                      {
+                        "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                      }
+                    ],
+                    "schema_definition": "stringvalidator.RegexMatches(regexp.MustCompile(\"^[0-9a-z\\\\_\\\\-]+$\"), \"\")"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "spec",
+            "single_nested": {
+              "computed_optional_required": "required",
+              "description": "Application Instance specification",
+              "attributes": [
+                {
+                  "name": "display_name",
+                  "string": {
+                    "description": "Display name of the application group",
+                    "computed_optional_required": "required"
+                  }
+                },
+                {
+                  "name": "description",
+                  "string": {
+                    "description": "Description of the application group",
+                    "computed_optional_required": "optional"
+                  }
+                },
+                {
+                  "name": "external_groups",
+                  "set": {
+                    "description": "Set of external groups from SSO mapped to this group",
+                    "computed_optional_required": "computed_optional",
+                    "element_type": {
+                      "string": {}
+                    },
+                    "default": {
                       "custom": {
                         "imports": [
                           {
-                            "path": "regexp"
-                          },
-                          {
-                            "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                            "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
                           }
                         ],
-                        "schema_definition": "stringvalidator.RegexMatches(regexp.MustCompile(\"^[0-9a-z\\\\_\\\\-]+$\"), \"\")"
+                        "schema_definition": "setdefault.StaticValue(basetypes.NewSetValueMust(types.StringType, []attr.Value{}))"
                       }
                     }
-                  ]
-                }
-              },
-              {
-                "name": "spec",
-                "single_nested": {
-                  "computed_optional_required": "required",
-                  "description": "Application Instance specification",
-                  "attributes": [
-                    {
-                      "name": "display_name",
-                      "string": {
-                        "description": "Display name of the application group",
-                        "computed_optional_required": "required"
+                  }
+                },
+                {
+                  "name": "members",
+                  "set": {
+                    "description": "Set of members of the group",
+                    "computed_optional_required": "computed_optional",
+                    "element_type": {
+                      "string": {}
+                    },
+                    "default": {
+                      "custom": {
+                        "imports": [
+                          {
+                            "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
+                          }
+                        ],
+                        "schema_definition": "setdefault.StaticValue(basetypes.NewSetValueMust(types.StringType, []attr.Value{}))"
                       }
                     },
-                    {
-                      "name": "description",
-                      "string": {
-                        "description": "Description of the application group",
-                        "computed_optional_required": "optional"
+                    "validators": []
+                  }
+                },
+                {
+                  "name": "members_from_external_groups",
+                  "set": {
+                    "description": "Set of members of the group (managed by backend, ReadOnly in Terraform",
+                    "computed_optional_required": "computed",
+                    "element_type": {
+                      "string": {}
+                    },
+                    "default": {
+                      "custom": {
+                        "imports": [
+                          {
+                            "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
+                          }
+                        ],
+                        "schema_definition": "setdefault.StaticValue(basetypes.NewSetValueMust(types.StringType, []attr.Value{}))"
                       }
                     },
-                    {
-                      "name": "external_groups",
-                      "set": {
-                        "description": "Set of external groups from SSO mapped to this group",
-                        "computed_optional_required": "computed_optional",
-                        "element_type": {
-                          "string": {}
-                        },
-                        "default": {
-                          "custom": {
-                            "imports": [
-                              {
-                                "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
-                              }
-                            ],
-                            "schema_definition": "setdefault.StaticValue(basetypes.NewSetValueMust(types.StringType, []attr.Value{}))"
-                          }
+                    "validators": [],
+                    "plan_modifiers": [
+                      {
+                        "custom": {
+                          "imports": [
+                            {
+                              "path": "github.com/conduktor/terraform-provider-conduktor/internal/planmodifiers"
+                            }
+                          ],
+                          "schema_definition": "planmodifiers.AlwaysUseStateForSet()"
                         }
                       }
-                    },
-                    {
-                      "name": "members",
-                      "set": {
-                        "description": "Set of members of the group",
-                        "computed_optional_required": "computed_optional",
-                        "element_type": {
-                          "string": {}
-                        },
-                        "default": {
-                          "custom": {
-                            "imports": [
+                    ]
+                  }
+                },
+                {
+                  "name": "permissions",
+                  "set_nested": {
+                    "description": "Set of all group permissions",
+                    "computed_optional_required": "computed_optional",
+                    "nested_object": {
+                      "attributes": [
+                        {
+                          "name": "app_instance",
+                          "string": {
+                            "description": "Reference to the application this instance belongs to",
+                            "computed_optional_required": "required",
+                            "validators": [
                               {
-                                "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
-                              }
-                            ],
-                            "schema_definition": "setdefault.StaticValue(basetypes.NewSetValueMust(types.StringType, []attr.Value{}))"
-                          }
-                        },
-                        "validators": []
-                      }
-                    },
-                    {
-                      "name": "members_from_external_groups",
-                      "set": {
-                        "description": "Set of members of the group (managed by backend, ReadOnly in Terraform",
-                        "computed_optional_required": "computed",
-                        "element_type": {
-                          "string": {}
-                        },
-                        "default": {
-                          "custom": {
-                            "imports": [
-                              {
-                                "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
-                              }
-                            ],
-                            "schema_definition": "setdefault.StaticValue(basetypes.NewSetValueMust(types.StringType, []attr.Value{}))"
-                          }
-                        },
-                        "validators": [],
-                        "plan_modifiers": [
-                          {
-                            "custom": {
-                              "imports": [
-                                {
-                                  "path": "github.com/conduktor/terraform-provider-conduktor/internal/planmodifiers"
+                                "custom": {
+                                  "imports": [
+                                    {
+                                      "path": "regexp"
+                                    },
+                                    {
+                                      "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                    }
+                                  ],
+                                  "schema_definition": "stringvalidator.RegexMatches(regexp.MustCompile(\"^[0-9a-z\\\\_\\\\-]+$\"), \"\")"
                                 }
-                              ],
-                              "schema_definition": "planmodifiers.AlwaysUseStateForSet()"
-                            }
+                              }
+                            ]
                           }
-                        ]
-                      }
-                    },
-                    {
-                      "name": "permissions",
-                      "set_nested": {
-                        "description": "Set of all group permissions",
-                        "computed_optional_required": "computed_optional",
-                        "nested_object": {
-                          "attributes": [
-                            {
-                              "name": "app_instance",
-                              "string": {
-                                "description": "Reference to the application this instance belongs to",
-                                "computed_optional_required": "required",
-                                "validators": [
-                                  {
-                                    "custom": {
-                                      "imports": [
-                                        {
-                                          "path": "regexp"
-                                        },
-                                        {
-                                          "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-                                        }
-                                      ],
-                                      "schema_definition": "stringvalidator.RegexMatches(regexp.MustCompile(\"^[0-9a-z\\\\_\\\\-]+$\"), \"\")"
+                        },
+                        {
+                          "name": "pattern_type",
+                          "string": {
+                            "description": "Type of the pattern to apply permission on valid values are: LITERAL, PREFIXED",
+                            "computed_optional_required": "required",
+                            "validators": [
+                              {
+                                "custom": {
+                                  "imports": [
+                                    {
+                                      "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                    },
+                                    {
+                                      "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
                                     }
-                                  }
-                                ]
+                                  ],
+                                  "schema_definition": "stringvalidator.OneOf(validation.ValidPermissionPatternTypes...)"
+                                }
                               }
-                            },
-                            {
-                              "name": "pattern_type",
-                              "string": {
-                                "description": "Type of the pattern to apply permission on valid values are: LITERAL, PREFIXED",
-                                "computed_optional_required": "required",
-                                "validators": [
-                                  {
-                                    "custom": {
-                                      "imports": [
-                                        {
-                                          "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-                                        },
-                                        {
-                                          "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
-                                        }
-                                      ],
-                                      "schema_definition": "stringvalidator.OneOf(validation.ValidPermissionPatternTypes...)"
+                            ]
+                          }
+                        },
+                        {
+                          "name": "connect_cluster",
+                          "string": {
+                            "description": "Valid Connect Cluster linked to the Kafka Cluster. Only mandatory when type is CONNECTOR",
+                            "computed_optional_required": "optional"
+                          }
+                        },
+                        {
+                          "name": "name",
+                          "string": {
+                            "description": "Name of the resource to apply permission could be a topic, a cluster, a consumer group, etc. depending on resource_type",
+                            "computed_optional_required": "required"
+                          }
+                        },
+                        {
+                          "name": "resource_type",
+                          "string": {
+                            "description": "Type of the resource to apply permission on valid values are: CONNECTOR, CONSUMER_GROUP, SUBJECT, TOPIC",
+                            "computed_optional_required": "required",
+                            "validators": [
+                              {
+                                "custom": {
+                                  "imports": [
+                                    {
+                                      "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                    },
+                                    {
+                                      "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
                                     }
-                                  }
-                                ]
+                                  ],
+                                  "schema_definition": "stringvalidator.OneOf(validation.ValidAppGroupPermissionTypes...)"
+                                }
                               }
+                            ]
+                          }
+                        },
+                        {
+                          "name": "permissions",
+                          "set": {
+                            "description": "Set of all permissions to apply on the resource. See https://docs.conduktor.io/platform/reference/resource-reference/console/#permissions for more details",
+                            "computed_optional_required": "optional",
+                            "element_type": {
+                              "string": {}
                             },
-                            {
-                              "name": "connect_cluster",
-                              "string": {
-                                "description": "Valid Connect Cluster linked to the Kafka Cluster. Only mandatory when type is CONNECTOR",
-                                "computed_optional_required": "optional"
-                              }
-                            },
-                            {
-                              "name": "name",
-                              "string": {
-                                "description": "Name of the resource to apply permission could be a topic, a cluster, a consumer group, etc. depending on resource_type",
-                                "computed_optional_required": "required"
-                              }
-                            },
-                            {
-                              "name": "resource_type",
-                              "string": {
-                                "description": "Type of the resource to apply permission on valid values are: CONNECTOR, CONSUMER_GROUP, SUBJECT, TOPIC",
-                                "computed_optional_required": "required",
-                                "validators": [
-                                  {
-                                    "custom": {
-                                      "imports": [
-                                        {
-                                          "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-                                        },
-                                        {
-                                          "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
-                                        }
-                                      ],
-                                      "schema_definition": "stringvalidator.OneOf(validation.ValidAppGroupPermissionTypes...)"
+                            "validators": [
+                              {
+                                "custom": {
+                                  "imports": [
+                                    {
+                                      "path": "github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
+                                    },
+                                    {
+                                      "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                    },
+                                    {
+                                      "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
                                     }
-                                  }
-                                ]
+                                  ],
+                                  "schema_definition": "setvalidator.ValueStringsAre(stringvalidator.OneOf(validation.ValidPermissions ...))"
+                                }
                               }
-                            },
-                            {
-                              "name": "permissions",
-                              "set": {
-                                "description": "Set of all permissions to apply on the resource. See https://docs.conduktor.io/platform/reference/resource-reference/console/#permissions for more details",
-                                "computed_optional_required": "optional",
-                                "element_type": {
-                                  "string": {}
-                                },
-                                "validators": [
-                                  {
-                                    "custom": {
-                                      "imports": [
-                                        {
-                                          "path": "github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
-                                        },
-                                        {
-                                          "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-                                        },
-                                        {
-                                          "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
-                                        }
-                                      ],
-                                      "schema_definition": "setvalidator.ValueStringsAre(stringvalidator.OneOf(validation.ValidPermissions ...))"
-                                    }
-                                  }
-                                ]
-                              }
-                            }
-                          ]
+                            ]
+                          }
                         }
-                      }
+                      ]
                     }
-                  ]
+                  }
                 }
-              }
-            ]
+              ]
+            }
           }
+        ]
+      }
     },
     {
       "name": "console_group_v2",
