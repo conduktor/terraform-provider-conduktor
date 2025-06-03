@@ -31,6 +31,14 @@ spec:
   owner: admin
 ---
 apiVersion: v1
+kind: ApplicationInstance
+metadata:
+  name: my-app-instance
+  application: myapp
+spec:
+  cluster: kafka-cluster
+---
+apiVersion: v1
 kind: TopicPolicy
 metadata:
   name: topic-policy
