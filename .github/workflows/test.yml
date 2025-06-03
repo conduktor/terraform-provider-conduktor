@@ -67,8 +67,8 @@ jobs:
         terraform:
           - version: "1.0.*"
             name: "TF-1.0"
-          - version: "1.10.*"
-            name: "TF-1.10"
+          - version: "latest"
+            name: "TF-latest"
         console:
           - "1.26.0"
           #- "1.27.0"
