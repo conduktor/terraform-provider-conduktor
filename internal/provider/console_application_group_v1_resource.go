@@ -32,6 +32,7 @@ type ApplicationGroupV1Resource struct {
 func (r *ApplicationGroupV1Resource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_console_application_group_v1"
 }
+
 func (r *ApplicationGroupV1Resource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.ConsoleApplicationGroupV1ResourceSchema(ctx)
 }
@@ -57,7 +58,8 @@ func (r *ApplicationGroupV1Resource) Configure(ctx context.Context, req resource
 		resp.Diagnostics.AddError(
 			"Unexpected Resource Configure Type",
 			"Console Client not configured. Please provide client configuration details for Console API and ensure you have set the right provider mode for this resource. \n"+
-				"Please refer to the documentation for more information.",
+				"More info here: \n"+
+				" - https://registry.terraform.io/providers/conduktor/conduktor/latest/docs",
 		)
 		return
 	}
@@ -75,34 +77,35 @@ func (r *ApplicationGroupV1Resource) Create(ctx context.Context, req resource.Cr
 		return
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("Creating Application Group named %s", data.Name.String()))
-	tflog.Debug(ctx, fmt.Sprintf("Creating Application Group with desired state : %v", data))
+	tflog.Info(ctx, fmt.Sprintf("Creating application group named %s", data.Name.String()))
+	tflog.Trace(ctx, fmt.Sprintf("Create application group with desired state : %+v", data))
 
 	consoleResource, err := mapper.TFToInternalModel(ctx, &data)
 	if err != nil {
-		resp.Diagnostics.AddError("Model Error,", fmt.Sprintf("Unable to create group, got error: %s", err))
+		resp.Diagnostics.AddError("Model Error", fmt.Sprintf("Unable to create application group, got error: %s", err))
 		return
 	}
-	tflog.Debug(ctx, fmt.Sprintf("Creating Application Group with internal model : %v", consoleResource))
+	tflog.Debug(ctx, fmt.Sprintf("Application Group to create : %+v", consoleResource))
 
 	apply, err := r.apiClient.Apply(ctx, applicationGroupV1ApiPath, consoleResource)
 	if err != nil {
-		resp.Diagnostics.AddError("API Error", fmt.Sprintf("Unable to create group, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create application group, got error: %s", err))
 		return
 	}
-	tflog.Debug(ctx, fmt.Sprintf("Created Application Group with response : %v", apply))
+
+	tflog.Debug(ctx, fmt.Sprintf("Application Group created with result: %s", apply.UpsertResult))
 
 	var consoleRes = console.ApplicationGroupConsoleResource{}
 	err = consoleRes.FromRawJsonInterface(apply.Resource)
 	if err != nil {
-		resp.Diagnostics.AddError("Unmarshalling Error", fmt.Sprintf("Response resource can't be cast as application group : %v got error: %s", apply.Resource, err))
+		resp.Diagnostics.AddError("Unmarshall Error", fmt.Sprintf("Response resource can't be cast as application group : %v, got error: %s", apply.Resource, err))
 		return
 	}
-	tflog.Debug(ctx, fmt.Sprintf("New Application Group state : %v", consoleRes))
+	tflog.Debug(ctx, fmt.Sprintf("New application group state : %+v", consoleRes))
 
 	data, err = mapper.InternalModelToTerraform(ctx, &consoleRes)
 	if err != nil {
-		resp.Diagnostics.AddError("Model Error", fmt.Sprintf("Unable to create group, got error: %s", err))
+		resp.Diagnostics.AddError("Model Error", fmt.Sprintf("Unable to read application group, got error: %s", err))
 		return
 	}
 
@@ -115,14 +118,15 @@ func (r *ApplicationGroupV1Resource) Read(ctx context.Context, req resource.Read
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	tflog.Info(ctx, fmt.Sprintf("Reading Application Group named %s", data.Name.String()))
 
+	tflog.Info(ctx, fmt.Sprintf("Read application group named %s", data.Name.String()))
 	get, err := r.apiClient.Describe(ctx, fmt.Sprintf("%s/%s", applicationGroupV1ApiPath, data.Name.ValueString()))
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Application Group, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read application group, got error: %s", err))
 		return
 	}
 
@@ -135,14 +139,14 @@ func (r *ApplicationGroupV1Resource) Read(ctx context.Context, req resource.Read
 	var consoleRes = console.ApplicationGroupConsoleResource{}
 	err = jsoniter.Unmarshal(get, &consoleRes)
 	if err != nil {
-		resp.Diagnostics.AddError("Parsing Error", fmt.Sprintf("Unable to read Application Group, got error: %s", err))
+		resp.Diagnostics.AddError("Parsing Error", fmt.Sprintf("Unable to read application group, got error: %s", err))
 		return
 	}
-	tflog.Debug(ctx, fmt.Sprintf("Application Group state : %v", consoleRes))
+	tflog.Debug(ctx, fmt.Sprintf("New application group state : %+v", consoleRes))
 
 	data, err = mapper.InternalModelToTerraform(ctx, &consoleRes)
 	if err != nil {
-		resp.Diagnostics.AddError("Model Error", fmt.Sprintf("Unable to read Application Group, got error: %s", err))
+		resp.Diagnostics.AddError("Model Error", fmt.Sprintf("Unable to read application group, got error: %s", err))
 		return
 	}
 
@@ -153,44 +157,43 @@ func (r *ApplicationGroupV1Resource) Read(ctx context.Context, req resource.Read
 func (r *ApplicationGroupV1Resource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data schema.ConsoleApplicationGroupV1Model
 
-	// Read Terraform prior state data into the model
-	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+	// Read Terraform plan data into the model
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("Updating Application Group named %s", data.Name.String()))
-	tflog.Trace(ctx, fmt.Sprintf("Update Application Group with TF data: %+v", data))
+	tflog.Info(ctx, fmt.Sprintf("Updating application group named %s", data.Name.String()))
+	tflog.Trace(ctx, fmt.Sprintf("Update application group with TF data: %+v", data))
 
 	consoleResource, err := mapper.TFToInternalModel(ctx, &data)
 	if err != nil {
-		resp.Diagnostics.AddError("Model Error,", fmt.Sprintf("Unable to update application group, got error: %s", err))
+		resp.Diagnostics.AddError("Model Error", fmt.Sprintf("Unable to create application group, got error: %s", err))
 		return
 	}
-	tflog.Debug(ctx, fmt.Sprintf("Updating Application Group with internal model : %v", consoleResource))
+	tflog.Debug(ctx, fmt.Sprintf("Application Group to update : %+v", consoleResource))
 
 	apply, err := r.apiClient.Apply(ctx, applicationGroupV1ApiPath, consoleResource)
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update group, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create application group, got error: %s", err))
 		return
 	}
-	tflog.Debug(ctx, fmt.Sprintf("Application Group updated with response : %v", apply))
+	tflog.Debug(ctx, fmt.Sprintf("Application Group updated with result: %s", apply))
 
 	var consoleRes = console.ApplicationGroupConsoleResource{}
 	err = consoleRes.FromRawJsonInterface(apply.Resource)
 	if err != nil {
-		resp.Diagnostics.AddError("Unmarshalling Error", fmt.Sprintf("Response resource can't be cast as application group : %v got error: %s", apply.Resource, err))
+		resp.Diagnostics.AddError("Unmarshall Error", fmt.Sprintf("Response resource can't be cast as application group : %v, got error: %s", apply.Resource, err))
 		return
 	}
-	tflog.Debug(ctx, fmt.Sprintf("New Application Group state : %v", consoleRes))
+	tflog.Debug(ctx, fmt.Sprintf("New application group state : %+v", consoleRes))
 
 	data, err = mapper.InternalModelToTerraform(ctx, &consoleRes)
 	if err != nil {
-		resp.Diagnostics.AddError("Model Error", fmt.Sprintf("Unable to update group, got error: %s", err))
+		resp.Diagnostics.AddError("Model Error", fmt.Sprintf("Unable to read application group, got error: %s", err))
 		return
 	}
-
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -200,14 +203,17 @@ func (r *ApplicationGroupV1Resource) Delete(ctx context.Context, req resource.De
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+
+	tflog.Info(ctx, fmt.Sprintf("Deleting application group named %s", data.Name.String()))
+
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	tflog.Info(ctx, fmt.Sprintf("Deleting Application Group named %s", data.Name.String()))
 
-	err := r.apiClient.Delete(ctx, client.CONSOLE, fmt.Sprintf("%s/%s", applicationGroupV1ApiPath, data.Name.ValueString()), nil)
+	resourcePath := fmt.Sprintf("%s/%s", applicationGroupV1ApiPath, data.Name.ValueString())
+	err := r.apiClient.Delete(ctx, client.CONSOLE, resourcePath, nil)
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete group, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete application group, got error: %s", err))
 		return
 	}
 
