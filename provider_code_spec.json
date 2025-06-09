@@ -650,7 +650,7 @@
                                       "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
                                     }
                                   ],
-                                  "schema_definition": "setvalidator.ValueStringsAre(stringvalidator.OneOf(validation.ValidPermissions ...))"
+                                  "schema_definition": "setvalidator.ValueStringsAre(stringvalidator.OneOf(validation.ValidAppGroupPermissions ...))"
                                 }
                               }
                             ]

@@ -39,8 +39,36 @@ var ValidPermissions = []string{
 	"topicCreate",
 	"topicAddPartition",
 	"topicDelete",
+	"topicDataQualityManage",
 	"chargebackManage",
 	"sqlManage",
+}
+
+var ValidAppGroupPermissions = []string{
+	"kafkaConnectorViewConfig",
+	"kafkaConnectorStatus",
+	"kafkaConnectorEditConfig",
+	"kafkaConnectorDelete",
+	"kafkaConnectorCreate",
+	"kafkaConnectPauseResume",
+	"kafkaConnectRestart",
+	"consumerGroupView",
+	"consumerGroupReset",
+	"consumerGroupDelete",
+	"consumerGroupCreate",
+	"subjectCreateUpdate",
+	"subjectEditCompatibility",
+	"subjectDelete",
+	"subjectView",
+	"topicViewConfig",
+	"topicEmpty",
+	"topicConsume",
+	"topicProduce",
+	"topicEditConfig",
+	"topicCreate",
+	"topicAddPartition",
+	"topicDelete",
+	"topicDataQualityManage",
 }
 
 // Provider modes.
