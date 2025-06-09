@@ -119,7 +119,7 @@ func ConsoleApplicationGroupV1ResourceSchema(ctx context.Context) schema.Schema 
 									Description:         "Set of all permissions to apply on the resource. See https://docs.conduktor.io/platform/reference/resource-reference/console/#permissions for more details",
 									MarkdownDescription: "Set of all permissions to apply on the resource. See https://docs.conduktor.io/platform/reference/resource-reference/console/#permissions for more details",
 									Validators: []validator.Set{
-										setvalidator.ValueStringsAre(stringvalidator.OneOf(validation.ValidPermissions...)),
+										setvalidator.ValueStringsAre(stringvalidator.OneOf(validation.ValidAppGroupPermissions...)),
 									},
 								},
 								"resource_type": schema.StringAttribute{

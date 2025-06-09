@@ -13,7 +13,7 @@ This resource allows you to create, read, update and delete application groups i
 
 ## Example Usage
 
-### Simple application instance
+### Simple application group
 ```terraform
 resource "conduktor_console_application_group_v1" "simple" {
   name        = "simple"
@@ -34,7 +34,7 @@ resource "conduktor_console_application_group_v1" "simple" {
 }
 ```
 
-### Complex application instances
+### Complex application group
 ```terraform
 resource "conduktor_console_application_group_v1" "complex" {
   name        = "complex"

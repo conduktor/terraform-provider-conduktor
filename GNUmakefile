@@ -10,8 +10,7 @@ export $(shell sed 's/=.*//' .env)
 # Include .envrc file if it exists
 ifneq (,$(wildcard .envrc))
   include .envrc
-  # Commented out problematic line
-  # export $(shell grep -v '^#' .envrc | sed "s/export //")
+  export $(shell grep -v '^#' .envrc | sed 's/export //')
 endif
 
 default: testacc
