@@ -32,7 +32,7 @@ type ApplicationGroupPermission struct {
 
 type ApplicationGroupSpec struct {
 	DisplayName               string                       `json:"displayName"`
-	Description               string                       `json:"description"`
+	Description               string                       `json:"description,omitempty"`
 	Permissions               []ApplicationGroupPermission `json:"permissions"`
 	Members                   []string                     `json:"members"`
 	ExternalGroups            []string                     `json:"externalGroups"`

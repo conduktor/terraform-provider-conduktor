@@ -81,9 +81,9 @@ resource "conduktor_console_application_group_v1" "complex" {
 
 ### Required
 
-- `application` (String) Reference to the application this instance belongs to
-- `name` (String) Application Instance name, must be unique, acts as an ID for import
-- `spec` (Attributes) Application Instance specification (see [below for nested schema](#nestedatt--spec))
+- `application` (String) Reference to the application this group belongs to
+- `name` (String) Application Group name, must be unique, acts as an ID for import
+- `spec` (Attributes) Application Group specification (see [below for nested schema](#nestedatt--spec))
 
 <a id="nestedatt--spec"></a>
 ### Nested Schema for `spec`
@@ -101,14 +101,14 @@ Optional:
 
 Read-Only:
 
-- `members_from_external_groups` (Set of String) Set of members of the group (managed by backend, ReadOnly in Terraform
+- `members_from_external_groups` (Set of String) Set of members of the group (managed by backend, ReadOnly in Terraform)
 
 <a id="nestedatt--spec--permissions"></a>
 ### Nested Schema for `spec.permissions`
 
 Required:
 
-- `app_instance` (String) Reference to the application this instance belongs to
+- `app_instance` (String) Reference to the application instance this group belongs to
 - `name` (String) Name of the resource to apply permission could be a topic, a cluster, a consumer group, etc. depending on resource_type
 - `pattern_type` (String) Type of the pattern to apply permission on valid values are: LITERAL, PREFIXED
 - `resource_type` (String) Type of the resource to apply permission on valid values are: CONNECTOR, CONSUMER_GROUP, SUBJECT, TOPIC

@@ -394,7 +394,7 @@
           {
             "name": "name",
             "string": {
-              "description": "Application Instance name, must be unique, acts as an ID for import",
+              "description": "Application Group name, must be unique, acts as an ID for import",
               "computed_optional_required": "required",
               "plan_modifiers": [
                 {
@@ -428,7 +428,7 @@
           {
             "name": "application",
             "string": {
-              "description": "Reference to the application this instance belongs to",
+              "description": "Reference to the application this group belongs to",
               "computed_optional_required": "required",
               "validators": [
                 {
@@ -451,7 +451,7 @@
             "name": "spec",
             "single_nested": {
               "computed_optional_required": "required",
-              "description": "Application Instance specification",
+              "description": "Application Group specification",
               "attributes": [
                 {
                   "name": "display_name",
@@ -511,7 +511,7 @@
                 {
                   "name": "members_from_external_groups",
                   "set": {
-                    "description": "Set of members of the group (managed by backend, ReadOnly in Terraform",
+                    "description": "Set of members of the group (managed by backend, ReadOnly in Terraform)",
                     "computed_optional_required": "computed",
                     "element_type": {
                       "string": {}
@@ -551,7 +551,7 @@
                         {
                           "name": "app_instance",
                           "string": {
-                            "description": "Reference to the application this instance belongs to",
+                            "description": "Reference to the application instance this group belongs to",
                             "computed_optional_required": "required",
                             "validators": [
                               {

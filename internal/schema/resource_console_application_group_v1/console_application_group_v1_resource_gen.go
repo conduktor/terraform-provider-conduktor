@@ -29,16 +29,16 @@ func ConsoleApplicationGroupV1ResourceSchema(ctx context.Context) schema.Schema 
 		Attributes: map[string]schema.Attribute{
 			"application": schema.StringAttribute{
 				Required:            true,
-				Description:         "Reference to the application this instance belongs to",
-				MarkdownDescription: "Reference to the application this instance belongs to",
+				Description:         "Reference to the application this group belongs to",
+				MarkdownDescription: "Reference to the application this group belongs to",
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(regexp.MustCompile("^[0-9a-z\\_\\-]+$"), ""),
 				},
 			},
 			"name": schema.StringAttribute{
 				Required:            true,
-				Description:         "Application Instance name, must be unique, acts as an ID for import",
-				MarkdownDescription: "Application Instance name, must be unique, acts as an ID for import",
+				Description:         "Application Group name, must be unique, acts as an ID for import",
+				MarkdownDescription: "Application Group name, must be unique, acts as an ID for import",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
@@ -77,8 +77,8 @@ func ConsoleApplicationGroupV1ResourceSchema(ctx context.Context) schema.Schema 
 					"members_from_external_groups": schema.SetAttribute{
 						ElementType:         types.StringType,
 						Computed:            true,
-						Description:         "Set of members of the group (managed by backend, ReadOnly in Terraform",
-						MarkdownDescription: "Set of members of the group (managed by backend, ReadOnly in Terraform",
+						Description:         "Set of members of the group (managed by backend, ReadOnly in Terraform)",
+						MarkdownDescription: "Set of members of the group (managed by backend, ReadOnly in Terraform)",
 						PlanModifiers: []planmodifier.Set{
 							planmodifiers.AlwaysUseStateForSet(),
 						},
@@ -89,8 +89,8 @@ func ConsoleApplicationGroupV1ResourceSchema(ctx context.Context) schema.Schema 
 							Attributes: map[string]schema.Attribute{
 								"app_instance": schema.StringAttribute{
 									Required:            true,
-									Description:         "Reference to the application this instance belongs to",
-									MarkdownDescription: "Reference to the application this instance belongs to",
+									Description:         "Reference to the application instance this group belongs to",
+									MarkdownDescription: "Reference to the application instance this group belongs to",
 									Validators: []validator.String{
 										stringvalidator.RegexMatches(regexp.MustCompile("^[0-9a-z\\_\\-]+$"), ""),
 									},
@@ -149,8 +149,8 @@ func ConsoleApplicationGroupV1ResourceSchema(ctx context.Context) schema.Schema 
 					},
 				},
 				Required:            true,
-				Description:         "Application Instance specification",
-				MarkdownDescription: "Application Instance specification",
+				Description:         "Application Group specification",
+				MarkdownDescription: "Application Group specification",
 			},
 		},
 	}

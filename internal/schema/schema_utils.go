@@ -7,8 +7,6 @@ import (
 
 	mapper "github.com/conduktor/terraform-provider-conduktor/internal/mapper"
 	"github.com/conduktor/terraform-provider-conduktor/internal/model"
-	"github.com/conduktor/terraform-provider-conduktor/internal/model/console"
-	applicationGroup "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_console_application_group_v1"
 	groups "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_console_group_v2"
 	users "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_console_user_v2"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -233,80 +231,6 @@ func SetValueToPermissionArray(ctx context.Context, resource Resource, set baset
 		}
 	}
 	return permissions, nil
-}
-
-// Parse a ApplicationGroupPermissions Array into a Set.
-func ApplicationGroupPermissionArrayToSetValue(ctx context.Context, arr []console.ApplicationGroupPermission) (basetypes.SetValue, error) {
-	var permissionsList basetypes.SetValue
-	var tfPermissions []attr.Value
-	var diag diag.Diagnostics
-
-	for _, p := range arr {
-		flagsList, diag := StringArrayToSetValue(p.Permissions)
-		if diag.HasError() {
-			return basetypes.SetValue{}, mapper.WrapDiagError(diag, "permissions.permissions", mapper.FromTerraform)
-		}
-
-		types := map[string]attr.Type{
-			"name":            basetypes.StringType{},
-			"resource_type":   basetypes.StringType{},
-			"permissions":     flagsList.Type(ctx),
-			"pattern_type":    basetypes.StringType{},
-			"connect_cluster": basetypes.StringType{},
-			"app_instance":    basetypes.StringType{},
-		}
-		values := map[string]attr.Value{
-			"name":            NewStringValue(p.Name),
-			"resource_type":   NewStringValue(p.ResourceType),
-			"permissions":     flagsList,
-			"pattern_type":    NewStringValue(p.PatternType),
-			"connect_cluster": NewStringValue(p.ConnectCluster),
-			"app_instance":    NewStringValue(p.AppInstance),
-		}
-
-		appPermObj, diag := applicationGroup.NewPermissionsValue(types, values)
-		if diag.HasError() {
-			return basetypes.SetValue{}, mapper.WrapDiagError(diag, "permissions", mapper.FromTerraform)
-		}
-		tfPermissions = append(tfPermissions, appPermObj)
-	}
-
-	permissionsList, diag = types.SetValue(applicationGroup.PermissionsValue{}.Type(ctx), tfPermissions)
-	if diag.HasError() {
-		return basetypes.SetValue{}, mapper.WrapDiagError(diag, "permissions", mapper.FromTerraform)
-	}
-
-	return permissionsList, nil
-}
-
-// Parse a Set into an array of ApplicationGroupPermissions.
-func SetValueToApplicationGroupPermissionArray(ctx context.Context, set basetypes.SetValue) ([]console.ApplicationGroupPermission, error) {
-	permission := make([]console.ApplicationGroupPermission, 0)
-	var diag diag.Diagnostics
-
-	if !set.IsNull() && !set.IsUnknown() {
-		var tfPermissions []applicationGroup.PermissionsValue
-		diag = set.ElementsAs(ctx, &tfPermissions, false)
-		if diag.HasError() {
-			return nil, mapper.WrapDiagError(diag, "permissions", mapper.FromTerraform)
-		}
-		for _, p := range tfPermissions {
-			flags, diag := SetValueToStringArray(ctx, p.Permissions)
-			if diag.HasError() {
-				return nil, mapper.WrapDiagError(diag, "permissions.permissions", mapper.FromTerraform)
-			}
-
-			permission = append(permission, console.ApplicationGroupPermission{
-				AppInstance:    p.AppInstance.ValueString(),
-				ResourceType:   p.ResourceType.ValueString(),
-				Name:           p.Name.ValueString(),
-				Permissions:    flags,
-				PatternType:    p.PatternType.ValueString(),
-				ConnectCluster: p.ConnectCluster.ValueString(),
-			})
-		}
-	}
-	return permission, nil
 }
 
 // MapValueToStringMap Convert a MapValue to a map[string]string.
