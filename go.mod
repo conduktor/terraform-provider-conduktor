@@ -18,7 +18,7 @@ require (
 	github.com/hashicorp/terraform-plugin-testing v1.13.1
 	github.com/json-iterator/go v1.1.12
 	github.com/stretchr/testify v1.10.0
-	golang.org/x/mod v0.24.0
+	golang.org/x/mod v0.25.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
