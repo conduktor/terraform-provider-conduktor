@@ -12,9 +12,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	jsoniter "github.com/json-iterator/go"
+	"golang.org/x/mod/semver"
 )
 
 const resourcePolicyV1ApiPath = "/public/self-serve/v1/resource-policy"
+const resourcePolicyMininumVersion = "v1.34.0"
 
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &ResourcePolicyV1Resource{}
@@ -60,6 +62,22 @@ func (r *ResourcePolicyV1Resource) Configure(ctx context.Context, req resource.C
 			"Console Client not configured. Please provide client configuration details for Console API and ensure you have set the right provider mode for this resource. \n"+
 				"More info here: \n"+
 				" - https://registry.terraform.io/providers/conduktor/conduktor/latest/docs",
+		)
+		return
+	}
+
+	consoleVersion, err := data.Client.GetConsoleVersion(ctx)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error fetching Console version",
+			err.Error(),
+		)
+		return
+	}
+	if semver.IsValid(consoleVersion) && semver.Compare(consoleVersion, resourcePolicyMininumVersion) < 0 {
+		resp.Diagnostics.AddError(
+			"Minimum version requirement not met",
+			"This resource requires Conduktor Console API version "+resourcePolicyMininumVersion,
 		)
 		return
 	}

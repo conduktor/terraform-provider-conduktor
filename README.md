@@ -358,7 +358,6 @@ We are currently reviewing the following resources:
   - [Connector](https://docs.conduktor.io/platform/reference/resource-reference/kafka/#connector)
 3. Self-service resources:
   - [ApplicationInstancePermission](https://docs.conduktor.io/platform/reference/resource-reference/self-service/#application-instance-permissions)
-  - [ApplicationGroup](https://docs.conduktor.io/platform/reference/resource-reference/self-service/#application-group)
 4. Gateway resources:
   - [GatewayGroup](https://docs.conduktor.io/gateway/reference/resources-reference/#gatewaygroup)
   - [ConcentrationRule](https://docs.conduktor.io/gateway/reference/resources-reference/#concentrationrule)
