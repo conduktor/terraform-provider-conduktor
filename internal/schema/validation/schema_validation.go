@@ -39,8 +39,36 @@ var ValidPermissions = []string{
 	"topicCreate",
 	"topicAddPartition",
 	"topicDelete",
+	"topicDataQualityManage",
 	"chargebackManage",
 	"sqlManage",
+}
+
+var ValidAppGroupPermissions = []string{
+	"kafkaConnectorViewConfig",
+	"kafkaConnectorStatus",
+	"kafkaConnectorEditConfig",
+	"kafkaConnectorDelete",
+	"kafkaConnectorCreate",
+	"kafkaConnectPauseResume",
+	"kafkaConnectRestart",
+	"consumerGroupView",
+	"consumerGroupReset",
+	"consumerGroupDelete",
+	"consumerGroupCreate",
+	"subjectCreateUpdate",
+	"subjectEditCompatibility",
+	"subjectDelete",
+	"subjectView",
+	"topicViewConfig",
+	"topicEmpty",
+	"topicConsume",
+	"topicProduce",
+	"topicEditConfig",
+	"topicCreate",
+	"topicAddPartition",
+	"topicDelete",
+	"topicDataQualityManage",
 }
 
 // Provider modes.
@@ -53,6 +81,7 @@ var ValidOwnershipModes = []string{"ALL", "LIMITED"}
 var ValidCatalogVisibilities = []string{"PRIVATE", "PUBLIC"}
 
 var ValidPermissionTypes = []string{"CLUSTER", "CONSUMER_GROUP", "KAFKA_CONNECT", "KSQLDB", "PLATFORM", "SUBJECT", "TOPIC"}
+var ValidAppGroupPermissionTypes = []string{"CONNECTOR", "CONSUMER_GROUP", "TOPIC", "SUBJECT"}
 var ValidPermissionPatternTypes = []string{"LITERAL", "PREFIXED"}
 
 var ConfluentKafkaFlavor = "Confluent"

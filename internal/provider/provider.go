@@ -160,6 +160,7 @@ func (p *ConduktorProvider) Resources(ctx context.Context) []func() resource.Res
 	return []func() resource.Resource{
 		NewApplicationV1Resource,
 		NewApplicationInstanceV1Resource,
+		NewApplicationGroupV1Resource,
 		NewUserV2Resource,
 		NewGroupV2Resource,
 		NewGenericResource,
