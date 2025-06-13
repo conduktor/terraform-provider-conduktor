@@ -66,6 +66,38 @@ func TestAccApplicationInstanceV1Resource(t *testing.T) {
 	})
 }
 
+// This test contains a resource definition for creating an application instance targeting specifically Conduktor Console v1.34.
+// Currently used to test the new `spec.policy_ref` field.
+func TestAccApplicationInstanceV1Resource2(t *testing.T) {
+	v, err := fetchClientVersion(client.CONSOLE)
+	if err != nil {
+		t.Fatalf("Error fetching current version: %s", err)
+	}
+	test.CheckMinimumVersionRequirement(t, v, "v1.34.0")
+
+	resourceRef := "conduktor_console_application_instance_v1.test"
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { test.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read testing
+			{
+				Config: providerConfigConsole + test.TestAccTestdata(t, "console/application_instance_v1/resource_create_2.tf"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceRef, "name", "appinstance"),
+					resource.TestCheckResourceAttr(resourceRef, "application", "myapp"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.cluster", "kafka-cluster"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.policy_ref.#", "1"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.policy_ref.0", "resource-policy"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.application_managed_service_account", "false"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.service_account", "my-service-account"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
 func TestAccApplicationInstanceV1Minimal(t *testing.T) {
 	v, err := fetchClientVersion(client.CONSOLE)
 	if err != nil {

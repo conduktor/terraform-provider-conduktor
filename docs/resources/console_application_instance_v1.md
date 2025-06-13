@@ -103,6 +103,7 @@ Optional:
 
 - `application_managed_service_account` (Boolean) If set to true, the service account ACLs will be managed by the Application owners directly instead of being synchronized by the ApplicationInstance component. See [documentation](https://docs.conduktor.io/platform/reference/resource-reference/self-service/#application-managed-service-account) for more information
 - `default_catalog_visibility` (String) Default catalog visibility for the application instance, valid values are: PRIVATE, PUBLIC
+- `policy_ref` (Set of String) Reference to the resource policy to apply to this instance
 - `resources` (Attributes Set) Set of all resources associated with this application instance (see [below for nested schema](#nestedatt--spec--resources))
 - `service_account` (String) Service account associated with this application instance
 - `topic_policy_ref` (Set of String) Reference to the topic policy to apply to this instance

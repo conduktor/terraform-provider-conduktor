@@ -32,6 +32,7 @@ func (r ApplicationInstanceConsoleMetadata) String() string {
 type ApplicationInstanceConsoleSpec struct {
 	Cluster                          string                  `json:"cluster"`
 	TopicPolicyRef                   []string                `json:"topicPolicyRef,omitempty"`
+	PolicyRef                        []string                `json:"policyRef,omitempty"`
 	Resources                        []ResourceWithOwnership `json:"resources,omitempty"`
 	ApplicationManagedServiceAccount bool                    `json:"applicationManagedServiceAccount"`
 	ServiceAccount                   string                  `json:"serviceAccount,omitempty"`

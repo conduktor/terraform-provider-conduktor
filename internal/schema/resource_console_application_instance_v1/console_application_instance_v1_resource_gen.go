@@ -67,6 +67,12 @@ func ConsoleApplicationInstanceV1ResourceSchema(ctx context.Context) schema.Sche
 							stringvalidator.OneOf(validation.ValidCatalogVisibilities...),
 						},
 					},
+					"policy_ref": schema.SetAttribute{
+						ElementType:         types.StringType,
+						Optional:            true,
+						Description:         "Reference to the resource policy to apply to this instance",
+						MarkdownDescription: "Reference to the resource policy to apply to this instance",
+					},
 					"resources": schema.SetNestedAttribute{
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
@@ -226,6 +232,24 @@ func (t SpecType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue)
 			fmt.Sprintf(`default_catalog_visibility expected to be basetypes.StringValue, was: %T`, defaultCatalogVisibilityAttribute))
 	}
 
+	policyRefAttribute, ok := attributes["policy_ref"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`policy_ref is missing from object`)
+
+		return nil, diags
+	}
+
+	policyRefVal, ok := policyRefAttribute.(basetypes.SetValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`policy_ref expected to be basetypes.SetValue, was: %T`, policyRefAttribute))
+	}
+
 	resourcesAttribute, ok := attributes["resources"]
 
 	if !ok {
@@ -288,6 +312,7 @@ func (t SpecType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue)
 		ApplicationManagedServiceAccount: applicationManagedServiceAccountVal,
 		Cluster:                          clusterVal,
 		DefaultCatalogVisibility:         defaultCatalogVisibilityVal,
+		PolicyRef:                        policyRefVal,
 		Resources:                        resourcesVal,
 		ServiceAccount:                   serviceAccountVal,
 		TopicPolicyRef:                   topicPolicyRefVal,
@@ -412,6 +437,24 @@ func NewSpecValue(attributeTypes map[string]attr.Type, attributes map[string]att
 			fmt.Sprintf(`default_catalog_visibility expected to be basetypes.StringValue, was: %T`, defaultCatalogVisibilityAttribute))
 	}
 
+	policyRefAttribute, ok := attributes["policy_ref"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`policy_ref is missing from object`)
+
+		return NewSpecValueUnknown(), diags
+	}
+
+	policyRefVal, ok := policyRefAttribute.(basetypes.SetValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`policy_ref expected to be basetypes.SetValue, was: %T`, policyRefAttribute))
+	}
+
 	resourcesAttribute, ok := attributes["resources"]
 
 	if !ok {
@@ -474,6 +517,7 @@ func NewSpecValue(attributeTypes map[string]attr.Type, attributes map[string]att
 		ApplicationManagedServiceAccount: applicationManagedServiceAccountVal,
 		Cluster:                          clusterVal,
 		DefaultCatalogVisibility:         defaultCatalogVisibilityVal,
+		PolicyRef:                        policyRefVal,
 		Resources:                        resourcesVal,
 		ServiceAccount:                   serviceAccountVal,
 		TopicPolicyRef:                   topicPolicyRefVal,
@@ -552,6 +596,7 @@ type SpecValue struct {
 	ApplicationManagedServiceAccount basetypes.BoolValue   `tfsdk:"application_managed_service_account"`
 	Cluster                          basetypes.StringValue `tfsdk:"cluster"`
 	DefaultCatalogVisibility         basetypes.StringValue `tfsdk:"default_catalog_visibility"`
+	PolicyRef                        basetypes.SetValue    `tfsdk:"policy_ref"`
 	Resources                        basetypes.SetValue    `tfsdk:"resources"`
 	ServiceAccount                   basetypes.StringValue `tfsdk:"service_account"`
 	TopicPolicyRef                   basetypes.SetValue    `tfsdk:"topic_policy_ref"`
@@ -559,7 +604,7 @@ type SpecValue struct {
 }
 
 func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
-	attrTypes := make(map[string]tftypes.Type, 6)
+	attrTypes := make(map[string]tftypes.Type, 7)
 
 	var val tftypes.Value
 	var err error
@@ -567,6 +612,9 @@ func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) 
 	attrTypes["application_managed_service_account"] = basetypes.BoolType{}.TerraformType(ctx)
 	attrTypes["cluster"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["default_catalog_visibility"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["policy_ref"] = basetypes.SetType{
+		ElemType: types.StringType,
+	}.TerraformType(ctx)
 	attrTypes["resources"] = basetypes.SetType{
 		ElemType: ResourcesValue{}.Type(ctx),
 	}.TerraformType(ctx)
@@ -579,7 +627,7 @@ func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) 
 
 	switch v.state {
 	case attr.ValueStateKnown:
-		vals := make(map[string]tftypes.Value, 6)
+		vals := make(map[string]tftypes.Value, 7)
 
 		val, err = v.ApplicationManagedServiceAccount.ToTerraformValue(ctx)
 
@@ -604,6 +652,14 @@ func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) 
 		}
 
 		vals["default_catalog_visibility"] = val
+
+		val, err = v.PolicyRef.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["policy_ref"] = val
 
 		val, err = v.Resources.ToTerraformValue(ctx)
 
@@ -687,6 +743,36 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 		)
 	}
 
+	var policyRefVal basetypes.SetValue
+	switch {
+	case v.PolicyRef.IsUnknown():
+		policyRefVal = types.SetUnknown(types.StringType)
+	case v.PolicyRef.IsNull():
+		policyRefVal = types.SetNull(types.StringType)
+	default:
+		var d diag.Diagnostics
+		policyRefVal, d = types.SetValue(types.StringType, v.PolicyRef.Elements())
+		diags.Append(d...)
+	}
+
+	if diags.HasError() {
+		return types.ObjectUnknown(map[string]attr.Type{
+			"application_managed_service_account": basetypes.BoolType{},
+			"cluster":                             basetypes.StringType{},
+			"default_catalog_visibility":          basetypes.StringType{},
+			"policy_ref": basetypes.SetType{
+				ElemType: types.StringType,
+			},
+			"resources": basetypes.SetType{
+				ElemType: ResourcesValue{}.Type(ctx),
+			},
+			"service_account": basetypes.StringType{},
+			"topic_policy_ref": basetypes.SetType{
+				ElemType: types.StringType,
+			},
+		}), diags
+	}
+
 	var topicPolicyRefVal basetypes.SetValue
 	switch {
 	case v.TopicPolicyRef.IsUnknown():
@@ -704,6 +790,9 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 			"application_managed_service_account": basetypes.BoolType{},
 			"cluster":                             basetypes.StringType{},
 			"default_catalog_visibility":          basetypes.StringType{},
+			"policy_ref": basetypes.SetType{
+				ElemType: types.StringType,
+			},
 			"resources": basetypes.SetType{
 				ElemType: ResourcesValue{}.Type(ctx),
 			},
@@ -718,6 +807,9 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 		"application_managed_service_account": basetypes.BoolType{},
 		"cluster":                             basetypes.StringType{},
 		"default_catalog_visibility":          basetypes.StringType{},
+		"policy_ref": basetypes.SetType{
+			ElemType: types.StringType,
+		},
 		"resources": basetypes.SetType{
 			ElemType: ResourcesValue{}.Type(ctx),
 		},
@@ -741,6 +833,7 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 			"application_managed_service_account": v.ApplicationManagedServiceAccount,
 			"cluster":                             v.Cluster,
 			"default_catalog_visibility":          v.DefaultCatalogVisibility,
+			"policy_ref":                          policyRefVal,
 			"resources":                           resources,
 			"service_account":                     v.ServiceAccount,
 			"topic_policy_ref":                    topicPolicyRefVal,
@@ -776,6 +869,10 @@ func (v SpecValue) Equal(o attr.Value) bool {
 		return false
 	}
 
+	if !v.PolicyRef.Equal(other.PolicyRef) {
+		return false
+	}
+
 	if !v.Resources.Equal(other.Resources) {
 		return false
 	}
@@ -804,6 +901,9 @@ func (v SpecValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 		"application_managed_service_account": basetypes.BoolType{},
 		"cluster":                             basetypes.StringType{},
 		"default_catalog_visibility":          basetypes.StringType{},
+		"policy_ref": basetypes.SetType{
+			ElemType: types.StringType,
+		},
 		"resources": basetypes.SetType{
 			ElemType: ResourcesValue{}.Type(ctx),
 		},

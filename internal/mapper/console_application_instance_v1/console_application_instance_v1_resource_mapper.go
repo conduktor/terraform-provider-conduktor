@@ -18,6 +18,10 @@ func TFToInternalModel(ctx context.Context, r *appinstance.ConsoleApplicationIns
 	if diag.HasError() {
 		return console.ApplicationInstanceConsoleResource{}, mapper.WrapDiagError(diag, "topic_policy_ref", mapper.FromTerraform)
 	}
+	policyRef, diag := schema.SetValueToStringArray(ctx, r.Spec.PolicyRef)
+	if diag.HasError() {
+		return console.ApplicationInstanceConsoleResource{}, mapper.WrapDiagError(diag, "policy_ref", mapper.FromTerraform)
+	}
 	resources, err := setValueToResourceArray(ctx, r.Spec.Resources)
 	if err != nil {
 		return console.ApplicationInstanceConsoleResource{}, err
@@ -29,6 +33,7 @@ func TFToInternalModel(ctx context.Context, r *appinstance.ConsoleApplicationIns
 		console.ApplicationInstanceConsoleSpec{
 			Cluster:                          r.Spec.Cluster.ValueString(),
 			TopicPolicyRef:                   topicPolicyRef,
+			PolicyRef:                        policyRef,
 			Resources:                        resources,
 			ApplicationManagedServiceAccount: r.Spec.ApplicationManagedServiceAccount.ValueBool(),
 			ServiceAccount:                   r.Spec.ServiceAccount.ValueString(),
@@ -48,6 +53,13 @@ func InternalModelToTerraform(ctx context.Context, r *console.ApplicationInstanc
 			return appinstance.ConsoleApplicationInstanceV1Model{}, mapper.WrapDiagError(diag, "topic_policy_ref", mapper.FromTerraform)
 		}
 	}
+	policyRef := basetypes.NewSetNull(basetypes.StringType{})
+	if r.Spec.PolicyRef != nil {
+		policyRef, diag = schema.StringArrayToSetValue(r.Spec.PolicyRef)
+		if diag.HasError() {
+			return appinstance.ConsoleApplicationInstanceV1Model{}, mapper.WrapDiagError(diag, "policy_ref", mapper.FromTerraform)
+		}
+	}
 
 	resourcesSet, err := resourceArrayToSetValue(ctx, r.Spec.Resources)
 	if err != nil {
@@ -58,6 +70,7 @@ func InternalModelToTerraform(ctx context.Context, r *console.ApplicationInstanc
 		map[string]attr.Type{
 			"cluster":                             basetypes.StringType{},
 			"topic_policy_ref":                    topicPolicyRef.Type(ctx),
+			"policy_ref":                          policyRef.Type(ctx),
 			"resources":                           resourcesSet.Type(ctx),
 			"application_managed_service_account": basetypes.BoolType{},
 			"service_account":                     basetypes.StringType{},
@@ -66,6 +79,7 @@ func InternalModelToTerraform(ctx context.Context, r *console.ApplicationInstanc
 		map[string]attr.Value{
 			"cluster":                             schema.NewStringValue(r.Spec.Cluster),
 			"topic_policy_ref":                    topicPolicyRef,
+			"policy_ref":                          policyRef,
 			"resources":                           resourcesSet,
 			"application_managed_service_account": basetypes.NewBoolValue(r.Spec.ApplicationManagedServiceAccount),
 			"service_account":                     schema.NewStringValue(r.Spec.ServiceAccount),

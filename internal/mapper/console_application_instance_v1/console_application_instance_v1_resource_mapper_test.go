@@ -44,6 +44,7 @@ func TestApplicationInstanceV1ModelMapping(t *testing.T) {
 	assert.Equal(t, "app", internal.Metadata.Application)
 	assert.Equal(t, "cluster", internal.Spec.Cluster)
 	assert.Equal(t, []string{"ref2", "ref1"}, internal.Spec.TopicPolicyRef)
+	assert.Equal(t, []string{"resourcepolicy1", "resourcepolicy2"}, internal.Spec.PolicyRef)
 	assert.Equal(t, false, internal.Spec.ApplicationManagedServiceAccount)
 	assert.Equal(t, "serviceaccount", internal.Spec.ServiceAccount)
 	assert.Equal(t, "PRIVATE", internal.Spec.DefaultCatalogVisibility)
@@ -72,10 +73,12 @@ func TestApplicationInstanceV1ModelMapping(t *testing.T) {
 		return
 	}
 	topicPolicyRef, _ := schema.StringArrayToSetValue([]string{"ref2", "ref1"})
+	policyRef, _ := schema.StringArrayToSetValue([]string{"resourcepolicy1", "resourcepolicy2"})
 	assert.Equal(t, types.StringValue("appinstance"), tfModel.Name)
 	assert.Equal(t, types.StringValue("app"), tfModel.Application)
 	assert.Equal(t, types.StringValue("cluster"), tfModel.Spec.Cluster)
 	assert.Equal(t, topicPolicyRef, tfModel.Spec.TopicPolicyRef)
+	assert.Equal(t, policyRef, tfModel.Spec.PolicyRef)
 	assert.Equal(t, types.BoolValue(false), tfModel.Spec.ApplicationManagedServiceAccount)
 	assert.Equal(t, types.StringValue("serviceaccount"), tfModel.Spec.ServiceAccount)
 	assert.Equal(t, types.StringValue("PRIVATE"), tfModel.Spec.DefaultCatalogVisibility)
@@ -94,6 +97,7 @@ func TestApplicationInstanceV1ModelMapping(t *testing.T) {
 	assert.Equal(t, "app", internal2.Metadata.Application)
 	assert.Equal(t, "cluster", internal2.Spec.Cluster)
 	assert.Equal(t, []string{"ref2", "ref1"}, internal2.Spec.TopicPolicyRef)
+	assert.Equal(t, []string{"resourcepolicy1", "resourcepolicy2"}, internal2.Spec.PolicyRef)
 	assert.Equal(t, false, internal2.Spec.ApplicationManagedServiceAccount)
 	assert.Equal(t, "serviceaccount", internal2.Spec.ServiceAccount)
 	assert.Equal(t, "PRIVATE", internal2.Spec.DefaultCatalogVisibility)

@@ -255,6 +255,16 @@
                   }
                 },
                 {
+                  "name": "policy_ref",
+                  "set": {
+                    "description": "Reference to the resource policy to apply to this instance",
+                    "computed_optional_required": "optional",
+                    "element_type": {
+                      "string": {}
+                    }
+                  }
+                },
+                {
                   "name": "resources",
                   "set_nested": {
                     "description": "Set of all resources associated with this application instance",
