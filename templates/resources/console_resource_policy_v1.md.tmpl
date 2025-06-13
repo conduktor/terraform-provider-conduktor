@@ -21,3 +21,15 @@ This resource allows you to create, read, update and delete resource policies in
 
 
 {{ .SchemaMarkdown }}
+
+## Import
+
+In order to import a Resource Policy into Conduktor, you need to know the Resource Policy ID.
+
+For example, using an [`import` block](https://developer.hashicorp.com/terraform/language/import) :
+{{tffile "examples/resources/conduktor_console_resource_policy_v1/import.tf"}}
+
+Using the `terraform import` command:
+```shell
+terraform import conduktor_console_resource_policy_v1.example resourcepolicy
+```

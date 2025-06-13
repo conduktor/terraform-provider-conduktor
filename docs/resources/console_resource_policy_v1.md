@@ -93,3 +93,20 @@ Required:
 
 
 
+
+## Import
+
+In order to import a Resource Policy into Conduktor, you need to know the Resource Policy ID.
+
+For example, using an [`import` block](https://developer.hashicorp.com/terraform/language/import) :
+```terraform
+import {
+  to = conduktor_console_resource_policy_v1.example
+  id = "resourcepolicy"
+}
+```
+
+Using the `terraform import` command:
+```shell
+terraform import conduktor_console_resource_policy_v1.example resourcepolicy
+```
