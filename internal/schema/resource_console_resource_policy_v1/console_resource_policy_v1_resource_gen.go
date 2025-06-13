@@ -74,8 +74,8 @@ func ConsoleResourcePolicyV1ResourceSchema(ctx context.Context) schema.Schema {
 					},
 					"target_kind": schema.StringAttribute{
 						Required:            true,
-						Description:         "Type of the resource to apply policy on. Valid values are: Connector, Topic",
-						MarkdownDescription: "Type of the resource to apply policy on. Valid values are: Connector, Topic",
+						Description:         "Type of the resource to apply policy on. Valid values are: ApplicationGroup, Connector, Subject, Topic",
+						MarkdownDescription: "Type of the resource to apply policy on. Valid values are: ApplicationGroup, Connector, Subject, Topic",
 						Validators: []validator.String{
 							stringvalidator.OneOf(validation.ValidResourcePolicyTargetKind...),
 						},

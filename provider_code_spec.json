@@ -1710,7 +1710,7 @@
                 {
                   "name": "target_kind",
                   "string": {
-                    "description": "Type of the resource to apply policy on. Valid values are: Connector, Topic",
+                    "description": "Type of the resource to apply policy on. Valid values are: ApplicationGroup, Connector, Subject, Topic",
                     "computed_optional_required": "required",
                     "validators": [
                       {

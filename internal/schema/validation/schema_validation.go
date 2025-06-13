@@ -84,7 +84,7 @@ var ValidPermissionTypes = []string{"CLUSTER", "CONSUMER_GROUP", "KAFKA_CONNECT"
 var ValidAppGroupPermissionTypes = []string{"CONNECTOR", "CONSUMER_GROUP", "TOPIC", "SUBJECT"}
 var ValidPermissionPatternTypes = []string{"LITERAL", "PREFIXED"}
 
-var ValidResourcePolicyTargetKind = []string{"Connector", "Topic"}
+var ValidResourcePolicyTargetKind = []string{"ApplicationGroup", "Connector", "Subject", "Topic"}
 
 var ConfluentKafkaFlavor = "Confluent"
 var AivenKafkaFlavor = "Aiven"

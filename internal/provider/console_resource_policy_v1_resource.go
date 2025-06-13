@@ -77,7 +77,7 @@ func (r *ResourcePolicyV1Resource) Configure(ctx context.Context, req resource.C
 	if semver.IsValid(consoleVersion) && semver.Compare(consoleVersion, resourcePolicyMininumVersion) < 0 {
 		resp.Diagnostics.AddError(
 			"Minimum version requirement not met",
-			"This resource requires Conduktor Console API version "+resourcePolicyMininumVersion,
+			"This resource requires Conduktor Console API version "+resourcePolicyMininumVersion+" but targeted Conduktor Console API is "+consoleVersion,
 		)
 		return
 	}

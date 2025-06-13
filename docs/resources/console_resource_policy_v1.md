@@ -76,7 +76,7 @@ resource "conduktor_console_resource_policy_v1" "complex" {
 Required:
 
 - `rules` (Attributes Set) Set of all rules to apply on the resource. (see [below for nested schema](#nestedatt--spec--rules))
-- `target_kind` (String) Type of the resource to apply policy on. Valid values are: Connector, Topic
+- `target_kind` (String) Type of the resource to apply policy on. Valid values are: ApplicationGroup, Connector, Subject, Topic
 
 Optional:
 
