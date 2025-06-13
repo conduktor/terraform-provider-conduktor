@@ -1,0 +1,24 @@
+{
+  "kind": "ResourcePolicy",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "resourcepolicy",
+    "labels": {
+      "key": "value"
+    }
+  },
+  "spec": {
+    "targetKind": "Connector",
+    "description": "This is a resource policy",
+    "rules": [
+      {
+        "condition": "condition-1",
+        "errorMessage": "error-1"
+      },
+      {
+        "condition": "condition-2",
+        "errorMessage": "error-2"
+      }
+    ]
+  }
+}
