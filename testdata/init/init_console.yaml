@@ -15,12 +15,12 @@ spec:
 apiVersion: v2
 kind: KafkaConnectCluster
 metadata:
-    name: kafka-connect
-    cluster: kafka-cluster
+  name: kafka-connect
+  cluster: kafka-cluster
 spec:
-    displayName: My kafka connect
-    urls: http://localhost:8083
-    ignoreUntrustedCertificate: true
+  displayName: My kafka connect
+  urls: http://localhost:8083
+  ignoreUntrustedCertificate: true
 ---
 apiVersion: v1
 kind: Application
@@ -37,6 +37,19 @@ metadata:
   application: myapp
 spec:
   cluster: kafka-cluster
+  resources:
+    - type: TOPIC
+      name: my-topic
+      patternType: LITERAL
+---
+apiVersion: v2
+kind: Topic
+metadata:
+  name: my-topic
+  cluster: kafka-cluster
+spec:
+  partitions: 1
+  replicationFactor: 1
 ---
 apiVersion: v1
 kind: TopicPolicy
