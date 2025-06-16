@@ -86,6 +86,9 @@ var ValidPermissionPatternTypes = []string{"LITERAL", "PREFIXED"}
 
 var ValidResourcePolicyTargetKind = []string{"ApplicationGroup", "Connector", "Subject", "Topic"}
 
+var ValidApplicationInstancePermission = []string{"NONE", "READ", "WRITE"}
+var ValidApplicationInstancePermissionDeprecated = []string{"READ", "WRITE"}
+
 var ConfluentKafkaFlavor = "Confluent"
 var AivenKafkaFlavor = "Aiven"
 var GatewayKafkaFlavor = "Gateway"

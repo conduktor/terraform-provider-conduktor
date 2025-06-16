@@ -160,6 +160,245 @@
       }
     },
     {
+      "name": "console_application_instance_permission_v1",
+      "schema": {
+        "attributes": [
+          {
+            "name": "name",
+            "string": {
+              "description": "Application Instance Permission name, must be unique, acts as an ID for import",
+              "computed_optional_required": "required",
+              "plan_modifiers": [
+                {
+                  "custom": {
+                    "imports": [
+                      {
+                        "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+                      }
+                    ],
+                    "schema_definition": "stringplanmodifier.RequiresReplace()"
+                  }
+                }
+              ],
+              "validators": [
+                {
+                  "custom": {
+                    "imports": [
+                      {
+                        "path": "regexp"
+                      },
+                      {
+                        "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                      }
+                    ],
+                    "schema_definition": "stringvalidator.RegexMatches(regexp.MustCompile(\"^[0-9a-z\\\\_\\\\-]+$\"), \"\")"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "application",
+            "string": {
+              "description": "Reference to the application this permission belongs to",
+              "computed_optional_required": "required",
+              "validators": [
+                {
+                  "custom": {
+                    "imports": [
+                      {
+                        "path": "regexp"
+                      },
+                      {
+                        "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                      }
+                    ],
+                    "schema_definition": "stringvalidator.RegexMatches(regexp.MustCompile(\"^[0-9a-z\\\\_\\\\-]+$\"), \"\")"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "app_instance",
+            "string": {
+              "description": "Reference to the application instance this permission belongs to",
+              "computed_optional_required": "required",
+              "validators": [
+                {
+                  "custom": {
+                    "imports": [
+                      {
+                        "path": "regexp"
+                      },
+                      {
+                        "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                      }
+                    ],
+                    "schema_definition": "stringvalidator.RegexMatches(regexp.MustCompile(\"^[0-9a-z\\\\_\\\\-]+$\"), \"\")"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "spec",
+            "single_nested": {
+              "computed_optional_required": "required",
+              "description": "Application Instance specification. It's immutable (update will require the resource to be recreated)",
+              "attributes": [
+                {
+                  "name": "resource",
+                  "single_nested": {
+                    "description": "Resources associated with this application instance permission",
+                    "computed_optional_required": "computed_optional",
+                    "attributes": [
+                      {
+                        "name": "type",
+                        "string": {
+                          "description": "Type of the resource, valid values are: TOPIC, CONSUMER_GROUP, SUBJECT, CONNECTOR",
+                          "computed_optional_required": "required",
+                          "validators": [
+                            {
+                              "custom": {
+                                "imports": [
+                                  {
+                                    "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                  },
+                                  {
+                                    "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
+                                  }
+                                ],
+                                "schema_definition": "stringvalidator.OneOf(validation.ValidResourceTypes...)"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "name": "name",
+                        "string": {
+                          "description": "Name of the resource. Must reference any sub-resource of app_instance",
+                          "computed_optional_required": "required"
+                        }
+                      },
+                      {
+                        "name": "pattern_type",
+                        "string": {
+                          "description": "Pattern type for the resource, valid values are: LITERAL, PREFIXED",
+                          "computed_optional_required": "required",
+                          "validators": [
+                            {
+                              "custom": {
+                                "imports": [
+                                  {
+                                    "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                  },
+                                  {
+                                    "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
+                                  }
+                                ],
+                                "schema_definition": "stringvalidator.OneOf(validation.ValidPatternTypes...)"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "name": "connect_cluster",
+                        "string": {
+                          "description": "Valid Kafka Connect Cluster refrence",
+                          "computed_optional_required": "optional"
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "user_permission",
+                  "string": {
+                    "description": "Permission applied to the user, valid values are: NONE, READ, WRITE",
+                    "computed_optional_required": "required",
+                    "validators": [
+                      {
+                        "custom": {
+                          "imports": [
+                            {
+                              "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                            },
+                            {
+                              "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
+                            }
+                          ],
+                          "schema_definition": "stringvalidator.OneOf(validation.ValidApplicationInstancePermission...)"
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "service_account_permission",
+                  "string": {
+                    "description": "Permission applied to the service account, valid values are: NONE, READ, WRITE",
+                    "computed_optional_required": "required",
+                    "validators": [
+                      {
+                        "custom": {
+                          "imports": [
+                            {
+                              "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                            },
+                            {
+                              "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
+                            }
+                          ],
+                          "schema_definition": "stringvalidator.OneOf(validation.ValidApplicationInstancePermission...)"
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "granted_to",
+                  "string": {
+                    "description": "Reference to an application instance. Must be on the same Kafka cluster as app_instance",
+                    "computed_optional_required": "required",
+                    "validators": [
+                      {
+                        "custom": {
+                          "imports": [
+                            {
+                              "path": "regexp"
+                            },
+                            {
+                              "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                            }
+                          ],
+                          "schema_definition": "stringvalidator.RegexMatches(regexp.MustCompile(\"^[0-9a-z\\\\_\\\\-]+$\"), \"\")"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ],
+              "plan_modifiers": [
+                {
+                  "custom": {
+                    "imports": [
+                      {
+                        "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
+                      }
+                    ],
+                    "schema_definition": "objectplanmodifier.RequiresReplace()"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "console_application_instance_v1",
       "schema": {
         "attributes": [

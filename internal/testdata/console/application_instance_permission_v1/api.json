@@ -1,0 +1,20 @@
+{
+  "kind": "ApplicationInstancePermission",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "appinstance-permission",
+    "application": "app",
+    "appInstance": "appinstance"
+  },
+  "spec": {
+    "resource": {
+      "type": "CONSUMER_GROUP",
+      "name": "resource",
+      "patternType": "PREFIXED",
+      "connectCluster": "connectCluster"
+    },
+    "userPermission": "READ",
+    "serviceAccountPermission": "READ",
+    "grantedTo": "appinstance"
+  }
+}
