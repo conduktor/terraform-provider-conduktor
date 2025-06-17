@@ -76,3 +76,20 @@ Optional:
 
 
 
+
+## Import
+
+In order to import an ApplicationInstancePermission into Conduktor, you need to know the resource ID.
+
+For example, using an [`import` block](https://developer.hashicorp.com/terraform/language/import) :
+```terraform
+import {
+  to = conduktor_console_application_instance_permission_v1.example
+  id = "appinstance-permission"
+}
+```
+
+Using the `terraform import` command:
+```shell
+terraform import conduktor_console_application_instance_permission_v1.example resourcepolicy
+```
