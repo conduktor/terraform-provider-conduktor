@@ -1,0 +1,8 @@
+apiVersion: v2
+kind: Topic
+metadata:
+  name: my-topic
+  cluster: kafka-cluster
+spec:
+  partitions: 1
+  replicationFactor: 1
