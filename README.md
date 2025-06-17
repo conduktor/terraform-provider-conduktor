@@ -82,7 +82,7 @@ This repository contains the Conduktor Terraform provider, which defines Condukt
 - [Console application](./docs/resources/console_application_v1.md)
 - [Console application group](./docs/resources/console_application_group_v1.md)
 - [Console application instance](./docs/resources/console_application_instance_v1.md)
-- [ApplicationInstancePermission](https://docs.conduktor.io/platform/reference/resource-reference/self-service/#application-instance-permissions)
+- [Console application instance permission](https://docs.conduktor.io/platform/reference/resource-reference/self-service/#application-instance-permissions)
 - [Resource policy](./docs/resources/console_resource_policy_v1.md)
 - [Topic policy](./docs/resources/console_topic_policy_v1.md)
 

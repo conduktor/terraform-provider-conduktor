@@ -11,6 +11,6 @@ resource "conduktor_console_application_instance_permission_v1" "complex" {
     }
     user_permission            = "WRITE"
     service_account_permission = "NONE"
-    granted_to                 = "my-app-instance"
+    granted_to                 = "another-app-instance"
   }
 }

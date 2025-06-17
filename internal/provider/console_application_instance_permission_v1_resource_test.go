@@ -88,7 +88,7 @@ func TestAccApplicationInstancePermissionV1ExampleResource(t *testing.T) {
 					resource.TestCheckResourceAttr("conduktor_console_application_instance_permission_v1.complex", "spec.resource.pattern_type", "LITERAL"),
 					resource.TestCheckResourceAttr("conduktor_console_application_instance_permission_v1.complex", "spec.user_permission", "WRITE"),
 					resource.TestCheckResourceAttr("conduktor_console_application_instance_permission_v1.complex", "spec.service_account_permission", "NONE"),
-					resource.TestCheckResourceAttr("conduktor_console_application_instance_permission_v1.complex", "spec.granted_to", "my-app-instance"),
+					resource.TestCheckResourceAttr("conduktor_console_application_instance_permission_v1.complex", "spec.granted_to", "another-app-instance"),
 				),
 			},
 		},
