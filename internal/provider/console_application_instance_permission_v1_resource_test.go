@@ -3,12 +3,19 @@ package provider
 import (
 	"testing"
 
+	"github.com/conduktor/terraform-provider-conduktor/internal/client"
 	"github.com/conduktor/terraform-provider-conduktor/internal/test"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func TestAccApplicationInstancePermissionV1Resource(t *testing.T) {
+	v, err := fetchClientVersion(client.CONSOLE)
+	if err != nil {
+		t.Fatalf("Error fetching current version: %s", err)
+	}
+	test.CheckMinimumVersionRequirement(t, v, applicationInstancePermissionMininumVersion)
+
 	resourceRef := "conduktor_console_application_instance_permission_v1.test"
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { test.TestAccPreCheck(t) },
@@ -58,6 +65,12 @@ func TestAccApplicationInstancePermissionV1Resource(t *testing.T) {
 }
 
 func TestAccApplicationInstancePermissionV1ExampleResource(t *testing.T) {
+	v, err := fetchClientVersion(client.CONSOLE)
+	if err != nil {
+		t.Fatalf("Error fetching current version: %s", err)
+	}
+	test.CheckMinimumVersionRequirement(t, v, applicationInstancePermissionMininumVersion)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { test.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,

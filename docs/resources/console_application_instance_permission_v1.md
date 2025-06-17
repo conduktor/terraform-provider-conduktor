@@ -91,5 +91,5 @@ import {
 
 Using the `terraform import` command:
 ```shell
-terraform import conduktor_console_application_instance_permission_v1.example resourcepolicy
+terraform import conduktor_console_application_instance_permission_v1.example appinstance-permission
 ```
