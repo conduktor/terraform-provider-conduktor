@@ -106,6 +106,7 @@ services:
       GATEWAY_USER_POOL_SECRET_KEY: "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAw"
       # OAuth config needed to test EXTERNAL service accounts
       GATEWAY_SECURITY_PROTOCOL: SASL_PLAINTEXT
+      GATEWAY_ACL_ENABLED: false
       GATEWAY_LICENSE_KEY: ${CDK_LICENSE:-}
       GATEWAY_OAUTH_JWKS_URL: "https://login.microsoftonline.com/common/discovery/keys"
       GATEWAY_OAUTH_EXPECTED_ISSUER: "https://sts.windows.net/38755287-df00-48cd-805b-1ebe914e8b11/"
