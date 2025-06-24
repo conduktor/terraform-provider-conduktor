@@ -1,0 +1,62 @@
+{
+	"kind": "PartnerZone",
+	"apiVersion": "v2",
+	"metadata": {
+		"name": "partner-zone",
+		"labels": {
+			"key": "value"
+		}
+	},
+	"spec": {
+		"cluster": "mycluster",
+		"displayName": "Partner Zone",
+		"description": "This is a partner zone",
+		"url": "https://partnerzone.example.com",
+		"authenticationMode": {
+			"serviceAccount": "my-service-account",
+			"type": "OAUTHBEARER"
+		},
+		"topics": [
+			{
+				"name": "topic-1",
+				"backingTopic": "backing-topic-1",
+				"permission": "READ"
+			},
+			{
+				"name": "topic-2",
+				"backingTopic": "backing-topic-2",
+				"permission": "WRITE"
+			}
+		],
+		"partner": {
+			"name": "John Doe",
+			"role": "Data analyst",
+			"email": "johndoe@company.io",
+			"phone": "07827 837 177"
+		},
+		"trafficControlPolicies": {
+			"maxProduceRate": 1000000,
+			"maxConsumeRate": 2000000,
+			"limitCommitOffset": 30
+		},
+		"headers": {
+			"addOnProduce": [
+				{
+					"key": "key-1",
+					"value": "value-1",
+					"overrideIfExists": false
+				},
+				{
+					"key": "key-2",
+					"value": "value-2",
+					"overrideIfExists": true
+				}
+			],
+			"removeOnConsume": [
+				{
+					"keyRegex": "my_org_prefix.*"
+				}
+			]
+		}
+	}
+}
