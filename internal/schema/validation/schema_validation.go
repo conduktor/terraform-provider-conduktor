@@ -88,6 +88,9 @@ var ValidResourcePolicyTargetKind = []string{"ApplicationGroup", "Connector", "S
 
 var ValidApplicationInstancePermission = []string{"NONE", "READ", "WRITE"}
 
+var ValidPartnerZoneAuthenticationType = []string{"MTLS", "OAUTHBEARER", "PLAIN"}
+var ValidPartnerZoneTopicPermission = []string{"READ", "WRITE"}
+
 var ConfluentKafkaFlavor = "Confluent"
 var AivenKafkaFlavor = "Aiven"
 var GatewayKafkaFlavor = "Gateway"
