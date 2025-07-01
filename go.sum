@@ -39,8 +39,8 @@ github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e/go.mod h1:nSuG5e5P
 github.com/chzyer/test v0.0.0-20180213035817-a1ea475d72b1/go.mod h1:Q3SI9o4m/ZMnBNeIyt5eFwwo7qiLfzFZmjNmxjkiQlU=
 github.com/cloudflare/circl v1.6.1 h1:zqIqSPIndyBh1bjLVVDHMPpVKqp8Su/V+6MeDzzQBQ0=
 github.com/cloudflare/circl v1.6.1/go.mod h1:uddAzsPgqdMAYatqJ0lsjX1oECcQLIlRpzZh3pJrofs=
-github.com/conduktor/ctl v0.5.1 h1:F+W/oV3jyC4w7CMsf6gaRO+vQ0hB4kO6HGPhBpH9O/Y=
-github.com/conduktor/ctl v0.5.1/go.mod h1:vqtutWjFaXu8Dg/oojsGIvNjcv4Ig8wkepLvpbzN+GY=
+github.com/conduktor/ctl v0.6.1 h1:4i7WOVvYJkxq3VVLbuSOPfyZMO8/VpOqURzwfDQuYv0=
+github.com/conduktor/ctl v0.6.1/go.mod h1:vqtutWjFaXu8Dg/oojsGIvNjcv4Ig8wkepLvpbzN+GY=
 github.com/conduktor/terraform-plugin-codegen-framework v0.0.0-20250305143449-8d9a145a512a h1:tMunkm5PU1DFJSUiP12Z/Ns0W8+fsHKG5igIbtXDyfM=
 github.com/conduktor/terraform-plugin-codegen-framework v0.0.0-20250305143449-8d9a145a512a/go.mod h1:1kTvWWgdbLsDf/N7VnRT5dIjdIqaZIHMfLrqucPpOQU=
 github.com/conduktor/terraform-plugin-codegen-spec v0.0.0-20250213112457-5b5117af3e12 h1:qMI/AOw4aX8+MThf+hW9bCquklE64CV2xvKGddDWsTg=
