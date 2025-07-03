@@ -61,15 +61,15 @@ type PartnerZoneHeaders struct {
 }
 
 type PartnerZoneConsoleSpec struct {
-	Cluster                string                            `json:"cluster"`
-	DisplayName            string                            `json:"displayName,omitempty"`
-	Description            string                            `json:"description,omitempty"`
-	Url                    string                            `json:"url,omitempty"`
-	AuthenticationMode     PartnerZoneAuthenticationMode     `json:"authenticationMode"`
-	Topics                 []PartnerZoneTopic                `json:"topics,omitempty"`
-	Partner                PartnerZonePartner                `json:"partner,omitempty"`
-	TrafficControlPolicies PartnerZoneTrafficControlPolicies `json:"trafficControlPolicies,omitempty"`
-	Headers                PartnerZoneHeaders                `json:"headers,omitempty"`
+	Cluster                string                             `json:"cluster"`
+	DisplayName            string                             `json:"displayName,omitempty"`
+	Description            string                             `json:"description,omitempty"`
+	Url                    string                             `json:"url,omitempty"`
+	AuthenticationMode     *PartnerZoneAuthenticationMode     `json:"authenticationMode"`
+	Topics                 []PartnerZoneTopic                 `json:"topics,omitempty"`
+	Partner                *PartnerZonePartner                `json:"partner,omitempty"`
+	TrafficControlPolicies *PartnerZoneTrafficControlPolicies `json:"trafficControlPolicies,omitempty"`
+	Headers                *PartnerZoneHeaders                `json:"headers,omitempty"`
 }
 
 type PartnerZoneConsoleResource struct {

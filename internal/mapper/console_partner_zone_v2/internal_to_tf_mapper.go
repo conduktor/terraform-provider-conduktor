@@ -46,7 +46,7 @@ func specInternalModelToTerraform(ctx context.Context, r *console.PartnerZoneCon
 	valuesMap["description"] = schema.NewStringValue(r.Description)
 	valuesMap["url"] = schema.NewStringValue(r.Url)
 
-	authMode, err := authenticationModeToTerraform(&r.AuthenticationMode)
+	authMode, err := authenticationModeToTerraform(r.AuthenticationMode)
 	if err != nil {
 		return partnerZone.SpecValue{}, err
 	}
@@ -62,7 +62,7 @@ func specInternalModelToTerraform(ctx context.Context, r *console.PartnerZoneCon
 	}
 	valuesMap["topics"] = topicsSet
 
-	partner, err := partnerToTerraform(&r.Partner)
+	partner, err := partnerToTerraform(r.Partner)
 	if err != nil {
 		return partnerZone.SpecValue{}, err
 	}
@@ -72,7 +72,7 @@ func specInternalModelToTerraform(ctx context.Context, r *console.PartnerZoneCon
 	}
 	valuesMap["partner"] = partnerValue
 
-	tfc, err := trafficControlPoliciesToTerraform(&r.TrafficControlPolicies)
+	tfc, err := trafficControlPoliciesToTerraform(r.TrafficControlPolicies)
 	if err != nil {
 		return partnerZone.SpecValue{}, err
 	}
@@ -82,7 +82,7 @@ func specInternalModelToTerraform(ctx context.Context, r *console.PartnerZoneCon
 	}
 	valuesMap["traffic_control_policies"] = tfcValue
 
-	headers, err := headersToTerraform(ctx, &r.Headers)
+	headers, err := headersToTerraform(ctx, r.Headers)
 	if err != nil {
 		return partnerZone.SpecValue{}, err
 	}

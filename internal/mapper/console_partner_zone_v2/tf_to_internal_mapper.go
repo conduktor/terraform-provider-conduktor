@@ -37,7 +37,7 @@ func TFToInternalModel(ctx context.Context, r *partnerZone.ConsolePartnerZoneV2M
 		return console.PartnerZoneConsoleResource{}, err
 	}
 
-	headers, err := objectValueToHeaders(ctx, r.Spec.Headers)
+	headers, err := objectValueToHeaders(ctx, &r.Spec.Headers)
 	if err != nil {
 		return console.PartnerZoneConsoleResource{}, err
 	}
@@ -61,16 +61,17 @@ func TFToInternalModel(ctx context.Context, r *partnerZone.ConsolePartnerZoneV2M
 	), nil
 }
 
-func objectValueToAuthenticationMode(ctx context.Context, r basetypes.ObjectValue) (console.PartnerZoneAuthenticationMode, error) {
+func objectValueToAuthenticationMode(ctx context.Context, r basetypes.ObjectValue) (*console.PartnerZoneAuthenticationMode, error) {
+	// This should never happen since the authentication mode is required in the schema.
 	if r.IsNull() {
-		return console.PartnerZoneAuthenticationMode{}, nil
+		return nil, nil
 	}
 
 	authModeValue, diag := partnerZone.NewAuthenticationModeValue(r.AttributeTypes(ctx), r.Attributes())
 	if diag.HasError() {
-		return console.PartnerZoneAuthenticationMode{}, mapper.WrapDiagError(diag, "authentication_mode", mapper.FromTerraform)
+		return &console.PartnerZoneAuthenticationMode{}, mapper.WrapDiagError(diag, "authentication_mode", mapper.FromTerraform)
 	}
-	return console.PartnerZoneAuthenticationMode{
+	return &console.PartnerZoneAuthenticationMode{
 		ServiceAccount: authModeValue.ServiceAccount.ValueString(),
 		Type:           authModeValue.AuthenticationModeType.ValueString(),
 	}, nil
@@ -99,16 +100,16 @@ func setValueToTopicsArray(ctx context.Context, set basetypes.SetValue) ([]conso
 	return topics, nil
 }
 
-func objectValueToPartner(ctx context.Context, r basetypes.ObjectValue) (console.PartnerZonePartner, error) {
+func objectValueToPartner(ctx context.Context, r basetypes.ObjectValue) (*console.PartnerZonePartner, error) {
 	if r.IsNull() {
-		return console.PartnerZonePartner{}, nil
+		return nil, nil
 	}
 
 	partnerValue, diag := partnerZone.NewPartnerValue(r.AttributeTypes(ctx), r.Attributes())
 	if diag.HasError() {
-		return console.PartnerZonePartner{}, mapper.WrapDiagError(diag, "partner", mapper.FromTerraform)
+		return &console.PartnerZonePartner{}, mapper.WrapDiagError(diag, "partner", mapper.FromTerraform)
 	}
-	return console.PartnerZonePartner{
+	return &console.PartnerZonePartner{
 		Name:  partnerValue.Name.ValueString(),
 		Role:  partnerValue.Role.ValueString(),
 		Email: partnerValue.Email.ValueString(),
@@ -116,43 +117,43 @@ func objectValueToPartner(ctx context.Context, r basetypes.ObjectValue) (console
 	}, nil
 }
 
-func objectValueToTrafficControlPolicies(ctx context.Context, r basetypes.ObjectValue) (console.PartnerZoneTrafficControlPolicies, error) {
+func objectValueToTrafficControlPolicies(ctx context.Context, r basetypes.ObjectValue) (*console.PartnerZoneTrafficControlPolicies, error) {
 	if r.IsNull() {
-		return console.PartnerZoneTrafficControlPolicies{}, nil
+		return nil, nil
 	}
 
 	tcpValue, diag := partnerZone.NewTrafficControlPoliciesValue(r.AttributeTypes(ctx), r.Attributes())
 	if diag.HasError() {
-		return console.PartnerZoneTrafficControlPolicies{}, mapper.WrapDiagError(diag, "traffic_control_policies", mapper.FromTerraform)
+		return &console.PartnerZoneTrafficControlPolicies{}, mapper.WrapDiagError(diag, "traffic_control_policies", mapper.FromTerraform)
 	}
-	return console.PartnerZoneTrafficControlPolicies{
+	return &console.PartnerZoneTrafficControlPolicies{
 		MaxProduceRate:    tcpValue.MaxProduceRate.ValueInt64(),
 		MaxConsumeRate:    tcpValue.MaxConsumeRate.ValueInt64(),
 		LimitCommitOffset: tcpValue.LimitCommitOffset.ValueInt64(),
 	}, nil
 }
 
-func objectValueToHeaders(ctx context.Context, r basetypes.ObjectValue) (console.PartnerZoneHeaders, error) {
+func objectValueToHeaders(ctx context.Context, r *basetypes.ObjectValue) (*console.PartnerZoneHeaders, error) {
 	if r.IsNull() {
-		return console.PartnerZoneHeaders{}, nil
+		return nil, nil
 	}
 
 	headers, diag := partnerZone.NewHeadersValue(r.AttributeTypes(ctx), r.Attributes())
 	if diag.HasError() {
-		return console.PartnerZoneHeaders{}, mapper.WrapDiagError(diag, "headers", mapper.FromTerraform)
+		return &console.PartnerZoneHeaders{}, mapper.WrapDiagError(diag, "headers", mapper.FromTerraform)
 	}
 
 	toAdd, err := setValueToAddArray(ctx, headers.AddOnProduce)
 	if err != nil {
-		return console.PartnerZoneHeaders{}, err
+		return &console.PartnerZoneHeaders{}, err
 	}
 
 	toRemove, err := setValueToRemoveArray(ctx, headers.RemoveOnConsume)
 	if err != nil {
-		return console.PartnerZoneHeaders{}, err
+		return &console.PartnerZoneHeaders{}, err
 	}
 
-	return console.PartnerZoneHeaders{
+	return &console.PartnerZoneHeaders{
 		AddOnProduce:    toAdd,
 		RemoveOnConsume: toRemove,
 	}, nil
