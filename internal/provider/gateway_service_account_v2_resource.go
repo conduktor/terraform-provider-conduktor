@@ -145,8 +145,13 @@ func (r *GatewayServiceAccountV2Resource) Read(ctx context.Context, req resource
 
 	var gatewayRes = []gateway.GatewayServiceAccountResource{}
 	err = json.Unmarshal(get, &gatewayRes)
-	if err != nil || len(gatewayRes) < 1 {
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read service account, got error: %s", err))
+		return
+	}
+	if len(gatewayRes) == 0 {
+		tflog.Debug(ctx, fmt.Sprintf("Service account %s not found, removing from state", data.Name.String()))
+		resp.State.RemoveResource(ctx)
 		return
 	}
 	tflog.Debug(ctx, fmt.Sprintf("New service account state : %+v", gatewayRes))

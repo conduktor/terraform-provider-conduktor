@@ -1,7 +1,12 @@
 package provider
 
 import (
+	"context"
+	"github.com/conduktor/terraform-provider-conduktor/internal/client"
+	"github.com/conduktor/terraform-provider-conduktor/internal/model/gateway"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"testing"
+	"time"
 
 	"github.com/conduktor/terraform-provider-conduktor/internal/test"
 
@@ -11,6 +16,11 @@ import (
 func TestAccGatewayServiceAccountV2Resource(t *testing.T) {
 	test.CheckEnterpriseEnabled(t)
 	resourceRef := "conduktor_gateway_service_account_v2.test"
+
+	gwClient, err := testClient(client.GATEWAY)
+	if err != nil {
+		t.Fatalf("Error creating gateway client: %s", err)
+	}
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { test.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
@@ -33,6 +43,30 @@ func TestAccGatewayServiceAccountV2Resource(t *testing.T) {
 				ImportStateVerify:                    true,
 				ImportStateId:                        "user1",
 				ImportStateVerifyIdentifierAttribute: "name",
+			},
+			// Test plan changes if externally deleted resource
+			{
+				PreConfig: func() {
+					// wait a bit to ensure the service account is created
+					time.Sleep(1 * time.Second)
+					deleteRes := gateway.GatewayServiceAccountMetadata{
+						Name:     "user1",
+						VCluster: "passthrough",
+					}
+					deletePath := gatewayServiceAccountV2ApiPath
+					err := gwClient.Delete(context.Background(), client.GATEWAY, deletePath, deleteRes)
+					if err != nil {
+						t.Fatalf("Error externally deleting interceptor: %s", err)
+					}
+				},
+				Config:             providerConfigGateway + test.TestAccTestdata(t, "gateway/service_account_v2/resource_create.tf"),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PostApplyPostRefresh: []plancheck.PlanCheck{
+						plancheck.ExpectNonEmptyPlan(),
+					},
+				},
 			},
 			// Update and Read testing
 			{
