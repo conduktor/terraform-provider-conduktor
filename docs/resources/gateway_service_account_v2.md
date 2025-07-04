@@ -62,3 +62,22 @@ Optional:
 
 
 
+
+## Import
+
+In order to import an existing Conduktor Gateway Service Account, you need to know the Service account's and virtual cluster unique name pair.
+
+The import ID is constructed as follows: `<service_account_name>/<vcluster>`.
+
+For example, using an [`import` block](https://developer.hashicorp.com/terraform/language/import) :
+```terraform
+import {
+  to = conduktor_gateway_service_account_v2.example
+  id = "sa-name/vcluster_sa" # Import <service_account_name>/<vcluster> Service Account
+}
+```
+
+Using the `terraform import` command:
+```shell
+terraform import conduktor_gateway_service_account_v2.example service_account_name/vcluster_name
+```
