@@ -14,7 +14,12 @@ func TestAccPartnerZoneV2Resource(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error fetching current version: %s", err)
 	}
-	test.CheckMinimumVersionRequirement(t, v, partnerZoneMininumVersion)
+	test.CheckMinimumVersionRequirement(t, v, partnerZoneMininumConsoleVersion)
+	v, err = fetchClientVersion(client.GATEWAY)
+	if err != nil {
+		t.Fatalf("Error fetching current version: %s", err)
+	}
+	test.CheckMinimumVersionRequirement(t, v, partnerZoneMininumGatewayVersion)
 
 	resourceRef := "conduktor_console_partner_zone_v2.test"
 	resource.Test(t, resource.TestCase{
@@ -73,7 +78,12 @@ func TestAccPartnerZoneV2Minimal(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error fetching current version: %s", err)
 	}
-	test.CheckMinimumVersionRequirement(t, v, partnerZoneMininumVersion)
+	test.CheckMinimumVersionRequirement(t, v, partnerZoneMininumConsoleVersion)
+	v, err = fetchClientVersion(client.GATEWAY)
+	if err != nil {
+		t.Fatalf("Error fetching current version: %s", err)
+	}
+	test.CheckMinimumVersionRequirement(t, v, partnerZoneMininumGatewayVersion)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { test.TestAccPreCheck(t) },
@@ -103,7 +113,12 @@ func TestAccPartnerZoneV2ExampleResource(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error fetching current version: %s", err)
 	}
-	test.CheckMinimumVersionRequirement(t, v, partnerZoneMininumVersion)
+	test.CheckMinimumVersionRequirement(t, v, partnerZoneMininumConsoleVersion)
+	v, err = fetchClientVersion(client.GATEWAY)
+	if err != nil {
+		t.Fatalf("Error fetching current version: %s", err)
+	}
+	test.CheckMinimumVersionRequirement(t, v, partnerZoneMininumGatewayVersion)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { test.TestAccPreCheck(t) },

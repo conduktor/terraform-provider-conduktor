@@ -66,7 +66,7 @@ func (r *ApplicationInstancePermissionV1Resource) Configure(ctx context.Context,
 		return
 	}
 
-	consoleVersion, err := data.Client.GetConsoleVersion(ctx)
+	consoleVersion, err := data.Client.GetAPIVersion(ctx, client.CONSOLE)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error fetching Console version",
