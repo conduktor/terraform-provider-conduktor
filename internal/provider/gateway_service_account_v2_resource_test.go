@@ -29,7 +29,7 @@ func TestAccGatewayServiceAccountV2Resource(t *testing.T) {
 			{
 				Config: providerConfigGateway + test.TestAccTestdata(t, "gateway/service_account_v2/resource_create.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceRef, "name", "user1"),
+					resource.TestCheckResourceAttr(resourceRef, "name", "test-sa"),
 					resource.TestCheckResourceAttr(resourceRef, "vcluster", "vcluster_sa"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.type", "EXTERNAL"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.external_names.#", "1"),
@@ -41,7 +41,7 @@ func TestAccGatewayServiceAccountV2Resource(t *testing.T) {
 				ResourceName:                         resourceRef,
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateId:                        "user1",
+				ImportStateId:                        "test-sa/vcluster_sa",
 				ImportStateVerifyIdentifierAttribute: "name",
 			},
 			// Test plan changes if externally deleted resource
@@ -50,9 +50,10 @@ func TestAccGatewayServiceAccountV2Resource(t *testing.T) {
 					// wait a bit to ensure the service account is created
 					time.Sleep(1 * time.Second)
 					deleteRes := gateway.GatewayServiceAccountMetadata{
-						Name:     "user1",
+						Name:     "test-sa",
 						VCluster: "vcluster_sa",
 					}
+					t.Logf("Deleting service account %s in vcluster %s", deleteRes.Name, deleteRes.VCluster)
 					err := gwClient.Delete(context.Background(), client.GATEWAY, gatewayServiceAccountV2ApiPath, deleteRes)
 					if err != nil {
 						t.Fatalf("Error externally deleting interceptor: %s", err)
@@ -67,11 +68,15 @@ func TestAccGatewayServiceAccountV2Resource(t *testing.T) {
 					},
 				},
 			},
+			// Re-create and Read testing for update test
+			{
+				Config: providerConfigGateway + test.TestAccTestdata(t, "gateway/service_account_v2/resource_create.tf"),
+			},
 			// Update and Read testing
 			{
 				Config: providerConfigGateway + test.TestAccTestdata(t, "gateway/service_account_v2/resource_update.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceRef, "name", "user1"),
+					resource.TestCheckResourceAttr(resourceRef, "name", "test-sa"),
 					resource.TestCheckResourceAttr(resourceRef, "vcluster", "vcluster_sa"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.type", "EXTERNAL"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.external_names.#", "1"),
