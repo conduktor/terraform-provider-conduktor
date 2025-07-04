@@ -263,8 +263,15 @@ func (client *Client) Delete(ctx context.Context, mode Mode, path string, resour
 	return nil
 }
 
-func (client *Client) GetConsoleVersion(ctx context.Context) (string, error) {
-	path := "/versions"
+func (client *Client) GetAPIVersion(ctx context.Context, mode Mode) (string, error) {
+	var path string
+	if mode == CONSOLE {
+		path = "/versions"
+	}
+	if mode == GATEWAY {
+		path = "/health"
+	}
+
 	url := client.BaseUrl + path
 	resp, err := client.Client.R().Get(url)
 	if err != nil {
@@ -279,10 +286,33 @@ func (client *Client) GetConsoleVersion(ctx context.Context) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	v := result["platform"]
+
+	var v any
+	var ok bool
+	if mode == CONSOLE {
+		v, ok = result["platform"]
+		if !ok {
+			return "", fmt.Errorf("No version found in response")
+		}
+	}
+	if mode == GATEWAY {
+		checks, ok := result["checks"].([]any)
+		if !ok || len(checks) == 0 {
+			return "", fmt.Errorf("No checks found in response")
+		}
+		data, ok := checks[0].(map[string]any)["data"]
+		if !ok {
+			return "", fmt.Errorf("No data found in checks response")
+		}
+		v, ok = data.(map[string]any)["version"]
+		if !ok {
+			return "", fmt.Errorf("No version found in data response")
+		}
+	}
+
 	version, ok := v.(string)
 	if !ok {
-		return "", err
+		return "", fmt.Errorf("Error parsing version to string")
 	}
 
 	// Go module semver requires version to start with v.
