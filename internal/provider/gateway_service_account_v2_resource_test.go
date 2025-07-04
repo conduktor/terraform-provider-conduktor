@@ -51,10 +51,9 @@ func TestAccGatewayServiceAccountV2Resource(t *testing.T) {
 					time.Sleep(1 * time.Second)
 					deleteRes := gateway.GatewayServiceAccountMetadata{
 						Name:     "user1",
-						VCluster: "passthrough",
+						VCluster: "vcluster_sa",
 					}
-					deletePath := gatewayServiceAccountV2ApiPath
-					err := gwClient.Delete(context.Background(), client.GATEWAY, deletePath, deleteRes)
+					err := gwClient.Delete(context.Background(), client.GATEWAY, gatewayServiceAccountV2ApiPath, deleteRes)
 					if err != nil {
 						t.Fatalf("Error externally deleting interceptor: %s", err)
 					}
