@@ -122,6 +122,10 @@ func TestAccGatewayInterceptorV2Resource(t *testing.T) {
 					},
 				},
 			},
+			// Re-create and Read testing for update test
+			{
+				Config: providerConfigGateway + test.TestAccTestdata(t, "gateway/interceptor_v2/resource_create.tf"),
+			},
 			//Update and Read testing
 			{
 				Config: providerConfigGateway + test.TestAccTestdata(t, "gateway/interceptor_v2/resource_update.tf"),
