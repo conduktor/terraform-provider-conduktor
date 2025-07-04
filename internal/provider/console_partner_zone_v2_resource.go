@@ -16,7 +16,8 @@ import (
 )
 
 const partnerZoneV2ApiPath = "/public/console/v2/partner-zone"
-const partnerZoneMininumVersion = "v1.31.0"
+const partnerZoneMininumConsoleVersion = "v1.31.0"
+const partnerZoneMininumGatewayVersion = "v3.6.1"
 
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &PartnerZoneV2Resource{}
@@ -66,7 +67,7 @@ func (r *PartnerZoneV2Resource) Configure(ctx context.Context, req resource.Conf
 		return
 	}
 
-	consoleVersion, err := data.Client.GetConsoleVersion(ctx)
+	consoleVersion, err := data.Client.GetAPIVersion(ctx, client.CONSOLE)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error fetching Console version",
@@ -74,10 +75,10 @@ func (r *PartnerZoneV2Resource) Configure(ctx context.Context, req resource.Conf
 		)
 		return
 	}
-	if semver.IsValid(consoleVersion) && semver.Compare(consoleVersion, partnerZoneMininumVersion) < 0 {
+	if semver.IsValid(consoleVersion) && semver.Compare(consoleVersion, partnerZoneMininumConsoleVersion) < 0 {
 		resp.Diagnostics.AddError(
 			"Minimum version requirement not met",
-			"This resource requires Conduktor Console API version "+partnerZoneMininumVersion+" but targeted Conduktor Console API is "+consoleVersion,
+			"This resource requires Conduktor Console API version "+partnerZoneMininumConsoleVersion+" but targeted Conduktor Console API is "+consoleVersion,
 		)
 		return
 	}
