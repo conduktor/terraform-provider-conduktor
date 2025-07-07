@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/conduktor/terraform-provider-conduktor/internal/client"
 	mapper "github.com/conduktor/terraform-provider-conduktor/internal/mapper/gateway_service_account_v2"
@@ -130,7 +131,7 @@ func (r *GatewayServiceAccountV2Resource) Read(ctx context.Context, req resource
 		queryString += "&vcluster=" + data.Vcluster.ValueString()
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("Read service account named %s", data.Name.String()))
+	tflog.Info(ctx, fmt.Sprintf("Read service account named %s on vcluster %s", data.Name.String(), data.Vcluster.String()))
 	get, err := r.apiClient.Describe(ctx, fmt.Sprintf("%s?%s", gatewayServiceAccountV2ApiPath, queryString))
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read service account, got error: %s", err))
@@ -143,15 +144,37 @@ func (r *GatewayServiceAccountV2Resource) Read(ctx context.Context, req resource
 		return
 	}
 
-	var gatewayRes = []gateway.GatewayServiceAccountResource{}
-	err = json.Unmarshal(get, &gatewayRes)
-	if err != nil || len(gatewayRes) < 1 {
+	var gatewayResult = []gateway.GatewayServiceAccountResource{}
+	err = json.Unmarshal(get, &gatewayResult)
+	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read service account, got error: %s", err))
 		return
 	}
-	tflog.Debug(ctx, fmt.Sprintf("New service account state : %+v", gatewayRes))
+	if len(gatewayResult) > 1 {
+		tflog.Warn(ctx, fmt.Sprintf("Multiple service accounts found with query name %s and vcluster %s, using best match", data.Name.String(), data.Vcluster.ValueString()))
+	}
+	var gatewayResource = gateway.GatewayServiceAccountResource{}
+	var matchFound = false
+	for _, res := range gatewayResult {
+		nameMatch := res.Metadata.Name == data.Name.ValueString()
+		vclusterMatch := res.Metadata.VCluster == data.Vcluster.ValueString()
+		passthroughMatch := res.Metadata.VCluster == "" && data.Vcluster.ValueString() == "passthrough"
 
-	data, err = mapper.InternalModelToTerraform(ctx, &gatewayRes[0])
+		if nameMatch && (vclusterMatch || passthroughMatch) {
+			gatewayResource = res
+			matchFound = true
+			break
+		}
+	}
+	if !matchFound {
+		tflog.Debug(ctx, fmt.Sprintf("Service account %s not found, removing from state", data.Name.String()))
+		resp.State.RemoveResource(ctx)
+		return
+	}
+
+	tflog.Debug(ctx, fmt.Sprintf("New service account state : %+v", gatewayResource))
+
+	data, err = mapper.InternalModelToTerraform(ctx, &gatewayResource)
 	if err != nil {
 		resp.Diagnostics.AddError("Model Error", fmt.Sprintf("Unable to read service account, got error: %s", err))
 		return
@@ -235,6 +258,23 @@ func (r *GatewayServiceAccountV2Resource) Delete(ctx context.Context, req resour
 	tflog.Debug(ctx, fmt.Sprintf("Service account %s deleted", data.Name.String()))
 }
 
+// ImportState imports the state of the resource from the given ID.
+// The ID is expected to be in the format: <service_account_name>/<vcluster> with backward compatibility as <service_account_name> only.
 func (r *GatewayServiceAccountV2Resource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("name"), req, resp)
+	idParts := strings.Split(req.ID, "/")
+
+	if idParts[0] == "" {
+		resp.Diagnostics.AddError(
+			"Unexpected Import Identifier",
+			fmt.Sprintf("Expected import identifier with format: <service_account_name>/<vcluster>. Got: %q", req.ID),
+		)
+		return
+	}
+
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("name"), idParts[0])...)
+
+	// optional vcluster part for backward compatibility
+	if len(idParts) == 2 && idParts[1] != "" && idParts[1] != "null" {
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("vcluster"), idParts[1])...)
+	}
 }
