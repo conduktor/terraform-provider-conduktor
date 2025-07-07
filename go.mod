@@ -1,6 +1,6 @@
 module github.com/conduktor/terraform-provider-conduktor
 
-go 1.23.0
+go 1.23.7
 
 require (
 	github.com/conduktor/ctl v0.6.1
@@ -9,7 +9,7 @@ require (
 	github.com/go-resty/resty/v2 v2.16.5
 	github.com/google/go-cmp v0.7.0
 	github.com/hashicorp/terraform-plugin-codegen-framework v0.4.1
-	github.com/hashicorp/terraform-plugin-docs v0.21.0
+	github.com/hashicorp/terraform-plugin-docs v0.22.0
 	github.com/hashicorp/terraform-plugin-framework v1.15.0
 	github.com/hashicorp/terraform-plugin-framework-jsontypes v0.2.0
 	github.com/hashicorp/terraform-plugin-framework-validators v0.18.0
