@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-// Prefix of labels managed by Conduktor Console.
+// ManagedLabelsPrefix Prefix of labels managed by Conduktor Console.
 const ManagedLabelsPrefix = "conduktor.io/"
 
 var _ validator.Map = labelsValidator{}
