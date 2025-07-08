@@ -12,9 +12,13 @@ import (
 )
 
 func TFToInternalModel(ctx context.Context, r *topic.ConsoleTopicV2Model) (console.TopicConsoleResource, error) {
-	labels, diag := schema.MapValueToStringMap(ctx, r.Labels)
+	userLabels, diag := schema.MapValueToStringMap(ctx, r.Labels)
 	if diag.HasError() {
 		return console.TopicConsoleResource{}, mapper.WrapDiagError(diag, "labels", mapper.FromTerraform)
+	}
+	managedLabels, diag := schema.MapValueToStringMap(ctx, r.ManagedLabels)
+	if diag.HasError() {
+		return console.TopicConsoleResource{}, mapper.WrapDiagError(diag, "managed_labels", mapper.FromTerraform)
 	}
 
 	configs, diag := schema.MapValueToStringMap(ctx, r.Spec.Configs)
@@ -34,7 +38,7 @@ func TFToInternalModel(ctx context.Context, r *topic.ConsoleTopicV2Model) (conso
 		console.TopicConsoleMetadata{
 			Name:                  r.Name.ValueString(),
 			Cluster:               r.Cluster.ValueString(),
-			Labels:                labels,
+			Labels:                mapper.MergeLabels(managedLabels, userLabels),
 			CatalogVisibility:     r.CatalogVisibility.ValueString(),
 			DescriptionIsEditable: r.DescriptionIsEditable.ValueBool(),
 			Description:           r.Description.ValueString(),
@@ -49,9 +53,16 @@ func TFToInternalModel(ctx context.Context, r *topic.ConsoleTopicV2Model) (conso
 }
 
 func InternalModelToTerraform(ctx context.Context, r *console.TopicConsoleResource) (topic.ConsoleTopicV2Model, error) {
-	labels, diag := schema.StringMapToMapValue(ctx, r.Metadata.Labels)
+
+	var modelUserLabels, modelManagedLabels = mapper.SplitLabels(r.Metadata.Labels)
+	labels, diag := schema.StringMapToMapValue(ctx, modelUserLabels)
 	if diag.HasError() {
 		return topic.ConsoleTopicV2Model{}, mapper.WrapDiagError(diag, "labels", mapper.IntoTerraform)
+	}
+
+	managedLabels, diag := schema.StringMapToMapValue(ctx, modelManagedLabels)
+	if diag.HasError() {
+		return topic.ConsoleTopicV2Model{}, mapper.WrapDiagError(diag, "managed_labels", mapper.IntoTerraform)
 	}
 
 	configs, diag := schema.StringMapToMapValue(ctx, r.Spec.Configs)
@@ -84,6 +95,7 @@ func InternalModelToTerraform(ctx context.Context, r *console.TopicConsoleResour
 		Name:                  schema.NewStringValue(r.Metadata.Name),
 		Cluster:               schema.NewStringValue(r.Metadata.Cluster),
 		Labels:                labels,
+		ManagedLabels:         managedLabels,
 		CatalogVisibility:     schema.NewStringValue(r.Metadata.CatalogVisibility),
 		DescriptionIsEditable: basetypes.NewBoolValue(r.Metadata.DescriptionIsEditable),
 		Description:           schema.NewStringValue(r.Metadata.Description),

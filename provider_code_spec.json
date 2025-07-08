@@ -2092,7 +2092,29 @@
             "name": "labels",
             "map": {
               "description": "Custom labels for the topic resource. Used in Conduktor's topic catalog and UI",
-              "computed_optional_required": "computed_optional",
+              "computed_optional_required": "optional",
+              "element_type": {
+                "string": {}
+              },
+              "validators": [
+                {
+                  "custom": {
+                    "imports": [
+                      {
+                        "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
+                      }
+                    ],
+                    "schema_definition": "validation.Labels()"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "managed_labels",
+            "map": {
+              "description": "Read-only Conduktor managed labels labels for the topic resource. Used in Conduktor's topic catalog and UI",
+              "computed_optional_required": "computed",
               "element_type": {
                 "string": {}
               }

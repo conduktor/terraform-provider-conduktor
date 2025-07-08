@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"regexp"
 	"testing"
 
 	"github.com/conduktor/terraform-provider-conduktor/internal/client"
@@ -92,6 +93,32 @@ func TestAccTopicV2Minimal(t *testing.T) {
 				),
 			},
 			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccTopicV2Labels(t *testing.T) {
+	v, err := fetchClientVersion(client.CONSOLE)
+	if err != nil {
+		t.Fatalf("Error fetching current version: %s", err)
+	}
+
+	test.CheckMinimumVersionRequirement(t, v, topicMininumVersion)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { test.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config:      providerConfigConsole + test.TestAccTestdata(t, "console/topic_v2/resource_with_managed_labels.tf"),
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile("Managed Label Key"),
+			},
+			{
+				Config:      providerConfigConsole + test.TestAccTestdata(t, "console/topic_v2/resource_with_managed_labels_not_ro.tf"),
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile("Invalid Configuration for Read-Only Attribute"),
+			},
 		},
 	})
 }

@@ -104,6 +104,10 @@ resource "conduktor_console_topic_v2" "complex" {
 - `labels` (Map of String) Custom labels for the topic resource. Used in Conduktor's topic catalog and UI
 - `sql_storage` (Attributes) (see [below for nested schema](#nestedatt--sql_storage))
 
+### Read-Only
+
+- `managed_labels` (Map of String) Read-only Conduktor managed labels labels for the topic resource. Used in Conduktor's topic catalog and UI
+
 <a id="nestedatt--spec"></a>
 ### Nested Schema for `spec`
 

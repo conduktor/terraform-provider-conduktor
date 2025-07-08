@@ -61,9 +61,17 @@ func ConsoleTopicV2ResourceSchema(ctx context.Context) schema.Schema {
 			"labels": schema.MapAttribute{
 				ElementType:         types.StringType,
 				Optional:            true,
-				Computed:            true,
 				Description:         "Custom labels for the topic resource. Used in Conduktor's topic catalog and UI",
 				MarkdownDescription: "Custom labels for the topic resource. Used in Conduktor's topic catalog and UI",
+				Validators: []validator.Map{
+					validation.Labels(),
+				},
+			},
+			"managed_labels": schema.MapAttribute{
+				ElementType:         types.StringType,
+				Computed:            true,
+				Description:         "Read-only Conduktor managed labels labels for the topic resource. Used in Conduktor's topic catalog and UI",
+				MarkdownDescription: "Read-only Conduktor managed labels labels for the topic resource. Used in Conduktor's topic catalog and UI",
 			},
 			"name": schema.StringAttribute{
 				Required:            true,
@@ -148,6 +156,7 @@ type ConsoleTopicV2Model struct {
 	Description           types.String    `tfsdk:"description"`
 	DescriptionIsEditable types.Bool      `tfsdk:"description_is_editable"`
 	Labels                types.Map       `tfsdk:"labels"`
+	ManagedLabels         types.Map       `tfsdk:"managed_labels"`
 	Name                  types.String    `tfsdk:"name"`
 	Spec                  SpecValue       `tfsdk:"spec"`
 	SqlStorage            SqlStorageValue `tfsdk:"sql_storage"`

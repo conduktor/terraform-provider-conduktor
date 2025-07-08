@@ -5,7 +5,12 @@
     "name": "topic",
     "cluster": "cluster",
     "labels": {
-      "kind": "topic"
+      "conduktor.io/application": "test-app",
+      "conduktor.io/application-instance": "test-app-instance",
+      "kind": "topic",
+      "data-criticality": "C0",
+      "environment": "prod",
+      "team": "analytics"
     },
     "catalogVisibility": "PRIVATE",
     "descriptionIsEditable": true,
