@@ -25,14 +25,22 @@ func SplitLabels(labels map[string]string) (map[string]string, map[string]string
 
 // MergeLabels combines user-defined labels with managed labels.
 func MergeLabels(userLabels, managedLabels map[string]string) map[string]string {
-	mergedLabels := make(map[string]string)
-
-	for key, value := range userLabels {
-		mergedLabels[key] = value
+	if userLabels == nil && managedLabels == nil {
+		return nil
 	}
 
-	for key, value := range managedLabels {
-		mergedLabels[key] = value
+	mergedLabels := make(map[string]string)
+
+	if userLabels != nil {
+		for key, value := range userLabels {
+			mergedLabels[key] = value
+		}
+	}
+
+	if managedLabels != nil {
+		for key, value := range managedLabels {
+			mergedLabels[key] = value
+		}
 	}
 
 	return mergedLabels
