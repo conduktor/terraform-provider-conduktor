@@ -1,9 +1,7 @@
 package mapper
 
 import "strings"
-
-// Prefix of labels managed by Conduktor Console.
-const managedLabelPrefix = "conduktor.io/"
+import schema "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
 
 // SplitLabels separates user-defined labels from managed labels.
 func SplitLabels(labels map[string]string) (map[string]string, map[string]string) {
@@ -11,7 +9,7 @@ func SplitLabels(labels map[string]string) (map[string]string, map[string]string
 	managedLabels := make(map[string]string)
 
 	for key, value := range labels {
-		if strings.HasPrefix(key, managedLabelPrefix) {
+		if strings.HasPrefix(key, schema.ManagedLabelsPrefix) {
 			managedLabels[key] = value
 		} else {
 			userLabels[key] = value

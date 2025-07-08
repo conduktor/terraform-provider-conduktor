@@ -2092,7 +2092,7 @@
             "name": "labels",
             "map": {
               "description": "Custom labels for the topic resource. Used in Conduktor's topic catalog and UI",
-              "computed_optional_required": "computed_optional",
+              "computed_optional_required": "optional",
               "element_type": {
                 "string": {}
               },

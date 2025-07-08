@@ -6,7 +6,8 @@ import (
 	"strings"
 )
 
-const managedLabelsPrefix = "conduktor.io/"
+// Prefix of labels managed by Conduktor Console.
+const ManagedLabelsPrefix = "conduktor.io/"
 
 var _ validator.Map = labelsValidator{}
 
@@ -32,11 +33,11 @@ func (v labelsValidator) ValidateMap(_ context.Context, req validator.MapRequest
 	elements := req.ConfigValue.Elements()
 
 	for key := range elements {
-		if strings.HasPrefix(key, managedLabelsPrefix) {
+		if strings.HasPrefix(key, ManagedLabelsPrefix) {
 			resp.Diagnostics.AddAttributeError(
 				req.Path.AtMapKey(key),
 				"Managed Label Key",
-				"Keys starting with '"+managedLabelsPrefix+"' are reserved for Conduktor managed labels.",
+				"Keys starting with '"+ManagedLabelsPrefix+"' are reserved for Conduktor managed labels.",
 			)
 			continue
 		}

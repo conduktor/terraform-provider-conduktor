@@ -61,7 +61,6 @@ func ConsoleTopicV2ResourceSchema(ctx context.Context) schema.Schema {
 			"labels": schema.MapAttribute{
 				ElementType:         types.StringType,
 				Optional:            true,
-				Computed:            true,
 				Description:         "Custom labels for the topic resource. Used in Conduktor's topic catalog and UI",
 				MarkdownDescription: "Custom labels for the topic resource. Used in Conduktor's topic catalog and UI",
 				Validators: []validator.Map{
