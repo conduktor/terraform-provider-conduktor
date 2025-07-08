@@ -33,6 +33,7 @@ func (v labelsValidator) ValidateMap(_ context.Context, req validator.MapRequest
 	elements := req.ConfigValue.Elements()
 
 	for key := range elements {
+		// did not use regex because go doesn't support negative lookahead like `^(?!conduktor\.io\/).*$`
 		if strings.HasPrefix(key, ManagedLabelsPrefix) {
 			resp.Diagnostics.AddAttributeError(
 				req.Path.AtMapKey(key),

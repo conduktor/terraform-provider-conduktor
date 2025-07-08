@@ -5,6 +5,10 @@ import schema "github.com/conduktor/terraform-provider-conduktor/internal/schema
 
 // SplitLabels separates user-defined labels from managed labels.
 func SplitLabels(labels map[string]string) (map[string]string, map[string]string) {
+	if labels == nil {
+		return nil, nil
+	}
+
 	userLabels := make(map[string]string)
 	managedLabels := make(map[string]string)
 
