@@ -1,6 +1,6 @@
 module github.com/conduktor/terraform-provider-conduktor
 
-go 1.23.7
+go 1.24.4
 
 require (
 	github.com/conduktor/ctl v0.6.1
