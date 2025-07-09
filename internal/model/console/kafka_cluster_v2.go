@@ -139,7 +139,7 @@ func (r *KafkaClusterResource) FromClientResource(cliResource ctlresource.Resour
 	return nil
 }
 
-func (r *KafkaClusterResource) FromRawJsonInterface(jsonInterface interface{}) error {
+func (r *KafkaClusterResource) FromRawJsonInterface(jsonInterface any) error {
 	jsonData, err := json.Marshal(jsonInterface)
 	if err != nil {
 		return err

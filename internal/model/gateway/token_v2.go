@@ -44,7 +44,7 @@ func (r *GatewayTokenResource) FromRawJson(jsonData []byte) error {
 	return nil
 }
 
-func (r *GatewayTokenResource) FromRawJsonInterface(jsonInterface interface{}) error {
+func (r *GatewayTokenResource) FromRawJsonInterface(jsonInterface any) error {
 	jsonData, err := json.Marshal(jsonInterface)
 	if err != nil {
 		return err

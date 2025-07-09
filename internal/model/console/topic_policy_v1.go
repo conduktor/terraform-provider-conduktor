@@ -157,7 +157,7 @@ func (r *TopicPolicyResource) FromClientResource(cliResource ctlresource.Resourc
 	return nil
 }
 
-func (r *TopicPolicyResource) FromRawJsonInterface(jsonInterface interface{}) error {
+func (r *TopicPolicyResource) FromRawJsonInterface(jsonInterface any) error {
 	jsonData, err := json.Marshal(jsonInterface)
 	if err != nil {
 		return err

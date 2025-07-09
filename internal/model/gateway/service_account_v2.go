@@ -54,7 +54,7 @@ func (r *GatewayServiceAccountResource) FromClientResource(cliResource ctlresour
 	return nil
 }
 
-func (r *GatewayServiceAccountResource) FromRawJsonInterface(jsonInterface interface{}) error {
+func (r *GatewayServiceAccountResource) FromRawJsonInterface(jsonInterface any) error {
 	jsonData, err := json.Marshal(jsonInterface)
 	if err != nil {
 		return err

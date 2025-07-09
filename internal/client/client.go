@@ -36,8 +36,8 @@ type LoginResult struct {
 }
 
 type ApplyResult struct {
-	UpsertResult string      `json:"upsertResult"`
-	Resource     interface{} `json:"resource"`
+	UpsertResult string `json:"upsertResult"`
+	Resource     any    `json:"resource"`
 }
 
 func Make(ctx context.Context, mode Mode, apiParameter ApiParameter, providerVersion string) (*Client, error) {
@@ -190,7 +190,7 @@ func (client *Client) ApplyGeneric(ctx context.Context, cliResource ctlresource.
 	return upsertResponse.UpsertResult, nil
 }
 
-func (client *Client) Apply(ctx context.Context, path string, resource interface{}) (ApplyResult, error) {
+func (client *Client) Apply(ctx context.Context, path string, resource any) (ApplyResult, error) {
 	url := client.BaseUrl + path
 	jsonData, err := jsoniter.Marshal(resource)
 	if err != nil {
@@ -232,14 +232,15 @@ func (client *Client) Describe(ctx context.Context, path string) ([]byte, error)
 	return resp.Body(), nil
 }
 
-func (client *Client) Delete(ctx context.Context, mode Mode, path string, resource interface{}) error {
+func (client *Client) Delete(ctx context.Context, mode Mode, path string, resource any) error {
 	var req *resty.Request
 	url := client.BaseUrl + path
 	tflog.Trace(ctx, fmt.Sprintf("DELETE %s", path))
 
-	if mode == CONSOLE {
+	switch mode {
+	case CONSOLE:
 		req = client.Client.R()
-	} else if mode == GATEWAY {
+	case GATEWAY:
 		// Gateway API handles deletion in a different way
 		// It needs information about the resource in the body of the request
 		// as opposed to Console API who needs them in the URL

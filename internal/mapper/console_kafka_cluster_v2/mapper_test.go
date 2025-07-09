@@ -29,7 +29,7 @@ func TestKafkaClusterV2ModelMapping(t *testing.T) {
 	assert.Equal(t, "KafkaCluster", ctlResource.Kind)
 	assert.Equal(t, "v2", ctlResource.Version)
 	assert.Equal(t, "cluster-name", ctlResource.Name)
-	assert.Equal(t, map[string]interface{}{"name": "cluster-name", "labels": map[string]interface{}{"key1": "value1"}}, ctlResource.Metadata)
+	assert.Equal(t, map[string]any{"name": "cluster-name", "labels": map[string]any{"key1": "value1"}}, ctlResource.Metadata)
 	assert.Equal(t, jsonKafkaClusterV2Resource, ctlResource.Json)
 
 	// convert into internal model

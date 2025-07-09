@@ -70,7 +70,7 @@ func (r *ApplicationGroupConsoleResource) FromClientResource(cliResource ctlreso
 	return nil
 }
 
-func (r *ApplicationGroupConsoleResource) FromRawJsonInterface(jsonInterface interface{}) error {
+func (r *ApplicationGroupConsoleResource) FromRawJsonInterface(jsonInterface any) error {
 	jsonData, err := json.Marshal(jsonInterface)
 	if err != nil {
 		return err

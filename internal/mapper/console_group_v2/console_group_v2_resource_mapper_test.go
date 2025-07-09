@@ -29,7 +29,7 @@ func TestGroupV2ModelMapping(t *testing.T) {
 	assert.Equal(t, "Group", ctlResource.Kind)
 	assert.Equal(t, "v2", ctlResource.Version)
 	assert.Equal(t, "sales", ctlResource.Name)
-	assert.Equal(t, map[string]interface{}{"name": "sales"}, ctlResource.Metadata)
+	assert.Equal(t, map[string]any{"name": "sales"}, ctlResource.Metadata)
 	assert.Equal(t, jsonGroupV2Resource, ctlResource.Json)
 
 	// convert into internal model

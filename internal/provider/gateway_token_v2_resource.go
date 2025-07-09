@@ -242,7 +242,7 @@ func isTokenExpired(tokenString string) (bool, error) {
 }
 
 // Helper function to issue a new token.
-func applyGatewayToken(ctx context.Context, cli *client.Client, path string, resource interface{}) (client.ApplyResult, error) {
+func applyGatewayToken(ctx context.Context, cli *client.Client, path string, resource any) (client.ApplyResult, error) {
 	url := cli.BaseUrl + path
 	jsonData, err := jsoniter.Marshal(resource)
 	if err != nil {

@@ -64,7 +64,7 @@ func (r *ApplicationInstancePermissionConsoleResource) FromClientResource(cliRes
 	return nil
 }
 
-func (r *ApplicationInstancePermissionConsoleResource) FromRawJsonInterface(jsonInterface interface{}) error {
+func (r *ApplicationInstancePermissionConsoleResource) FromRawJsonInterface(jsonInterface any) error {
 	jsonData, err := json.Marshal(jsonInterface)
 	if err != nil {
 		return err

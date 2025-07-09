@@ -28,7 +28,7 @@ func TestTopicV2ModelMapping(t *testing.T) {
 	assert.Equal(t, "Topic", ctlResource.Kind)
 	assert.Equal(t, "v2", ctlResource.Version)
 	assert.Equal(t, "topic", ctlResource.Name)
-	expectedLabels := map[string]interface{}{
+	expectedLabels := map[string]any{
 		"conduktor.io/application":          "test-app",
 		"conduktor.io/application-instance": "test-app-instance",
 		"kind":                              "topic",
@@ -36,8 +36,8 @@ func TestTopicV2ModelMapping(t *testing.T) {
 		"environment":                       "prod",
 		"team":                              "analytics",
 	}
-	assert.Equal(t, map[string]interface{}{"name": "topic", "cluster": "cluster", "labels": expectedLabels, "catalogVisibility": "PRIVATE", "descriptionIsEditable": true, "description": "This is a topic", "sqlStorage": map[string]interface{}{"retentionTimeInSecond": float64(86400), "enabled": true}}, ctlResource.Metadata)
-	assert.Equal(t, map[string]interface{}{"configs": map[string]interface{}{"cleanup.policy": "delete", "min.insync.replicas": "2", "retention.ms": "60000"}, "partitions": float64(1), "replicationFactor": float64(1)}, ctlResource.Spec)
+	assert.Equal(t, map[string]any{"name": "topic", "cluster": "cluster", "labels": expectedLabels, "catalogVisibility": "PRIVATE", "descriptionIsEditable": true, "description": "This is a topic", "sqlStorage": map[string]any{"retentionTimeInSecond": float64(86400), "enabled": true}}, ctlResource.Metadata)
+	assert.Equal(t, map[string]any{"configs": map[string]any{"cleanup.policy": "delete", "min.insync.replicas": "2", "retention.ms": "60000"}, "partitions": float64(1), "replicationFactor": float64(1)}, ctlResource.Spec)
 
 	assert.Equal(t, jsonTopicV2Resource, ctlResource.Json)
 

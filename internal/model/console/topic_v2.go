@@ -65,7 +65,7 @@ func (r *TopicConsoleResource) FromClientResource(cliResource ctlresource.Resour
 	return nil
 }
 
-func (r *TopicConsoleResource) FromRawJsonInterface(jsonInterface interface{}) error {
+func (r *TopicConsoleResource) FromRawJsonInterface(jsonInterface any) error {
 	jsonData, err := json.Marshal(jsonInterface)
 	if err != nil {
 		return err

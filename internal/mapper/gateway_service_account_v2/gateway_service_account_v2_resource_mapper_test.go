@@ -28,7 +28,7 @@ func TestGatewayServiceAccountV2ModelMapping(t *testing.T) {
 	assert.Equal(t, "GatewayServiceAccount", ctlResource.Kind)
 	assert.Equal(t, "gateway/v2", ctlResource.Version)
 	assert.Equal(t, "user1", ctlResource.Name)
-	assert.Equal(t, map[string]interface{}{"name": "user1", "vCluster": "vcluster1"}, ctlResource.Metadata)
+	assert.Equal(t, map[string]any{"name": "user1", "vCluster": "vcluster1"}, ctlResource.Metadata)
 	assert.Equal(t, jsonServiceAccountV2Resource, ctlResource.Json)
 
 	// convert into internal model

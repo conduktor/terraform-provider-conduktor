@@ -28,7 +28,7 @@ func TestGatewayInterceptorV2ModelMapping(t *testing.T) {
 	assert.Equal(t, "GatewayInterceptor", ctlResource.Kind)
 	assert.Equal(t, "gateway/v2", ctlResource.Version)
 	assert.Equal(t, "mask-sensitive-fields", ctlResource.Name)
-	assert.Equal(t, map[string]interface{}{"name": "mask-sensitive-fields", "scope": map[string]interface{}{"vCluster": "vcluster", "group": "group", "username": "username"}}, ctlResource.Metadata)
+	assert.Equal(t, map[string]any{"name": "mask-sensitive-fields", "scope": map[string]any{"vCluster": "vcluster", "group": "group", "username": "username"}}, ctlResource.Metadata)
 	assert.Equal(t, jsonInterceptorV2Resource, ctlResource.Json)
 
 	// convert into internal model
