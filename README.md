@@ -69,6 +69,7 @@ This repository contains the Conduktor Terraform provider, which defines Condukt
 
 - [Console user](./docs/resources/console_user_v2.md)
 - [Console group](./docs/resources/console_group_v2.md)
+- [Console Partner Zone](./docs/resources/console_partner_zone_v2.md)
 - [Kafka clusters with schema registry](./docs/resources/console_kafka_cluster_v2.md)
 - [Kafka connect server](./docs/resources/console_kafka_connect_v2.md)
 
