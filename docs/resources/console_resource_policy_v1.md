@@ -45,8 +45,8 @@ resource "conduktor_console_resource_policy_v1" "complex" {
     description = "A policy to check some basic rule for a topic"
     rules = [
       {
-        condition     = "metadata.name.matches(\"^click.[a-z0-9-]+.(avro|json)$\")"
-        error_message = "topic name should match ^click.(?<event>[a-z0-9-]+).(avro|json)$"
+        condition     = "metadata.name.matches(\"^click\\\\.[a-z0-9-]+\\\\.(avro|json)$\")" # Note: \\\\ to escape in Terraform string to end up as \\ in api call
+        error_message = "topic name should match ^click\\.(?<event>[a-z0-9-]+)\\.(avro|json)$"
       },
       {
         condition     = "metadata.labels[\"data-criticality\"] in [\"C0\", \"C1\", \"C2\"]"
