@@ -108,7 +108,9 @@ func ConsolePartnerZoneV2ResourceSchema(ctx context.Context) schema.Schema {
 										},
 									},
 								},
-								Optional: true,
+								Optional:            true,
+								Description:         "Sets a key-value pair to be added when producing to the partner zone",
+								MarkdownDescription: "Sets a key-value pair to be added when producing to the partner zone",
 							},
 							"remove_on_consume": schema.SetNestedAttribute{
 								NestedObject: schema.NestedAttributeObject{
@@ -125,7 +127,9 @@ func ConsolePartnerZoneV2ResourceSchema(ctx context.Context) schema.Schema {
 										},
 									},
 								},
-								Optional: true,
+								Optional:            true,
+								Description:         "Regular expression for finding the keys of headers to be removed on consume of the partner zone",
+								MarkdownDescription: "Regular expression for finding the keys of headers to be removed on consume of the partner zone",
 							},
 						},
 						CustomType: HeadersType{
@@ -133,7 +137,9 @@ func ConsolePartnerZoneV2ResourceSchema(ctx context.Context) schema.Schema {
 								AttrTypes: HeadersValue{}.AttributeTypes(ctx),
 							},
 						},
-						Optional: true,
+						Optional:            true,
+						Description:         "Key-Value HTTP headers to add to requests",
+						MarkdownDescription: "Key-Value HTTP headers to add to requests",
 					},
 					"partner": schema.SingleNestedAttribute{
 						Attributes: map[string]schema.Attribute{
@@ -163,7 +169,9 @@ func ConsolePartnerZoneV2ResourceSchema(ctx context.Context) schema.Schema {
 								AttrTypes: PartnerValue{}.AttributeTypes(ctx),
 							},
 						},
-						Optional: true,
+						Optional:            true,
+						Description:         "Partner information for the partner zone",
+						MarkdownDescription: "Partner information for the partner zone",
 					},
 					"topics": schema.SetNestedAttribute{
 						NestedObject: schema.NestedAttributeObject{
@@ -220,7 +228,9 @@ func ConsolePartnerZoneV2ResourceSchema(ctx context.Context) schema.Schema {
 								AttrTypes: TrafficControlPoliciesValue{}.AttributeTypes(ctx),
 							},
 						},
-						Optional: true,
+						Optional:            true,
+						Description:         "Traffic control policies for the partner zone",
+						MarkdownDescription: "Traffic control policies for the partner zone",
 					},
 					"url": schema.StringAttribute{
 						Optional:            true,

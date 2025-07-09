@@ -2072,6 +2072,7 @@
                   "name": "partner",
                   "single_nested": {
                     "computed_optional_required": "optional",
+                    "description": "Partner information for the partner zone",
                     "attributes": [
                       {
                         "name": "name",
@@ -2108,6 +2109,7 @@
                   "name": "traffic_control_policies",
                   "single_nested": {
                     "computed_optional_required": "optional",
+                    "description": "Traffic control policies for the partner zone",
                     "attributes": [
                       {
                         "name": "max_produce_rate",
@@ -2137,11 +2139,13 @@
                   "name": "headers",
                   "single_nested": {
                     "computed_optional_required": "optional",
+                    "description": "Key-Value HTTP headers to add to requests",
                     "attributes": [
                       {
                         "name": "add_on_produce",
                         "set_nested": {
                           "computed_optional_required": "optional",
+                          "description": "Sets a key-value pair to be added when producing to the partner zone",
                           "nested_object": {
                             "attributes": [
                               {
@@ -2173,6 +2177,7 @@
                         "name": "remove_on_consume",
                         "set_nested": {
                           "computed_optional_required": "optional",
+                          "description": "Regular expression for finding the keys of headers to be removed on consume of the partner zone",
                           "nested_object": {
                             "attributes": [
                               {

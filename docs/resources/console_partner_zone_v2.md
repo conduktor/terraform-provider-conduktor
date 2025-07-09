@@ -1,6 +1,6 @@
 ---
 page_title: "Conduktor : conduktor_console_partner_zone_v2 "
-subcategory: "self-serve/v1"
+subcategory: "console/v2"
 description: |-
     Resource for managing Conduktor Console Partner Zone.
     This resource allows you to create, read, update and delete partner zones in Conduktor.
@@ -127,9 +127,9 @@ Optional:
 
 - `description` (String) Description of the partner zone
 - `display_name` (String) Display name of the partner zone
-- `headers` (Attributes) (see [below for nested schema](#nestedatt--spec--headers))
-- `partner` (Attributes) (see [below for nested schema](#nestedatt--spec--partner))
-- `traffic_control_policies` (Attributes) (see [below for nested schema](#nestedatt--spec--traffic_control_policies))
+- `headers` (Attributes) Key-Value HTTP headers to add to requests (see [below for nested schema](#nestedatt--spec--headers))
+- `partner` (Attributes) Partner information for the partner zone (see [below for nested schema](#nestedatt--spec--partner))
+- `traffic_control_policies` (Attributes) Traffic control policies for the partner zone (see [below for nested schema](#nestedatt--spec--traffic_control_policies))
 - `url` (String) URL of the partner zone
 
 <a id="nestedatt--spec--authentication_mode"></a>
@@ -156,8 +156,8 @@ Required:
 
 Optional:
 
-- `add_on_produce` (Attributes Set) (see [below for nested schema](#nestedatt--spec--headers--add_on_produce))
-- `remove_on_consume` (Attributes Set) (see [below for nested schema](#nestedatt--spec--headers--remove_on_consume))
+- `add_on_produce` (Attributes Set) Sets a key-value pair to be added when producing to the partner zone (see [below for nested schema](#nestedatt--spec--headers--add_on_produce))
+- `remove_on_consume` (Attributes Set) Regular expression for finding the keys of headers to be removed on consume of the partner zone (see [below for nested schema](#nestedatt--spec--headers--remove_on_consume))
 
 <a id="nestedatt--spec--headers--add_on_produce"></a>
 ### Nested Schema for `spec.headers.add_on_produce`

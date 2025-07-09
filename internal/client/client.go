@@ -296,17 +296,27 @@ func (client *Client) GetAPIVersion(ctx context.Context, mode Mode) (string, err
 		}
 	}
 	if mode == GATEWAY {
+		// This is a temporary workaround for the Gateway API till a dedicated endpoint is available.
 		checks, ok := result["checks"].([]any)
 		if !ok || len(checks) == 0 {
 			return "", fmt.Errorf("No checks found in response")
 		}
-		data, ok := checks[0].(map[string]any)["data"]
-		if !ok {
-			return "", fmt.Errorf("No data found in checks response")
-		}
-		v, ok = data.(map[string]any)["version"]
-		if !ok {
-			return "", fmt.Errorf("No version found in data response")
+		for _, check := range checks {
+			// Need to assert check to map[string]any to access its fields.
+			id, ok := check.(map[string]any)["id"]
+			if !ok {
+				return "", fmt.Errorf("Error parsing check ID")
+			}
+			if id == "buildInfo" {
+				data, ok := check.(map[string]any)["data"]
+				if !ok {
+					return "", fmt.Errorf("No data found in checks response")
+				}
+				v, ok = data.(map[string]any)["version"]
+				if !ok {
+					return "", fmt.Errorf("No version found in data response")
+				}
+			}
 		}
 	}
 
