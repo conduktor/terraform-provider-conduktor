@@ -13,6 +13,24 @@ spec:
   icon: icon
 ---
 apiVersion: v2
+kind: KafkaCluster
+metadata:
+  name: gw-cluster
+spec:
+  displayName: Gateway Cluster
+  bootstrapServers: gateway:9094
+  # properties:
+  #   sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="admin" password="admin-secret";
+  color: '#FF0000'
+  icon: icon
+  kafkaFlavor:
+    url: http://gateway:8888
+    user: admin
+    password: conduktor
+    virtualCluster: vcluster_sa
+    type: Gateway
+---
+apiVersion: v2
 kind: KafkaConnectCluster
 metadata:
   name: kafka-connect

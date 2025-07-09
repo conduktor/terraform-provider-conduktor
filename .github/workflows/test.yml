@@ -64,26 +64,21 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        terraform:
-          - version: "1.0.*"
-            name: "TF-1.0"
-          - version: "latest"
-            name: "TF-latest"
-        console:
-          - "1.26.0"
-          #- "1.27.0"
-          #- "1.28.0"
-          #- "1.29.0"
-          #- "1.30.0"
-          #- "1.31.0"
-          #- "1.32.0"
-          #- "1.33.0"
-          # - "1.34.0"
-          - "1.35.0"
-        gateway:
-          - "3.5.2"
-          # - "3.9.0"
-          - "3.10.0"
+        env:
+          # minimal versions
+          - console: "1.26.0"
+            gateway: "3.5.2"
+            terraform:
+            - version: "1.0.*"
+              name: "TF-1.0"
+            license: v2
+          # latest versions
+          - console: "1.35.0"
+            gateway: "3.10.0"
+            terraform:
+            - version: "latest"
+              name: "TF-latest"
+            license: v3
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -92,16 +87,16 @@ jobs:
           cache: true
       - uses: hashicorp/setup-terraform@v3.1.2
         with:
-          terraform_version: ${{ matrix.terraform.version }}
+          terraform_version: ${{ matrix.env.terraform.version }}
           terraform_wrapper: false
       - run: go mod download
 
       - name: Pull images
         timeout-minutes: 10
         env:
-          CONDUKTOR_CONSOLE_IMAGE: conduktor/conduktor-console:${{ matrix.console }}
-          CONDUKTOR_CONSOLE_CORTEX_IMAGE: conduktor/conduktor-console-cortex:${{ matrix.console }}
-          CONDUKTOR_GATEWAY_IMAGE: conduktor/conduktor-gateway:${{ matrix.gateway }}
+          CONDUKTOR_CONSOLE_IMAGE: conduktor/conduktor-console:${{ matrix.env.console }}
+          CONDUKTOR_CONSOLE_CORTEX_IMAGE: conduktor/conduktor-console-cortex:${{ matrix.env.console }}
+          CONDUKTOR_GATEWAY_IMAGE: conduktor/conduktor-gateway:${{ matrix.env.gateway }}
         run: |
           echo "" > .env
           make pull_test_assets
@@ -109,7 +104,11 @@ jobs:
       - name: Set License if not dependabot
         run: |
           if [ "${{ github.actor }}" != "dependabot[bot]" ]; then
-            echo "CDK_LICENSE=${{ secrets.TEST_LICENSE }}" >> "$GITHUB_ENV"
+            if [ "${{ matrix.env.license }}" == "v2" ]; then
+              echo "CDK_LICENSE=${{ secrets.TEST_LICENSE_V2 }}" >> "$GITHUB_ENV"
+            elif [ "${{ matrix.env.license }}" == "v3" ]; then
+              echo "CDK_LICENSE=${{ secrets.TEST_LICENSE_V3 }}" >> "$GITHUB_ENV"
+            fi
           fi
 
       - name: Run acceptance tests
@@ -117,9 +116,9 @@ jobs:
         env:
           TF_ACC: "1"
           TESTARGS: "-cover ./internal/provider/"
-          CONDUKTOR_CONSOLE_IMAGE: conduktor/conduktor-console:${{ matrix.console }}
-          CONDUKTOR_CONSOLE_CORTEX_IMAGE: conduktor/conduktor-console-cortex:${{ matrix.console }}
-          CONDUKTOR_GATEWAY_IMAGE: conduktor/conduktor-gateway:${{ matrix.gateway }}
+          CONDUKTOR_CONSOLE_IMAGE: conduktor/conduktor-console:${{ matrix.env.console }}
+          CONDUKTOR_CONSOLE_CORTEX_IMAGE: conduktor/conduktor-console-cortex:${{ matrix.env.console }}
+          CONDUKTOR_GATEWAY_IMAGE: conduktor/conduktor-gateway:${{ matrix.env.gateway }}
           CDK_BASE_URL: http://localhost:8080
           CDK_ADMIN_EMAIL: admin@conduktor.io
           CDK_ADMIN_PASSWORD: testP4ss!
@@ -137,7 +136,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: api-logs-CDK-${{ matrix.console }}-GW-${{ matrix.gateway }}-${{ matrix.terraform.name }}
+          name: api-logs-CDK-${{ matrix.env.console }}-GW-${{ matrix.env.gateway }}-${{ matrix.env.terraform.name }}
           path: ./logs/
           if-no-files-found: error
           retention-days: 1

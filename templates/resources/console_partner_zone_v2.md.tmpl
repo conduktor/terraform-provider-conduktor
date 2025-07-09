@@ -1,0 +1,41 @@
+---
+page_title: "Conduktor : conduktor_console_partner_zone_v2 "
+subcategory: "console/v2"
+description: |-
+    Resource for managing Conduktor Console Partner Zone.
+    This resource allows you to create, read, update and delete partner zones in Conduktor.
+---
+
+# {{ .Name }}
+
+Resource for managing Conduktor partner zones.
+This resource allows you to create, read, update and delete partner zones in Conduktor.
+
+> [!WARNING]
+> Minimum requirement for this resource:
+>   - Conduktor Console version is `1.32.0`.
+>   - Conduktor Gateway `3.6.1`.
+> For more information, please refer to the [Conduktor documentation](https://docs.conduktor.io/platform/navigation/partner-zones/#prerequisites).
+
+## Example Usage
+
+### Simple partner zone
+{{tffile "examples/resources/conduktor_console_partner_zone_v2/simple.tf"}}
+
+### Complex partner zone
+{{tffile "examples/resources/conduktor_console_partner_zone_v2/complex.tf"}}
+
+
+{{ .SchemaMarkdown }}
+
+## Import
+
+In order to import a Partner Zone into Conduktor, you need to know the Partner Zone ID.
+
+For example, using an [`import` block](https://developer.hashicorp.com/terraform/language/import) :
+{{tffile "examples/resources/conduktor_console_partner_zone_v2/import.tf"}}
+
+Using the `terraform import` command:
+```shell
+terraform import conduktor_console_partner_zone_v2.example partner-zone
+```
