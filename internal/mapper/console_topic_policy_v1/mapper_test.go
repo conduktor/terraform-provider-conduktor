@@ -29,7 +29,7 @@ func TestTopicPolicyV1ModelMapping(t *testing.T) {
 	assert.Equal(t, "TopicPolicy", ctlResource.Kind)
 	assert.Equal(t, "v1", ctlResource.Version)
 	assert.Equal(t, "topicPolicy", ctlResource.Name)
-	assert.Equal(t, map[string]interface{}{"name": "topicPolicy"}, ctlResource.Metadata)
+	assert.Equal(t, map[string]any{"name": "topicPolicy"}, ctlResource.Metadata)
 	assert.Equal(t, jsonTopicPolicyV1Resource, ctlResource.Json)
 
 	// convert into internal model

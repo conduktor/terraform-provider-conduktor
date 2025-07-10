@@ -29,7 +29,7 @@ func TestUserV2ModelMapping(t *testing.T) {
 	assert.Equal(t, "User", ctlResource.Kind)
 	assert.Equal(t, "v2", ctlResource.Version)
 	assert.Equal(t, "michael.scott@dunder.mifflin.com", ctlResource.Name)
-	assert.Equal(t, map[string]interface{}{"name": "michael.scott@dunder.mifflin.com"}, ctlResource.Metadata)
+	assert.Equal(t, map[string]any{"name": "michael.scott@dunder.mifflin.com"}, ctlResource.Metadata)
 	assert.Equal(t, jsonUserV2Resource, ctlResource.Json)
 
 	// convert into internal model

@@ -96,7 +96,7 @@ func yamlEqual(s1, s2 string) (bool, error) {
 func normalizeYAMLString(yamlStr string) (string, error) {
 	dec := yaml.NewDecoder(strings.NewReader(yamlStr))
 
-	var temp interface{}
+	var temp any
 	if err := dec.Decode(&temp); err != nil {
 		return "", err
 	}
@@ -116,7 +116,7 @@ func (v YAMLNormalized) ValidateAttribute(ctx context.Context, req xattr.Validat
 		return
 	}
 
-	var temp interface{}
+	var temp any
 	if err := yaml.Unmarshal([]byte(v.ValueString()), &temp); err != nil {
 		resp.Diagnostics.AddAttributeError(
 			req.Path,
@@ -136,7 +136,7 @@ func (v YAMLNormalized) ValidateParameter(ctx context.Context, req function.Vali
 		return
 	}
 
-	var temp interface{}
+	var temp any
 	if err := yaml.Unmarshal([]byte(v.ValueString()), &temp); err != nil {
 		resp.Error = function.NewArgumentFuncError(
 			req.Position,

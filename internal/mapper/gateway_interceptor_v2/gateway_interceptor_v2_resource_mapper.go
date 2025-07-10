@@ -16,7 +16,7 @@ func TFToInternalModel(ctx context.Context, r *gwinterceptor.GatewayInterceptorV
 		Username: r.Scope.Username.ValueString(),
 	}
 
-	var config interface{}
+	var config any
 	configStr := r.Spec.Config.ValueString()
 	err := json.Unmarshal([]byte(configStr), &config)
 	if err != nil {

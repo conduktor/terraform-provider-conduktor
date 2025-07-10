@@ -27,7 +27,7 @@ func TestApplicationGroupV1ModelMapping(t *testing.T) {
 	assert.Equal(t, "ApplicationGroup", ctlResource.Kind)
 	assert.Equal(t, "v1", ctlResource.Version)
 	assert.Equal(t, "test-application-group", ctlResource.Name)
-	assert.Equal(t, map[string]interface{}{"name": "test-application-group", "application": "test-application"}, ctlResource.Metadata)
+	assert.Equal(t, map[string]any{"name": "test-application-group", "application": "test-application"}, ctlResource.Metadata)
 	assert.Equal(t, jsonApplicationGroupV1Resource, ctlResource.Json)
 
 	// convert into internal model

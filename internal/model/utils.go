@@ -11,7 +11,7 @@ type Discriminable struct {
 	Constraint string `json:"constraint,omitempty"`
 }
 
-func ToClientResource(o interface{}) (ctlresource.Resource, error) {
+func ToClientResource(o any) (ctlresource.Resource, error) {
 	jsonData, err := json.Marshal(o)
 	if err != nil {
 		return ctlresource.Resource{}, err

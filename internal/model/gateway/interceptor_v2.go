@@ -32,10 +32,10 @@ func (r GatewayInterceptorMetadata) String() string {
 }
 
 type GatewayInterceptorSpec struct {
-	Comment     string       `json:"comment,omitempty"`
-	PluginClass string       `json:"pluginClass"`
-	Priority    int64        `json:"priority"` // API accepts int32 but terraform doesn't support that.
-	Config      *interface{} `json:"config"`
+	Comment     string `json:"comment,omitempty"`
+	PluginClass string `json:"pluginClass"`
+	Priority    int64  `json:"priority"` // API accepts int32 but terraform doesn't support that.
+	Config      *any   `json:"config"`
 }
 
 type GatewayInterceptorResource struct {
@@ -66,7 +66,7 @@ func (r *GatewayInterceptorResource) FromClientResource(cliResource ctlresource.
 	return nil
 }
 
-func (r *GatewayInterceptorResource) FromRawJsonInterface(jsonInterface interface{}) error {
+func (r *GatewayInterceptorResource) FromRawJsonInterface(jsonInterface any) error {
 	jsonData, err := json.Marshal(jsonInterface)
 	if err != nil {
 		return err
