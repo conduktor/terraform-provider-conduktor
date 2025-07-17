@@ -112,7 +112,7 @@ func (r *GenericResource) Read(ctx context.Context, req resource.ReadRequest, re
 	}
 
 	tflog.Info(ctx, fmt.Sprintf("Read %s kind named %s", data.Kind.String(), data.Name.String()))
-	resourcePath, err := resourcePath(ctx, data)
+	resourcePath, err := resourcePath(data)
 	if err != nil {
 		resp.Diagnostics.AddError("Model Error", fmt.Sprintf("Unable to build Generic api path, got error: \"%s\" from kind:%s name:%s (cluster:%s)", err, data.Kind.ValueString(), data.Name.ValueString(), data.Cluster.ValueString()))
 		return
@@ -207,7 +207,7 @@ func (r *GenericResource) Delete(ctx context.Context, req resource.DeleteRequest
 	}
 
 	tflog.Info(ctx, fmt.Sprintf("Delete %s kind named %s", data.Kind.String(), data.Name.String()))
-	resourcePath, err := resourcePath(ctx, data)
+	resourcePath, err := resourcePath(data)
 	if err != nil {
 		resp.Diagnostics.AddError("Model Error", fmt.Sprintf("Unable to read Generic, got error: %s", err))
 		return
@@ -238,7 +238,7 @@ func getKindFromName(kindName string) (ctlschema.Kind, error) {
 }
 
 // Generate the resource path for the given kind, cluster and resource name.
-func resourcePath(_ctx context.Context, data schema.GenericModel) (string, error) {
+func resourcePath(data schema.GenericModel) (string, error) {
 	kind, err := getKindFromName(data.Kind.ValueString())
 	if err != nil {
 		return "", err
