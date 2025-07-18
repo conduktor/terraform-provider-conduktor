@@ -2315,6 +2315,312 @@
       }
     },
     {
+      "name": "console_service_account_v1",
+      "schema": {
+        "attributes": [
+          {
+            "name": "name",
+            "string": {
+              "description": "Service Account name, must be unique, acts as an ID for import",
+              "computed_optional_required": "required",
+              "plan_modifiers": [
+                {
+                  "custom": {
+                    "imports": [
+                      {
+                        "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+                      }
+                    ],
+                    "schema_definition": "stringplanmodifier.RequiresReplace()"
+                  }
+                }
+              ],
+              "validators": [
+                {
+                  "custom": {
+                    "imports": [
+                      {
+                        "path": "regexp"
+                      },
+                      {
+                        "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                      }
+                    ],
+                    "schema_definition": "stringvalidator.RegexMatches(regexp.MustCompile(\"^[0-9a-z\\\\_\\\\-]+$\"), \"\")"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "app_instance",
+            "string": {
+              "description": "Reference to the application instance this service account is associated with",
+              "computed_optional_required": "optional",
+              "validators": [
+                {
+                  "custom": {
+                    "imports": [
+                      {
+                        "path": "regexp"
+                      },
+                      {
+                        "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                      }
+                    ],
+                    "schema_definition": "stringvalidator.RegexMatches(regexp.MustCompile(\"^[0-9a-z\\\\_\\\\-]+$\"), \"\")"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "cluster",
+            "string": {
+              "description": "Valid Kafka Cluster name linked with the Service Account",
+              "computed_optional_required": "required"
+            }
+          },
+          {
+            "name": "labels",
+            "map": {
+              "description": "Custom labels for the service account",
+              "computed_optional_required": "optional",
+              "element_type": {
+                "string": {}
+              }
+            }
+          },
+          {
+            "name": "spec",
+            "single_nested": {
+              "computed_optional_required": "required",
+              "description": "Service Accoount specification",
+              "attributes": [
+                {
+                  "name": "authorization",
+                  "single_nested": {
+                    "description": "Service Account authorization. One of `aiven`, `kafka`",
+                    "computed_optional_required": "required",
+                    "attributes": [
+                      {
+                        "name": "aiven",
+                        "single_nested": {
+                          "description": "Aiven type authorization configuration",
+                          "computed_optional_required": "optional",
+                          "attributes": [
+                            {
+                              "name": "acls",
+                              "set_nested": {
+                                "custom_type_name": "aiven_acls",
+                                "description": "Set of the Aiven ACLs to apply on the service account",
+                                "computed_optional_required": "required",
+                                "nested_object": {
+                                  "attributes": [
+                                    {
+                                      "name": "resource_type",
+                                      "string": {
+                                        "description": "Aiven resource type. Valid values are: SCHEMA, TOPIC",
+                                        "computed_optional_required": "required",
+                                        "validators": [
+                                          {
+                                            "custom": {
+                                              "imports": [
+                                                {
+                                                  "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                                },
+                                                {
+                                                  "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
+                                                }
+                                              ],
+                                              "schema_definition": "stringvalidator.OneOf(validation.ValidServiceAccountAivenResourceType...)"
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    },
+                                    {
+                                      "name": "name",
+                                      "string": {
+                                        "description": "Aiven resource name",
+                                        "computed_optional_required": "required"
+                                      }
+                                    },
+                                    {
+                                      "name": "permission",
+                                      "string": {
+                                        "description": "Aiven resource permission. Valid values are: admin, read, readwrite, schema_registry_read, schema_registry_write, write",
+                                        "computed_optional_required": "required",
+                                        "validators": [
+                                          {
+                                            "custom": {
+                                              "imports": [
+                                                {
+                                                  "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                                },
+                                                {
+                                                  "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
+                                                }
+                                              ],
+                                              "schema_definition": "stringvalidator.OneOf(validation.ValidServiceAccountAivenPermission...)"
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "name": "kafka",
+                        "single_nested": {
+                          "description": "Kafka type authorization configuration",
+                          "computed_optional_required": "optional",
+                          "attributes": [
+                            {
+                              "name": "acls",
+                              "set_nested": {
+                                "custom_type_name": "kafka_acls",
+                                "description": "Set of the Kafka ACLs to apply on the service account",
+                                "computed_optional_required": "required",
+                                "nested_object": {
+                                  "attributes": [
+                                    {
+                                      "name": "type",
+                                      "string": {
+                                        "description": "Kafka resource type. Valid values are: CLUSTER, CONSUMER_GROUP, DELEGATION_TOKEN, TOPIC, TRANSACTIONAL_ID, UNKNOWN, USER",
+                                        "computed_optional_required": "required",
+                                        "validators": [
+                                          {
+                                            "custom": {
+                                              "imports": [
+                                                {
+                                                  "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                                },
+                                                {
+                                                  "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
+                                                }
+                                              ],
+                                              "schema_definition": "stringvalidator.OneOf(validation.ValidServiceAccountKafkaType...)"
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    },
+                                    {
+                                      "name": "name",
+                                      "string": {
+                                        "description": "Kafka resource name",
+                                        "computed_optional_required": "required"
+                                      }
+                                    },
+                                    {
+                                      "name": "pattern_type",
+                                      "string": {
+                                        "description": "Kafka resource pattern type. Valid values are: LITERAL, PREFIXED",
+                                        "computed_optional_required": "required",
+                                        "validators": [
+                                          {
+                                            "custom": {
+                                              "imports": [
+                                                {
+                                                  "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                                },
+                                                {
+                                                  "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
+                                                }
+                                              ],
+                                              "schema_definition": "stringvalidator.OneOf(validation.ValidServiceAccountKafkaPatternType...)"
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    },
+                                    {
+                                      "name": "connect_cluster",
+                                      "string": {
+                                        "description": "Valid Kafka Connect Cluster refrence",
+                                        "computed_optional_required": "optional"
+                                      }
+                                    },
+                                    {
+                                      "name": "operations",
+                                      "set": {
+                                        "description": "Set of all operations to apply on the resource. Valid values are: All, Alter, AlterConfigs, ClusterAction, Create, CreateTokens, Delete, Describe, DescribeConfigs, DescribeTokens, IdempotentWrite, Read, Unknown, Write",
+                                        "computed_optional_required": "required",
+                                        "element_type": {
+                                          "string": {}
+                                        },
+                                        "validators": [
+                                          {
+                                            "custom": {
+                                              "imports": [
+                                                {
+                                                  "path": "github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
+                                                },
+                                                {
+                                                  "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                                },
+                                                {
+                                                  "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
+                                                }
+                                              ],
+                                              "schema_definition": "setvalidator.ValueStringsAre(stringvalidator.OneOf(validation.ValidServiceAccountKafkaOperations...))"
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    },
+                                    {
+                                      "name": "host",
+                                      "string": {
+                                        "description": "Host of the Kafka cluster. If not set it will default to '*'",
+                                        "computed_optional_required": "optional"
+                                      }
+                                    },
+                                    {
+                                      "name": "permission",
+                                      "string": {
+                                        "description": "Permission Type for Access Control Entry. Valid values are: Deny, Allow. If not set it will default to Allow",
+                                        "computed_optional_required": "optional",
+                                        "validators": [
+                                          {
+                                            "custom": {
+                                              "imports": [
+                                                {
+                                                  "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                                },
+                                                {
+                                                  "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
+                                                }
+                                              ],
+                                              "schema_definition": "stringvalidator.OneOf(validation.ValidServiceAccountKafkaPermission...)"
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "console_topic_v2",
       "schema": {
         "attributes": [
