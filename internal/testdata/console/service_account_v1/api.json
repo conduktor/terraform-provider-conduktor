@@ -1,0 +1,30 @@
+{
+	"apiVersion": "v1",
+	"kind": "ServiceAccount",
+	"metadata": {
+		"name": "sa-clicko-dev",
+		"appInstance": "my-app-instance-dev",
+		"cluster": "my-kafka-cluster",
+		"labels": {
+			"key": "value"
+		}
+	},
+	"spec": {
+		"authorization": {
+			"acls": [
+				{
+					"type": "TOPIC",
+					"name": "click.",
+					"patternType": "PREFIXED",
+					"connectCluster": "my-connect-cluster",
+					"operations": [
+						"Write"
+					],
+					"host": "*",
+					"permission": "Allow"
+				}
+			],
+			"type": "KAFKA_ACL"
+		}
+	}
+}

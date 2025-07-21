@@ -40,14 +40,14 @@ func (dst *ServiceAccountAuthorization) UnmarshalJSON(data []byte) error {
 	}
 
 	switch disc.Type {
-	case "Aiven":
+	case "AIVEN_ACL":
 		var aiven ServiceAccountAuthAiven
 		err = json.Unmarshal(data, &aiven)
 		if err != nil {
 			return err
 		}
 		dst.Aiven = &aiven
-	case "Kafka":
+	case "KAFKA_ACL":
 		var kafka ServiceAccountAuthKafka
 		err = json.Unmarshal(data, &kafka)
 		if err != nil {
@@ -72,6 +72,7 @@ func (src *ServiceAccountAuthorization) MarshalJSON() ([]byte, error) {
 
 type ServiceAccountAuthAiven struct {
 	ACLS []ServiceAccountAuthAivenACL `json:"acls"`
+	Type string                       `json:"type"`
 }
 type ServiceAccountAuthAivenACL struct {
 	ResourceType string `json:"resourceType"`
@@ -81,6 +82,7 @@ type ServiceAccountAuthAivenACL struct {
 
 type ServiceAccountAuthKafka struct {
 	ACLS []ServiceAccountAuthKafkaACL `json:"acls"`
+	Type string                       `json:"type"`
 }
 
 type ServiceAccountAuthKafkaACL struct {

@@ -1,56 +1,56 @@
 {
-    "apiVersion": "v1",
-    "kind": "ApplicationGroup",
-    "metadata": {
-        "application": "test-application",
-        "name": "test-application-group"
-    },
-    "spec": {
-        "displayName": "Test Application Group",
-        "description": "A great test application group",
+  "apiVersion": "v1",
+  "kind": "ApplicationGroup",
+  "metadata": {
+    "application": "test-application",
+    "name": "test-application-group"
+  },
+  "spec": {
+    "displayName": "Test Application Group",
+    "description": "A great test application group",
+    "permissions": [
+      {
+        "appInstance": "test-application-dev",
+        "patternType": "LITERAL",
+        "connectCluster": "kafka-connect",
+        "name": "*",
         "permissions": [
-            {
-                "appInstance": "test-application-dev",
-                "patternType": "LITERAL",
-                "connectCluster": "kafka-connect",
-                "name": "*",
-                "permissions": [
-                    "kafkaConnectPauseResume",
-                    "kafkaConnectRestart",
-                    "kafkaConnectorStatus",
-                    "kafkaConnectorViewConfig"
-                ],
-                "resourceType": "CONNECTOR"
-            },
-            {
-                "appInstance": "test-application-dev",
-                "patternType": "LITERAL",
-                "name": "*",
-                "permissions": [
-                    "consumerGroupCreate",
-                    "consumerGroupDelete",
-                    "consumerGroupReset",
-                    "consumerGroupView"
-                ],
-                "resourceType": "CONSUMER_GROUP"
-            },
-            {
-                "appInstance": "test-application-dev",
-                "patternType": "LITERAL",
-                "name": "*",
-                "permissions": [
-                    "topicConsume",
-                    "topicViewConfig"
-                ],
-                "resourceType": "TOPIC"
-            }
+          "kafkaConnectPauseResume",
+          "kafkaConnectRestart",
+          "kafkaConnectorStatus",
+          "kafkaConnectorViewConfig"
         ],
-        "members": [
-            "tatum@conduktor.io"
+        "resourceType": "CONNECTOR"
+      },
+      {
+        "appInstance": "test-application-dev",
+        "patternType": "LITERAL",
+        "name": "*",
+        "permissions": [
+          "consumerGroupCreate",
+          "consumerGroupDelete",
+          "consumerGroupReset",
+          "consumerGroupView"
         ],
-        "membersFromExternalGroups": [],
-        "externalGroups": [
-            "COMPANY-SUPPORT"
-        ]
-    }
+        "resourceType": "CONSUMER_GROUP"
+      },
+      {
+        "appInstance": "test-application-dev",
+        "patternType": "LITERAL",
+        "name": "*",
+        "permissions": [
+          "topicConsume",
+          "topicViewConfig"
+        ],
+        "resourceType": "TOPIC"
+      }
+    ],
+    "members": [
+      "tatum@conduktor.io"
+    ],
+    "membersFromExternalGroups": [],
+    "externalGroups": [
+      "COMPANY-SUPPORT"
+    ]
+  }
 }
