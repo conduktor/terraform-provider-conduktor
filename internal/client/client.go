@@ -97,8 +97,17 @@ func ConfigureAuth(ctx context.Context, mode Mode, restyClient *resty.Client, ap
 			resp, err := restyClient.SetRetryCount(3).SetRetryWaitTime(1 * time.Second).R().Get(testUrl)
 			if err != nil {
 				return nil, err
-			} else if resp.StatusCode() != 200 {
-				return nil, fmt.Errorf("Invalid username or password")
+			} else if resp.IsError() {
+				switch resp.StatusCode() {
+				case 401:
+					return nil, fmt.Errorf("Invalid username or password")
+				case 403:
+					return nil, fmt.Errorf("Forbidden: You do not have permission to access admin API. Please check your user permissions.")
+				case 500:
+					return nil, fmt.Errorf("Internal Server Error: Please check the server logs for more details")
+				default:
+					return nil, fmt.Errorf("Unexpected response (%d): %s", resp.StatusCode(), resp.String())
+				}
 			}
 		}
 	}
