@@ -69,7 +69,7 @@ func Make(ctx context.Context, mode Mode, apiParameter ApiParameter, providerVer
 	}, nil
 }
 
-func ConfigureAuth(ctx context.Context, mode Mode, restyClient *resty.Client, apiParameter ApiParameter) (*resty.Client, error) {
+func ConfigureAuth(_ context.Context, mode Mode, restyClient *resty.Client, apiParameter ApiParameter) (*resty.Client, error) {
 	var err error
 	switch mode {
 	case CONSOLE:
