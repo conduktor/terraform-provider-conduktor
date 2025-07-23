@@ -118,6 +118,7 @@ func ConsoleServiceAccountV1ResourceSchema(ctx context.Context) schema.Schema {
 												},
 												"host": schema.StringAttribute{
 													Optional:            true,
+													Computed:            true,
 													Description:         "Host of the Kafka cluster. If not set it will default to '*'",
 													MarkdownDescription: "Host of the Kafka cluster. If not set it will default to '*'",
 												},
@@ -145,6 +146,7 @@ func ConsoleServiceAccountV1ResourceSchema(ctx context.Context) schema.Schema {
 												},
 												"permission": schema.StringAttribute{
 													Optional:            true,
+													Computed:            true,
 													Description:         "Permission Type for Access Control Entry. Valid values are: Deny, Allow. If not set it will default to Allow",
 													MarkdownDescription: "Permission Type for Access Control Entry. Valid values are: Deny, Allow. If not set it will default to Allow",
 													Validators: []validator.String{

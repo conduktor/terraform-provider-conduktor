@@ -2579,14 +2579,14 @@
                                       "name": "host",
                                       "string": {
                                         "description": "Host of the Kafka cluster. If not set it will default to '*'",
-                                        "computed_optional_required": "optional"
+                                        "computed_optional_required": "computed_optional"
                                       }
                                     },
                                     {
                                       "name": "permission",
                                       "string": {
                                         "description": "Permission Type for Access Control Entry. Valid values are: Deny, Allow. If not set it will default to Allow",
-                                        "computed_optional_required": "optional",
+                                        "computed_optional_required": "computed_optional",
                                         "validators": [
                                           {
                                             "custom": {

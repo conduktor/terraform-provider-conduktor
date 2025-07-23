@@ -92,7 +92,7 @@ type ServiceAccountAuthKafkaACL struct {
 	ConnectCluster string   `json:"connectCluster,omitempty"`
 	Operations     []string `json:"operations"`
 	Host           string   `json:"host,omitempty"`
-	Permission     string   `json:"permission"`
+	Permission     string   `json:"permission,omitempty"`
 }
 
 type ServiceAccountResource struct {
