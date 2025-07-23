@@ -89,9 +89,9 @@ func StringArrayToListValue(array []string) (basetypes.ListValue, diag.Diagnosti
 // Helper to parse array of strings to SetValue.
 func SetValueToStringArray(ctx context.Context, set basetypes.SetValue) ([]string, diag.Diagnostics) {
 	var flags []string
-	diag := set.ElementsAs(ctx, &flags, false)
-	if diag.HasError() {
-		return nil, diag
+	diagnostics := set.ElementsAs(ctx, &flags, false)
+	if diagnostics.HasError() {
+		return nil, diagnostics
 	}
 	return flags, nil
 }
@@ -103,9 +103,9 @@ func StringArrayToSetValue(arr []string) (basetypes.SetValue, diag.Diagnostics) 
 		flags = append(flags, types.StringValue(f))
 	}
 
-	flagsList, diag := types.SetValue(types.StringType, flags)
-	if diag.HasError() {
-		return basetypes.SetValue{}, diag
+	flagsList, diagnostics := types.SetValue(types.StringType, flags)
+	if diagnostics.HasError() {
+		return basetypes.SetValue{}, diagnostics
 	}
 
 	return flagsList, nil
@@ -115,12 +115,12 @@ func StringArrayToSetValue(arr []string) (basetypes.SetValue, diag.Diagnostics) 
 func PermissionArrayToSetValue(ctx context.Context, resource Resource, arr []model.Permission) (basetypes.SetValue, error) {
 	var permissionsList basetypes.SetValue
 	var tfPermissions []attr.Value
-	var diag diag.Diagnostics
+	var diagnostics diag.Diagnostics
 
 	for _, p := range arr {
-		flagsList, diag := StringArrayToSetValue(p.Permissions)
-		if diag.HasError() {
-			return basetypes.SetValue{}, mapper.WrapDiagError(diag, "permissions.permissions", mapper.FromTerraform)
+		flagsList, diagnostics := StringArrayToSetValue(p.Permissions)
+		if diagnostics.HasError() {
+			return basetypes.SetValue{}, mapper.WrapDiagError(diagnostics, "permissions.permissions", mapper.FromTerraform)
 		}
 
 		types := map[string]attr.Type{
@@ -156,18 +156,17 @@ func PermissionArrayToSetValue(ctx context.Context, resource Resource, arr []mod
 			}
 			tfPermissions = append(tfPermissions, permObj)
 		}
-
 	}
 
 	switch resource {
 	case GROUPS:
-		permissionsList, diag = types.SetValue(groups.PermissionsValue{}.Type(ctx), tfPermissions)
+		permissionsList, diagnostics = types.SetValue(groups.PermissionsValue{}.Type(ctx), tfPermissions)
 	case USERS:
-		permissionsList, diag = types.SetValue(users.PermissionsValue{}.Type(ctx), tfPermissions)
+		permissionsList, diagnostics = types.SetValue(users.PermissionsValue{}.Type(ctx), tfPermissions)
 	}
 
-	if diag.HasError() {
-		return basetypes.SetValue{}, mapper.WrapDiagError(diag, "permissions", mapper.FromTerraform)
+	if diagnostics.HasError() {
+		return basetypes.SetValue{}, mapper.WrapDiagError(diagnostics, "permissions", mapper.FromTerraform)
 	}
 
 	return permissionsList, nil
@@ -176,7 +175,7 @@ func PermissionArrayToSetValue(ctx context.Context, resource Resource, arr []mod
 // Parse a Set into an array of Permissions based on resource type.
 func SetValueToPermissionArray(ctx context.Context, resource Resource, set basetypes.SetValue) ([]model.Permission, error) {
 	permissions := make([]model.Permission, 0)
-	var diag diag.Diagnostics
+	var diagnostics diag.Diagnostics
 
 	// Ideally the switch within groups and users would have less replication.
 	// This might be worth a re-work in the future.
@@ -185,9 +184,9 @@ func SetValueToPermissionArray(ctx context.Context, resource Resource, set baset
 		switch resource {
 		case GROUPS:
 			var tfPermissions []groups.PermissionsValue
-			diag = set.ElementsAs(ctx, &tfPermissions, false)
-			if diag.HasError() {
-				return nil, mapper.WrapDiagError(diag, "permissions", mapper.FromTerraform)
+			diagnostics = set.ElementsAs(ctx, &tfPermissions, false)
+			if diagnostics.HasError() {
+				return nil, mapper.WrapDiagError(diagnostics, "permissions", mapper.FromTerraform)
 			}
 			for _, p := range tfPermissions {
 				flags, diag := SetValueToStringArray(ctx, p.Permissions)
@@ -205,14 +204,12 @@ func SetValueToPermissionArray(ctx context.Context, resource Resource, set baset
 					KsqlDB:       p.Ksqldb.ValueString(),
 				})
 			}
-
 		case USERS:
 			var tfPermissions []users.PermissionsValue
-			diag = set.ElementsAs(ctx, &tfPermissions, false)
-			if diag.HasError() {
-				return nil, mapper.WrapDiagError(diag, "permissions", mapper.FromTerraform)
+			diagnostics = set.ElementsAs(ctx, &tfPermissions, false)
+			if diagnostics.HasError() {
+				return nil, mapper.WrapDiagError(diagnostics, "permissions", mapper.FromTerraform)
 			}
-
 			for _, p := range tfPermissions {
 				flags, diag := SetValueToStringArray(ctx, p.Permissions)
 				if diag.HasError() {

@@ -1,7 +1,7 @@
 export SHELL := /bin/sh
 export SHELLOPTS:=$(if $(SHELLOPTS),$(SHELLOPTS):)pipefail:errexit
 
-GO_LINT_VERSION ?= v1.64.5
+GO_LINT_VERSION ?= v2.3.0
 
 .ONESHELL:
 
@@ -46,14 +46,14 @@ tf-fmt: ## Run terraform fmt
 	terraform fmt -recursive
 
 tools:
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v$(GO_LINT_VERSION)
+	go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v$(GO_LINT_VERSION)
 
 .PHONY: go-lint
 go-lint: tools ## Run Golang linters
 	@echo "==> Run Golang CLI linter..."
-	@go run github.com/golangci/golangci-lint/cmd/golangci-lint@$(GO_LINT_VERSION) version
-	@go run github.com/golangci/golangci-lint/cmd/golangci-lint@$(GO_LINT_VERSION) config verify
-	@go run github.com/golangci/golangci-lint/cmd/golangci-lint@$(GO_LINT_VERSION) run
+	@go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GO_LINT_VERSION) version
+	@go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GO_LINT_VERSION) config verify
+	@go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GO_LINT_VERSION) run
 
 .PHONY: pull_test_assets
 pull_test_assets: ## Pull test docker images
