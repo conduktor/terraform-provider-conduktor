@@ -169,6 +169,7 @@ func (p *ConduktorProvider) Resources(ctx context.Context) []func() resource.Res
 		NewKafkaConnectV2Resource,
 		NewPartnerZoneV2Resource,
 		NewResourcePolicyV1Resource,
+		NewServiceAccountV1Resource,
 		NewTopicV2Resource,
 		NewTopicPolicyV1Resource,
 		NewGatewayServiceAccountV2Resource,
