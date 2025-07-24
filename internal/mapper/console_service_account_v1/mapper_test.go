@@ -15,10 +15,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestServiceAccountV1ModelMapping(t *testing.T) {
+func TestServiceAccountV1KafkaModelMapping(t *testing.T) {
 	ctx := context.Background()
 
-	jsonServiceAccountV1Resource := []byte(test.TestAccTestdata(t, "console/service_account_v1/api.json"))
+	jsonServiceAccountV1Resource := []byte(test.TestAccTestdata(t, "console/service_account_v1/kafka_api.json"))
 
 	ctlResource := ctlresource.Resource{}
 	err := ctlResource.UnmarshalJSON(jsonServiceAccountV1Resource)
@@ -88,6 +88,77 @@ func TestServiceAccountV1ModelMapping(t *testing.T) {
 		"key": "value",
 	}, internal2.Metadata.Labels)
 	assert.Equal(t, expectedACLs, internal2.Spec.Authorization.Kafka.ACLS)
+
+	// convert back to ctl model
+	ctlResource2, err := internal2.ToClientResource()
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	// compare without json
+	if !cmp.Equal(ctlResource, ctlResource2, cmpopts.IgnoreFields(ctlresource.Resource{}, "Json")) {
+		t.Errorf("expected %+v, got %+v", ctlResource, ctlResource2)
+	}
+}
+
+func TestServiceAccountV1AivenModelMapping(t *testing.T) {
+	ctx := context.Background()
+
+	jsonServiceAccountV1Resource := []byte(test.TestAccTestdata(t, "console/service_account_v1/aiven_api.json"))
+
+	ctlResource := ctlresource.Resource{}
+	err := ctlResource.UnmarshalJSON(jsonServiceAccountV1Resource)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	assert.Equal(t, "ServiceAccount", ctlResource.Kind)
+	assert.Equal(t, "v1", ctlResource.Version)
+	assert.Equal(t, "aiven-kafka-sa", ctlResource.Name)
+	assert.Equal(t, map[string]any{"name": "aiven-kafka-sa", "cluster": "aiven-cluster"}, ctlResource.Metadata)
+	assert.Equal(t, jsonServiceAccountV1Resource, ctlResource.Json)
+
+	// convert into internal model
+	internal, err := console.NewServiceAccountResourceFromClientResource(ctlResource)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	assert.Equal(t, "ServiceAccount", internal.Kind)
+	assert.Equal(t, "v1", internal.ApiVersion)
+	assert.Equal(t, "aiven-kafka-sa", internal.Metadata.Name)
+	assert.Equal(t, "aiven-cluster", internal.Metadata.Cluster)
+	expectedACLs := []console.ServiceAccountAuthAivenACL{
+		{
+			ResourceType: "SCHEMA",
+			Name:         "my-schema",
+			Permission:   "schema_registry_write",
+		},
+	}
+	assert.Equal(t, expectedACLs, internal.Spec.Authorization.Aiven.ACLS)
+
+	// convert to terraform model
+	tfModel, err := InternalModelToTerraform(ctx, &internal)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	assert.Equal(t, types.StringValue("aiven-kafka-sa"), tfModel.Name)
+	assert.Equal(t, types.StringValue("aiven-cluster"), tfModel.Cluster)
+	assert.Equal(t, false, tfModel.Spec.Authorization.IsNull())
+	assert.Equal(t, false, tfModel.Spec.Authorization.IsUnknown())
+
+	// convert back to internal model
+	internal2, err := TFToInternalModel(ctx, &tfModel)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	assert.Equal(t, "ServiceAccount", internal2.Kind)
+	assert.Equal(t, "v1", internal2.ApiVersion)
+	assert.Equal(t, "aiven-kafka-sa", internal2.Metadata.Name)
+	assert.Equal(t, "aiven-cluster", internal2.Metadata.Cluster)
+	assert.Equal(t, expectedACLs, internal2.Spec.Authorization.Aiven.ACLS)
 
 	// convert back to ctl model
 	ctlResource2, err := internal2.ToClientResource()
