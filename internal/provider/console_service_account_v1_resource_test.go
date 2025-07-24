@@ -4,12 +4,19 @@ import (
 	"regexp"
 	"testing"
 
+	"github.com/conduktor/terraform-provider-conduktor/internal/client"
 	"github.com/conduktor/terraform-provider-conduktor/internal/test"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func TestAccServiceAccountV1Resource(t *testing.T) {
+	v, err := fetchClientVersion(client.CONSOLE)
+	if err != nil {
+		t.Fatalf("Error fetching current version: %s", err)
+	}
+	test.CheckMinimumVersionRequirement(t, v, consoleServiceAccountMininumVersion)
+
 	resourceRef := "conduktor_console_service_account_v1.test"
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { test.TestAccPreCheck(t) },
@@ -66,6 +73,12 @@ func TestAccServiceAccountV1Resource(t *testing.T) {
 }
 
 func TestAccServiceAccountV1Constraints(t *testing.T) {
+	v, err := fetchClientVersion(client.CONSOLE)
+	if err != nil {
+		t.Fatalf("Error fetching current version: %s", err)
+	}
+	test.CheckMinimumVersionRequirement(t, v, consoleServiceAccountMininumVersion)
+
 	test.CheckEnterpriseEnabled(t)
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { test.TestAccPreCheck(t) },
@@ -81,6 +94,12 @@ func TestAccServiceAccountV1Constraints(t *testing.T) {
 }
 
 func TestAccServiceAccountV1ExampleResource(t *testing.T) {
+	v, err := fetchClientVersion(client.CONSOLE)
+	if err != nil {
+		t.Fatalf("Error fetching current version: %s", err)
+	}
+	test.CheckMinimumVersionRequirement(t, v, consoleServiceAccountMininumVersion)
+
 	test.CheckEnterpriseEnabled(t)
 
 	var kafkaResourceRef = "conduktor_console_service_account_v1.kafka_sa"

@@ -3,6 +3,8 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strings"
+
 	"github.com/conduktor/terraform-provider-conduktor/internal/client"
 	mapper "github.com/conduktor/terraform-provider-conduktor/internal/mapper/console_service_account_v1"
 	console "github.com/conduktor/terraform-provider-conduktor/internal/model/console"
@@ -12,7 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	jsoniter "github.com/json-iterator/go"
-	"strings"
+	"golang.org/x/mod/semver"
 )
 
 func serviceAccountV1ApiPutPath(cluster string) string {
@@ -22,6 +24,8 @@ func serviceAccountV1ApiPutPath(cluster string) string {
 func serviceAccountV1ApiGetPath(cluster string, connectServerName string) string {
 	return fmt.Sprintf("/public/self-serve/v1/cluster/%s/service-account/%s", cluster, connectServerName)
 }
+
+const consoleServiceAccountMininumVersion = "v1.30.0"
 
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &ServiceAccountV1Resource{}
@@ -45,7 +49,7 @@ func (r *ServiceAccountV1Resource) Schema(ctx context.Context, _ resource.Schema
 	resp.Schema = schema.ConsoleServiceAccountV1ResourceSchema(ctx)
 }
 
-func (r *ServiceAccountV1Resource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *ServiceAccountV1Resource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -68,6 +72,22 @@ func (r *ServiceAccountV1Resource) Configure(_ context.Context, req resource.Con
 			"Console Client not configured. Please provide client configuration details for Console API and ensure you have set the right provider mode for this resource. \n"+
 				"More info here: \n"+
 				" - https://registry.terraform.io/providers/conduktor/conduktor/latest/docs",
+		)
+		return
+	}
+
+	consoleVersion, err := data.Client.GetAPIVersion(ctx, client.CONSOLE)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error fetching Console version",
+			err.Error(),
+		)
+		return
+	}
+	if semver.IsValid(consoleVersion) && semver.Compare(consoleVersion, consoleServiceAccountMininumVersion) < 0 {
+		resp.Diagnostics.AddError(
+			"Minimum version requirement not met",
+			"This resource requires Conduktor Console API version "+consoleServiceAccountMininumVersion+" but targeted Conduktor Console API is "+consoleVersion,
 		)
 		return
 	}
