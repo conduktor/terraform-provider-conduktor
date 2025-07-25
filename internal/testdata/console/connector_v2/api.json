@@ -1,0 +1,31 @@
+{
+  "kind": "Connector",
+  "apiVersion": "v2",
+  "metadata": {
+    "name": "connector",
+    "cluster": "cluster",
+    "connectCluster": "connect",
+    "labels": {
+      "conduktor.io/application": "test-app",
+      "conduktor.io/application-instance": "test-app-instance",
+      "kind": "connector",
+      "data-criticality": "C0",
+      "environment": "prod",
+      "team": "analytics"
+    },
+    "description": "This is a connector",
+    "autoRestart": {
+      "enabled": true,
+      "frequencySeconds": 500
+    }
+  },
+  "spec": {
+    "config": {
+      "connector.class": "io.connect.jdbc.JdbcSourceConnector",
+      "tasks.max": "1",
+      "topic": "click.pageviews",
+      "connection.url": "jdbc:mysql://127.0.0.1:3306/sample?verifyServerCertificate=false&useSSL=true&requireSSL=true",
+      "consumer.override.sasl.jaas.config": "o.a.k.s.s.ScramLoginModule required username='<user>' password='<password>';"
+    }
+  }
+}
