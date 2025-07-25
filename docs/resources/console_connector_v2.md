@@ -8,7 +8,7 @@ description: |-
 
 # conduktor_console_connector_v2
 
-Resource for managing Kafka Connect connectors.
+Resource for managing [Kafka Connect connectors](https://docs.conduktor.io/platform/reference/resource-reference/kafka/#connector).
 This resource allows you to create, read, update and delete kafka connector in Conduktor.
 
 > [!WARNING]
