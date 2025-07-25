@@ -1,0 +1,42 @@
+---
+page_title: "Conduktor : conduktor_console_connector_v2 "
+subcategory: "kafka/v2"
+description: |-
+    Resource for managing Kafka Connect connectors with Conduktor Console.
+    This resource allows you to create, read, update and delete kafka connector in Conduktor.
+---
+
+# {{ .Name }}
+
+Resource for managing [Kafka Connect connectors](https://docs.conduktor.io/platform/reference/resource-reference/kafka/#connector).
+This resource allows you to create, read, update and delete kafka connector in Conduktor.
+
+> [!WARNING]
+> - This resource is officially supported from Conduktor Console `1.29.0` and newer.
+> - Usage of this resource with older Console version might result in unexpected behavior.
+> - e.g. `auto_restart` has been made available from Conduktor Console `1.29.0`.
+
+## Example Usage
+
+### Simple connector
+{{tffile "examples/resources/conduktor_console_connector_v2/simple.tf"}}
+
+### Complex connector
+{{tffile "examples/resources/conduktor_console_connector_v2/complex.tf"}}
+
+
+{{ .SchemaMarkdown }}
+
+## Import
+
+In order to import a Kafka connector into Conduktor, you need to know the Kafka cluster name, Kafka Connect server name and the Connector name.
+
+The import ID is constructed as follows: `< cluster_name >/< connect_server_name >/< connector_name >`.
+
+For example, using an [`import` block](https://developer.hashicorp.com/terraform/language/import) :
+{{tffile "examples/resources/conduktor_console_connector_v2/import.tf"}}
+
+Using the `terraform import` command:
+```shell
+terraform import conduktor_console_connector_v2.example my-cluster/my-connect-server/my-connector
+```

@@ -52,12 +52,13 @@ func fetchClientVersion(mode client.Mode) (string, error) {
 		return "", err
 	}
 
-	if mode == client.CONSOLE {
+	switch mode {
+	case client.CONSOLE:
 		version, err = testClient.GetAPIVersion(context.Background(), client.CONSOLE)
 		if err != nil {
 			return "", err
 		}
-	} else if mode == client.GATEWAY {
+	case client.GATEWAY:
 		version, err = testClient.GetAPIVersion(context.Background(), client.GATEWAY)
 		if err != nil {
 			return "", err
