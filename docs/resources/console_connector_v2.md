@@ -68,8 +68,8 @@ resource "conduktor_console_connector_v2" "complex" {
 
 ### Required
 
-- `cluster` (String) Kafka cluster name linked with Kafka topic. Must already exist in Conduktor Console. Any change will require the Topic to be destroyed and re-created
-- `connect_cluster` (String) Kafka Connect cluster name linked with Kafka topic. Must already exist in Conduktor Console. Any change will require the Topic to be destroyed and re-created
+- `cluster` (String) Kafka cluster name linked with Kafka Connect connector. Must already exist in Conduktor Console. Any change will require the Connector to be destroyed and re-created
+- `connect_cluster` (String) Kafka Connect server name linked with connector. Must already exist in Conduktor Console. Any change will require the Connector to be destroyed and re-created
 - `name` (String) Connector name, must be unique, acts as an ID for import
 - `spec` (Attributes) Connector specification (see [below for nested schema](#nestedatt--spec))
 
@@ -77,7 +77,7 @@ resource "conduktor_console_connector_v2" "complex" {
 
 - `auto_restart` (Attributes) Auto restart configuration for the connector (see [below for nested schema](#nestedatt--auto_restart))
 - `description` (String) Connector description
-- `labels` (Map of String) Custom labels for the topic resource.
+- `labels` (Map of String) Custom labels for the connector resource.
 
 ### Read-Only
 

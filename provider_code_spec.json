@@ -941,7 +941,7 @@
           {
             "name": "cluster",
             "string": {
-              "description": "Kafka cluster name linked with Kafka topic. Must already exist in Conduktor Console. Any change will require the Topic to be destroyed and re-created",
+              "description": "Kafka cluster name linked with Kafka Connect connector. Must already exist in Conduktor Console. Any change will require the Connector to be destroyed and re-created",
               "computed_optional_required": "required",
               "plan_modifiers": [
                 {
@@ -975,7 +975,7 @@
           {
             "name": "connect_cluster",
             "string": {
-              "description": "Kafka Connect cluster name linked with Kafka topic. Must already exist in Conduktor Console. Any change will require the Topic to be destroyed and re-created",
+              "description": "Kafka Connect server name linked with connector. Must already exist in Conduktor Console. Any change will require the Connector to be destroyed and re-created",
               "computed_optional_required": "required",
               "plan_modifiers": [
                 {
@@ -1009,7 +1009,7 @@
           {
             "name": "labels",
             "map": {
-              "description": "Custom labels for the topic resource.",
+              "description": "Custom labels for the connector resource.",
               "computed_optional_required": "optional",
               "element_type": {
                 "string": {}
