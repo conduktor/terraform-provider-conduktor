@@ -1061,7 +1061,7 @@
                 {
                   "name": "frequency_seconds",
                   "int64": {
-                    "description": "Defines the delay between consecutive restart attempts, default to 600 seconds (10 minutes).",
+                    "description": "Defines the delay between consecutive restart attempts, default to 600 seconds (10 minutes) max 86400 (1 day).",
                     "computed_optional_required": "computed_optional",
                     "validators": [
                       {
@@ -1074,7 +1074,7 @@
                               "path": "github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
                             }
                           ],
-                          "schema_definition": "int64validator.AtLeast(1)"
+                          "schema_definition": "int64validator.Between(600, 86400)"
                         }
                       }
                     ],
