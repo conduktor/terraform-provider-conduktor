@@ -55,8 +55,8 @@ func ConsoleConnectorV2ResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"cluster": schema.StringAttribute{
 				Required:            true,
-				Description:         "Kafka cluster name linked with Kafka topic. Must already exist in Conduktor Console. Any change will require the Topic to be destroyed and re-created",
-				MarkdownDescription: "Kafka cluster name linked with Kafka topic. Must already exist in Conduktor Console. Any change will require the Topic to be destroyed and re-created",
+				Description:         "Kafka cluster name linked with Kafka Connect connector. Must already exist in Conduktor Console. Any change will require the Connector to be destroyed and re-created",
+				MarkdownDescription: "Kafka cluster name linked with Kafka Connect connector. Must already exist in Conduktor Console. Any change will require the Connector to be destroyed and re-created",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
@@ -66,8 +66,8 @@ func ConsoleConnectorV2ResourceSchema(ctx context.Context) schema.Schema {
 			},
 			"connect_cluster": schema.StringAttribute{
 				Required:            true,
-				Description:         "Kafka Connect cluster name linked with Kafka topic. Must already exist in Conduktor Console. Any change will require the Topic to be destroyed and re-created",
-				MarkdownDescription: "Kafka Connect cluster name linked with Kafka topic. Must already exist in Conduktor Console. Any change will require the Topic to be destroyed and re-created",
+				Description:         "Kafka Connect server name linked with connector. Must already exist in Conduktor Console. Any change will require the Connector to be destroyed and re-created",
+				MarkdownDescription: "Kafka Connect server name linked with connector. Must already exist in Conduktor Console. Any change will require the Connector to be destroyed and re-created",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
@@ -83,8 +83,8 @@ func ConsoleConnectorV2ResourceSchema(ctx context.Context) schema.Schema {
 			"labels": schema.MapAttribute{
 				ElementType:         types.StringType,
 				Optional:            true,
-				Description:         "Custom labels for the topic resource.",
-				MarkdownDescription: "Custom labels for the topic resource.",
+				Description:         "Custom labels for the connector resource.",
+				MarkdownDescription: "Custom labels for the connector resource.",
 				Validators: []validator.Map{
 					validation.Labels(),
 				},
