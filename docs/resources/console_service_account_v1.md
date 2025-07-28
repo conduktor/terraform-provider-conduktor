@@ -11,6 +11,11 @@ description: |-
 Resource for managing Conduktor service accounts.
 This resource allows you to create, read, update and delete service accounts in Conduktor.
 
+> [!WARNING]
+> Minimum requirement for this resource:
+>   - Conduktor Console version is `1.30.0`.
+> For more information, please refer to the [Conduktor documentation](https://docs.conduktor.io/platform/navigation/console/service-accounts/).
+
 ## Example Usage
 
 ### Aiven linked service account

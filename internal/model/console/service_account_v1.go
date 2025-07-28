@@ -12,6 +12,13 @@ import (
 const ServiceAccountV1Kind = "ServiceAccount"
 const ServiceAccountV1ApiVersion = "v1"
 
+type AclType string
+
+const (
+	AIVEN_ACL AclType = "AIVEN_ACL"
+	KAFKA_ACL AclType = "KAFKA_ACL"
+)
+
 type ServiceAccountMetadata struct {
 	AppInstance string            `json:"appInstance,omitempty"`
 	Cluster     string            `json:"cluster"`
@@ -39,15 +46,16 @@ func (dst *ServiceAccountAuthorization) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	switch disc.Type {
-	case "AIVEN_ACL":
+	ACLtype := AclType(disc.Type)
+	switch ACLtype {
+	case AIVEN_ACL:
 		var aiven ServiceAccountAuthAiven
 		err = json.Unmarshal(data, &aiven)
 		if err != nil {
 			return err
 		}
 		dst.Aiven = &aiven
-	case "KAFKA_ACL":
+	case KAFKA_ACL:
 		var kafka ServiceAccountAuthKafka
 		err = json.Unmarshal(data, &kafka)
 		if err != nil {
@@ -57,6 +65,7 @@ func (dst *ServiceAccountAuthorization) UnmarshalJSON(data []byte) error {
 	default:
 		return fmt.Errorf("unknown authorization type %s", disc.Type)
 	}
+
 	return nil
 }
 

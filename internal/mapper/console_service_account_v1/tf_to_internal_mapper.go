@@ -59,7 +59,7 @@ func objectValueToAuthorization(ctx context.Context, r basetypes.ObjectValue) (*
 		}
 		aiven = &console.ServiceAccountAuthAiven{
 			ACLS: aivenACLs,
-			Type: "AIVEN_ACL",
+			Type: string(console.AIVEN_ACL),
 		}
 	}
 
@@ -76,7 +76,7 @@ func objectValueToAuthorization(ctx context.Context, r basetypes.ObjectValue) (*
 		}
 		kafka = &console.ServiceAccountAuthKafka{
 			ACLS: kafkaACLs,
-			Type: "KAFKA_ACL",
+			Type: string(console.KAFKA_ACL),
 		}
 	}
 
