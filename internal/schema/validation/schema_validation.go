@@ -91,6 +91,14 @@ var ValidApplicationInstancePermission = []string{"NONE", "READ", "WRITE"}
 var ValidPartnerZoneAuthenticationType = []string{"MTLS", "OAUTHBEARER", "PLAIN"}
 var ValidPartnerZoneTopicPermission = []string{"READ", "WRITE"}
 
+// Console Service Account.
+var ValidServiceAccountAivenResourceType = []string{"SCHEMA", "TOPIC"}
+var ValidServiceAccountAivenPermission = []string{"admin", "read", "readwrite", "schema_registry_read", "schema_registry_write", "write"}
+var ValidServiceAccountKafkaType = []string{"CLUSTER", "CONSUMER_GROUP", "DELEGATION_TOKEN", "TOPIC", "TRANSACTIONAL_ID", "UNKNOWN", "USER"}
+var ValidServiceAccountKafkaPatternType = []string{"LITERAL", "PREFIXED"}
+var ValidServiceAccountKafkaOperations = []string{"All", "Alter", "AlterConfigs", "ClusterAction", "Create", "CreateTokens", "Delete", "Describe", "DescribeConfigs", "DescribeTokens", "IdempotentWrite", "Read", "Unknown", "Write"}
+var ValidServiceAccountKafkaPermission = []string{"Deny", "Allow"}
+
 var ConfluentKafkaFlavor = "Confluent"
 var AivenKafkaFlavor = "Aiven"
 var GatewayKafkaFlavor = "Gateway"

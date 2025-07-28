@@ -142,13 +142,14 @@ func PermissionArrayToSetValue(ctx context.Context, resource Resource, arr []mod
 			"ksqldb":        NewStringValue(p.KsqlDB),
 		}
 
-		if resource == GROUPS {
+		switch resource {
+		case GROUPS:
 			permObj, diag := groups.NewPermissionsValue(types, values)
 			if diag.HasError() {
 				return basetypes.SetValue{}, mapper.WrapDiagError(diag, "permissions", mapper.FromTerraform)
 			}
 			tfPermissions = append(tfPermissions, permObj)
-		} else if resource == USERS {
+		case USERS:
 			permObj, diag := users.NewPermissionsValue(types, values)
 			if diag.HasError() {
 				return basetypes.SetValue{}, mapper.WrapDiagError(diag, "permissions", mapper.FromTerraform)
@@ -158,9 +159,10 @@ func PermissionArrayToSetValue(ctx context.Context, resource Resource, arr []mod
 
 	}
 
-	if resource == GROUPS {
+	switch resource {
+	case GROUPS:
 		permissionsList, diag = types.SetValue(groups.PermissionsValue{}.Type(ctx), tfPermissions)
-	} else if resource == USERS {
+	case USERS:
 		permissionsList, diag = types.SetValue(users.PermissionsValue{}.Type(ctx), tfPermissions)
 	}
 
@@ -180,8 +182,8 @@ func SetValueToPermissionArray(ctx context.Context, resource Resource, set baset
 	// This might be worth a re-work in the future.
 	// NOTE: an idea would be to use ObjectValue instead of user/group PermissionsValue.
 	if !set.IsNull() && !set.IsUnknown() {
-		// Case for groups
-		if resource == GROUPS {
+		switch resource {
+		case GROUPS:
 			var tfPermissions []groups.PermissionsValue
 			diag = set.ElementsAs(ctx, &tfPermissions, false)
 			if diag.HasError() {
@@ -204,8 +206,7 @@ func SetValueToPermissionArray(ctx context.Context, resource Resource, set baset
 				})
 			}
 
-			// Case for users
-		} else if resource == USERS {
+		case USERS:
 			var tfPermissions []users.PermissionsValue
 			diag = set.ElementsAs(ctx, &tfPermissions, false)
 			if diag.HasError() {
