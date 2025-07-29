@@ -17,7 +17,12 @@ func TFToInternalModel(ctx context.Context, r *appgroup.ConsoleApplicationGroupV
 	// ExternalGroups
 	externalGroups, diag := schema.SetValueToStringArray(ctx, r.Spec.ExternalGroups)
 	if diag.HasError() {
-		return console.ApplicationGroupConsoleResource{}, mapper.WrapDiagError(diag, "externalGroups", mapper.FromTerraform)
+		return console.ApplicationGroupConsoleResource{}, mapper.WrapDiagError(diag, "external_groups", mapper.FromTerraform)
+	}
+
+	externalGroupRegex, diag := schema.SetValueToStringArray(ctx, r.Spec.ExternalGroupRegex)
+	if diag.HasError() {
+		return console.ApplicationGroupConsoleResource{}, mapper.WrapDiagError(diag, "external_group_regex", mapper.FromTerraform)
 	}
 
 	// Members
@@ -29,7 +34,7 @@ func TFToInternalModel(ctx context.Context, r *appgroup.ConsoleApplicationGroupV
 	// MembersFromExternalGroups
 	membersFromExternalGroups, diag := schema.SetValueToStringArray(ctx, r.Spec.MembersFromExternalGroups)
 	if diag.HasError() {
-		return console.ApplicationGroupConsoleResource{}, mapper.WrapDiagError(diag, "membersFromExternalGroups", mapper.FromTerraform)
+		return console.ApplicationGroupConsoleResource{}, mapper.WrapDiagError(diag, "members_from_external_groups", mapper.FromTerraform)
 	}
 
 	// Permissions
@@ -45,6 +50,7 @@ func TFToInternalModel(ctx context.Context, r *appgroup.ConsoleApplicationGroupV
 			DisplayName:               r.Spec.DisplayName.ValueString(),
 			Description:               r.Spec.Description.ValueString(),
 			ExternalGroups:            externalGroups,
+			ExternalGroupRegex:        externalGroupRegex,
 			Members:                   members,
 			MembersFromExternalGroups: membersFromExternalGroups,
 			Permissions:               permissions,
@@ -57,6 +63,11 @@ func InternalModelToTerraform(ctx context.Context, r *console.ApplicationGroupCo
 	externalGroupsList, diag := schema.StringArrayToSetValue(r.Spec.ExternalGroups)
 	if diag.HasError() {
 		return appgroup.ConsoleApplicationGroupV1Model{}, mapper.WrapDiagError(diag, "external_groups", mapper.IntoTerraform)
+	}
+
+	externalGroupRegexList, diag := schema.StringArrayToSetValue(r.Spec.ExternalGroupRegex)
+	if diag.HasError() {
+		return appgroup.ConsoleApplicationGroupV1Model{}, mapper.WrapDiagError(diag, "external_group_regex", mapper.IntoTerraform)
 	}
 
 	membersList, diag := schema.StringArrayToSetValue(r.Spec.Members)
@@ -79,6 +90,7 @@ func InternalModelToTerraform(ctx context.Context, r *console.ApplicationGroupCo
 			"description":                  basetypes.StringType{},
 			"display_name":                 basetypes.StringType{},
 			"external_groups":              externalGroupsList.Type(ctx),
+			"external_group_regex":         externalGroupRegexList.Type(ctx),
 			"members":                      membersList.Type(ctx),
 			"members_from_external_groups": membersFromExternalGroupsList.Type(ctx),
 			"permissions":                  permissionsList.Type(ctx),
@@ -87,6 +99,7 @@ func InternalModelToTerraform(ctx context.Context, r *console.ApplicationGroupCo
 			"description":                  schema.NewStringValue(r.Spec.Description),
 			"display_name":                 schema.NewStringValue(r.Spec.DisplayName),
 			"external_groups":              externalGroupsList,
+			"external_group_regex":         externalGroupRegexList,
 			"members":                      membersList,
 			"members_from_external_groups": membersFromExternalGroupsList,
 			"permissions":                  permissionsList,

@@ -737,6 +737,26 @@
                   }
                 },
                 {
+                  "name": "external_group_regex",
+                  "set": {
+                    "description": "Set of regex to be applied to external groups. NOTE: this field has been introduced with Console `1.36.0` and it will not work with previous versions",
+                    "computed_optional_required": "computed_optional",
+                    "element_type": {
+                      "string": {}
+                    },
+                    "default": {
+                      "custom": {
+                        "imports": [
+                          {
+                            "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
+                          }
+                        ],
+                        "schema_definition": "setdefault.StaticValue(basetypes.NewSetValueMust(types.StringType, []attr.Value{}))"
+                      }
+                    }
+                  }
+                },
+                {
                   "name": "members",
                   "set": {
                     "description": "Set of members of the group",
@@ -1177,6 +1197,26 @@
                   "name": "external_groups",
                   "set": {
                     "description": "Set of external groups from SSO mapped to this group",
+                    "computed_optional_required": "computed_optional",
+                    "element_type": {
+                      "string": {}
+                    },
+                    "default": {
+                      "custom": {
+                        "imports": [
+                          {
+                            "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
+                          }
+                        ],
+                        "schema_definition": "setdefault.StaticValue(basetypes.NewSetValueMust(types.StringType, []attr.Value{}))"
+                      }
+                    }
+                  }
+                },
+                {
+                  "name": "external_group_regex",
+                  "set": {
+                    "description": "Set of regex to be applied to external groups. NOTE: this field has been introduced with Console `1.36.0` and it will not work with previous versions",
                     "computed_optional_required": "computed_optional",
                     "element_type": {
                       "string": {}

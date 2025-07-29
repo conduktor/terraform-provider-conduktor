@@ -78,6 +78,7 @@ Required:
 Optional:
 
 - `description` (String) Group description
+- `external_group_regex` (Set of String) Set of regex to be applied to external groups. NOTE: this field has been introduced with Console `1.36.0` and it will not work with previous versions
 - `external_groups` (Set of String) Set of external groups from SSO mapped to this group
 - `members` (Set of String) Set of members of the group
 - `permissions` (Attributes Set) Set of all group permissions (see [below for nested schema](#nestedatt--spec--permissions))

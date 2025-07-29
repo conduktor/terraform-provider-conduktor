@@ -44,6 +44,7 @@ func TestGroupV2ModelMapping(t *testing.T) {
 	assert.Equal(t, "Sales Department", internal.Spec.DisplayName)
 	assert.Equal(t, "Sales Department Group", internal.Spec.Description)
 	assert.Equal(t, []string{"sales"}, internal.Spec.ExternalGroups)
+	assert.Equal(t, []string{".*"}, internal.Spec.ExternalGroupRegex)
 	assert.Equal(t, []string{"jim.halpert@dunder.mifflin.com", "dwight.schrute@dunder.mifflin.com"}, internal.Spec.Members)
 	expectedInternalPermissions := []model.Permission{
 		{
@@ -116,6 +117,7 @@ func TestGroupV2ModelMapping(t *testing.T) {
 	assert.Equal(t, "Sales Department", internal2.Spec.DisplayName)
 	assert.Equal(t, "Sales Department Group", internal2.Spec.Description)
 	assert.Equal(t, []string{"sales"}, internal2.Spec.ExternalGroups)
+	assert.Equal(t, []string{".*"}, internal2.Spec.ExternalGroupRegex)
 	assert.Equal(t, []string{"jim.halpert@dunder.mifflin.com", "dwight.schrute@dunder.mifflin.com"}, internal2.Spec.Members)
 	assert.Equal(t, expectedInternalPermissions, internal2.Spec.Permissions)
 	assert.Equal(t, internal, internal2)
