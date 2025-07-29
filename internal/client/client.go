@@ -55,7 +55,7 @@ func Make(ctx context.Context, mode Mode, apiParameter ApiParameter, providerVer
 		return nil, err
 	}
 
-	restyClient, err = ConfigureAuth(ctx, mode, restyClient, apiParameter)
+	restyClient, err = ConfigureAuth(mode, restyClient, apiParameter)
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +69,7 @@ func Make(ctx context.Context, mode Mode, apiParameter ApiParameter, providerVer
 	}, nil
 }
 
-func ConfigureAuth(_ context.Context, mode Mode, restyClient *resty.Client, apiParameter ApiParameter) (*resty.Client, error) {
+func ConfigureAuth(mode Mode, restyClient *resty.Client, apiParameter ApiParameter) (*resty.Client, error) {
 	var err error
 	switch mode {
 	case CONSOLE:

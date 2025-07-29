@@ -15,7 +15,7 @@ func TestAccConnectorV2Resource(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error fetching current version: %s", err)
 	}
-	test.CheckMinimumVersionRequirement(t, v, connectorMininumVersion)
+	test.CheckMinimumVersionRequirement(t, v, connectorMininumRecommendedVersion)
 
 	resourceRef := "conduktor_console_connector_v2.test"
 	resource.Test(t, resource.TestCase{
@@ -76,7 +76,7 @@ func TestAccConnectorV2Minimal(t *testing.T) {
 		t.Fatalf("Error fetching current version: %s", err)
 	}
 
-	test.CheckMinimumVersionRequirement(t, v, connectorMininumVersion)
+	test.CheckMinimumVersionRequirement(t, v, connectorMininumRecommendedVersion)
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { test.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
@@ -105,7 +105,7 @@ func TestAccConnectorV2Labels(t *testing.T) {
 		t.Fatalf("Error fetching current version: %s", err)
 	}
 
-	test.CheckMinimumVersionRequirement(t, v, connectorMininumVersion)
+	test.CheckMinimumVersionRequirement(t, v, connectorMininumRecommendedVersion)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { test.TestAccPreCheck(t) },
@@ -131,7 +131,7 @@ func TestAccConnectorV2ExampleResource(t *testing.T) {
 		t.Fatalf("Error fetching current version: %s", err)
 	}
 
-	test.CheckMinimumVersionRequirement(t, v, connectorMininumVersion)
+	test.CheckMinimumVersionRequirement(t, v, connectorMininumRecommendedVersion)
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { test.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,

@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	jsoniter "github.com/json-iterator/go"
+	"golang.org/x/mod/semver"
 )
 
 func connectorV2ApiPutPath(cluster, connectCluster string) string {
@@ -23,7 +24,12 @@ func connectorV2ApiGetPath(cluster, connectCluster, connectorName string) string
 	return fmt.Sprintf("/public/kafka/v2/cluster/%s/connect/%s/connector/%s", cluster, connectCluster, connectorName)
 }
 
-const connectorMininumVersion = "v1.29.0"
+// Version when this resource was introduced.
+const connectorMininumVersion = "v1.26.0"
+
+// Version when this resource was updated and recommended to be used.
+// More details here : https://docs.conduktor.io/guide/release-notes#changes-to-conduktor-io-labels
+const connectorMininumRecommendedVersion = "v1.29.0"
 
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &ConnectorV2Resource{}
@@ -71,6 +77,27 @@ func (r *ConnectorV2Resource) Configure(ctx context.Context, req resource.Config
 				" - https://registry.terraform.io/providers/conduktor/conduktor/latest/docs",
 		)
 		return
+	}
+
+	consoleVersion, err := data.Client.GetAPIVersion(ctx, client.CONSOLE)
+	if err != nil {
+		resp.Diagnostics.AddError("Error fetching Console version", err.Error())
+		return
+	}
+	if semver.IsValid(consoleVersion) {
+		switch {
+		case semver.Compare(consoleVersion, connectorMininumVersion) < 0:
+			resp.Diagnostics.AddError(
+				"Minimum version requirement not met",
+				"This resource requires Conduktor Console API version "+connectorMininumVersion+" and is recommended with version "+connectorMininumRecommendedVersion+" or higher,  but targeted Conduktor Console API is "+consoleVersion,
+			)
+			return
+		case semver.Compare(consoleVersion, connectorMininumRecommendedVersion) < 0:
+			resp.Diagnostics.AddWarning(
+				"Recommended version not met",
+				"This resource is recommended to be used with Conduktor Console API version "+connectorMininumRecommendedVersion+" or higher, but targeted Conduktor Console API is "+consoleVersion+". You may experience unexpected behavior or missing features.",
+			)
+		}
 	}
 
 	r.apiClient = data.Client
