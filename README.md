@@ -90,6 +90,7 @@ This repository contains the Conduktor Terraform provider, which defines Condukt
 
 ### Kafka resources
 - [Topic](./docs/resources/console_topic_v2.md)
+- [Connector](./docs/resources/console_connector_v2.md)
 
 ### Generic resource
 
@@ -358,7 +359,6 @@ We are currently reviewing the following resources:
   - [Alert](https://docs.conduktor.io/platform/reference/resource-reference/console/#alert)
 2. Kafka resources:
   - [Subject](https://docs.conduktor.io/platform/reference/resource-reference/kafka/#subject)
-  - [Connector](https://docs.conduktor.io/platform/reference/resource-reference/kafka/#connector)
 3. Gateway resources:
   - [GatewayGroup](https://docs.conduktor.io/gateway/reference/resources-reference/#gatewaygroup)
   - [ConcentrationRule](https://docs.conduktor.io/gateway/reference/resources-reference/#concentrationrule)

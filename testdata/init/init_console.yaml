@@ -11,6 +11,12 @@ spec:
   #   sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="admin" password="admin-secret";
   color: '#FF0000'
   icon: icon
+  schemaRegistry:
+    type: "ConfluentLike"
+    url: http://redpanda:8081
+    security:
+      type: NoSecurity
+    ignoreUntrustedCertificate: false
 ---
 apiVersion: v2
 kind: KafkaCluster
@@ -37,7 +43,7 @@ metadata:
   cluster: kafka-cluster
 spec:
   displayName: My kafka connect
-  urls: http://localhost:8083
+  urls: http://kafka-connect:8083
   ignoreUntrustedCertificate: true
 ---
 apiVersion: v1

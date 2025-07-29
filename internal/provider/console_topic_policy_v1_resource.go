@@ -9,7 +9,6 @@ import (
 	console "github.com/conduktor/terraform-provider-conduktor/internal/model/console"
 	schemaUtils "github.com/conduktor/terraform-provider-conduktor/internal/schema"
 	schema "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_console_topic_policy_v1"
-	topicPolicy "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_console_topic_policy_v1"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -33,15 +32,15 @@ type TopicPolicyV1Resource struct {
 	apiClient *client.Client
 }
 
-func (r *TopicPolicyV1Resource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *TopicPolicyV1Resource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_console_topic_policy_v1"
 }
 
-func (r *TopicPolicyV1Resource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *TopicPolicyV1Resource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.ConsoleTopicPolicyV1ResourceSchema(ctx)
 }
 
-func (r *TopicPolicyV1Resource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *TopicPolicyV1Resource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -80,7 +79,7 @@ func (r *TopicPolicyV1Resource) ValidateConfig(ctx context.Context, req resource
 		return
 	}
 
-	var tfPolicies map[string]topicPolicy.PoliciesValue
+	var tfPolicies map[string]schema.PoliciesValue
 	diag := data.Spec.Policies.ElementsAs(ctx, &tfPolicies, false)
 	if diag.HasError() {
 		return
