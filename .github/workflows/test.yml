@@ -73,8 +73,8 @@ jobs:
               name: "TF-1.0"
             license: v2
           # latest versions
-          - console: "1.35.0"
-            gateway: "3.10.0"
+          - console: "1.36.1"
+            gateway: "3.11.0"
             terraform:
             - version: "latest"
               name: "TF-latest"
