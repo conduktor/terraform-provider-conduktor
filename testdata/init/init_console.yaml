@@ -11,6 +11,12 @@ spec:
   #   sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="admin" password="admin-secret";
   color: '#FF0000'
   icon: icon
+  schemaRegistry:
+    type: "ConfluentLike"
+    url: http://redpanda:18081
+    security:
+      type: "NoSecurity"
+    ignoreUntrustedCertificate: true
 ---
 apiVersion: v2
 kind: KafkaCluster
@@ -80,3 +86,30 @@ spec:
       values:
         - value1
         - value2
+---
+apiVersion: v2
+kind: Subject
+metadata:
+  name: example-subject.value
+  cluster: kafka-cluster
+spec:
+  compatibility: BACKWARD
+  schema: |
+    {
+      "$id": "https://mycompany.com/myrecord",
+      "$schema": "https://json-schema.org/draft/2019-09/schema",
+      "type": "object",
+      "title": "MyRecord",
+      "description": "Json schema for MyRecord",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": [ "string", "null" ]
+        }
+      },
+      "required": [ "id" ],
+      "additionalProperties": false
+    }
+  format: JSON

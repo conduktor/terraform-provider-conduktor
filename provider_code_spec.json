@@ -1694,6 +1694,152 @@
       }
     },
     {
+      "name": "console_kafka_subject_v2",
+      "schema": {
+        "attributes": [
+          {
+            "name": "name",
+            "string": {
+              "description": "Kafka subject name, must be unique, acts as an ID for import",
+              "computed_optional_required": "required",
+              "plan_modifiers": [
+                {
+                  "custom": {
+                    "imports": [
+                      {
+                        "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+                      }
+                    ],
+                    "schema_definition": "stringplanmodifier.RequiresReplace()"
+                  }
+                }
+              ],
+              "validators": [
+                {
+                  "custom": {
+                    "imports": [
+                      {
+                        "path": "regexp"
+                      },
+                      {
+                        "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                      }
+                    ],
+                    "schema_definition": "stringvalidator.RegexMatches(regexp.MustCompile(\"^[0-9a-z\\\\_\\\\-]+$\"), \"\")"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "cluster",
+            "string": {
+              "description": "Kafka cluster name linked with Kafka subject. Must already exist in Conduktor Console. Any change will require the Subject to be destroyed and re-created",
+              "computed_optional_required": "required",
+              "plan_modifiers": [
+                {
+                  "custom": {
+                    "imports": [
+                      {
+                        "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+                      }
+                    ],
+                    "schema_definition": "stringplanmodifier.RequiresReplace()"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "labels",
+            "map": {
+              "description": "Kafka connect server labels",
+              "computed_optional_required": "computed_optional",
+              "element_type": {
+                "string": {}
+              }
+            }
+          },
+          {
+            "name": "spec",
+            "single_nested": {
+              "computed_optional_required": "required",
+              "description": "Kafka subject spec",
+              "attributes": [
+                {
+                  "name": "schema",
+                  "string": {
+                    "description": "Kafka subject schema",
+                    "computed_optional_required": "required"
+                  }
+                },
+                {
+                  "name": "format",
+                  "string": {
+                    "description": "Kafka subject format (AVRO, JSON, PROTOBUF)",
+                    "computed_optional_required": "required"
+                  }
+                },
+                {
+                  "name": "version",
+                  "int64": {
+                    "description": "Kafka subject version",
+                    "computed_optional_required": "computed_optional"
+                  }
+                },
+                {
+                  "name": "compatibility",
+                  "string": {
+                    "description": "Kafka subject compatibility (BACKWARD, BACKWARD_TRANSITIVE, FORWARD, FORWARD_TRANSITIVE, FULL, FULL_TRANSITIVE, NONE)",
+                    "computed_optional_required": "computed_optional"
+                  }
+                },
+                {
+                  "name": "id",
+                  "int64": {
+                    "description": "Kafka subject ID",
+                    "computed_optional_required": "computed_optional"
+                  }
+                },
+                {
+                  "name": "references",
+                  "list_nested": {
+                    "description": "Array of objects (SchemaReference)",
+                    "computed_optional_required": "computed_optional",
+                    "nested_object": {
+                      "attributes": [
+                        {
+                          "name": "name",
+                          "string": {
+                            "description": "name required string",
+                            "computed_optional_required": "required"
+                          }
+                        },
+                        {
+                          "name": "subject",
+                          "string": {
+                            "description": "subject required string",
+                            "computed_optional_required": "required"
+                          }
+                        },
+                        {
+                          "name": "version",
+                          "int64": {
+                            "description": "version required integer",
+                            "computed_optional_required": "required"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "console_kafka_connect_v2",
       "schema": {
         "attributes": [
