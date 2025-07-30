@@ -9,7 +9,7 @@ type SchemaRegistryType string
 
 const (
 	CONFLUENT SchemaRegistryType = "ConfluentLike"
-	GLUE SchemaRegistryType = "Glue"
+	GLUE      SchemaRegistryType = "Glue"
 )
 
 type SchemaRegistry struct {
@@ -67,10 +67,10 @@ type ConfluentLike struct {
 type ConfluentSecurityType string
 
 const (
-	BASIC_AUTH ConfluentSecurityType = "BasicAuth"
+	BASIC_AUTH   ConfluentSecurityType = "BasicAuth"
 	BEARER_TOKEN ConfluentSecurityType = "BearerToken"
-	NO_SECURITY ConfluentSecurityType = "NoSecurity"
-	SSL_AUTH ConfluentSecurityType = "SSLAuth"
+	NO_SECURITY  ConfluentSecurityType = "NoSecurity"
+	SSL_AUTH     ConfluentSecurityType = "SSLAuth"
 )
 
 type ConfluentLikeSchemaRegistrySecurity struct {
@@ -86,7 +86,7 @@ func (s *ConfluentLikeSchemaRegistrySecurity) UnmarshalJSON(bytes []byte) error 
 	if err != nil {
 		return err
 	}
-	
+
 	confluentSecurityType := ConfluentSecurityType(disc.Type)
 	switch confluentSecurityType {
 	case BASIC_AUTH:
@@ -168,7 +168,7 @@ type Glue struct {
 type AmazonSecurityType string
 
 const (
-	CREDENTIALS AmazonSecurityType = "Credentials"
+	CREDENTIALS  AmazonSecurityType = "Credentials"
 	FROM_CONTEXT AmazonSecurityType = "FromContext"
 	FROM_ROLE    AmazonSecurityType = "FromRole"
 	IAM_ANYWHERE AmazonSecurityType = "IAMAnywhere"
@@ -187,7 +187,7 @@ func (s *AmazonSecurity) UnmarshalJSON(bytes []byte) error {
 	if err != nil {
 		return err
 	}
-	
+
 	amazonSecurityType := AmazonSecurityType(disc.Type)
 	switch amazonSecurityType {
 	case CREDENTIALS:
