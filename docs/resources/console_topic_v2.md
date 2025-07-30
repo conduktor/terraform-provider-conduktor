@@ -11,16 +11,18 @@ description: |-
 Resource for managing Kafka topics.
 This resource allows you to create, read, update and delete kafka topics in Conduktor.
 
-> [!NOTE]
-> - It is essential to set `lifecycle { prevent_destroy = true }` on production instances to prevent accidental topic deletion and data loss.
-> - This setting rejects plans that would destroy or recreate the topic, such as attempting to change uneditable attributes.
-> - Read more about it in the [Terraform docs](https://www.terraform.io/language/meta-arguments/lifecycle#prevent_destroy).
-> - Some providers may set default configs that will appear after the initial apply. In these cases resource definitions may need to be updated e.g. "cleanup.policy" = "delete" after creating a Redpanda topic
+## WARNING
+Minimum requirement for this resource:
+ - Conduktor Console version `1.30.0`.
 
-> [!WARNING]
-> - This resource is officially supported from Conduktor Console `1.30.0` and newer.
-> - Usage of this resource with older Console version might result in unexpected behavior.
-> - e.g. `sql_storage` has been made available from Conduktor Console `1.30.0`.
+Usage of this resource with older Console version might produce errors since the API might not support all types of constraints
+ - e.g. `sql_storage` has been made available from Conduktor Console `1.30.0`.
+
+## NOTE
+ - It is essential to set `lifecycle { prevent_destroy = true }` on production instances to prevent accidental topic deletion and data loss.
+ - This setting rejects plans that would destroy or recreate the topic, such as attempting to change uneditable attributes.
+ - Read more about it in the [Terraform docs](https://www.terraform.io/language/meta-arguments/lifecycle#prevent_destroy).
+ - Some providers may set default configs that will appear after the initial apply. In these cases resource definitions may need to be updated e.g. "cleanup.policy" = "delete" after creating a Redpanda topic
 
 ## Example Usage
 
@@ -102,7 +104,7 @@ resource "conduktor_console_topic_v2" "complex" {
 - `description` (String) Topic description
 - `description_is_editable` (Boolean) is optional (defaults 'true'). Defines whether the description can be updated in the UI
 - `labels` (Map of String) Custom labels for the topic resource. Used in Conduktor's topic catalog and UI
-- `sql_storage` (Attributes) (see [below for nested schema](#nestedatt--sql_storage))
+- `sql_storage` (Attributes) Sql storage configuration. NOTE: this field has been introduced with Console `1.30.0` and it will not work with previous versions (see [below for nested schema](#nestedatt--sql_storage))
 
 ### Read-Only
 

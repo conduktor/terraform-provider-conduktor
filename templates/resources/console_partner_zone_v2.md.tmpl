@@ -11,11 +11,12 @@ description: |-
 Resource for managing Conduktor partner zones.
 This resource allows you to create, read, update and delete partner zones in Conduktor.
 
-> [!WARNING]
-> Minimum requirement for this resource:
->   - Conduktor Console version is `1.32.0`.
->   - Conduktor Gateway `3.6.1`.
-> For more information, please refer to the [Conduktor documentation](https://docs.conduktor.io/platform/navigation/partner-zones/#prerequisites).
+## WARNING
+Minimum requirement for this resource:
+ - Conduktor Console version `1.32.0`.
+ - Conduktor Gateway version `3.6.1`.
+
+For more information, please refer to the [Conduktor documentation](https://docs.conduktor.io/platform/navigation/partner-zones/#prerequisites).
 
 ## Example Usage
 

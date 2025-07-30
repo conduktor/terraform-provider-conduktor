@@ -11,9 +11,11 @@ description: |-
 Resource for managing Conduktor topic policies.
 This resource allows you to create, read, update and delete topic policies in Conduktor.
 
-> [!NOTE]
-> - This resource is officially supported from Conduktor Console `1.30.0` and newer
-> - Usage of this resource with older Console version might produce errors since the API might not support all types of constraints
+## WARNING
+Minimum requirement for this resource:
+ - Conduktor Console version `1.30.0`.
+
+Usage of this resource with older Console version might produce errors since the API might not support all types of constraints
 
 ## Example Usage
 

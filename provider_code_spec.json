@@ -496,7 +496,7 @@
                 {
                   "name": "policy_ref",
                   "set": {
-                    "description": "Reference to the resource policy to apply to this instance",
+                    "description": "Reference to the resource policy to apply to this instance. NOTE: this field has been introduced with Console `1.34.0` and it will not work with previous versions",
                     "computed_optional_required": "optional",
                     "element_type": {
                       "string": {}
@@ -1068,7 +1068,7 @@
           {
             "name": "auto_restart",
             "single_nested": {
-              "description": "Auto restart configuration for the connector",
+              "description": "Auto restart configuration for the connector. NOTE: this field has been introduced with Console `1.29.0` and it will not work with previous versions",
               "computed_optional_required": "optional",
               "attributes": [
                 {
@@ -3013,6 +3013,7 @@
           {
             "name": "sql_storage",
             "single_nested": {
+              "description": "Sql storage configuration. NOTE: this field has been introduced with Console `1.30.0` and it will not work with previous versions",
               "computed_optional_required": "optional",
               "attributes": [
                 {

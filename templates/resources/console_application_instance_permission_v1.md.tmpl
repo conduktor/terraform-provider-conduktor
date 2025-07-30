@@ -11,9 +11,15 @@ description: |-
 Resource for managing Conduktor application instances permissions.
 This resource allows you to create, read, update and delete application instances permissions in Conduktor.
 
-> [!NOTE]
-> - `spec.permission` has been deprecated and won't be supported by this terraform provider plugin 
-> - Use `spec.user_permission` and `spec.service_account_permission` instead 
+## WARNING
+Minimum requirement for this resource:
+ - Conduktor Console version `1.33.0`.
+
+Usage of this resource with older Console version might result in unexpected behavior.
+
+## NOTE
+ - `spec.permission` has been deprecated and won't be supported by this terraform provider plugin 
+ - Use `spec.user_permission` and `spec.service_account_permission` instead 
 
 ## Example Usage
 

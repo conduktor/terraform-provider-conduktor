@@ -50,8 +50,8 @@ func ConsoleConnectorV2ResourceSchema(ctx context.Context) schema.Schema {
 					},
 				},
 				Optional:            true,
-				Description:         "Auto restart configuration for the connector",
-				MarkdownDescription: "Auto restart configuration for the connector",
+				Description:         "Auto restart configuration for the connector. NOTE: this field has been introduced with Console `1.29.0` and it will not work with previous versions",
+				MarkdownDescription: "Auto restart configuration for the connector. NOTE: this field has been introduced with Console `1.29.0` and it will not work with previous versions",
 			},
 			"cluster": schema.StringAttribute{
 				Required:            true,
