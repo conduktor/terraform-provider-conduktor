@@ -55,7 +55,7 @@ func Make(ctx context.Context, mode Mode, apiParameter ApiParameter, providerVer
 		return nil, err
 	}
 
-	restyClient, err = ConfigureAuth(ctx, mode, restyClient, apiParameter)
+	restyClient, err = ConfigureAuth(mode, restyClient, apiParameter)
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +69,7 @@ func Make(ctx context.Context, mode Mode, apiParameter ApiParameter, providerVer
 	}, nil
 }
 
-func ConfigureAuth(ctx context.Context, mode Mode, restyClient *resty.Client, apiParameter ApiParameter) (*resty.Client, error) {
+func ConfigureAuth(mode Mode, restyClient *resty.Client, apiParameter ApiParameter) (*resty.Client, error) {
 	var err error
 	switch mode {
 	case CONSOLE:
@@ -79,7 +79,7 @@ func ConfigureAuth(ctx context.Context, mode Mode, restyClient *resty.Client, ap
 				// Only Login with username and password if no apiKey has been provided.
 				apiKey, err = Login(apiParameter, restyClient)
 				if err != nil {
-					return nil, fmt.Errorf("Could not login: %s", err)
+					return nil, fmt.Errorf("could not login: %s", err)
 				}
 			}
 
@@ -97,8 +97,17 @@ func ConfigureAuth(ctx context.Context, mode Mode, restyClient *resty.Client, ap
 			resp, err := restyClient.SetRetryCount(3).SetRetryWaitTime(1 * time.Second).R().Get(testUrl)
 			if err != nil {
 				return nil, err
-			} else if resp.StatusCode() != 200 {
-				return nil, fmt.Errorf("Invalid username or password")
+			} else if resp.IsError() {
+				switch resp.StatusCode() {
+				case 401:
+					return nil, fmt.Errorf("invalid username or password")
+				case 403:
+					return nil, fmt.Errorf("forbidden: You do not have permission to access admin API. Please check your user permissions")
+				case 500:
+					return nil, fmt.Errorf("internal Server Error: Please check the server logs for more details")
+				default:
+					return nil, fmt.Errorf("unexpected response (%d): %s", resp.StatusCode(), resp.String())
+				}
 			}
 		}
 	}
@@ -119,7 +128,7 @@ func Login(apiParameter ApiParameter, client *resty.Client) (string, error) {
 		return "", err
 	} else if resp.IsError() {
 		if resp.StatusCode() == 401 {
-			return "", fmt.Errorf("Invalid username or password")
+			return "", fmt.Errorf("invalid username or password")
 		} else {
 			return "", fmt.Errorf("%s", ExtractApiError(resp))
 		}
@@ -134,7 +143,7 @@ func Login(apiParameter ApiParameter, client *resty.Client) (string, error) {
 
 func ConfigureTLS(ctx context.Context, restyClient *resty.Client, tlsParameter TLSParameters) (*resty.Client, error) {
 	if (tlsParameter.Key == "" && tlsParameter.Cert != "") || (tlsParameter.Key != "" && tlsParameter.Cert == "") {
-		return nil, fmt.Errorf("Certificate and Key must be provided together")
+		return nil, fmt.Errorf("certificate and Key must be provided together")
 	} else if tlsParameter.Key != "" && tlsParameter.Cert != "" {
 		tflog.Debug(ctx, fmt.Sprintf("Loading certificate and key from files %s and %s", tlsParameter.Cert, tlsParameter.Key))
 		certificate, err := tls.LoadX509KeyPair(tlsParameter.Cert, tlsParameter.Key)
@@ -163,7 +172,7 @@ func (client *Client) ApplyGeneric(ctx context.Context, cliResource ctlresource.
 	kindName := cliResource.Kind
 	kind, ok := kinds[kindName]
 	if !ok {
-		return "", fmt.Errorf("Apply kind %s not found", cliResource.Kind)
+		return "", fmt.Errorf("apply kind %s not found", cliResource.Kind)
 	}
 
 	applyPath, err := kind.ApplyPath(&cliResource)
@@ -185,7 +194,7 @@ func (client *Client) ApplyGeneric(ctx context.Context, cliResource ctlresource.
 	var upsertResponse ApplyResult
 	err = jsoniter.Unmarshal(bodyBytes, &upsertResponse)
 	if err != nil {
-		return "", fmt.Errorf("Error unmarshalling response: %s", err)
+		return "", fmt.Errorf("error unmarshalling response: %s", err)
 	}
 	return upsertResponse.UpsertResult, nil
 }
@@ -194,7 +203,7 @@ func (client *Client) Apply(ctx context.Context, path string, resource any) (App
 	url := client.BaseUrl + path
 	jsonData, err := jsoniter.Marshal(resource)
 	if err != nil {
-		return ApplyResult{}, fmt.Errorf("Error marshalling resource: %s", err)
+		return ApplyResult{}, fmt.Errorf("error marshalling resource: %s", err)
 	}
 
 	tflog.Trace(ctx, fmt.Sprintf("PUT %s request body : %s", path, string(jsonData)))
@@ -212,7 +221,7 @@ func (client *Client) Apply(ctx context.Context, path string, resource any) (App
 	var upsertResponse ApplyResult
 	err = jsoniter.Unmarshal(bodyBytes, &upsertResponse)
 	if err != nil {
-		return ApplyResult{}, fmt.Errorf("Error unmarshalling response: %s", err)
+		return ApplyResult{}, fmt.Errorf("error unmarshalling response: %s", err)
 	}
 	return upsertResponse, nil
 }
@@ -246,7 +255,7 @@ func (client *Client) Delete(ctx context.Context, mode Mode, path string, resour
 		// as opposed to Console API who needs them in the URL
 		jsonData, err := json.Marshal(resource)
 		if err != nil {
-			return fmt.Errorf("Error marshalling resource: %s", err)
+			return fmt.Errorf("error marshalling resource: %s", err)
 		}
 		tflog.Debug(ctx, string(jsonData))
 		tflog.Trace(ctx, fmt.Sprintf("DELETE %s request body : %s", path, string(jsonData)))
@@ -293,29 +302,29 @@ func (client *Client) GetAPIVersion(ctx context.Context, mode Mode) (string, err
 	if mode == CONSOLE {
 		v, ok = result["platform"]
 		if !ok {
-			return "", fmt.Errorf("No version found in response")
+			return "", fmt.Errorf("no version found in response")
 		}
 	}
 	if mode == GATEWAY {
 		// This is a temporary workaround for the Gateway API till a dedicated endpoint is available.
 		checks, ok := result["checks"].([]any)
 		if !ok || len(checks) == 0 {
-			return "", fmt.Errorf("No checks found in response")
+			return "", fmt.Errorf("no checks found in response")
 		}
 		for _, check := range checks {
 			// Need to assert check to map[string]any to access its fields.
 			id, ok := check.(map[string]any)["id"]
 			if !ok {
-				return "", fmt.Errorf("Error parsing check ID")
+				return "", fmt.Errorf("error parsing check ID")
 			}
 			if id == "buildInfo" {
 				data, ok := check.(map[string]any)["data"]
 				if !ok {
-					return "", fmt.Errorf("No data found in checks response")
+					return "", fmt.Errorf("no data found in checks response")
 				}
 				v, ok = data.(map[string]any)["version"]
 				if !ok {
-					return "", fmt.Errorf("No version found in data response")
+					return "", fmt.Errorf("no version found in data response")
 				}
 			}
 		}
@@ -323,7 +332,7 @@ func (client *Client) GetAPIVersion(ctx context.Context, mode Mode) (string, err
 
 	version, ok := v.(string)
 	if !ok {
-		return "", fmt.Errorf("Error parsing version to string")
+		return "", fmt.Errorf("error parsing version to string")
 	}
 
 	// Go module semver requires version to start with v.

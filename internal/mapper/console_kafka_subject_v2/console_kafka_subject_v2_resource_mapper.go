@@ -6,7 +6,6 @@ import (
 	mapper "github.com/conduktor/terraform-provider-conduktor/internal/mapper"
 	console "github.com/conduktor/terraform-provider-conduktor/internal/model/console"
 	schema "github.com/conduktor/terraform-provider-conduktor/internal/schema"
-	schemaUtils "github.com/conduktor/terraform-provider-conduktor/internal/schema"
 	subject "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_console_kafka_subject_v2"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -63,7 +62,7 @@ func setValueToReferencesArray(ctx context.Context, set basetypes.SetValue) ([]c
 }
 
 func InternalModelToTerraform(ctx context.Context, r *console.KafkaSubjectResource) (subject.ConsoleKafkaSubjectV2Model, error) {
-	labels, diag := schemaUtils.StringMapToMapValue(ctx, r.Metadata.Labels)
+	labels, diag := schema.StringMapToMapValue(ctx, r.Metadata.Labels)
 	if diag.HasError() {
 		return subject.ConsoleKafkaSubjectV2Model{}, mapper.WrapDiagError(diag, "labels", mapper.IntoTerraform)
 	}
@@ -87,12 +86,12 @@ func specInternalModelToTerraform(ctx context.Context, r *console.KafkaSubjectSp
 		return subject.SpecValue{}, mapper.WrapDiagError(diag, "spec", mapper.IntoTerraform)
 	}
 	var typesMap = unknownSpecObjectValue.AttributeTypes(ctx)
-	var valuesMap = schemaUtils.ValueMapFromTypes(ctx, typesMap)
+	var valuesMap = schema.ValueMapFromTypes(ctx, typesMap)
 
-	valuesMap["schema"] = schemaUtils.NewStringValue(r.Schema)
-	valuesMap["format"] = schemaUtils.NewStringValue(r.Format)
+	valuesMap["schema"] = schema.NewStringValue(r.Schema)
+	valuesMap["format"] = schema.NewStringValue(r.Format)
 	valuesMap["version"] = types.Int64Value(int64(r.Version))
-	valuesMap["compatibility"] = schemaUtils.NewStringValue(r.Compatibility)
+	valuesMap["compatibility"] = schema.NewStringValue(r.Compatibility)
 	valuesMap["id"] = types.Int64Value(int64(r.Id))
 
 	referencesValue, err := referencesToSetValue(ctx, r.References)

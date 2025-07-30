@@ -1,0 +1,20 @@
+{
+  "apiVersion": "v1",
+  "kind": "ServiceAccount",
+  "metadata": {
+    "name": "aiven-kafka-sa",
+    "cluster": "aiven-cluster"
+  },
+  "spec": {
+    "authorization": {
+      "acls": [
+        {
+          "resourceType": "SCHEMA",
+          "name": "my-schema",
+          "permission": "schema_registry_write"
+        }
+      ],
+      "type": "AIVEN_ACL"
+    }
+  }
+}

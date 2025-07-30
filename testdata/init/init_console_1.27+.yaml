@@ -6,3 +6,5 @@ metadata:
 spec:
   partitions: 1
   replicationFactor: 1
+  configs:
+    cleanup.policy: delete

@@ -13,10 +13,10 @@ spec:
   icon: icon
   schemaRegistry:
     type: "ConfluentLike"
-    url: http://redpanda:18081
+    url: http://redpanda:8081
     security:
-      type: "NoSecurity"
-    ignoreUntrustedCertificate: true
+      type: NoSecurity
+    ignoreUntrustedCertificate: false
 ---
 apiVersion: v2
 kind: KafkaCluster
@@ -43,7 +43,7 @@ metadata:
   cluster: kafka-cluster
 spec:
   displayName: My kafka connect
-  urls: http://localhost:8083
+  urls: http://kafka-connect:8083
   ignoreUntrustedCertificate: true
 ---
 apiVersion: v1

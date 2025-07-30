@@ -69,7 +69,7 @@ This repository contains the Conduktor Terraform provider, which defines Condukt
 
 - [Console user](./docs/resources/console_user_v2.md)
 - [Console group](./docs/resources/console_group_v2.md)
-- [Console Partner Zone](./docs/resources/console_partner_zone_v2.md)
+- [Console partner zone](./docs/resources/console_partner_zone_v2.md)
 - [Kafka clusters with schema registry](./docs/resources/console_kafka_cluster_v2.md)
 - [Kafka connect server](./docs/resources/console_kafka_connect_v2.md)
 
@@ -83,12 +83,14 @@ This repository contains the Conduktor Terraform provider, which defines Condukt
 - [Console application](./docs/resources/console_application_v1.md)
 - [Console application group](./docs/resources/console_application_group_v1.md)
 - [Console application instance](./docs/resources/console_application_instance_v1.md)
-- [Console application instance permission](https://docs.conduktor.io/platform/reference/resource-reference/self-service/#application-instance-permissions)
-- [Resource policy](./docs/resources/console_resource_policy_v1.md)
-- [Topic policy](./docs/resources/console_topic_policy_v1.md)
+- [Console application instance permission](./docs/resources/console_application_instance_permission_v1.md)
+- [Console service account](./docs/resources/console_service_account_v1.md)
+- [Console resource policy](./docs/resources/console_resource_policy_v1.md)
+- [Console topic policy](./docs/resources/console_topic_policy_v1.md)
 
 ### Kafka resources
 - [Topic](./docs/resources/console_topic_v2.md)
+- [Connector](./docs/resources/console_connector_v2.md)
 
 ### Generic resource
 
@@ -357,7 +359,6 @@ We are currently reviewing the following resources:
   - [Alert](https://docs.conduktor.io/platform/reference/resource-reference/console/#alert)
 2. Kafka resources:
   - [Subject](https://docs.conduktor.io/platform/reference/resource-reference/kafka/#subject)
-  - [Connector](https://docs.conduktor.io/platform/reference/resource-reference/kafka/#connector)
 3. Gateway resources:
   - [GatewayGroup](https://docs.conduktor.io/gateway/reference/resources-reference/#gatewaygroup)
   - [ConcentrationRule](https://docs.conduktor.io/gateway/reference/resources-reference/#concentrationrule)

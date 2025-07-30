@@ -30,15 +30,15 @@ type GatewayTokenV2Resource struct {
 	apiClient *client.Client
 }
 
-func (r *GatewayTokenV2Resource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *GatewayTokenV2Resource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_gateway_token_v2"
 }
 
-func (r *GatewayTokenV2Resource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *GatewayTokenV2Resource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.GatewayTokenV2ResourceSchema(ctx)
 }
 
-func (r *GatewayTokenV2Resource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *GatewayTokenV2Resource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -232,10 +232,10 @@ func isTokenExpired(tokenString string) (bool, error) {
 				return true, nil
 			}
 		} else {
-			return false, fmt.Errorf("Expiration time not found in token")
+			return false, fmt.Errorf("expiration time not found in token")
 		}
 	} else {
-		return false, fmt.Errorf("Unable to parse claims")
+		return false, fmt.Errorf("unable to parse claims")
 	}
 
 	return false, nil
@@ -246,7 +246,7 @@ func applyGatewayToken(ctx context.Context, cli *client.Client, path string, res
 	url := cli.BaseUrl + path
 	jsonData, err := jsoniter.Marshal(resource)
 	if err != nil {
-		return client.ApplyResult{}, fmt.Errorf("Error marshalling resource: %s", err)
+		return client.ApplyResult{}, fmt.Errorf("error marshalling resource: %s", err)
 	}
 
 	tflog.Trace(ctx, fmt.Sprintf("POST %s request body : %s", path, string(jsonData)))
@@ -264,7 +264,7 @@ func applyGatewayToken(ctx context.Context, cli *client.Client, path string, res
 	var upsertResponse gateway.GatewayTokenResource
 	err = jsoniter.Unmarshal(bodyBytes, &upsertResponse)
 	if err != nil {
-		return client.ApplyResult{}, fmt.Errorf("Error unmarshalling response: %s", err)
+		return client.ApplyResult{}, fmt.Errorf("error unmarshalling response: %s", err)
 	}
 	return client.ApplyResult{Resource: upsertResponse}, nil
 }
