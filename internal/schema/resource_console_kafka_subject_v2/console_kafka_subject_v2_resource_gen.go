@@ -68,7 +68,7 @@ func ConsoleKafkaSubjectV2ResourceSchema(ctx context.Context) schema.Schema {
 						Description:         "Kafka subject ID",
 						MarkdownDescription: "Kafka subject ID",
 					},
-					"references": schema.ListNestedAttribute{
+					"references": schema.SetNestedAttribute{
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"name": schema.StringAttribute{
@@ -219,12 +219,12 @@ func (t SpecType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue)
 		return nil, diags
 	}
 
-	referencesVal, ok := referencesAttribute.(basetypes.ListValue)
+	referencesVal, ok := referencesAttribute.(basetypes.SetValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`references expected to be basetypes.ListValue, was: %T`, referencesAttribute))
+			fmt.Sprintf(`references expected to be basetypes.SetValue, was: %T`, referencesAttribute))
 	}
 
 	schemaAttribute, ok := attributes["schema"]
@@ -405,12 +405,12 @@ func NewSpecValue(attributeTypes map[string]attr.Type, attributes map[string]att
 		return NewSpecValueUnknown(), diags
 	}
 
-	referencesVal, ok := referencesAttribute.(basetypes.ListValue)
+	referencesVal, ok := referencesAttribute.(basetypes.SetValue)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`references expected to be basetypes.ListValue, was: %T`, referencesAttribute))
+			fmt.Sprintf(`references expected to be basetypes.SetValue, was: %T`, referencesAttribute))
 	}
 
 	schemaAttribute, ok := attributes["schema"]
@@ -535,7 +535,7 @@ type SpecValue struct {
 	Compatibility basetypes.StringValue `tfsdk:"compatibility"`
 	Format        basetypes.StringValue `tfsdk:"format"`
 	Id            basetypes.Int64Value  `tfsdk:"id"`
-	References    basetypes.ListValue   `tfsdk:"references"`
+	References    basetypes.SetValue    `tfsdk:"references"`
 	Schema        basetypes.StringValue `tfsdk:"schema"`
 	Version       basetypes.Int64Value  `tfsdk:"version"`
 	state         attr.ValueState
@@ -550,7 +550,7 @@ func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) 
 	attrTypes["compatibility"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["format"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["id"] = basetypes.Int64Type{}.TerraformType(ctx)
-	attrTypes["references"] = basetypes.ListType{
+	attrTypes["references"] = basetypes.SetType{
 		ElemType: ReferencesValue{}.Type(ctx),
 	}.TerraformType(ctx)
 	attrTypes["schema"] = basetypes.StringType{}.TerraformType(ctx)
@@ -639,7 +639,7 @@ func (v SpecValue) String() string {
 func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	references := types.ListValueMust(
+	references := types.SetValueMust(
 		ReferencesType{
 			basetypes.ObjectType{
 				AttrTypes: ReferencesValue{}.AttributeTypes(ctx),
@@ -649,7 +649,7 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 	)
 
 	if v.References.IsNull() {
-		references = types.ListNull(
+		references = types.SetNull(
 			ReferencesType{
 				basetypes.ObjectType{
 					AttrTypes: ReferencesValue{}.AttributeTypes(ctx),
@@ -659,7 +659,7 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 	}
 
 	if v.References.IsUnknown() {
-		references = types.ListUnknown(
+		references = types.SetUnknown(
 			ReferencesType{
 				basetypes.ObjectType{
 					AttrTypes: ReferencesValue{}.AttributeTypes(ctx),
@@ -672,7 +672,7 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 		"compatibility": basetypes.StringType{},
 		"format":        basetypes.StringType{},
 		"id":            basetypes.Int64Type{},
-		"references": basetypes.ListType{
+		"references": basetypes.SetType{
 			ElemType: ReferencesValue{}.Type(ctx),
 		},
 		"schema":  basetypes.StringType{},
@@ -756,7 +756,7 @@ func (v SpecValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 		"compatibility": basetypes.StringType{},
 		"format":        basetypes.StringType{},
 		"id":            basetypes.Int64Type{},
-		"references": basetypes.ListType{
+		"references": basetypes.SetType{
 			ElemType: ReferencesValue{}.Type(ctx),
 		},
 		"schema":  basetypes.StringType{},

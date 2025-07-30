@@ -40,7 +40,7 @@ func TFToInternalModel(ctx context.Context, r *subject.ConsoleKafkaSubjectV2Mode
 	), nil
 }
 
-func setValueToReferencesArray(ctx context.Context, set basetypes.ListValue) ([]console.KafkaSubjectReferences, error) {
+func setValueToReferencesArray(ctx context.Context, set basetypes.SetValue) ([]console.KafkaSubjectReferences, error) {
 	references := make([]console.KafkaSubjectReferences, 0)
 	var diag diag.Diagnostics
 
@@ -91,11 +91,11 @@ func specInternalModelToTerraform(ctx context.Context, r *console.KafkaSubjectSp
 
 	valuesMap["schema"] = schemaUtils.NewStringValue(r.Schema)
 	valuesMap["format"] = schemaUtils.NewStringValue(r.Format)
-	valuesMap["version"] = basetypes.NewInt64Value(int64(r.Version))
+	valuesMap["version"] = types.Int64Value(int64(r.Version))
 	valuesMap["compatibility"] = schemaUtils.NewStringValue(r.Compatibility)
-	valuesMap["id"] = basetypes.NewInt64Value(int64(r.Id))
+	valuesMap["id"] = types.Int64Value(int64(r.Id))
 
-	referencesValue, err := referencesToListValue(ctx, r.References)
+	referencesValue, err := referencesToSetValue(ctx, r.References)
 	if err != nil {
 		return subject.SpecValue{}, err
 	}
@@ -108,37 +108,31 @@ func specInternalModelToTerraform(ctx context.Context, r *console.KafkaSubjectSp
 	return value, nil
 }
 
-func referencesToListValue(ctx context.Context, references []console.KafkaSubjectReferences) (basetypes.ListValue, error) {
-	if len(references) == 0 {
-		return types.ListNull(types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				"name":    types.StringType,
-				"subject": types.StringType,
-				"version": types.Int64Type,
-			},
-		}), nil
-	}
+func referencesToSetValue(ctx context.Context, references []console.KafkaSubjectReferences) (basetypes.SetValue, error) {
+	var referencesSet basetypes.SetValue
+	var refs []attr.Value
+	var diag diag.Diagnostics
 
-	referencesList := make([]subject.ReferencesValue, 0)
-	for _, reference := range references {
-		referencesList = append(referencesList, subject.ReferencesValue{
-			Name:    types.StringValue(reference.Name),
-			Subject: types.StringValue(reference.Subject),
-			Version: types.Int64Value(int64(reference.Version)),
-		})
-	}
-
-	referencesValue, diags := types.ListValueFrom(ctx, types.ObjectType{
-		AttrTypes: map[string]attr.Type{
+	for _, p := range references {
+		types := map[string]attr.Type{
 			"name":    types.StringType,
 			"subject": types.StringType,
 			"version": types.Int64Type,
-		},
-	}, referencesList)
-
-	if diags.HasError() {
-		return basetypes.ListValue{}, mapper.WrapDiagError(diags, "references", mapper.IntoTerraform)
+		}
+		values := map[string]attr.Value{
+			"name":    schema.NewStringValue(p.Name),
+			"subject": schema.NewStringValue(p.Subject),
+			"version": schema.NewInt64Value(int64(p.Version)),
+		}
+		value, diag := subject.NewReferencesValue(types, values)
+		if diag.HasError() {
+			return basetypes.SetValue{}, mapper.WrapDiagError(diag, "references", mapper.IntoTerraform)
+		}
+		refs = append(refs, value)
 	}
-
-	return referencesValue, nil
+	referencesSet, diag = types.SetValue(subject.ReferencesValue{}.Type(ctx), refs)
+	if diag.HasError() {
+		return basetypes.SetValue{}, mapper.WrapDiagError(diag, "references", mapper.IntoTerraform)
+	}
+	return referencesSet, nil
 }

@@ -9,7 +9,7 @@ import (
 	jsoniter "github.com/json-iterator/go"
 )
 
-const KafkaSubjectV2Kind = "KafkaSubject"
+const KafkaSubjectV2Kind = "Subject"
 const KafkaSubjectV2ApiVersion = "v2"
 
 type KafkaSubjectMetadata struct {

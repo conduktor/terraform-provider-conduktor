@@ -1803,7 +1803,7 @@
                 },
                 {
                   "name": "references",
-                  "list_nested": {
+                  "set_nested": {
                     "description": "Array of objects (SchemaReference)",
                     "computed_optional_required": "computed_optional",
                     "nested_object": {
