@@ -24,6 +24,7 @@ type GroupConsoleSpec struct {
 	Description               string             `json:"description,omitempty"`
 	DisplayName               string             `json:"displayName"`
 	ExternalGroups            []string           `json:"externalGroups"`
+	ExternalGroupRegex        []string           `json:"externalGroupRegex,omitempty"`
 	Members                   []string           `json:"members"`
 	MembersFromExternalGroups []string           `json:"membersFromExternalGroups"`
 	Permissions               []model.Permission `json:"permissions"`

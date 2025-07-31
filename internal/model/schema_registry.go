@@ -5,6 +5,13 @@ import (
 	"fmt"
 )
 
+type SchemaRegistryType string
+
+const (
+	CONFLUENT SchemaRegistryType = "ConfluentLike"
+	GLUE      SchemaRegistryType = "Glue"
+)
+
 type SchemaRegistry struct {
 	ConfluentLike *ConfluentLike
 	Glue          *Glue
@@ -17,15 +24,16 @@ func (s *SchemaRegistry) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	switch disc.Type {
-	case "ConfluentLike":
+	schemaRegistryType := SchemaRegistryType(disc.Type)
+	switch schemaRegistryType {
+	case CONFLUENT:
 		var confluentLike ConfluentLike
 		err = json.Unmarshal(data, &confluentLike)
 		if err != nil {
 			return err
 		}
 		s.ConfluentLike = &confluentLike
-	case "Glue":
+	case GLUE:
 		var glue Glue
 		err = json.Unmarshal(data, &glue)
 		if err != nil {
@@ -56,6 +64,15 @@ type ConfluentLike struct {
 	IgnoreUntrustedCertificate bool                                `json:"ignoreUntrustedCertificate"`
 }
 
+type ConfluentSecurityType string
+
+const (
+	BASIC_AUTH   ConfluentSecurityType = "BasicAuth"
+	BEARER_TOKEN ConfluentSecurityType = "BearerToken"
+	NO_SECURITY  ConfluentSecurityType = "NoSecurity"
+	SSL_AUTH     ConfluentSecurityType = "SSLAuth"
+)
+
 type ConfluentLikeSchemaRegistrySecurity struct {
 	BasicAuth   *BasicAuth
 	BearerToken *BearerToken
@@ -69,29 +86,31 @@ func (s *ConfluentLikeSchemaRegistrySecurity) UnmarshalJSON(bytes []byte) error 
 	if err != nil {
 		return err
 	}
-	switch disc.Type {
-	case "BasicAuth":
+
+	confluentSecurityType := ConfluentSecurityType(disc.Type)
+	switch confluentSecurityType {
+	case BASIC_AUTH:
 		var basic BasicAuth
 		err = json.Unmarshal(bytes, &basic)
 		if err != nil {
 			return err
 		}
 		s.BasicAuth = &basic
-	case "BearerToken":
+	case BEARER_TOKEN:
 		var bearertoken BearerToken
 		err = json.Unmarshal(bytes, &bearertoken)
 		if err != nil {
 			return err
 		}
 		s.BearerToken = &bearertoken
-	case "NoSecurity":
+	case NO_SECURITY:
 		var nosecurity NoSecurity
 		err = json.Unmarshal(bytes, &nosecurity)
 		if err != nil {
 			return err
 		}
 		s.NoSecurity = &nosecurity
-	case "SSLAuth":
+	case SSL_AUTH:
 		var sslauth SSLAuth
 		err = json.Unmarshal(bytes, &sslauth)
 		if err != nil {
@@ -146,6 +165,15 @@ type Glue struct {
 	Security     AmazonSecurity `json:"security"`
 }
 
+type AmazonSecurityType string
+
+const (
+	CREDENTIALS  AmazonSecurityType = "Credentials"
+	FROM_CONTEXT AmazonSecurityType = "FromContext"
+	FROM_ROLE    AmazonSecurityType = "FromRole"
+	IAM_ANYWHERE AmazonSecurityType = "IAMAnywhere"
+)
+
 type AmazonSecurity struct {
 	Credentials *Credentials
 	FromContext *FromContext
@@ -159,29 +187,31 @@ func (s *AmazonSecurity) UnmarshalJSON(bytes []byte) error {
 	if err != nil {
 		return err
 	}
-	switch disc.Type {
-	case "Credentials":
+
+	amazonSecurityType := AmazonSecurityType(disc.Type)
+	switch amazonSecurityType {
+	case CREDENTIALS:
 		var creds Credentials
 		err = json.Unmarshal(bytes, &creds)
 		if err != nil {
 			return err
 		}
 		s.Credentials = &creds
-	case "FromContext":
+	case FROM_CONTEXT:
 		var fromcontext FromContext
 		err = json.Unmarshal(bytes, &fromcontext)
 		if err != nil {
 			return err
 		}
 		s.FromContext = &fromcontext
-	case "FromRole":
+	case FROM_ROLE:
 		var fromrole FromRole
 		err = json.Unmarshal(bytes, &fromrole)
 		if err != nil {
 			return err
 		}
 		s.FromRole = &fromrole
-	case "IAMAnywhere":
+	case IAM_ANYWHERE:
 		var iamanywhere IAMAnywhere
 		err = json.Unmarshal(bytes, &iamanywhere)
 		if err != nil {

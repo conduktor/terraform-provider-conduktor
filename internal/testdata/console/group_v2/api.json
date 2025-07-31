@@ -10,6 +10,9 @@
     "externalGroups": [
       "sales"
     ],
+    "externalGroupRegex": [
+      ".*"
+    ],
     "members": [
       "jim.halpert@dunder.mifflin.com",
       "dwight.schrute@dunder.mifflin.com"

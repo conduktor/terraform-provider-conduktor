@@ -31,6 +31,14 @@ type KafkaClusterSpec struct {
 	SchemaRegistry             *model.SchemaRegistry `json:"schemaRegistry,omitempty"`
 }
 
+type KafkaFlavorType string
+
+const (
+	AIVEN     KafkaFlavorType = "Aiven"
+	CONFLUENT KafkaFlavorType = "Confluent"
+	GATEWAY   KafkaFlavorType = "Gateway"
+)
+
 type KafkaFlavor struct {
 	Aiven     *Aiven
 	Confluent *Confluent
@@ -44,22 +52,23 @@ func (dst *KafkaFlavor) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	switch disc.Type {
-	case "Aiven":
+	kafkaFlavor := KafkaFlavorType(disc.Type)
+	switch kafkaFlavor {
+	case AIVEN:
 		var aiven Aiven
 		err = json.Unmarshal(data, &aiven)
 		if err != nil {
 			return err
 		}
 		dst.Aiven = &aiven
-	case "Confluent":
+	case CONFLUENT:
 		var confluent Confluent
 		err = json.Unmarshal(data, &confluent)
 		if err != nil {
 			return err
 		}
 		dst.Confluent = &confluent
-	case "Gateway":
+	case GATEWAY:
 		var gateway Gateway
 		err = json.Unmarshal(data, &gateway)
 		if err != nil {
