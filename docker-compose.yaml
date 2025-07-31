@@ -34,6 +34,8 @@ services:
         condition: service_healthy
       conduktor-monitoring:
         condition: service_healthy
+      kafka-connect:
+        condition: service_healthy
     ports:
       - "8080:8080"
     volumes:
@@ -115,6 +117,10 @@ services:
       CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: "1"
       CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: "1"
       CONNECT_PLUGIN_PATH: '/usr/share/java,/etc/kafka-connect/jars,/usr/share/confluent-hub-components'
+    healthcheck:
+      interval: 5s
+      retries: 20
+      test: curl --fail --silent http://kafka-connect:8083/ --output /dev/null || exit 1
     depends_on:
       - redpanda
 
