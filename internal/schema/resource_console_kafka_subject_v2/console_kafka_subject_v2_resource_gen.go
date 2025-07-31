@@ -5,6 +5,7 @@ package resource_console_kafka_subject_v2
 import (
 	"context"
 	"fmt"
+	"github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -46,7 +47,7 @@ func ConsoleKafkaSubjectV2ResourceSchema(ctx context.Context) schema.Schema {
 					stringplanmodifier.RequiresReplace(),
 				},
 				Validators: []validator.String{
-					stringvalidator.RegexMatches(regexp.MustCompile("^[0-9a-z\\_\\-]+$"), ""),
+					stringvalidator.RegexMatches(regexp.MustCompile("^[0-9a-z\\_\\-\\.]+$"), ""),
 				},
 			},
 			"spec": schema.SingleNestedAttribute{
@@ -56,11 +57,17 @@ func ConsoleKafkaSubjectV2ResourceSchema(ctx context.Context) schema.Schema {
 						Computed:            true,
 						Description:         "Kafka subject compatibility (BACKWARD, BACKWARD_TRANSITIVE, FORWARD, FORWARD_TRANSITIVE, FULL, FULL_TRANSITIVE, NONE)",
 						MarkdownDescription: "Kafka subject compatibility (BACKWARD, BACKWARD_TRANSITIVE, FORWARD, FORWARD_TRANSITIVE, FULL, FULL_TRANSITIVE, NONE)",
+						Validators: []validator.String{
+							stringvalidator.OneOf(validation.ValidKafkaSubjectCompatibility...),
+						},
 					},
 					"format": schema.StringAttribute{
 						Required:            true,
 						Description:         "Kafka subject format (AVRO, JSON, PROTOBUF)",
 						MarkdownDescription: "Kafka subject format (AVRO, JSON, PROTOBUF)",
+						Validators: []validator.String{
+							stringvalidator.OneOf(validation.ValidKafkaSubjectFormat...),
+						},
 					},
 					"id": schema.Int64Attribute{
 						Optional:            true,

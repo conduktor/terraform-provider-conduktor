@@ -9,7 +9,7 @@ resource "conduktor_console_kafka_subject_v2" "test" {
     format        = "JSON"
     compatibility = "BACKWARD"
     schema        = "{\"$id\":\"https://mycompany.com/myrecord\",\"$schema\":\"https://json-schema.org/draft/2019-09/schema\",\"type\":\"object\",\"title\":\"MyRecord\",\"description\":\"Json schema for MyRecord\",\"properties\":{\"id\":{\"type\":\"string\"},\"name\":{\"type\":[\"string\",\"null\"]}},\"required\":[\"id\"],\"additionalProperties\":false}"
-    id            = 2
+    id            = 1
     version       = 1
   }
 }
