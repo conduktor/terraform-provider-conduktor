@@ -64,3 +64,25 @@ func TestAccKafkaSubjectV2Resource(t *testing.T) {
 		},
 	})
 }
+
+func TestAccKafkaSubjectV2Minimal(t *testing.T) {
+	test.CheckEnterpriseEnabled(t)
+	resourceRef := "conduktor_console_kafka_subject_v2.minimal"
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { test.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read from minimal example
+			{
+				Config: providerConfigConsole + test.TestAccTestdata(t, "console/kafka_subject_v2/resource_minimal.tf"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceRef, "name", "api-json-example-subject.value"),
+					resource.TestCheckResourceAttr(resourceRef, "cluster", "kafka-cluster"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.format", "JSON"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.schema", schemaValue),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
