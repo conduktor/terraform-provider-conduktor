@@ -19,6 +19,16 @@ func (r TopicPolicyMetadata) String() string {
 	return fmt.Sprintf(`name: %s`, r.Name)
 }
 
+type ConstraintType string
+
+const (
+	ALLOWED_KEYS ConstraintType = "AllowedKeys"
+	MATCH        ConstraintType = "Match"
+	NONE_OF      ConstraintType = "NoneOf"
+	ONE_OF       ConstraintType = "OneOf"
+	RANGE        ConstraintType = "Range"
+)
+
 type Constraint struct {
 	AllowedKeys *AllowedKeys
 	Match       *Match
@@ -34,36 +44,37 @@ func (dst *Constraint) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	switch disc.Constraint {
-	case "AllowedKeys":
+	constraintType := ConstraintType(disc.Constraint)
+	switch constraintType {
+	case ALLOWED_KEYS:
 		var allowedKeys AllowedKeys
 		err = json.Unmarshal(data, &allowedKeys)
 		if err != nil {
 			return err
 		}
 		dst.AllowedKeys = &allowedKeys
-	case "Match":
+	case MATCH:
 		var match Match
 		err = json.Unmarshal(data, &match)
 		if err != nil {
 			return err
 		}
 		dst.Match = &match
-	case "NoneOf":
+	case NONE_OF:
 		var noneOf NoneOf
 		err = json.Unmarshal(data, &noneOf)
 		if err != nil {
 			return err
 		}
 		dst.NoneOf = &noneOf
-	case "OneOf":
+	case ONE_OF:
 		var oneOf OneOf
 		err = json.Unmarshal(data, &oneOf)
 		if err != nil {
 			return err
 		}
 		dst.OneOf = &oneOf
-	case "Range":
+	case RANGE:
 		var rangeVal Range
 		err = json.Unmarshal(data, &rangeVal)
 		if err != nil {

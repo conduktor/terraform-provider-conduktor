@@ -36,6 +36,7 @@ type ApplicationGroupSpec struct {
 	Permissions               []ApplicationGroupPermission `json:"permissions"`
 	Members                   []string                     `json:"members"`
 	ExternalGroups            []string                     `json:"externalGroups"`
+	ExternalGroupRegex        []string                     `json:"externalGroupRegex,omitempty"`
 	MembersFromExternalGroups []string                     `json:"membersFromExternalGroups"`
 }
 

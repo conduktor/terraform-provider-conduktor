@@ -60,7 +60,7 @@ func policiesValueToConstraint(ctx context.Context, key string, policy topicPoli
 			return nil, mapper.WrapDiagError(diag, "policies."+key+".values", mapper.FromTerraform)
 		}
 		AllowedKeys = &console.AllowedKeys{
-			Constraint: "AllowedKeys",
+			Constraint: string(console.ALLOWED_KEYS),
 			Optional:   allowedKeysfValue.Optional.ValueBool(),
 			Keys:       keys,
 		}
@@ -73,7 +73,7 @@ func policiesValueToConstraint(ctx context.Context, key string, policy topicPoli
 			return nil, mapper.WrapDiagError(diag, "policies."+key, mapper.FromTerraform)
 		}
 		Match = &console.Match{
-			Constraint: "Match",
+			Constraint: string(console.MATCH),
 			Optional:   matchValue.Optional.ValueBool(),
 			Pattern:    matchValue.Pattern.ValueString(),
 		}
@@ -90,7 +90,7 @@ func policiesValueToConstraint(ctx context.Context, key string, policy topicPoli
 			return nil, mapper.WrapDiagError(diag, "policies."+key+".values", mapper.FromTerraform)
 		}
 		NoneOf = &console.NoneOf{
-			Constraint: "NoneOf",
+			Constraint: string(console.NONE_OF),
 			Optional:   noneOfValue.Optional.ValueBool(),
 			Values:     values,
 		}
@@ -107,7 +107,7 @@ func policiesValueToConstraint(ctx context.Context, key string, policy topicPoli
 			return nil, mapper.WrapDiagError(diag, "policies."+key+".values", mapper.FromTerraform)
 		}
 		OneOf = &console.OneOf{
-			Constraint: "OneOf",
+			Constraint: string(console.ONE_OF),
 			Optional:   oneOfValue.Optional.ValueBool(),
 			Values:     values,
 		}
@@ -120,7 +120,7 @@ func policiesValueToConstraint(ctx context.Context, key string, policy topicPoli
 			return nil, mapper.WrapDiagError(diag, "policies."+key, mapper.FromTerraform)
 		}
 		Range = &console.Range{
-			Constraint: "Range",
+			Constraint: string(console.RANGE),
 			Optional:   rangeValue.Optional.ValueBool(),
 			Min:        rangeValue.Min.ValueInt64(),
 			Max:        rangeValue.Max.ValueInt64(),

@@ -69,7 +69,7 @@ func securityTFToInternalModel(ctx context.Context, r *schema.SecurityValue) (*c
 		}
 
 		basicAuth = &console.KafkaConnectBasicAuth{
-			Type:     "BasicAuth",
+			Type:     string(console.BASIC_AUTH),
 			Username: basicAuthValue.Username.ValueString(),
 			Password: basicAuthValue.Password.ValueString(),
 		}
@@ -83,7 +83,7 @@ func securityTFToInternalModel(ctx context.Context, r *schema.SecurityValue) (*c
 		}
 
 		bearerToken = &console.KafkaConnectBearerToken{
-			Type:  "BearerToken",
+			Type:  string(console.BEARER_TOKEN),
 			Token: bearerTokenValue.Token.ValueString(),
 		}
 	}
@@ -96,7 +96,7 @@ func securityTFToInternalModel(ctx context.Context, r *schema.SecurityValue) (*c
 		}
 
 		sslAuth = &console.KafkaConnectSSLAuth{
-			Type:             "SSLAuth",
+			Type:             string(console.SSL_AUTH),
 			CertificateChain: sslAUthValue.CertificateChain.ValueString(),
 			Key:              sslAUthValue.Key.ValueString(),
 		}

@@ -144,7 +144,9 @@ func ConsoleTopicV2ResourceSchema(ctx context.Context) schema.Schema {
 						AttrTypes: SqlStorageValue{}.AttributeTypes(ctx),
 					},
 				},
-				Optional: true,
+				Optional:            true,
+				Description:         "Sql storage configuration. NOTE: this field has been introduced with Console `1.30.0` and it will not work with previous versions",
+				MarkdownDescription: "Sql storage configuration. NOTE: this field has been introduced with Console `1.30.0` and it will not work with previous versions",
 			},
 		},
 	}

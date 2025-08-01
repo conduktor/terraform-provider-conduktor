@@ -58,6 +58,14 @@ func ConsoleApplicationGroupV1ResourceSchema(ctx context.Context) schema.Schema 
 						Description:         "Display name of the application group",
 						MarkdownDescription: "Display name of the application group",
 					},
+					"external_group_regex": schema.SetAttribute{
+						ElementType:         types.StringType,
+						Optional:            true,
+						Computed:            true,
+						Description:         "Set of regex to be applied to external groups. NOTE: this field has been introduced with Console `1.36.0` and it will not work with previous versions",
+						MarkdownDescription: "Set of regex to be applied to external groups. NOTE: this field has been introduced with Console `1.36.0` and it will not work with previous versions",
+						Default:             setdefault.StaticValue(basetypes.NewSetValueMust(types.StringType, []attr.Value{})),
+					},
 					"external_groups": schema.SetAttribute{
 						ElementType:         types.StringType,
 						Optional:            true,
@@ -223,6 +231,24 @@ func (t SpecType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue)
 			fmt.Sprintf(`display_name expected to be basetypes.StringValue, was: %T`, displayNameAttribute))
 	}
 
+	externalGroupRegexAttribute, ok := attributes["external_group_regex"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`external_group_regex is missing from object`)
+
+		return nil, diags
+	}
+
+	externalGroupRegexVal, ok := externalGroupRegexAttribute.(basetypes.SetValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`external_group_regex expected to be basetypes.SetValue, was: %T`, externalGroupRegexAttribute))
+	}
+
 	externalGroupsAttribute, ok := attributes["external_groups"]
 
 	if !ok {
@@ -302,6 +328,7 @@ func (t SpecType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue)
 	return SpecValue{
 		Description:               descriptionVal,
 		DisplayName:               displayNameVal,
+		ExternalGroupRegex:        externalGroupRegexVal,
 		ExternalGroups:            externalGroupsVal,
 		Members:                   membersVal,
 		MembersFromExternalGroups: membersFromExternalGroupsVal,
@@ -409,6 +436,24 @@ func NewSpecValue(attributeTypes map[string]attr.Type, attributes map[string]att
 			fmt.Sprintf(`display_name expected to be basetypes.StringValue, was: %T`, displayNameAttribute))
 	}
 
+	externalGroupRegexAttribute, ok := attributes["external_group_regex"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`external_group_regex is missing from object`)
+
+		return NewSpecValueUnknown(), diags
+	}
+
+	externalGroupRegexVal, ok := externalGroupRegexAttribute.(basetypes.SetValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`external_group_regex expected to be basetypes.SetValue, was: %T`, externalGroupRegexAttribute))
+	}
+
 	externalGroupsAttribute, ok := attributes["external_groups"]
 
 	if !ok {
@@ -488,6 +533,7 @@ func NewSpecValue(attributeTypes map[string]attr.Type, attributes map[string]att
 	return SpecValue{
 		Description:               descriptionVal,
 		DisplayName:               displayNameVal,
+		ExternalGroupRegex:        externalGroupRegexVal,
 		ExternalGroups:            externalGroupsVal,
 		Members:                   membersVal,
 		MembersFromExternalGroups: membersFromExternalGroupsVal,
@@ -566,6 +612,7 @@ var _ basetypes.ObjectValuable = SpecValue{}
 type SpecValue struct {
 	Description               basetypes.StringValue `tfsdk:"description"`
 	DisplayName               basetypes.StringValue `tfsdk:"display_name"`
+	ExternalGroupRegex        basetypes.SetValue    `tfsdk:"external_group_regex"`
 	ExternalGroups            basetypes.SetValue    `tfsdk:"external_groups"`
 	Members                   basetypes.SetValue    `tfsdk:"members"`
 	MembersFromExternalGroups basetypes.SetValue    `tfsdk:"members_from_external_groups"`
@@ -574,13 +621,16 @@ type SpecValue struct {
 }
 
 func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
-	attrTypes := make(map[string]tftypes.Type, 6)
+	attrTypes := make(map[string]tftypes.Type, 7)
 
 	var val tftypes.Value
 	var err error
 
 	attrTypes["description"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["display_name"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["external_group_regex"] = basetypes.SetType{
+		ElemType: types.StringType,
+	}.TerraformType(ctx)
 	attrTypes["external_groups"] = basetypes.SetType{
 		ElemType: types.StringType,
 	}.TerraformType(ctx)
@@ -598,7 +648,7 @@ func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) 
 
 	switch v.state {
 	case attr.ValueStateKnown:
-		vals := make(map[string]tftypes.Value, 6)
+		vals := make(map[string]tftypes.Value, 7)
 
 		val, err = v.Description.ToTerraformValue(ctx)
 
@@ -615,6 +665,14 @@ func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) 
 		}
 
 		vals["display_name"] = val
+
+		val, err = v.ExternalGroupRegex.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["external_group_regex"] = val
 
 		val, err = v.ExternalGroups.ToTerraformValue(ctx)
 
@@ -706,6 +764,40 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 		)
 	}
 
+	var externalGroupRegexVal basetypes.SetValue
+	switch {
+	case v.ExternalGroupRegex.IsUnknown():
+		externalGroupRegexVal = types.SetUnknown(types.StringType)
+	case v.ExternalGroupRegex.IsNull():
+		externalGroupRegexVal = types.SetNull(types.StringType)
+	default:
+		var d diag.Diagnostics
+		externalGroupRegexVal, d = types.SetValue(types.StringType, v.ExternalGroupRegex.Elements())
+		diags.Append(d...)
+	}
+
+	if diags.HasError() {
+		return types.ObjectUnknown(map[string]attr.Type{
+			"description":  basetypes.StringType{},
+			"display_name": basetypes.StringType{},
+			"external_group_regex": basetypes.SetType{
+				ElemType: types.StringType,
+			},
+			"external_groups": basetypes.SetType{
+				ElemType: types.StringType,
+			},
+			"members": basetypes.SetType{
+				ElemType: types.StringType,
+			},
+			"members_from_external_groups": basetypes.SetType{
+				ElemType: types.StringType,
+			},
+			"permissions": basetypes.SetType{
+				ElemType: PermissionsValue{}.Type(ctx),
+			},
+		}), diags
+	}
+
 	var externalGroupsVal basetypes.SetValue
 	switch {
 	case v.ExternalGroups.IsUnknown():
@@ -722,6 +814,9 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 		return types.ObjectUnknown(map[string]attr.Type{
 			"description":  basetypes.StringType{},
 			"display_name": basetypes.StringType{},
+			"external_group_regex": basetypes.SetType{
+				ElemType: types.StringType,
+			},
 			"external_groups": basetypes.SetType{
 				ElemType: types.StringType,
 			},
@@ -753,6 +848,9 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 		return types.ObjectUnknown(map[string]attr.Type{
 			"description":  basetypes.StringType{},
 			"display_name": basetypes.StringType{},
+			"external_group_regex": basetypes.SetType{
+				ElemType: types.StringType,
+			},
 			"external_groups": basetypes.SetType{
 				ElemType: types.StringType,
 			},
@@ -784,6 +882,9 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 		return types.ObjectUnknown(map[string]attr.Type{
 			"description":  basetypes.StringType{},
 			"display_name": basetypes.StringType{},
+			"external_group_regex": basetypes.SetType{
+				ElemType: types.StringType,
+			},
 			"external_groups": basetypes.SetType{
 				ElemType: types.StringType,
 			},
@@ -802,6 +903,9 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 	attributeTypes := map[string]attr.Type{
 		"description":  basetypes.StringType{},
 		"display_name": basetypes.StringType{},
+		"external_group_regex": basetypes.SetType{
+			ElemType: types.StringType,
+		},
 		"external_groups": basetypes.SetType{
 			ElemType: types.StringType,
 		},
@@ -829,6 +933,7 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 		map[string]attr.Value{
 			"description":                  v.Description,
 			"display_name":                 v.DisplayName,
+			"external_group_regex":         externalGroupRegexVal,
 			"external_groups":              externalGroupsVal,
 			"members":                      membersVal,
 			"members_from_external_groups": membersFromExternalGroupsVal,
@@ -858,6 +963,10 @@ func (v SpecValue) Equal(o attr.Value) bool {
 	}
 
 	if !v.DisplayName.Equal(other.DisplayName) {
+		return false
+	}
+
+	if !v.ExternalGroupRegex.Equal(other.ExternalGroupRegex) {
 		return false
 	}
 
@@ -892,6 +1001,9 @@ func (v SpecValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 	return map[string]attr.Type{
 		"description":  basetypes.StringType{},
 		"display_name": basetypes.StringType{},
+		"external_group_regex": basetypes.SetType{
+			ElemType: types.StringType,
+		},
 		"external_groups": basetypes.SetType{
 			ElemType: types.StringType,
 		},
