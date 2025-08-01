@@ -1,4 +1,4 @@
-resource "conduktor_console_kafka_subject_v2" "avro_full" {
+resource "conduktor_console_kafka_subject_v2" "avro" {
   name    = "api-avro-example-subject.value"
   cluster = "kafka-cluster"
   labels = {
@@ -21,7 +21,7 @@ resource "conduktor_console_kafka_subject_v2" "avro_full" {
   ]
 }
 EOF
-    id            = 2
-    version       = 2
+    id            = 1
+    version       = 1
   }
 }

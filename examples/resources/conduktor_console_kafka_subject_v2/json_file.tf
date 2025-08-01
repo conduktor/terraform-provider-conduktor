@@ -3,7 +3,7 @@ locals {
 }
 
 
-resource "conduktor_console_kafka_subject_v2" "json_full" {
+resource "conduktor_console_kafka_subject_v2" "json_file" {
   name    = "api-json-example-subject.value"
   cluster = "kafka-cluster"
   labels = {
