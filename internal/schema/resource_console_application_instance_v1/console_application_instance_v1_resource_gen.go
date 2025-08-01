@@ -70,8 +70,8 @@ func ConsoleApplicationInstanceV1ResourceSchema(ctx context.Context) schema.Sche
 					"policy_ref": schema.SetAttribute{
 						ElementType:         types.StringType,
 						Optional:            true,
-						Description:         "Reference to the resource policy to apply to this instance",
-						MarkdownDescription: "Reference to the resource policy to apply to this instance",
+						Description:         "Reference to the resource policy to apply to this instance. NOTE: this field has been introduced with Console `1.34.0` and it will not work with previous versions",
+						MarkdownDescription: "Reference to the resource policy to apply to this instance. NOTE: this field has been introduced with Console `1.34.0` and it will not work with previous versions",
 					},
 					"resources": schema.SetNestedAttribute{
 						NestedObject: schema.NestedAttributeObject{

@@ -74,7 +74,7 @@ func kafkaFlavorTFToInternalModel(ctx context.Context, r *basetypes.ObjectValue)
 			return nil, mapper.WrapDiagError(diag, "kafka_flavor.aiven", mapper.FromTerraform)
 		}
 		Aiven = &console.Aiven{
-			Type:        "Aiven",
+			Type:        string(console.AIVEN),
 			ApiToken:    aivenValue.ApiToken.ValueString(),
 			Project:     aivenValue.Project.ValueString(),
 			ServiceName: aivenValue.ServiceName.ValueString(),
@@ -88,7 +88,7 @@ func kafkaFlavorTFToInternalModel(ctx context.Context, r *basetypes.ObjectValue)
 			return nil, mapper.WrapDiagError(diag, "kafka_flavor.confluent", mapper.FromTerraform)
 		}
 		Confluent = &console.Confluent{
-			Type:                   "Confluent",
+			Type:                   string(console.CONFLUENT),
 			Key:                    confluentValue.Key.ValueString(),
 			Secret:                 confluentValue.Secret.ValueString(),
 			ConfluentEnvironmentId: confluentValue.ConfluentEnvironmentId.ValueString(),
@@ -103,7 +103,7 @@ func kafkaFlavorTFToInternalModel(ctx context.Context, r *basetypes.ObjectValue)
 			return nil, mapper.WrapDiagError(diag, "kafka_flavor.gateway", mapper.FromTerraform)
 		}
 		Gateway = &console.Gateway{
-			Type:                       "Gateway",
+			Type:                       string(console.GATEWAY),
 			Url:                        gatewayValue.Url.ValueString(),
 			User:                       gatewayValue.User.ValueString(),
 			Password:                   gatewayValue.Password.ValueString(),
@@ -126,7 +126,7 @@ func confluentLikeSchemaRegistrySecurityTFToInternalModel(ctx context.Context, r
 			return model.ConfluentLikeSchemaRegistrySecurity{}, mapper.WrapDiagError(diag, "schema_registry.security.basic_auth", mapper.FromTerraform)
 		}
 		BasicAuth = &model.BasicAuth{
-			Type:     "BasicAuth",
+			Type:     string(model.BASIC_AUTH),
 			UserName: basicAuthValue.Username.ValueString(),
 			Password: basicAuthValue.Password.ValueString(),
 		}
@@ -139,7 +139,7 @@ func confluentLikeSchemaRegistrySecurityTFToInternalModel(ctx context.Context, r
 			return model.ConfluentLikeSchemaRegistrySecurity{}, mapper.WrapDiagError(diag, "schema_registry.security.bearer_token", mapper.FromTerraform)
 		}
 		BearerToken = &model.BearerToken{
-			Type:  "BearerToken",
+			Type:  string(model.BEARER_TOKEN),
 			Token: bearerTokenValue.Token.ValueString(),
 		}
 	}
@@ -151,7 +151,7 @@ func confluentLikeSchemaRegistrySecurityTFToInternalModel(ctx context.Context, r
 			return model.ConfluentLikeSchemaRegistrySecurity{}, mapper.WrapDiagError(diag, "schema_registry.security.ssl_auth", mapper.FromTerraform)
 		}
 		SSLAuth = &model.SSLAuth{
-			Type:             "SSLAuth",
+			Type:             string(model.SSL_AUTH),
 			Key:              sslAuthValue.Key.ValueString(),
 			CertificateChain: sslAuthValue.CertificateChain.ValueString(),
 		}
@@ -160,7 +160,7 @@ func confluentLikeSchemaRegistrySecurityTFToInternalModel(ctx context.Context, r
 	var NoSecurity *model.NoSecurity = nil
 	if BasicAuth == nil && BearerToken == nil && SSLAuth == nil {
 		NoSecurity = &model.NoSecurity{
-			Type: "NoSecurity",
+			Type: string(model.NO_SECURITY),
 		}
 	}
 
@@ -181,7 +181,7 @@ func amazonSchemaRegistrySecurityTFToInternalModel(ctx context.Context, r *schem
 			return model.AmazonSecurity{}, mapper.WrapDiagError(diag, "schema_registry.security.credentials", mapper.FromTerraform)
 		}
 		credentials = &model.Credentials{
-			Type:        "Credentials",
+			Type:        string(model.CREDENTIALS),
 			AccessKeyId: credentialsValue.AccessKeyId.ValueString(),
 			SecretKey:   credentialsValue.SecretKey.ValueString(),
 		}
@@ -194,7 +194,7 @@ func amazonSchemaRegistrySecurityTFToInternalModel(ctx context.Context, r *schem
 			return model.AmazonSecurity{}, mapper.WrapDiagError(diag, "schema_registry.security.from_context", mapper.FromTerraform)
 		}
 		fromContext = &model.FromContext{
-			Type:    "FromContext",
+			Type:    string(model.FROM_CONTEXT),
 			Profile: fromContextValue.Profile.ValueString(),
 		}
 	}
@@ -206,7 +206,7 @@ func amazonSchemaRegistrySecurityTFToInternalModel(ctx context.Context, r *schem
 			return model.AmazonSecurity{}, mapper.WrapDiagError(diag, "schema_registry.security.from_role", mapper.FromTerraform)
 		}
 		fromRole = &model.FromRole{
-			Type: "FromRole",
+			Type: string(model.FROM_ROLE),
 			Role: fromRoleValue.Role.ValueString(),
 		}
 	}
@@ -218,7 +218,7 @@ func amazonSchemaRegistrySecurityTFToInternalModel(ctx context.Context, r *schem
 			return model.AmazonSecurity{}, mapper.WrapDiagError(diag, "schema_registry.security.iam_anywhere", mapper.FromTerraform)
 		}
 		iamAnywhere = &model.IAMAnywhere{
-			Type:           "IAMAnywhere",
+			Type:           string(model.IAM_ANYWHERE),
 			TrustAnchorArn: iamAnywhereValue.TrustAnchorArn.ValueString(),
 			ProfileArn:     iamAnywhereValue.ProfileArn.ValueString(),
 			RoleArn:        iamAnywhereValue.RoleArn.ValueString(),
@@ -263,7 +263,7 @@ func schemaRegistryTFToInternalModel(ctx context.Context, r *basetypes.ObjectVal
 		}
 
 		confluentLike = &model.ConfluentLike{
-			Type:                       "ConfluentLike",
+			Type:                       string(model.CONFLUENT),
 			Url:                        confluentLikeValue.Url.ValueString(),
 			Properties:                 confluentLikeValue.Properties.ValueString(),
 			IgnoreUntrustedCertificate: confluentLikeValue.IgnoreUntrustedCertificate.ValueBool(),
@@ -289,7 +289,7 @@ func schemaRegistryTFToInternalModel(ctx context.Context, r *basetypes.ObjectVal
 		}
 
 		glue = &model.Glue{
-			Type:         "Glue",
+			Type:         string(model.GLUE),
 			RegistryName: glueValue.RegistryName.ValueString(),
 			Region:       glueValue.Region.ValueString(),
 			Security:     security,

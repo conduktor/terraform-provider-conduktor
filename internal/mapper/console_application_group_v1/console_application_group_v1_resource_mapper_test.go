@@ -43,6 +43,7 @@ func TestApplicationGroupV1ModelMapping(t *testing.T) {
 	assert.Equal(t, "Test Application Group", internal.Spec.DisplayName)
 	assert.Equal(t, "A great test application group", internal.Spec.Description)
 	assert.Equal(t, []string{"COMPANY-SUPPORT"}, internal.Spec.ExternalGroups)
+	assert.Equal(t, []string{".*"}, internal.Spec.ExternalGroupRegex)
 	assert.Equal(t, []string{"tatum@conduktor.io"}, internal.Spec.Members)
 	expectedInternalResources := []console.ApplicationGroupPermission{
 		{
@@ -101,6 +102,7 @@ func TestApplicationGroupV1ModelMapping(t *testing.T) {
 	assert.Equal(t, "Test Application Group", internal2.Spec.DisplayName)
 	assert.Equal(t, "A great test application group", internal2.Spec.Description)
 	assert.Equal(t, []string{"COMPANY-SUPPORT"}, internal2.Spec.ExternalGroups)
+	assert.Equal(t, []string{".*"}, internal2.Spec.ExternalGroupRegex)
 	assert.Equal(t, []string{"tatum@conduktor.io"}, internal2.Spec.Members)
 	assert.Equal(t, expectedInternalResources, internal2.Spec.Permissions)
 	assert.Equal(t, internal, internal2)

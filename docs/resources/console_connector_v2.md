@@ -11,10 +11,12 @@ description: |-
 Resource for managing [Kafka Connect connectors](https://docs.conduktor.io/platform/reference/resource-reference/kafka/#connector).
 This resource allows you to create, read, update and delete kafka connector in Conduktor.
 
-> [!WARNING]
-> - This resource is officially supported from Conduktor Console `1.29.0` and newer.
-> - Usage of this resource with older Console version might result in unexpected behavior.
-> - e.g. `auto_restart` has been made available from Conduktor Console `1.29.0`.
+## WARNING
+Minimum requirement for this resource:
+ - Conduktor Console version `1.29.0`.
+
+Usage of this resource with older Console version might result in unexpected behavior.
+ - e.g. `auto_restart` has been made available from Conduktor Console `1.29.0`.
 
 ## Example Usage
 
@@ -75,7 +77,7 @@ resource "conduktor_console_connector_v2" "complex" {
 
 ### Optional
 
-- `auto_restart` (Attributes) Auto restart configuration for the connector (see [below for nested schema](#nestedatt--auto_restart))
+- `auto_restart` (Attributes) Auto restart configuration for the connector. NOTE: this field has been introduced with Console `1.29.0` and it will not work with previous versions (see [below for nested schema](#nestedatt--auto_restart))
 - `description` (String) Connector description
 - `labels` (Map of String) Custom labels for the connector resource.
 
