@@ -10,6 +10,7 @@ import (
 )
 
 func TestAccPartnerZoneV2Resource(t *testing.T) {
+	test.CheckEnterpriseEnabled(t)
 	v, err := fetchClientVersion(client.CONSOLE)
 	if err != nil {
 		t.Fatalf("Error fetching current version: %s", err)
@@ -74,6 +75,7 @@ func TestAccPartnerZoneV2Resource(t *testing.T) {
 }
 
 func TestAccPartnerZoneV2Minimal(t *testing.T) {
+	test.CheckEnterpriseEnabled(t)
 	v, err := fetchClientVersion(client.CONSOLE)
 	if err != nil {
 		t.Fatalf("Error fetching current version: %s", err)
@@ -109,6 +111,7 @@ func TestAccPartnerZoneV2Minimal(t *testing.T) {
 }
 
 func TestAccPartnerZoneV2ExampleResource(t *testing.T) {
+	test.CheckEnterpriseEnabled(t)
 	v, err := fetchClientVersion(client.CONSOLE)
 	if err != nil {
 		t.Fatalf("Error fetching current version: %s", err)
