@@ -57,8 +57,8 @@ func TestCheckResourceAttrContainsStringsFunc(expected ...string) func(value str
 
 // Check if license is setup in env to enable some tests behind license.
 func CheckEnterpriseEnabled(t *testing.T) {
-	_, exists := os.LookupEnv("CDK_LICENSE")
-	if !exists {
+	value, exists := os.LookupEnv("CDK_LICENSE")
+	if !exists || value == "" {
 		t.Skip("Skipping tests in free mode as it requires a license set on CDK_LICENSE env var")
 	}
 }
