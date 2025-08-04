@@ -3,6 +3,7 @@ package provider
 import (
 	"regexp"
 	"testing"
+	"time"
 
 	"github.com/conduktor/terraform-provider-conduktor/internal/client"
 	"github.com/conduktor/terraform-provider-conduktor/internal/test"
@@ -153,6 +154,10 @@ func TestAccConnectorV2ExampleResource(t *testing.T) {
 			},
 			// Create and Read from complex example
 			{
+				PreConfig: func() {
+					// Ensure the previous resource is fully created before starting the next one to avoid concurrency issues on Kafka Connect server.
+					time.Sleep(1 * time.Second)
+				},
 				Config: providerConfigConsole + test.TestAccExample(t, "resources", "conduktor_console_connector_v2", "complex.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("conduktor_console_connector_v2.complex", "name", "complex"),

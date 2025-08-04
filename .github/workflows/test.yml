@@ -72,6 +72,15 @@ jobs:
             - version: "1.0.*"
               name: "TF-1.0"
             license: v2
+
+          # latest versions
+          - console: "1.36.1"
+            gateway: "3.11.0"
+            terraform:
+              - version: "latest"
+                name: "TF-latest"
+            license: free # test with free tier
+
           # latest versions
           - console: "1.36.1"
             gateway: "3.11.0"
@@ -104,7 +113,10 @@ jobs:
       - name: Set License if not dependabot
         run: |
           if [ "${{ github.actor }}" != "dependabot[bot]" ]; then
-            if [ "${{ matrix.env.license }}" == "v2" ]; then
+            if [ "${{ matrix.env.license }}" == "free" ]; then
+              echo "No license set, free tier will be used"
+              echo "CDK_LICENSE=" >> "$GITHUB_ENV"
+            elif [ "${{ matrix.env.license }}" == "v2" ]; then
               echo "CDK_LICENSE=${{ secrets.TEST_LICENSE_V2 }}" >> "$GITHUB_ENV"
             elif [ "${{ matrix.env.license }}" == "v3" ]; then
               echo "CDK_LICENSE=${{ secrets.TEST_LICENSE_V3 }}" >> "$GITHUB_ENV"
@@ -136,7 +148,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: api-logs-CDK-${{ matrix.env.console }}-GW-${{ matrix.env.gateway }}-${{ matrix.env.terraform.name }}
+          name: api-logs-CDK-${{ matrix.env.console }}-GW-${{ matrix.env.gateway }}-${{ matrix.env.license }}-${{ matrix.env.terraform.name }}
           path: ./logs/
           if-no-files-found: error
           retention-days: 1
