@@ -58,6 +58,7 @@ jobs:
   # Run acceptance tests in a matrix with Terraform CLI versions
   test:
     name: Terraform Provider Acceptance Tests
+    if: ${{ matrix.env.run }}
     needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -65,29 +66,41 @@ jobs:
       fail-fast: false
       matrix:
         env:
-          # minimal versions
+          # minimal versions no license
           - console: "1.26.0"
             gateway: "3.5.2"
             terraform:
             - version: "1.0.*"
               name: "TF-1.0"
-            license: v2
+            license: free
+            run: true
 
-          # latest versions
+          # minimal versions with license
+          - console: "1.26.0"
+            gateway: "3.5.2"
+            terraform:
+              - version: "1.0.*"
+                name: "TF-1.0"
+            license: v2
+            run: ${{ secrets.TEST_LICENSE_V2 != '' }}
+
+          # latest versions no license
           - console: "1.36.1"
             gateway: "3.11.0"
             terraform:
               - version: "latest"
                 name: "TF-latest"
-            license: free # test with free tier
+            license: free
+            run: true
 
-          # latest versions
+          # latest versions with license
           - console: "1.36.1"
             gateway: "3.11.0"
             terraform:
             - version: "latest"
               name: "TF-latest"
             license: v3
+            run: ${{ secrets.TEST_LICENSE_V3 != '' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -110,17 +123,21 @@ jobs:
           echo "" > .env
           make pull_test_assets
 
-      - name: Set License if not dependabot
+      - name: Set License
+        id: set_license
         run: |
-          if [ "${{ github.actor }}" != "dependabot[bot]" ]; then
-            if [ "${{ matrix.env.license }}" == "free" ]; then
-              echo "No license set, free tier will be used"
-              echo "CDK_LICENSE=" >> "$GITHUB_ENV"
-            elif [ "${{ matrix.env.license }}" == "v2" ]; then
-              echo "CDK_LICENSE=${{ secrets.TEST_LICENSE_V2 }}" >> "$GITHUB_ENV"
-            elif [ "${{ matrix.env.license }}" == "v3" ]; then
-              echo "CDK_LICENSE=${{ secrets.TEST_LICENSE_V3 }}" >> "$GITHUB_ENV"
-            fi
+          license=""
+          if [[ "${{ matrix.env.license }}" == "v2" ]]; then
+            license="${{ secrets.TEST_LICENSE_V2 }}"
+          elif [[ "${{ matrix.env.license }}" == "v3" ]]; then
+            license="${{ secrets.TEST_LICENSE_V3 }}"
+          fi
+          
+          # only set license if it is not empty
+          # can be empty for free tier testing, dependabot or external PRs
+          # Note : old versions of Console fail health probe if license is set emtpy
+          if [[ "${license}" != "" ]]; then
+              echo "CDK_LICENSE=${license}" >> "$GITHUB_ENV"
           fi
 
       - name: Run acceptance tests
@@ -142,6 +159,7 @@ jobs:
         run: |
           # empty env to avoid any conflict with the current env
           echo "" > .env
+          mkdir -p ./logs
 
           make testacc
 
