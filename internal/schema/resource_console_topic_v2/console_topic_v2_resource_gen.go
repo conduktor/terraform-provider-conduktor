@@ -81,7 +81,7 @@ func ConsoleTopicV2ResourceSchema(ctx context.Context) schema.Schema {
 					stringplanmodifier.RequiresReplace(),
 				},
 				Validators: []validator.String{
-					stringvalidator.RegexMatches(regexp.MustCompile("^[0-9a-z\\_\\-.]+$"), ""),
+					stringvalidator.RegexMatches(regexp.MustCompile("^[0-9a-zA-Z\\_\\-.]+$"), ""),
 				},
 			},
 			"spec": schema.SingleNestedAttribute{

@@ -1,6 +1,6 @@
 
 resource "conduktor_console_topic_v2" "test" {
-  name    = "topic-test"
+  name    = "Kafka-1st-topic-test"
   cluster = "kafka-cluster"
   labels = {
     key1 = "value1"
