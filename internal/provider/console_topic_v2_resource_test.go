@@ -26,7 +26,7 @@ func TestAccTopicV2Resource(t *testing.T) {
 			{
 				Config: providerConfigConsole + test.TestAccTestdata(t, "console/topic_v2/resource_create.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceRef, "name", "topic-test"),
+					resource.TestCheckResourceAttr(resourceRef, "name", "Kafka-1st-topic-test"),
 					resource.TestCheckResourceAttr(resourceRef, "cluster", "kafka-cluster"),
 					resource.TestCheckResourceAttr(resourceRef, "labels.key1", "value1"),
 					resource.TestCheckResourceAttr(resourceRef, "catalog_visibility", "PUBLIC"),
@@ -44,14 +44,14 @@ func TestAccTopicV2Resource(t *testing.T) {
 				ResourceName:                         resourceRef,
 				ImportState:                          true,
 				ImportStateVerify:                    true,
-				ImportStateId:                        "kafka-cluster/topic-test",
+				ImportStateId:                        "kafka-cluster/Kafka-1st-topic-test",
 				ImportStateVerifyIdentifierAttribute: "name",
 			},
 			// Update and Read testing
 			{
 				Config: providerConfigConsole + test.TestAccTestdata(t, "console/topic_v2/resource_update.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceRef, "name", "topic-test"),
+					resource.TestCheckResourceAttr(resourceRef, "name", "Kafka-1st-topic-test"),
 					resource.TestCheckResourceAttr(resourceRef, "cluster", "kafka-cluster"),
 					resource.TestCheckResourceAttr(resourceRef, "labels.key1", "value1"),
 					resource.TestCheckResourceAttr(resourceRef, "labels.key2", "value2"),

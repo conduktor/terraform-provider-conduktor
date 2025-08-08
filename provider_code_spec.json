@@ -3068,7 +3068,7 @@
                         "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
                       }
                     ],
-                    "schema_definition": "stringvalidator.RegexMatches(regexp.MustCompile(\"^[0-9a-z\\\\_\\\\-.]+$\"), \"\")"
+                    "schema_definition": "stringvalidator.RegexMatches(regexp.MustCompile(\"^[0-9a-zA-Z\\\\_\\\\-.]+$\"), \"\")"
                   }
                 }
               ]
