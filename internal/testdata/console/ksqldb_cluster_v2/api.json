@@ -1,0 +1,22 @@
+{
+  "apiVersion": "v2",
+  "kind": "KsqlDBCluster",
+  "metadata": {
+    "name": "ksqldb-name",
+    "cluster": "cluster-name"
+  },
+  "spec": {
+    "url": "http://localhost:8088",
+    "displayName": "KSQL 1",
+    "headers": {
+      "X-PROJECT-HEADER": "value",
+      "AnotherHeader": "test"
+    },
+    "security": {
+      "type": "BasicAuth",
+      "username": "some_user",
+      "password": "some_password"
+    },
+    "ignoreUntrustedCertificate": false
+  }
+}
