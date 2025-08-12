@@ -32,9 +32,9 @@ type KafkaConnectSpec struct {
 type KafkaConnectSecurityType string
 
 const (
-	BASIC_AUTH   KafkaConnectSecurityType = "BasicAuth"
-	BEARER_TOKEN KafkaConnectSecurityType = "BearerToken"
-	SSL_AUTH     KafkaConnectSecurityType = "SSLAuth"
+	CONNECT_BASIC_AUTH   KafkaConnectSecurityType = "BasicAuth"
+	CONNECT_BEARER_TOKEN KafkaConnectSecurityType = "BearerToken"
+	CONNECT_SSL_AUTH     KafkaConnectSecurityType = "SSLAuth"
 )
 
 type KafkaConnectSecurity struct {
@@ -52,21 +52,21 @@ func (s *KafkaConnectSecurity) UnmarshalJSON(bytes []byte) error {
 
 	securityType := KafkaConnectSecurityType(disc.Type)
 	switch securityType {
-	case BASIC_AUTH:
+	case CONNECT_BASIC_AUTH:
 		var basic KafkaConnectBasicAuth
 		err = json.Unmarshal(bytes, &basic)
 		if err != nil {
 			return err
 		}
 		s.BasicAuth = &basic
-	case BEARER_TOKEN:
+	case CONNECT_BEARER_TOKEN:
 		var bearertoken KafkaConnectBearerToken
 		err = json.Unmarshal(bytes, &bearertoken)
 		if err != nil {
 			return err
 		}
 		s.BearerToken = &bearertoken
-	case SSL_AUTH:
+	case CONNECT_SSL_AUTH:
 		var sslauth KafkaConnectSSLAuth
 		err = json.Unmarshal(bytes, &sslauth)
 		if err != nil {
