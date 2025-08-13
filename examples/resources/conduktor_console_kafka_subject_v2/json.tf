@@ -8,7 +8,7 @@ resource "conduktor_console_kafka_subject_v2" "json_full" {
   spec = {
     format        = "JSON"
     compatibility = "BACKWARD"
-    schema = <<EOF
+    schema        = <<EOF
 {
   "$id": "https://mycompany.com/myrecord",
   "$schema": "https://json-schema.org/draft/2019-09/schema",

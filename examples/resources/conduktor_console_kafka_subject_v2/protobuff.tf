@@ -8,7 +8,7 @@ resource "conduktor_console_kafka_subject_v2" "protobuff" {
   spec = {
     format        = "PROTOBUF"
     compatibility = "BACKWARD"
-    schema = <<EOF
+    schema        = <<EOF
 syntax = "proto3";
 message MyRecord {
   int32 id = 1;
