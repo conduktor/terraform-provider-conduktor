@@ -136,7 +136,7 @@ resource "conduktor_console_kafka_subject_v2" "json_file" {
 ### Required
 
 - `cluster` (String) Kafka cluster name linked with Kafka subject. Must already exist in Conduktor Console. Any change will require the Subject to be destroyed and re-created
-- `name` (String) Kafka subject name, must be unique, acts as an ID for import
+- `name` (String) Kafka subject name, must be unique, acts as an ID for import - see naming strategy [here](https://docs.conduktor.io/guide/manage-kafka/kafka-resources/schema-registry#strategy)
 - `spec` (Attributes) Kafka subject spec (see [below for nested schema](#nestedatt--spec))
 
 ### Optional

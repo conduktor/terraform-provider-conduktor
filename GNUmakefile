@@ -10,10 +10,10 @@ include .env
 export $(shell sed 's/=.*//' .env)
 
 # Include .envrc file if it exists
-ifneq (,$(wildcard .envrc))
-  include .envrc
-  export $(shell grep -v '^#' .envrc | sed 's/export //')
-endif
+# ifneq (,$(wildcard .envrc))
+#   include .envrc
+#   export $(shell grep -v '^#' .envrc | sed 's/export //')
+# endif
 
 default: testacc
 

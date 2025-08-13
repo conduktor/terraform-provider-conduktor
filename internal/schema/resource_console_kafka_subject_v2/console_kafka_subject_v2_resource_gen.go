@@ -15,7 +15,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
-	"regexp"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -45,9 +44,6 @@ func ConsoleKafkaSubjectV2ResourceSchema(ctx context.Context) schema.Schema {
 				MarkdownDescription: "Kafka subject name, must be unique, acts as an ID for import",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
-				},
-				Validators: []validator.String{
-					stringvalidator.RegexMatches(regexp.MustCompile("^[0-9a-z\\_\\-\\.]+$"), ""),
 				},
 			},
 			"spec": schema.SingleNestedAttribute{

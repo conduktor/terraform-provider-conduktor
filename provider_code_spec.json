@@ -1953,21 +1953,6 @@
                     "schema_definition": "stringplanmodifier.RequiresReplace()"
                   }
                 }
-              ],
-              "validators": [
-                {
-                  "custom": {
-                    "imports": [
-                      {
-                        "path": "regexp"
-                      },
-                      {
-                        "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-                      }
-                    ],
-                    "schema_definition": "stringvalidator.RegexMatches(regexp.MustCompile(\"^[0-9a-z\\\\_\\\\-\\\\.]+$\"), \"\")"
-                  }
-                }
               ]
             }
           },
