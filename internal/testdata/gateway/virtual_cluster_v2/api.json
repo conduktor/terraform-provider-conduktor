@@ -1,0 +1,47 @@
+{
+  "kind": "VirtualCluster",
+  "apiVersion": "gateway/v2",
+  "metadata": {
+    "name": "vcluster1"
+  },
+  "spec": {
+    "aclEnabled": false,
+    "superUsers": [
+      "username1",
+      "username2"
+    ],
+    "type": "Standard",
+    "bootstrapServers": "kafka:9092",
+    "clientProperties": {
+      "PLAIN": {
+        "security.protocol": "SASL_PLAINTEXT",
+        "sasl.mechanism": "PLAIN",
+        "sasl.jaas.config": "org.apache.kafka.common.security.plain.PlainLoginModule required username='{{username}}' password='{{password}}';"
+      }
+    },
+    "acls": [
+      {
+        "resourcePattern": {
+          "resourceType": "TOPIC",
+          "name": "topic1",
+          "patternType": "ANY"
+        },
+        "principal": "User:username1",
+        "host": "*",
+        "operation": "READ",
+        "permissionType": "ALLOW"
+      },
+      {
+        "resourcePattern": {
+          "resourceType": "TOPIC",
+          "name": "topic2",
+          "patternType": "LITERAL"
+        },
+        "principal": "User:username2",
+        "host": "*",
+        "operation": "WRITE",
+        "permissionType": "DENY"
+      }
+    ]
+  }
+}
