@@ -10,7 +10,7 @@ import (
 )
 
 const VirtualClusterV2Kind = "VirtualCluster"
-const VirtualClusterV2ApiVersion = "v2"
+const VirtualClusterV2ApiVersion = "gateway/v2"
 
 type VirtualClusterMetadata struct {
 	Name string `json:"name"`
@@ -21,13 +21,13 @@ func (r VirtualClusterMetadata) String() string {
 }
 
 type VirtualClusterSpec struct {
-	AclEnabled       bool                `json:"aclEnabled,omitempty"`
-	AclMode          string              `json:"aclMode,omitempty"`
-	SuperUsers       []string            `json:"superUsers,omitempty"`
-	Type             string              `json:"type,omitempty"`
-	BootstrapServers string              `json:"bootstrapServers,omitempty"`
-	ClientProperties map[string]string   `json:"clientProperties,omitempty"`
-	Acls             []VirtualClusterACL `json:"acls,omitempty"`
+	AclEnabled       bool                         `json:"aclEnabled"`
+	AclMode          string                       `json:"aclMode,omitempty"`
+	SuperUsers       []string                     `json:"superUsers,omitempty"`
+	Type             string                       `json:"type,omitempty"`
+	BootstrapServers string                       `json:"bootstrapServers,omitempty"`
+	ClientProperties map[string]map[string]string `json:"clientProperties,omitempty"`
+	Acls             []VirtualClusterACL          `json:"acls,omitempty"`
 }
 
 type VirtualClusterACL struct {

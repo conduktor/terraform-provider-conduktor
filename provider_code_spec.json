@@ -4087,10 +4087,10 @@
                 },
                 {
                   "name": "client_properties",
-                  "map_nested": {
+                  "map": {
                     "description": "Depending on gateway config, different kind of authentication can be used: `MTLS`, `PLAIN` and `OAUTHBEARER`",
                     "computed_optional_required": "optional",
-                    "nested_object": {
+                    "element_type": {
                       "map": {
                         "element_type": {
                           "string": {}

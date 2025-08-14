@@ -133,14 +133,9 @@ func GatewayVirtualClusterV2ResourceSchema(ctx context.Context) schema.Schema {
 						Description:         "The bootstrap servers to create a connection to the virtual cluster. This field is automatically managed by the gateway",
 						MarkdownDescription: "The bootstrap servers to create a connection to the virtual cluster. This field is automatically managed by the gateway",
 					},
-					"client_properties": schema.MapNestedAttribute{
-						NestedObject: schema.NestedAttributeObject{
-							Attributes: map[string]schema.Attribute{},
-							CustomType: ClientPropertiesType{
-								ObjectType: types.ObjectType{
-									AttrTypes: ClientPropertiesValue{}.AttributeTypes(ctx),
-								},
-							},
+					"client_properties": schema.MapAttribute{
+						ElementType: types.MapType{
+							ElemType: types.StringType,
 						},
 						Optional:            true,
 						Description:         "Depending on gateway config, different kind of authentication can be used: `MTLS`, `PLAIN` and `OAUTHBEARER`",
@@ -643,7 +638,9 @@ func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) 
 	}.TerraformType(ctx)
 	attrTypes["bootstrap_servers"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["client_properties"] = basetypes.MapType{
-		ElemType: ClientPropertiesValue{}.Type(ctx),
+		ElemType: types.MapType{
+			ElemType: types.StringType,
+		},
 	}.TerraformType(ctx)
 	attrTypes["super_users"] = basetypes.SetType{
 		ElemType: types.StringType,
@@ -770,33 +767,42 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 		)
 	}
 
-	clientProperties := types.MapValueMust(
-		ClientPropertiesType{
-			basetypes.ObjectType{
-				AttrTypes: ClientPropertiesValue{}.AttributeTypes(ctx),
-			},
-		},
-		v.ClientProperties.Elements(),
-	)
-
-	if v.ClientProperties.IsNull() {
-		clientProperties = types.MapNull(
-			ClientPropertiesType{
-				basetypes.ObjectType{
-					AttrTypes: ClientPropertiesValue{}.AttributeTypes(ctx),
-				},
-			},
-		)
+	var clientPropertiesVal basetypes.MapValue
+	switch {
+	case v.ClientProperties.IsUnknown():
+		clientPropertiesVal = types.MapUnknown(types.MapType{
+			ElemType: types.StringType,
+		})
+	case v.ClientProperties.IsNull():
+		clientPropertiesVal = types.MapNull(types.MapType{
+			ElemType: types.StringType,
+		})
+	default:
+		var d diag.Diagnostics
+		clientPropertiesVal, d = types.MapValue(types.MapType{
+			ElemType: types.StringType,
+		}, v.ClientProperties.Elements())
+		diags.Append(d...)
 	}
 
-	if v.ClientProperties.IsUnknown() {
-		clientProperties = types.MapUnknown(
-			ClientPropertiesType{
-				basetypes.ObjectType{
-					AttrTypes: ClientPropertiesValue{}.AttributeTypes(ctx),
+	if diags.HasError() {
+		return types.ObjectUnknown(map[string]attr.Type{
+			"acl_enabled": basetypes.BoolType{},
+			"acl_mode":    basetypes.StringType{},
+			"acls": basetypes.SetType{
+				ElemType: AclsValue{}.Type(ctx),
+			},
+			"bootstrap_servers": basetypes.StringType{},
+			"client_properties": basetypes.MapType{
+				ElemType: types.MapType{
+					ElemType: types.StringType,
 				},
 			},
-		)
+			"super_users": basetypes.SetType{
+				ElemType: types.StringType,
+			},
+			"type": basetypes.StringType{},
+		}), diags
 	}
 
 	var superUsersVal basetypes.SetValue
@@ -820,7 +826,9 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 			},
 			"bootstrap_servers": basetypes.StringType{},
 			"client_properties": basetypes.MapType{
-				ElemType: ClientPropertiesValue{}.Type(ctx),
+				ElemType: types.MapType{
+					ElemType: types.StringType,
+				},
 			},
 			"super_users": basetypes.SetType{
 				ElemType: types.StringType,
@@ -837,7 +845,9 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 		},
 		"bootstrap_servers": basetypes.StringType{},
 		"client_properties": basetypes.MapType{
-			ElemType: ClientPropertiesValue{}.Type(ctx),
+			ElemType: types.MapType{
+				ElemType: types.StringType,
+			},
 		},
 		"super_users": basetypes.SetType{
 			ElemType: types.StringType,
@@ -860,7 +870,7 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 			"acl_mode":          v.AclMode,
 			"acls":              acls,
 			"bootstrap_servers": v.BootstrapServers,
-			"client_properties": clientProperties,
+			"client_properties": clientPropertiesVal,
 			"super_users":       superUsersVal,
 			"type":              v.SpecType,
 		})
@@ -931,7 +941,9 @@ func (v SpecValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 		},
 		"bootstrap_servers": basetypes.StringType{},
 		"client_properties": basetypes.MapType{
-			ElemType: ClientPropertiesValue{}.Type(ctx),
+			ElemType: types.MapType{
+				ElemType: types.StringType,
+			},
 		},
 		"super_users": basetypes.SetType{
 			ElemType: types.StringType,
@@ -1943,264 +1955,4 @@ func (v ResourcePatternValue) AttributeTypes(ctx context.Context) map[string]att
 		"pattern_type":  basetypes.StringType{},
 		"resource_type": basetypes.StringType{},
 	}
-}
-
-var _ basetypes.ObjectTypable = ClientPropertiesType{}
-
-type ClientPropertiesType struct {
-	basetypes.ObjectType
-}
-
-func (t ClientPropertiesType) Equal(o attr.Type) bool {
-	other, ok := o.(ClientPropertiesType)
-
-	if !ok {
-		return false
-	}
-
-	return t.ObjectType.Equal(other.ObjectType)
-}
-
-func (t ClientPropertiesType) String() string {
-	return "ClientPropertiesType"
-}
-
-func (t ClientPropertiesType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
-	var diags diag.Diagnostics
-
-	if diags.HasError() {
-		return nil, diags
-	}
-
-	return ClientPropertiesValue{
-		state: attr.ValueStateKnown,
-	}, diags
-}
-
-func NewClientPropertiesValueNull() ClientPropertiesValue {
-	return ClientPropertiesValue{
-		state: attr.ValueStateNull,
-	}
-}
-
-func NewClientPropertiesValueUnknown() ClientPropertiesValue {
-	return ClientPropertiesValue{
-		state: attr.ValueStateUnknown,
-	}
-}
-
-func NewClientPropertiesValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (ClientPropertiesValue, diag.Diagnostics) {
-	var diags diag.Diagnostics
-
-	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
-	ctx := context.Background()
-
-	for name, attributeType := range attributeTypes {
-		attribute, ok := attributes[name]
-
-		if !ok {
-			diags.AddError(
-				"Missing ClientPropertiesValue Attribute Value",
-				"While creating a ClientPropertiesValue value, a missing attribute value was detected. "+
-					"A ClientPropertiesValue must contain values for all attributes, even if null or unknown. "+
-					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
-					fmt.Sprintf("ClientPropertiesValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
-			)
-
-			continue
-		}
-
-		if !attributeType.Equal(attribute.Type(ctx)) {
-			diags.AddError(
-				"Invalid ClientPropertiesValue Attribute Type",
-				"While creating a ClientPropertiesValue value, an invalid attribute value was detected. "+
-					"A ClientPropertiesValue must use a matching attribute type for the value. "+
-					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
-					fmt.Sprintf("ClientPropertiesValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
-					fmt.Sprintf("ClientPropertiesValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
-			)
-		}
-	}
-
-	for name := range attributes {
-		_, ok := attributeTypes[name]
-
-		if !ok {
-			diags.AddError(
-				"Extra ClientPropertiesValue Attribute Value",
-				"While creating a ClientPropertiesValue value, an extra attribute value was detected. "+
-					"A ClientPropertiesValue must not contain values beyond the expected attribute types. "+
-					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
-					fmt.Sprintf("Extra ClientPropertiesValue Attribute Name: %s", name),
-			)
-		}
-	}
-
-	if diags.HasError() {
-		return NewClientPropertiesValueUnknown(), diags
-	}
-
-	if diags.HasError() {
-		return NewClientPropertiesValueUnknown(), diags
-	}
-
-	return ClientPropertiesValue{
-		state: attr.ValueStateKnown,
-	}, diags
-}
-
-func NewClientPropertiesValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) ClientPropertiesValue {
-	object, diags := NewClientPropertiesValue(attributeTypes, attributes)
-
-	if diags.HasError() {
-		// This could potentially be added to the diag package.
-		diagsStrings := make([]string, 0, len(diags))
-
-		for _, diagnostic := range diags {
-			diagsStrings = append(diagsStrings, fmt.Sprintf(
-				"%s | %s | %s",
-				diagnostic.Severity(),
-				diagnostic.Summary(),
-				diagnostic.Detail()))
-		}
-
-		panic("NewClientPropertiesValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
-	}
-
-	return object
-}
-
-func (t ClientPropertiesType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
-	if in.Type() == nil {
-		return NewClientPropertiesValueNull(), nil
-	}
-
-	if !in.Type().Equal(t.TerraformType(ctx)) {
-		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
-	}
-
-	if !in.IsKnown() {
-		return NewClientPropertiesValueUnknown(), nil
-	}
-
-	if in.IsNull() {
-		return NewClientPropertiesValueNull(), nil
-	}
-
-	attributes := map[string]attr.Value{}
-
-	val := map[string]tftypes.Value{}
-
-	err := in.As(&val)
-
-	if err != nil {
-		return nil, err
-	}
-
-	for k, v := range val {
-		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
-
-		if err != nil {
-			return nil, err
-		}
-
-		attributes[k] = a
-	}
-
-	return NewClientPropertiesValueMust(ClientPropertiesValue{}.AttributeTypes(ctx), attributes), nil
-}
-
-func (t ClientPropertiesType) ValueType(ctx context.Context) attr.Value {
-	return ClientPropertiesValue{}
-}
-
-var _ basetypes.ObjectValuable = ClientPropertiesValue{}
-
-type ClientPropertiesValue struct {
-	state attr.ValueState
-}
-
-func (v ClientPropertiesValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
-	attrTypes := make(map[string]tftypes.Type, 0)
-
-	objectType := tftypes.Object{AttributeTypes: attrTypes}
-
-	switch v.state {
-	case attr.ValueStateKnown:
-		vals := make(map[string]tftypes.Value, 0)
-
-		if err := tftypes.ValidateValue(objectType, vals); err != nil {
-			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
-		}
-
-		return tftypes.NewValue(objectType, vals), nil
-	case attr.ValueStateNull:
-		return tftypes.NewValue(objectType, nil), nil
-	case attr.ValueStateUnknown:
-		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
-	default:
-		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
-	}
-}
-
-func (v ClientPropertiesValue) IsNull() bool {
-	return v.state == attr.ValueStateNull
-}
-
-func (v ClientPropertiesValue) IsUnknown() bool {
-	return v.state == attr.ValueStateUnknown
-}
-
-func (v ClientPropertiesValue) String() string {
-	return "ClientPropertiesValue"
-}
-
-func (v ClientPropertiesValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
-	var diags diag.Diagnostics
-
-	attributeTypes := map[string]attr.Type{}
-
-	if v.IsNull() {
-		return types.ObjectNull(attributeTypes), diags
-	}
-
-	if v.IsUnknown() {
-		return types.ObjectUnknown(attributeTypes), diags
-	}
-
-	objVal, diags := types.ObjectValue(
-		attributeTypes,
-		map[string]attr.Value{})
-
-	return objVal, diags
-}
-
-func (v ClientPropertiesValue) Equal(o attr.Value) bool {
-	other, ok := o.(ClientPropertiesValue)
-
-	if !ok {
-		return false
-	}
-
-	if v.state != other.state {
-		return false
-	}
-
-	if v.state != attr.ValueStateKnown {
-		return true
-	}
-
-	return true
-}
-
-func (v ClientPropertiesValue) Type(ctx context.Context) attr.Type {
-	return ClientPropertiesType{
-		basetypes.ObjectType{
-			AttrTypes: v.AttributeTypes(ctx),
-		},
-	}
-}
-
-func (v ClientPropertiesValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
-	return map[string]attr.Type{}
 }
