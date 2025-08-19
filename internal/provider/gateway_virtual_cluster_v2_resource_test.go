@@ -3,11 +3,18 @@ package provider
 import (
 	"testing"
 
+	"github.com/conduktor/terraform-provider-conduktor/internal/client"
 	"github.com/conduktor/terraform-provider-conduktor/internal/test"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func TestAccGatewayVirtualClusterV2Resource(t *testing.T) {
+	v, err := fetchClientVersion(client.GATEWAY)
+	if err != nil {
+		t.Fatalf("Error fetching current version: %s", err)
+	}
+	test.CheckMinimumVersionRequirement(t, v, virtualClusterMininumRecommendedVersion)
+
 	resourceRef := "conduktor_gateway_virtual_cluster_v2.test"
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { test.TestAccPreCheck(t) },
@@ -73,6 +80,12 @@ func TestAccGatewayVirtualClusterV2Resource(t *testing.T) {
 }
 
 func TestAccVirtualClusterV2Minimal(t *testing.T) {
+	v, err := fetchClientVersion(client.GATEWAY)
+	if err != nil {
+		t.Fatalf("Error fetching current version: %s", err)
+	}
+	test.CheckMinimumVersionRequirement(t, v, virtualClusterMininumVersion)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { test.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
@@ -90,6 +103,12 @@ func TestAccVirtualClusterV2Minimal(t *testing.T) {
 }
 
 func TestAccVirtualClusterV2ExampleResource(t *testing.T) {
+	v, err := fetchClientVersion(client.GATEWAY)
+	if err != nil {
+		t.Fatalf("Error fetching current version: %s", err)
+	}
+	test.CheckMinimumVersionRequirement(t, v, virtualClusterMininumRecommendedVersion)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { test.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,

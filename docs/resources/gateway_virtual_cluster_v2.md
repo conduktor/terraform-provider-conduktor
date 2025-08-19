@@ -12,6 +12,16 @@ description: |-
 Resource for managing Conduktor virtual clusters.
 This resource allows you to create, read, update and delete virtual clusters in Conduktor Gateway.
 
+## WARNING
+Minimum requirement for this resource:
+ - Conduktor Gateway version `3.6.0`.
+
+Minimum recommended version for this resource:
+ - Conduktor Gateway version `3.11.0`.
+
+Usage of this resource with older Gateway versions might result in unexpected behavior.
+ - e.g. `acl_mode` and `acls` have been made available from Conduktor Gateway `3.11.0`.
+
 ## Example Usage
 
 ### Simple virtual cluster without ACLs
@@ -80,8 +90,8 @@ resource "conduktor_gateway_virtual_cluster_v2" "complex" {
 Optional:
 
 - `acl_enabled` (Boolean) Enable ACL checks on all Kafka API calls to this virtual cluster. Depending on the value of the `acl_mode` field, acls are required to be set in different ways. See the `acl_mode` field for more details
-- `acl_mode` (String) The mode defines how the ACLs will be managed on the virtual cluster. Can only be either KAFKA_API or REST_API. See [documentation](https://docs.conduktor.io/guide/reference/gateway-reference#virtualcluster) for more information
-- `acls` (Attributes Set) List of ACL bindings for the virtual cluster. Only required if `spec.acl_mode` is set to `REST_API`. See [documentation](https://docs.conduktor.io/guide/reference/gateway-reference#virtualcluster) for more information (see [below for nested schema](#nestedatt--spec--acls))
+- `acl_mode` (String) The mode defines how the ACLs will be managed on the virtual cluster. Can only be either KAFKA_API or REST_API. See [documentation](https://docs.conduktor.io/guide/reference/gateway-reference#virtualcluster) for more information. NOTE: this field has been introduced with Gateway `3.11.0` and it will not work with previous versions
+- `acls` (Attributes Set) List of ACL bindings for the virtual cluster. Only required if `spec.acl_mode` is set to `REST_API`. See [documentation](https://docs.conduktor.io/guide/reference/gateway-reference#virtualcluster) for more information. NOTE: this field has been introduced with Gateway `3.11.0` and it will not work with previous versions (see [below for nested schema](#nestedatt--spec--acls))
 - `super_users` (Set of String) List of usernames for which the associated service accounts in this virtual cluster can bypass ACLs. Required only if `spec.acl_mode` is set to `KAFKA_API`
 - `type` (String) The type of the virtual cluster. Can only be either `Standard` or `Partner`
 

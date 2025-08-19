@@ -12,6 +12,16 @@ description: |-
 Resource for managing Conduktor virtual clusters.
 This resource allows you to create, read, update and delete virtual clusters in Conduktor Gateway.
 
+## WARNING
+Minimum requirement for this resource:
+ - Conduktor Gateway version `3.6.0`.
+
+Minimum recommended version for this resource:
+ - Conduktor Gateway version `3.11.0`.
+
+Usage of this resource with older Gateway versions might result in unexpected behavior.
+ - e.g. `acl_mode` and `acls` have been made available from Conduktor Gateway `3.11.0`.
+
 ## Example Usage
 
 ### Simple virtual cluster without ACLs

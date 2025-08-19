@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	jsoniter "github.com/json-iterator/go"
+	"golang.org/x/mod/semver"
 )
 
 const virtualClusterV2ApiPath = "/gateway/v2/virtual-cluster"
@@ -23,6 +24,13 @@ var _ resource.ResourceWithImportState = &VirtualClusterV2Resource{}
 func NewVirtualClusterV2Resource() resource.Resource {
 	return &VirtualClusterV2Resource{}
 }
+
+// Version when this resource was introduced.
+const virtualClusterMininumVersion = "v3.6.0"
+
+// Version when this resource was updated and recommended to be used.
+// More details here : https://docs.conduktor.io/guide/release-notes#changes-to-conduktor-io-labels
+const virtualClusterMininumRecommendedVersion = "v3.11.0"
 
 // VirtualClusterV2Resource defines the resource implementation.
 type VirtualClusterV2Resource struct {
@@ -62,6 +70,27 @@ func (r *VirtualClusterV2Resource) Configure(ctx context.Context, req resource.C
 				" - https://registry.terraform.io/providers/conduktor/conduktor/latest/docs",
 		)
 		return
+	}
+
+	gatewayVersion, err := data.Client.GetAPIVersion(ctx, client.GATEWAY)
+	if err != nil {
+		resp.Diagnostics.AddError("Error fetching Gateway version", err.Error())
+		return
+	}
+	if semver.IsValid(gatewayVersion) {
+		switch {
+		case semver.Compare(gatewayVersion, virtualClusterMininumVersion) < 0:
+			resp.Diagnostics.AddError(
+				"Minimum version requirement not met",
+				"This resource requires Conduktor Gateway API version "+virtualClusterMininumVersion+" and is recommended with version "+virtualClusterMininumRecommendedVersion+" or higher,  but targeted Conduktor Gateway API is "+gatewayVersion,
+			)
+			return
+		case semver.Compare(gatewayVersion, virtualClusterMininumRecommendedVersion) < 0:
+			resp.Diagnostics.AddWarning(
+				"Recommended version not met",
+				"This resource is recommended to be used with Conduktor Gateway API version "+virtualClusterMininumRecommendedVersion+" or higher, but targeted Conduktor Gateway API is "+gatewayVersion+". You may experience unexpected behavior or missing features.",
+			)
+		}
 	}
 
 	r.apiClient = data.Client

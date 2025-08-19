@@ -46,8 +46,8 @@ func GatewayVirtualClusterV2ResourceSchema(ctx context.Context) schema.Schema {
 					},
 					"acl_mode": schema.StringAttribute{
 						Optional:            true,
-						Description:         "The mode defines how the ACLs will be managed on the virtual cluster. Can only be either KAFKA_API or REST_API. See [documentation](https://docs.conduktor.io/guide/reference/gateway-reference#virtualcluster) for more information",
-						MarkdownDescription: "The mode defines how the ACLs will be managed on the virtual cluster. Can only be either KAFKA_API or REST_API. See [documentation](https://docs.conduktor.io/guide/reference/gateway-reference#virtualcluster) for more information",
+						Description:         "The mode defines how the ACLs will be managed on the virtual cluster. Can only be either KAFKA_API or REST_API. See [documentation](https://docs.conduktor.io/guide/reference/gateway-reference#virtualcluster) for more information. NOTE: this field has been introduced with Gateway `3.11.0` and it will not work with previous versions",
+						MarkdownDescription: "The mode defines how the ACLs will be managed on the virtual cluster. Can only be either KAFKA_API or REST_API. See [documentation](https://docs.conduktor.io/guide/reference/gateway-reference#virtualcluster) for more information. NOTE: this field has been introduced with Gateway `3.11.0` and it will not work with previous versions",
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.RequiresReplace(),
 						},
@@ -126,8 +126,8 @@ func GatewayVirtualClusterV2ResourceSchema(ctx context.Context) schema.Schema {
 						},
 						Optional:            true,
 						Computed:            true,
-						Description:         "List of ACL bindings for the virtual cluster. Only required if `spec.acl_mode` is set to `REST_API`. See [documentation](https://docs.conduktor.io/guide/reference/gateway-reference#virtualcluster) for more information",
-						MarkdownDescription: "List of ACL bindings for the virtual cluster. Only required if `spec.acl_mode` is set to `REST_API`. See [documentation](https://docs.conduktor.io/guide/reference/gateway-reference#virtualcluster) for more information",
+						Description:         "List of ACL bindings for the virtual cluster. Only required if `spec.acl_mode` is set to `REST_API`. See [documentation](https://docs.conduktor.io/guide/reference/gateway-reference#virtualcluster) for more information. NOTE: this field has been introduced with Gateway `3.11.0` and it will not work with previous versions",
+						MarkdownDescription: "List of ACL bindings for the virtual cluster. Only required if `spec.acl_mode` is set to `REST_API`. See [documentation](https://docs.conduktor.io/guide/reference/gateway-reference#virtualcluster) for more information. NOTE: this field has been introduced with Gateway `3.11.0` and it will not work with previous versions",
 					},
 					"bootstrap_servers": schema.StringAttribute{
 						Computed:            true,
