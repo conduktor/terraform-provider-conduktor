@@ -1986,6 +1986,16 @@
             }
           },
           {
+            "name": "managed_labels",
+            "map": {
+              "description": "Read-only Conduktor managed labels labels for the topic resource. Used in Conduktor's topic catalog and UI",
+              "computed_optional_required": "computed",
+              "element_type": {
+                "string": {}
+              }
+            }
+          },
+          {
             "name": "spec",
             "single_nested": {
               "computed_optional_required": "required",

@@ -1,5 +1,5 @@
 resource "conduktor_console_kafka_subject_v2" "json_file" {
-  name    = "api-json-example-subject.value"
+  name    = "json-file-reference.value"
   cluster = "kafka-cluster"
   labels = {
     "team"        = "test"
@@ -10,6 +10,6 @@ resource "conduktor_console_kafka_subject_v2" "json_file" {
     compatibility = "BACKWARD"
     schema        = file("${path.module}/schema.json")
     id            = 2
-    version       = 2
+    version       = 1
   }
 }

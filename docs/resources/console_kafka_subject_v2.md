@@ -21,7 +21,25 @@ resource "conduktor_console_kafka_subject_v2" "minimal" {
   cluster = "kafka-cluster"
   spec = {
     format = "JSON"
-    schema = "{\"$id\":\"https://mycompany.com/myrecord\",\"$schema\":\"https://json-schema.org/draft/2019-09/schema\",\"type\":\"object\",\"title\":\"MyRecord\",\"description\":\"Json schema for MyRecord\",\"properties\":{\"id\":{\"type\":\"string\"},\"name\":{\"type\":[\"string\",\"null\"]}},\"required\":[\"id\"],\"additionalProperties\":false}"
+    schema = <<EOF
+{
+  "$id": "https://mycompany.com/myrecord",
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "type": "object",
+  "title": "MyRecord",
+  "description": "Json schema for MyRecord",
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "name": {
+      "type": ["string", "null"]
+    }
+  },
+  "required": ["id"],
+  "additionalProperties": false
+}
+EOF
   }
 }
 ```
@@ -39,7 +57,25 @@ resource "conduktor_console_kafka_subject_v2" "json_full" {
   spec = {
     format        = "JSON"
     compatibility = "BACKWARD"
-    schema        = "{\"$id\":\"https://mycompany.com/myrecord\",\"$schema\":\"https://json-schema.org/draft/2019-09/schema\",\"type\":\"object\",\"title\":\"MyRecord\",\"description\":\"Json schema for MyRecord\",\"properties\":{\"id\":{\"type\":\"string\"},\"name\":{\"type\":[\"string\",\"null\"]}},\"required\":[\"id\"],\"additionalProperties\":false}"
+    schema        = <<EOF
+{
+  "$id": "https://mycompany.com/myrecord",
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "type": "object",
+  "title": "MyRecord",
+  "description": "Json schema for MyRecord",
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "name": {
+      "type": ["string", "null"]
+    }
+  },
+  "required": ["id"],
+  "additionalProperties": false
+}
+EOF
     id            = 2
     version       = 2
     references = [
@@ -66,7 +102,14 @@ resource "conduktor_console_kafka_subject_v2" "protobuff" {
   spec = {
     format        = "PROTOBUF"
     compatibility = "BACKWARD"
-    schema        = "syntax = \"proto3\";\nmessage MyRecord {\n\tint32 id = 1;\n\tstring createdAt = 2;\n\tstring name = 3;\n}\n"
+    schema        = <<EOF
+syntax = "proto3";
+message MyRecord {
+  int32 id = 1;
+  string createdAt = 2;
+  string name = 3;
+}
+EOF
     id            = 2
     version       = 2
   }
@@ -108,11 +151,6 @@ EOF
 ### Kafka subject from file
 This example creates a complex Kafka JSON subject with all available configuration.
 ```terraform
-locals {
-  file_content = file("${path.module}/schema.json")
-}
-
-
 resource "conduktor_console_kafka_subject_v2" "json_file" {
   name    = "api-json-example-subject.value"
   cluster = "kafka-cluster"
@@ -123,7 +161,7 @@ resource "conduktor_console_kafka_subject_v2" "json_file" {
   spec = {
     format        = "JSON"
     compatibility = "BACKWARD"
-    schema        = local.file_content
+    schema        = file("${path.module}/schema.json")
     id            = 2
     version       = 2
   }
@@ -136,12 +174,16 @@ resource "conduktor_console_kafka_subject_v2" "json_file" {
 ### Required
 
 - `cluster` (String) Kafka cluster name linked with Kafka subject. Must already exist in Conduktor Console. Any change will require the Subject to be destroyed and re-created
-- `name` (String) Kafka subject name, must be unique, acts as an ID for import - see naming strategy [here](https://docs.conduktor.io/guide/manage-kafka/kafka-resources/schema-registry#strategy)
+- `name` (String) Kafka subject name, must be unique, acts as an ID for import
 - `spec` (Attributes) Kafka subject spec (see [below for nested schema](#nestedatt--spec))
 
 ### Optional
 
 - `labels` (Map of String) Kafka connect server labels
+
+### Read-Only
+
+- `managed_labels` (Map of String) Read-only Conduktor managed labels labels for the topic resource. Used in Conduktor's topic catalog and UI
 
 <a id="nestedatt--spec"></a>
 ### Nested Schema for `spec`

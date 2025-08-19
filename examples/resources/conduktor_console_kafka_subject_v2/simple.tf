@@ -1,5 +1,5 @@
 resource "conduktor_console_kafka_subject_v2" "minimal" {
-  name    = "api-json-example-subject.value"
+  name    = "minimal.value"
   cluster = "kafka-cluster"
   spec = {
     format = "JSON"

@@ -14,9 +14,13 @@ import (
 )
 
 func TFToInternalModel(ctx context.Context, r *subject.ConsoleKafkaSubjectV2Model) (console.KafkaSubjectResource, error) {
-	labels, diag := schema.MapValueToStringMap(ctx, r.Labels)
+	userLabels, diag := schema.MapValueToStringMap(ctx, r.Labels)
 	if diag.HasError() {
 		return console.KafkaSubjectResource{}, mapper.WrapDiagError(diag, "labels", mapper.FromTerraform)
+	}
+	managedLabels, diag := schema.MapValueToStringMap(ctx, r.ManagedLabels)
+	if diag.HasError() {
+		return console.KafkaSubjectResource{}, mapper.WrapDiagError(diag, "managed_labels", mapper.FromTerraform)
 	}
 
 	references, err := setValueToReferencesArray(ctx, r.Spec.References)
@@ -27,7 +31,7 @@ func TFToInternalModel(ctx context.Context, r *subject.ConsoleKafkaSubjectV2Mode
 	return console.NewKafkaSubjectResource(
 		r.Name.ValueString(),
 		r.Cluster.ValueString(),
-		labels,
+		mapper.MergeLabels(managedLabels, userLabels),
 		console.KafkaSubjectSpec{
 			Schema:        r.Spec.Schema.ValueString(),
 			Format:        r.Spec.Format.ValueString(),
@@ -62,9 +66,15 @@ func setValueToReferencesArray(ctx context.Context, set basetypes.SetValue) ([]c
 }
 
 func InternalModelToTerraform(ctx context.Context, r *console.KafkaSubjectResource) (subject.ConsoleKafkaSubjectV2Model, error) {
-	labels, diag := schema.StringMapToMapValue(ctx, r.Metadata.Labels)
+	var modelUserLabels, modelManagedLabels = mapper.SplitLabels(r.Metadata.Labels)
+	labels, diag := schema.StringMapToMapValue(ctx, modelUserLabels)
 	if diag.HasError() {
 		return subject.ConsoleKafkaSubjectV2Model{}, mapper.WrapDiagError(diag, "labels", mapper.IntoTerraform)
+	}
+
+	managedLabels, diag := schema.StringMapToMapValue(ctx, modelManagedLabels)
+	if diag.HasError() {
+		return subject.ConsoleKafkaSubjectV2Model{}, mapper.WrapDiagError(diag, "managed_labels", mapper.IntoTerraform)
 	}
 
 	specValue, err := specInternalModelToTerraform(ctx, &r.Spec)
@@ -73,10 +83,11 @@ func InternalModelToTerraform(ctx context.Context, r *console.KafkaSubjectResour
 	}
 
 	return subject.ConsoleKafkaSubjectV2Model{
-		Name:    types.StringValue(r.Metadata.Name),
-		Cluster: types.StringValue(r.Metadata.Cluster),
-		Labels:  labels,
-		Spec:    specValue,
+		Name:          types.StringValue(r.Metadata.Name),
+		Cluster:       types.StringValue(r.Metadata.Cluster),
+		Labels:        labels,
+		ManagedLabels: managedLabels,
+		Spec:          specValue,
 	}, nil
 }
 

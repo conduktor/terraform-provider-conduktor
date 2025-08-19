@@ -38,6 +38,12 @@ func ConsoleKafkaSubjectV2ResourceSchema(ctx context.Context) schema.Schema {
 				Description:         "Kafka connect server labels",
 				MarkdownDescription: "Kafka connect server labels",
 			},
+			"managed_labels": schema.MapAttribute{
+				ElementType:         types.StringType,
+				Computed:            true,
+				Description:         "Read-only Conduktor managed labels labels for the topic resource. Used in Conduktor's topic catalog and UI",
+				MarkdownDescription: "Read-only Conduktor managed labels labels for the topic resource. Used in Conduktor's topic catalog and UI",
+			},
 			"name": schema.StringAttribute{
 				Required:            true,
 				Description:         "Kafka subject name, must be unique, acts as an ID for import",
@@ -127,10 +133,11 @@ func ConsoleKafkaSubjectV2ResourceSchema(ctx context.Context) schema.Schema {
 }
 
 type ConsoleKafkaSubjectV2Model struct {
-	Cluster types.String `tfsdk:"cluster"`
-	Labels  types.Map    `tfsdk:"labels"`
-	Name    types.String `tfsdk:"name"`
-	Spec    SpecValue    `tfsdk:"spec"`
+	Cluster       types.String `tfsdk:"cluster"`
+	Labels        types.Map    `tfsdk:"labels"`
+	ManagedLabels types.Map    `tfsdk:"managed_labels"`
+	Name          types.String `tfsdk:"name"`
+	Spec          SpecValue    `tfsdk:"spec"`
 }
 
 var _ basetypes.ObjectTypable = SpecType{}

@@ -14,6 +14,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// When managedLabels are added we need to update the test
+
 func TestKafkaSubjectV2ModelMapping(t *testing.T) {
 
 	ctx := context.Background()
