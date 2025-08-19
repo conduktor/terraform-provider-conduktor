@@ -29,7 +29,6 @@ func NewVirtualClusterV2Resource() resource.Resource {
 const virtualClusterMininumVersion = "v3.6.0"
 
 // Version when this resource was updated and recommended to be used.
-// More details here : https://docs.conduktor.io/guide/release-notes#changes-to-conduktor-io-labels
 const virtualClusterMininumRecommendedVersion = "v3.11.0"
 
 // VirtualClusterV2Resource defines the resource implementation.
