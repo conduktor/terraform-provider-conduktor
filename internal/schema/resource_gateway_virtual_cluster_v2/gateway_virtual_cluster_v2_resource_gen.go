@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -124,11 +125,11 @@ func GatewayVirtualClusterV2ResourceSchema(ctx context.Context) schema.Schema {
 							},
 						},
 						Optional:            true,
+						Computed:            true,
 						Description:         "List of ACL bindings for the virtual cluster. Only required if `spec.acl_mode` is set to `REST_API`. See [documentation](https://docs.conduktor.io/guide/reference/gateway-reference#virtualcluster) for more information",
 						MarkdownDescription: "List of ACL bindings for the virtual cluster. Only required if `spec.acl_mode` is set to `REST_API`. See [documentation](https://docs.conduktor.io/guide/reference/gateway-reference#virtualcluster) for more information",
 					},
 					"bootstrap_servers": schema.StringAttribute{
-						Optional:            true,
 						Computed:            true,
 						Description:         "The bootstrap servers to create a connection to the virtual cluster. This field is automatically managed by the gateway",
 						MarkdownDescription: "The bootstrap servers to create a connection to the virtual cluster. This field is automatically managed by the gateway",
@@ -137,9 +138,9 @@ func GatewayVirtualClusterV2ResourceSchema(ctx context.Context) schema.Schema {
 						ElementType: types.MapType{
 							ElemType: types.StringType,
 						},
-						Optional:            true,
-						Description:         "Depending on gateway config, different kind of authentication can be used: `MTLS`, `PLAIN` and `OAUTHBEARER`",
-						MarkdownDescription: "Depending on gateway config, different kind of authentication can be used: `MTLS`, `PLAIN` and `OAUTHBEARER`",
+						Computed:            true,
+						Description:         "Rad only field. Depending on gateway config, different kind of authentication can be used: `MTLS`, `PLAIN` and `OAUTHBEARER`",
+						MarkdownDescription: "Rad only field. Depending on gateway config, different kind of authentication can be used: `MTLS`, `PLAIN` and `OAUTHBEARER`",
 					},
 					"super_users": schema.SetAttribute{
 						ElementType:         types.StringType,
@@ -147,9 +148,11 @@ func GatewayVirtualClusterV2ResourceSchema(ctx context.Context) schema.Schema {
 						Computed:            true,
 						Description:         "List of usernames for which the associated service accounts in this virtual cluster can bypass ACLs. Required only if `spec.acl_mode` is set to `KAFKA_API`",
 						MarkdownDescription: "List of usernames for which the associated service accounts in this virtual cluster can bypass ACLs. Required only if `spec.acl_mode` is set to `KAFKA_API`",
+						Default:             setdefault.StaticValue(basetypes.NewSetValueMust(types.StringType, []attr.Value{})),
 					},
 					"type": schema.StringAttribute{
 						Optional:            true,
+						Computed:            true,
 						Description:         "The type of the virtual cluster. Can only be either `Standard` or `Partner`",
 						MarkdownDescription: "The type of the virtual cluster. Can only be either `Standard` or `Partner`",
 						Validators: []validator.String{

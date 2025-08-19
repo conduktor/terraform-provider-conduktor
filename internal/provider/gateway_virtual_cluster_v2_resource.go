@@ -224,4 +224,3 @@ func (r *VirtualClusterV2Resource) Delete(ctx context.Context, req resource.Dele
 func (r *VirtualClusterV2Resource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("name"), req, resp)
 }
-

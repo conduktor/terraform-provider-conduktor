@@ -78,6 +78,7 @@ This repository contains the Conduktor Terraform provider, which defines Condukt
 
 - [Gateway service account](./docs/resources/gateway_service_account_v2.md)
 - [Gateway interceptor](./docs/resources/gateway_interceptor_v2.md)
+- [Gateway virtual cluster](./docs/resources/gateway_virtual_cluster_v2.md)
 
 ### Self-service resources
 
@@ -362,7 +363,6 @@ We are currently reviewing the following resources:
 3. Gateway resources:
   - [GatewayGroup](https://docs.conduktor.io/gateway/reference/resources-reference/#gatewaygroup)
   - [ConcentrationRule](https://docs.conduktor.io/gateway/reference/resources-reference/#concentrationrule)
-  - [VirtualCluster](https://docs.conduktor.io/gateway/reference/resources-reference/#virtualcluster)
   - [AliasTopic](https://docs.conduktor.io/gateway/reference/resources-reference/#aliastopic)
 
 > [!NOTE]
