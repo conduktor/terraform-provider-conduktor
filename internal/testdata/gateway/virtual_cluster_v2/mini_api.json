@@ -1,0 +1,10 @@
+{
+  "kind": "VirtualCluster",
+  "apiVersion": "gateway/v2",
+  "metadata": {
+    "name": "vcluster-mini"
+  },
+  "spec": {
+    "aclEnabled": false
+  }
+}

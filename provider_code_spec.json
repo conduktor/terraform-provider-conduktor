@@ -4015,7 +4015,7 @@
                 {
                   "name": "acl_mode",
                   "string": {
-                    "description": "The mode defines how the ACLs will be managed on the virtual cluster. Can only be either KAFKA_API or REST_API. See [documentation](https://docs.conduktor.io/guide/reference/gateway-reference#virtualcluster) for more information. NOTE: this field has been introduced with Gateway `3.11.0` and it will not work with previous versions",
+                    "description": "The mode defines how the ACLs will be managed on the virtual cluster. Can only be either `KAFKA_API` or `REST_API`. See [documentation](https://docs.conduktor.io/guide/reference/gateway-reference#virtualcluster) for more information. NOTE: this field has been introduced with Gateway `3.11.0` and it will not work with previous versions",
                     "computed_optional_required": "optional",
                     "plan_modifiers": [
                       {
@@ -4091,14 +4091,14 @@
                 {
                   "name": "bootstrap_servers",
                   "string": {
-                    "description": "The bootstrap servers to create a connection to the virtual cluster. This field is automatically managed by the gateway",
+                    "description": "Read only field. The bootstrap servers to create a connection to the virtual cluster. This field is automatically managed by the gateway",
                     "computed_optional_required": "computed"
                   }
                 },
                 {
                   "name": "client_properties",
                   "map": {
-                    "description": "Rad only field. Depending on gateway config, different kind of authentication can be used: `MTLS`, `PLAIN` and `OAUTHBEARER`",
+                    "description": "Read only field. Depending on gateway config, different kind of authentication can be used: `MTLS`, `PLAIN` and `OAUTHBEARER`",
                     "computed_optional_required": "computed",
                     "element_type": {
                       "map": {

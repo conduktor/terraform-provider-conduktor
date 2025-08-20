@@ -2,10 +2,10 @@
   "kind": "VirtualCluster",
   "apiVersion": "gateway/v2",
   "metadata": {
-    "name": "vcluster1"
+    "name": "vcluster-full"
   },
   "spec": {
-    "aclEnabled": false,
+    "aclEnabled": true,
     "superUsers": [
       "username1",
       "username2"

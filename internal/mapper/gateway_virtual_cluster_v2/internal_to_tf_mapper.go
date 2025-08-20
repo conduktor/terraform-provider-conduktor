@@ -64,19 +64,17 @@ func specInternalModelToTerraform(ctx context.Context, r *gateway.VirtualCluster
 }
 
 func clientPropertiesMapToMapValue(ctx context.Context, m map[string]map[string]string) (basetypes.MapValue, error) {
+	if m == nil {
+		return types.MapNull(types.MapNull(basetypes.StringType{}).Type(ctx)), nil
+	}
+
 	var tfProperties = make(map[string]attr.Value)
 	var diag diag.Diagnostics
 
 	for k, v := range m {
-		var tfValue = make(map[string]attr.Value)
-
-		for key, value := range v {
-			tfValue[key] = schemaUtils.NewStringValue(value)
-		}
-
-		permObj, diag := types.MapValue(basetypes.StringType{}, tfValue)
+		permObj, diag := schemaUtils.StringMapToMapValue(ctx, v)
 		if diag.HasError() {
-			return basetypes.MapValue{}, mapper.WrapDiagError(diag, "client_properties.inside", mapper.FromTerraform)
+			return basetypes.MapValue{}, mapper.WrapDiagError(diag, "client_properties", mapper.FromTerraform)
 		}
 
 		tfProperties[k] = permObj
@@ -86,13 +84,17 @@ func clientPropertiesMapToMapValue(ctx context.Context, m map[string]map[string]
 
 	mapValue, diag := types.MapValue(clientType, tfProperties)
 	if diag.HasError() {
-		return basetypes.MapValue{}, mapper.WrapDiagError(diag, "client_properties.outside", mapper.FromTerraform)
+		return basetypes.MapValue{}, mapper.WrapDiagError(diag, "client_properties", mapper.FromTerraform)
 	}
 
 	return mapValue, nil
 }
 
 func aclsArrayToSetValue(ctx context.Context, arr []gateway.VirtualClusterACL) (basetypes.SetValue, error) {
+	if arr == nil {
+		return types.SetNull(schema.AclsValue{}.Type(ctx)), nil
+	}
+
 	var aclsList basetypes.SetValue
 	var tfACLs []attr.Value
 	var diag diag.Diagnostics

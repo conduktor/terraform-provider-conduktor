@@ -46,8 +46,8 @@ func GatewayVirtualClusterV2ResourceSchema(ctx context.Context) schema.Schema {
 					},
 					"acl_mode": schema.StringAttribute{
 						Optional:            true,
-						Description:         "The mode defines how the ACLs will be managed on the virtual cluster. Can only be either KAFKA_API or REST_API. See [documentation](https://docs.conduktor.io/guide/reference/gateway-reference#virtualcluster) for more information. NOTE: this field has been introduced with Gateway `3.11.0` and it will not work with previous versions",
-						MarkdownDescription: "The mode defines how the ACLs will be managed on the virtual cluster. Can only be either KAFKA_API or REST_API. See [documentation](https://docs.conduktor.io/guide/reference/gateway-reference#virtualcluster) for more information. NOTE: this field has been introduced with Gateway `3.11.0` and it will not work with previous versions",
+						Description:         "The mode defines how the ACLs will be managed on the virtual cluster. Can only be either `KAFKA_API` or `REST_API`. See [documentation](https://docs.conduktor.io/guide/reference/gateway-reference#virtualcluster) for more information. NOTE: this field has been introduced with Gateway `3.11.0` and it will not work with previous versions",
+						MarkdownDescription: "The mode defines how the ACLs will be managed on the virtual cluster. Can only be either `KAFKA_API` or `REST_API`. See [documentation](https://docs.conduktor.io/guide/reference/gateway-reference#virtualcluster) for more information. NOTE: this field has been introduced with Gateway `3.11.0` and it will not work with previous versions",
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.RequiresReplace(),
 						},
@@ -131,16 +131,16 @@ func GatewayVirtualClusterV2ResourceSchema(ctx context.Context) schema.Schema {
 					},
 					"bootstrap_servers": schema.StringAttribute{
 						Computed:            true,
-						Description:         "The bootstrap servers to create a connection to the virtual cluster. This field is automatically managed by the gateway",
-						MarkdownDescription: "The bootstrap servers to create a connection to the virtual cluster. This field is automatically managed by the gateway",
+						Description:         "Read only field. The bootstrap servers to create a connection to the virtual cluster. This field is automatically managed by the gateway",
+						MarkdownDescription: "Read only field. The bootstrap servers to create a connection to the virtual cluster. This field is automatically managed by the gateway",
 					},
 					"client_properties": schema.MapAttribute{
 						ElementType: types.MapType{
 							ElemType: types.StringType,
 						},
 						Computed:            true,
-						Description:         "Rad only field. Depending on gateway config, different kind of authentication can be used: `MTLS`, `PLAIN` and `OAUTHBEARER`",
-						MarkdownDescription: "Rad only field. Depending on gateway config, different kind of authentication can be used: `MTLS`, `PLAIN` and `OAUTHBEARER`",
+						Description:         "Read only field. Depending on gateway config, different kind of authentication can be used: `MTLS`, `PLAIN` and `OAUTHBEARER`",
+						MarkdownDescription: "Read only field. Depending on gateway config, different kind of authentication can be used: `MTLS`, `PLAIN` and `OAUTHBEARER`",
 					},
 					"super_users": schema.SetAttribute{
 						ElementType:         types.StringType,

@@ -90,15 +90,15 @@ resource "conduktor_gateway_virtual_cluster_v2" "complex" {
 Optional:
 
 - `acl_enabled` (Boolean) Enable ACL checks on all Kafka API calls to this virtual cluster. Depending on the value of the `acl_mode` field, acls are required to be set in different ways. See the `acl_mode` field for more details
-- `acl_mode` (String) The mode defines how the ACLs will be managed on the virtual cluster. Can only be either KAFKA_API or REST_API. See [documentation](https://docs.conduktor.io/guide/reference/gateway-reference#virtualcluster) for more information. NOTE: this field has been introduced with Gateway `3.11.0` and it will not work with previous versions
+- `acl_mode` (String) The mode defines how the ACLs will be managed on the virtual cluster. Can only be either `KAFKA_API` or `REST_API`. See [documentation](https://docs.conduktor.io/guide/reference/gateway-reference#virtualcluster) for more information. NOTE: this field has been introduced with Gateway `3.11.0` and it will not work with previous versions
 - `acls` (Attributes Set) List of ACL bindings for the virtual cluster. Only required if `spec.acl_mode` is set to `REST_API`. See [documentation](https://docs.conduktor.io/guide/reference/gateway-reference#virtualcluster) for more information. NOTE: this field has been introduced with Gateway `3.11.0` and it will not work with previous versions (see [below for nested schema](#nestedatt--spec--acls))
 - `super_users` (Set of String) List of usernames for which the associated service accounts in this virtual cluster can bypass ACLs. Required only if `spec.acl_mode` is set to `KAFKA_API`
 - `type` (String) The type of the virtual cluster. Can only be either `Standard` or `Partner`
 
 Read-Only:
 
-- `bootstrap_servers` (String) The bootstrap servers to create a connection to the virtual cluster. This field is automatically managed by the gateway
-- `client_properties` (Map of Map of String) Rad only field. Depending on gateway config, different kind of authentication can be used: `MTLS`, `PLAIN` and `OAUTHBEARER`
+- `bootstrap_servers` (String) Read only field. The bootstrap servers to create a connection to the virtual cluster. This field is automatically managed by the gateway
+- `client_properties` (Map of Map of String) Read only field. Depending on gateway config, different kind of authentication can be used: `MTLS`, `PLAIN` and `OAUTHBEARER`
 
 <a id="nestedatt--spec--acls"></a>
 ### Nested Schema for `spec.acls`
