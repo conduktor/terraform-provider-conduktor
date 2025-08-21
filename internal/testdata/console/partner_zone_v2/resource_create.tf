@@ -1,3 +1,11 @@
+resource "conduktor_console_topic_v2" "backing_topic_a" {
+  name    = "kafka-topic-a"
+  cluster = "gw-cluster"
+  spec = {
+    partitions         = 1
+    replication_factor = 1
+  }
+}
 
 resource "conduktor_console_partner_zone_v2" "test" {
   name = "partner-zone"
@@ -20,4 +28,7 @@ resource "conduktor_console_partner_zone_v2" "test" {
       }
     ]
   }
+  depends_on = [
+    conduktor_console_topic_v2.backing_topic_a
+  ]
 }

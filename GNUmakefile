@@ -57,7 +57,7 @@ go-lint: tools ## Run Golang linters
 
 .PHONY: pull_test_assets
 pull_test_assets: ## Pull test docker images
-	@docker compose -f "$(CURDIR)/docker-compose.yaml" pull
+	@docker compose -f "$(CURDIR)/docker-compose.yaml" pull --quiet
 
 .PHONY: start_test_env
 start_test_env: ## Start test environment

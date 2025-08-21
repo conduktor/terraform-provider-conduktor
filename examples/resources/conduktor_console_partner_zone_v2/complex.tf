@@ -18,13 +18,13 @@ resource "conduktor_console_partner_zone_v2" "complex" {
     }
     topics = [
       {
-        name          = "topic-a"
-        backing_topic = "kafka-topic-a"
+        name          = "ext-analytics"
+        backing_topic = "internal-analytics"
         permission    = "WRITE"
       },
       {
-        name          = "topic-b"
-        backing_topic = "kafka-topic-b"
+        name          = "ext-customers"
+        backing_topic = "internal-customers"
         permission    = "READ"
       }
     ]

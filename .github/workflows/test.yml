@@ -96,6 +96,14 @@ jobs:
               version: "latest"
               name: "TF-latest"
             license: v3
+
+          # nightly versions with license
+          - console: "nightly"
+            gateway: "nightly"
+            terraform:
+              version: "latest"
+              name: "TF-latest"
+            license: v3
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-go@v5

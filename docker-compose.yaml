@@ -139,6 +139,8 @@ services:
       GATEWAY_PORT_START: 9094
       GATEWAY_PORT_COUNT: 1
       GATEWAY_USER_POOL_SECRET_KEY: "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAw"
+      GATEWAY_SUPER_USERS: "admin,console"
+      GATEWAY_ADMIN_API_USERS: "[{username: admin, password: conduktor, admin: true}]"
       # OAuth config needed to test EXTERNAL service accounts
       GATEWAY_SECURITY_PROTOCOL: SASL_PLAINTEXT
       GATEWAY_ACL_ENABLED: false
