@@ -104,8 +104,8 @@ type KafkaConnectBearerToken struct {
 
 type KafkaConnectBasicAuth struct {
 	Type     string `json:"type"`
-	Username string `json:"username,omitempty"`
-	Password string `json:"password,omitempty"`
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
 type KafkaConnectResource struct {
