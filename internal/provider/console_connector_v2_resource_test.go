@@ -156,7 +156,7 @@ func TestAccConnectorV2ExampleResource(t *testing.T) {
 			{
 				PreConfig: func() {
 					// Ensure the previous resource is fully created before starting the next one to avoid concurrency issues on Kafka Connect server.
-					time.Sleep(1 * time.Second)
+					time.Sleep(5 * time.Second)
 				},
 				Config: providerConfigConsole + test.TestAccExample(t, "resources", "conduktor_console_connector_v2", "complex.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
