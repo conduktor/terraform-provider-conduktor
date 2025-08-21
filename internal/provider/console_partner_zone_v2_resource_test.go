@@ -160,8 +160,8 @@ func TestAccPartnerZoneV2ExampleResource(t *testing.T) {
 			// Create and Read from complex example
 			{
 				PreConfig: func() {
-					createBackingTopic(t, consoleClient, "kafka-topic", "gw-cluster")
-					createBackingTopic(t, consoleClient, "kafka-topic", "gw-cluster")
+					createBackingTopic(t, consoleClient, "internal-analytics", "gw-cluster")
+					createBackingTopic(t, consoleClient, "internal-customers", "gw-cluster")
 				},
 				Config: providerConfigConsole + test.TestAccExample(t, "resources", "conduktor_console_partner_zone_v2", "complex.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
@@ -209,6 +209,9 @@ func createBackingTopic(t *testing.T, client *client.Client, name, cluster strin
 		Spec: console.TopicConsoleSpec{
 			Partitions:        1,
 			ReplicationFactor: 1,
+			Configs: map[string]string{
+				"cleanup.policy": "delete",
+			},
 		},
 	}
 	apiPath := fmt.Sprintf("/public/kafka/v2/cluster/%s/topic", cluster)
