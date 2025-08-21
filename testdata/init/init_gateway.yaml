@@ -10,6 +10,14 @@ spec:
 apiVersion: gateway/v2
 kind: GatewayServiceAccount
 metadata:
+ name: "console" # Console service account to connect to Gateway
+ vCluster: "passthrough"
+spec:
+ type: "LOCAL"
+---
+apiVersion: gateway/v2
+kind: GatewayServiceAccount
+metadata:
  vCluster: "vcluster_sa"
  name: "admin"
 spec:
