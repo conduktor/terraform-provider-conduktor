@@ -1,0 +1,46 @@
+---
+page_title: "Conduktor : conduktor_console_ksqldb_cluster_v2 "
+subcategory: "console/v2"
+description: |-
+    Resource for managing Conduktor KsqlDB clusters definition linked to an existing Kafka cluster definition inside Conduktor Console.
+    This resource allows you to create, read, update and delete KsqlDB clusters connections from Conduktor Console.
+---
+
+# {{ .Name }}
+
+Resource for managing [Conduktor KsqlDB clusters](https://docs.conduktor.io/guide/reference/console-reference#ksqldbcluster) definition linked to an existing Kafka cluster definition inside Conduktor Console.
+This resource allows you to create, read, update and delete KsqlDB clusters connections from Conduktor Console.
+
+## Example Usage
+
+### Simple KsqlDB cluster
+This example creates a simple KsqlDB cluster connection without any authentication.
+{{tffile "examples/resources/conduktor_console_ksqldb_cluster_v2/simple.tf"}}
+
+### Basic KsqlDB cluster
+This example creates a complex KsqlDB cluster connection with basic authentication.
+{{tffile "examples/resources/conduktor_console_ksqldb_cluster_v2/basicAuth.tf"}}
+
+### Bearer token KsqlDB cluster
+This example creates a complex KsqlDB cluster connection with bearer token authentication.
+{{tffile "examples/resources/conduktor_console_ksqldb_cluster_v2/bearerToken.tf"}}
+
+### mTLS KsqlDB cluster
+This example creates a complex KsqlDB cluster connection with mTLS authentication.
+{{tffile "examples/resources/conduktor_console_ksqldb_cluster_v2/mtls.tf"}}
+
+{{ .SchemaMarkdown }}
+
+## Import
+
+In order to import a KsqlDB cluster connection into Conduktor, you need to know the Kafka cluster ID and the KsqlDB cluster ID.
+
+The import ID is constructed as follows: `< cluster_id >/< ksqlkdb_cluster_name >`.
+
+For example, using an [`import` block](https://developer.hashicorp.com/terraform/language/import) :
+{{tffile "examples/resources/conduktor_console_ksqldb_cluster_v2/import.tf"}}
+
+Using the `terraform import` command:
+```shell
+terraform import conduktor_console_ksqldb_cluster_v2.example kafka-cluster/import-ksqldb
+```
