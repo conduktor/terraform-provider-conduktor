@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/conduktor/terraform-provider-conduktor/internal/test"
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"

@@ -3962,6 +3962,289 @@
       }
     },
     {
+      "name": "gateway_virtual_cluster_v2",
+      "schema": {
+        "attributes": [
+          {
+            "name": "name",
+            "string": {
+              "description": "The name of the virtual cluster, must be unique, acts as an ID for import",
+              "computed_optional_required": "required",
+              "plan_modifiers": [
+                {
+                  "custom": {
+                    "imports": [
+                      {
+                        "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+                      }
+                    ],
+                    "schema_definition": "stringplanmodifier.RequiresReplace()"
+                  }
+                }
+              ],
+              "validators": [
+                {
+                  "custom": {
+                    "imports": [
+                      {
+                        "path": "regexp"
+                      },
+                      {
+                        "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                      }
+                    ],
+                    "schema_definition": "stringvalidator.RegexMatches(regexp.MustCompile(\"^[a-zA-Z0-9._-]+$\"), \"\")"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "spec",
+            "single_nested": {
+              "computed_optional_required": "required",
+              "description": "Virtual Cluster specification",
+              "attributes": [
+                {
+                  "name": "acl_enabled",
+                  "bool": {
+                    "description": "Enable ACL checks on all Kafka API calls to this virtual cluster. Depending on the value of the `acl_mode` field, acls are required to be set in different ways. See the `acl_mode` field for more details",
+                    "computed_optional_required": "computed_optional"
+                  }
+                },
+                {
+                  "name": "acl_mode",
+                  "string": {
+                    "description": "The mode defines how the ACLs will be managed on the virtual cluster. Can only be either `KAFKA_API` or `REST_API`. See [documentation](https://docs.conduktor.io/guide/reference/gateway-reference#virtualcluster) for more information. NOTE: this field has been introduced with Gateway `3.11.0` and it will not work with previous versions",
+                    "computed_optional_required": "optional",
+                    "plan_modifiers": [
+                      {
+                        "custom": {
+                          "imports": [
+                            {
+                              "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+                            }
+                          ],
+                          "schema_definition": "stringplanmodifier.RequiresReplace()"
+                        }
+                      }
+                    ],
+                    "validators": [
+                      {
+                        "custom": {
+                          "imports": [
+                            {
+                              "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                            },
+                            {
+                              "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
+                            }
+                          ],
+                          "schema_definition": "stringvalidator.OneOf(validation.ValidVirtualClusterACLModes...)"
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "super_users",
+                  "set": {
+                    "description": "List of usernames for which the associated service accounts in this virtual cluster can bypass ACLs. Required only if `spec.acl_mode` is set to `KAFKA_API`",
+                    "computed_optional_required": "computed_optional",
+                    "element_type": {
+                      "string": {}
+                    },
+                    "default": {
+                      "custom": {
+                        "imports": [
+                          {
+                            "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
+                          }
+                        ],
+                        "schema_definition": "setdefault.StaticValue(basetypes.NewSetValueMust(types.StringType, []attr.Value{}))"
+                      }
+                    }
+                  }
+                },
+                {
+                  "name": "type",
+                  "string": {
+                    "description": "The type of the virtual cluster. Can only be either `Standard` or `Partner`",
+                    "computed_optional_required": "computed_optional",
+                    "validators": [
+                      {
+                        "custom": {
+                          "imports": [
+                            {
+                              "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                            },
+                            {
+                              "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
+                            }
+                          ],
+                          "schema_definition": "stringvalidator.OneOf(validation.ValidVirtualClusterTypes...)"
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "bootstrap_servers",
+                  "string": {
+                    "description": "Read only field. The bootstrap servers to create a connection to the virtual cluster. This field is automatically managed by the gateway",
+                    "computed_optional_required": "computed"
+                  }
+                },
+                {
+                  "name": "client_properties",
+                  "map": {
+                    "description": "Read only field. Depending on gateway config, different kind of authentication can be used: `MTLS`, `PLAIN` and `OAUTHBEARER`",
+                    "computed_optional_required": "computed",
+                    "element_type": {
+                      "map": {
+                        "element_type": {
+                          "string": {}
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "name": "acls",
+                  "set_nested": {
+                    "description": "List of ACL bindings for the virtual cluster. Only required if `spec.acl_mode` is set to `REST_API`. See [documentation](https://docs.conduktor.io/guide/reference/gateway-reference#virtualcluster) for more information. NOTE: this field has been introduced with Gateway `3.11.0` and it will not work with previous versions",
+                    "computed_optional_required": "computed_optional",
+                    "nested_object": {
+                      "attributes": [
+                        {
+                          "name": "resource_pattern",
+                          "single_nested": {
+                            "computed_optional_required": "required",
+                            "description": "The resource pattern to apply the ACL to",
+                            "attributes": [
+                              {
+                                "name": "resource_type",
+                                "string": {
+                                  "description": "Type of the resource to apply ACL on. Valid values are: `ANY`, `CLUSTER`, `DELEGATION_TOKEN`, `GROUP`, `TOPIC`, `TRANSACTIONAL_ID`, `UNKNOWN`",
+                                  "computed_optional_required": "required",
+                                  "validators": [
+                                    {
+                                      "custom": {
+                                        "imports": [
+                                          {
+                                            "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                          },
+                                          {
+                                            "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
+                                          }
+                                        ],
+                                        "schema_definition": "stringvalidator.OneOf(validation.ValidVirtualClusterACLsResourceTypes...)"
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "name": "name",
+                                "string": {
+                                  "description": "The name or pattern matching the name associated with the resource. Wildcards (e.g. `*`) are supported",
+                                  "computed_optional_required": "required"
+                                }
+                              },
+                              {
+                                "name": "pattern_type",
+                                "string": {
+                                  "description": "Type of the pattern to apply ACL on. Valid values are: `ANY`, `LITERAL`, `MATCH`, `PREFIXED`, `UNKNOWN`",
+                                  "computed_optional_required": "required",
+                                  "validators": [
+                                    {
+                                      "custom": {
+                                        "imports": [
+                                          {
+                                            "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                          },
+                                          {
+                                            "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
+                                          }
+                                        ],
+                                        "schema_definition": "stringvalidator.OneOf(validation.ValidVirtualClusterACLsPatternTypes...)"
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "name": "principal",
+                          "string": {
+                            "description": "Who or what the ACL applies to",
+                            "computed_optional_required": "required"
+                          }
+                        },
+                        {
+                          "name": "host",
+                          "string": {
+                            "description": "Host of the ACL",
+                            "computed_optional_required": "required"
+                          }
+                        },
+                        {
+                          "name": "operation",
+                          "string": {
+                            "description": "Set of all operations to apply on the resource. Valid values are: `ALL`, `ALTER`, `ALTER_CONFIGS`, `CLUSTER_ACTION`, `CREATE`, `CREATE_TOKENS`, `DELETE`, `DESCRIBE`, `DESCRIBE_CONFIGS`, `DESCRIBE_TOKENS`, `IDEMPOTENT_WRITE`, `READ`, `UNKNOWN`, `WRITE`",
+                            "computed_optional_required": "required",
+                            "validators": [
+                              {
+                                "custom": {
+                                  "imports": [
+                                    {
+                                      "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                    },
+                                    {
+                                      "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
+                                    }
+                                  ],
+                                  "schema_definition": "stringvalidator.OneOf(validation.ValidVirtualClusterACLsOperations...)"
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "name": "permission_type",
+                          "string": {
+                            "description": "Permission Type for Access Control Entry. Valid values are: ALLOW, DENY",
+                            "computed_optional_required": "required",
+                            "validators": [
+                              {
+                                "custom": {
+                                  "imports": [
+                                    {
+                                      "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                    },
+                                    {
+                                      "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
+                                    }
+                                  ],
+                                  "schema_definition": "stringvalidator.OneOf(validation.ValidVirtualClusterACLsPermissionTypes...)"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "gateway_interceptor_v2",
       "schema": {
         "attributes": [

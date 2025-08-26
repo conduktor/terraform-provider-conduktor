@@ -1,0 +1,49 @@
+---
+page_title: "Conduktor : conduktor_gateway_virtual_cluster_v2 "
+subcategory: "gateway/v2"
+description: |-
+    Resource for managing Conduktor Gateway Virtual Clusters.
+    This resource allows you to create, read, update and delete virtual clusters in Conduktor Gateway.
+    For a full description of what Gateway virtual clusters are, refer to our [docs site](https://docs.conduktor.io/guide/conduktor-concepts/virtual-clusters).
+---
+
+# {{ .Name }}
+
+Resource for managing Conduktor virtual clusters.
+This resource allows you to create, read, update and delete virtual clusters in Conduktor Gateway.
+
+## WARNING
+Minimum requirement for this resource:
+ - Conduktor Gateway version `3.6.0`.
+
+Minimum recommended version for this resource:
+ - Conduktor Gateway version `3.11.0`.
+
+Usage of this resource with older Gateway versions might result in unexpected behavior.
+ - e.g. `acl_mode` and `acls` have been made available from Conduktor Gateway `3.11.0`.
+
+## Example Usage
+
+### Simple virtual cluster without ACLs
+{{tffile "examples/resources/conduktor_gateway_virtual_cluster_v2/simple.tf"}}
+
+### Complex virtual cluster with ACLs
+{{tffile "examples/resources/conduktor_gateway_virtual_cluster_v2/complex.tf"}}
+
+
+{{ .SchemaMarkdown }}
+
+## Import
+
+In order to import an existing Conduktor Gateway Virtual Cluster, you need to know the virtual cluster's unique name.
+
+The import ID is the virtual cluster name.
+
+For example, using an [`import` block](https://developer.hashicorp.com/terraform/language/import) :
+{{tffile "examples/resources/conduktor_gateway_virtual_cluster_v2/import.tf"}}
+
+Using the `terraform import` command:
+```shell
+terraform import conduktor_gateway_virtual_cluster_v2.example vcluster_name
+```
+
