@@ -12,6 +12,23 @@ import (
 )
 
 var schemaValue = "{\"$id\":\"https://mycompany.com/myrecord\",\"$schema\":\"https://json-schema.org/draft/2019-09/schema\",\"type\":\"object\",\"title\":\"MyRecord\",\"description\":\"Json schema for MyRecord\",\"properties\":{\"id\":{\"type\":\"string\"},\"name\":{\"type\":[\"string\",\"null\"]}},\"required\":[\"id\"],\"additionalProperties\":false}"
+var schemaValuePretty = `{
+  "$id": "https://mycompany.com/myrecord",
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "type": "object",
+  "title": "MyRecord",
+  "description": "Json schema for MyRecord",
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "name": {
+      "type": ["string", "null"]
+    }
+  },
+  "required": ["id"],
+  "additionalProperties": false
+}`
 
 func TestAccKafkaSubjectV2Resource(t *testing.T) {
 	resourceRef := "conduktor_console_kafka_subject_v2.test"
@@ -94,7 +111,7 @@ func TestAccKafkaSubjectV2Minimal(t *testing.T) {
 func TestAccKafkaSubjectV2ResourceFileSchema(t *testing.T) {
 	test.CheckEnterpriseEnabled(t)
 	minimalRef := "conduktor_console_kafka_subject_v2.minimal"
-	// fileRef := "conduktor_console_kafka_subject_v2.json_file"
+	complexRef := "conduktor_console_kafka_subject_v2.complex"
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { test.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
@@ -106,7 +123,34 @@ func TestAccKafkaSubjectV2ResourceFileSchema(t *testing.T) {
 					resource.TestCheckResourceAttr(minimalRef, "name", "minimal.value"),
 					resource.TestCheckResourceAttr(minimalRef, "cluster", "kafka-cluster"),
 					resource.TestCheckResourceAttr(minimalRef, "spec.format", "JSON"),
-					testCheckJSONEquality(minimalRef, "spec.schema", schemaValue),
+					testCheckJSONEquality(minimalRef, "spec.schema", schemaValuePretty),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { test.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read from complex example
+			{
+				Config: providerConfigConsole + test.TestAccExample(t, "resources", "conduktor_console_kafka_subject_v2", "complex.tf"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(complexRef, "name", "complex.value"),
+					resource.TestCheckResourceAttr(complexRef, "cluster", "kafka-cluster"),
+					resource.TestCheckResourceAttr(complexRef, "labels.%", "2"),
+					resource.TestCheckResourceAttr(complexRef, "labels.team", "test"),
+					resource.TestCheckResourceAttr(complexRef, "labels.environment", "test"),
+					resource.TestCheckResourceAttr(complexRef, "spec.format", "JSON"),
+					resource.TestCheckResourceAttr(complexRef, "spec.compatibility", "BACKWARD"),
+					testCheckJSONEquality(complexRef, "spec.schema", schemaValuePretty),
+					resource.TestCheckResourceAttr(complexRef, "spec.id", "2"),
+					resource.TestCheckResourceAttr(complexRef, "spec.version", "1"),
+					resource.TestCheckResourceAttr(complexRef, "spec.references.#", "1"),
+					resource.TestCheckResourceAttr(complexRef, "spec.references.0.name", "example-reference"),
+					resource.TestCheckResourceAttr(complexRef, "spec.references.0.subject", "minimal_subject"),
+					resource.TestCheckResourceAttr(complexRef, "spec.references.0.version", "1"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -114,8 +158,11 @@ func TestAccKafkaSubjectV2ResourceFileSchema(t *testing.T) {
 	})
 }
 
-// testCheckJSONEquality compares two JSON strings for equality by parsing them into structs and comparing the structs
 func testCheckJSONEquality(resourceName, attributeName, expectedJSON string) resource.TestCheckFunc {
+	// This function returns a resource.TestCheckFunc that checks if the value of an attribute named attributeName
+	// on a resource named resourceName is equal to the expectedJSON in terms of JSON equality.
+	// This function is useful if you want to compare JSON strings in a resource.TestStep.
+
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[resourceName]
 		if !ok {

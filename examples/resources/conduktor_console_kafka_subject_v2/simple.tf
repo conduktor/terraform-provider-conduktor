@@ -3,24 +3,24 @@ resource "conduktor_console_kafka_subject_v2" "minimal" {
   cluster = "kafka-cluster"
   spec = {
     format = "JSON"
-    schema = <<EOF
-{
-  "$id": "https://mycompany.com/myrecord",
-  "$schema": "https://json-schema.org/draft/2019-09/schema",
-  "type": "object",
-  "title": "MyRecord",
-  "description": "Json schema for MyRecord",
-  "properties": {
-    "id": {
-      "type": "string"
-    },
-    "name": {
-      "type": ["string", "null"]
-    }
-  },
-  "required": ["id"],
-  "additionalProperties": false
-}
-EOF
+    schema = jsonencode(
+      {
+        "$id" : "https://mycompany.com/myrecord",
+        "$schema" : "https://json-schema.org/draft/2019-09/schema",
+        "type" : "object",
+        "title" : "MyRecord",
+        "description" : "Json schema for MyRecord",
+        "properties" : {
+          "id" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : ["string", "null"]
+          }
+        },
+        "required" : ["id"],
+        "additionalProperties" : false
+      }
+    )
   }
 }

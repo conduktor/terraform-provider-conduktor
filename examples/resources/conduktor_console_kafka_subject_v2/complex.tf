@@ -3,12 +3,30 @@ resource "conduktor_console_kafka_subject_v2" "this" {
   cluster = "kafka-cluster"
   spec = {
     format = "JSON"
-    schema = file("${path.module}/schema.json")
+    schema = jsonencode(
+      {
+        "$id" : "https://mycompany.com/myrecord",
+        "$schema" : "https://json-schema.org/draft/2019-09/schema",
+        "type" : "object",
+        "title" : "MyRecord",
+        "description" : "Json schema for MyRecord",
+        "properties" : {
+          "id" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : ["string", "null"]
+          }
+        },
+        "required" : ["id"],
+        "additionalProperties" : false
+      }
+    )
   }
 }
 
 resource "conduktor_console_kafka_subject_v2" "complex" {
-  name    = "api-json-example-subject.value"
+  name    = "complex.value"
   cluster = "kafka-cluster"
   labels = {
     "team"        = "test"
@@ -17,9 +35,27 @@ resource "conduktor_console_kafka_subject_v2" "complex" {
   spec = {
     format        = "JSON"
     compatibility = "BACKWARD"
-    schema        = file("${path.module}/schema.json")
-    id            = 2
-    version       = 1
+    schema = jsonencode(
+      {
+        "$id" : "https://mycompany.com/myrecord",
+        "$schema" : "https://json-schema.org/draft/2019-09/schema",
+        "type" : "object",
+        "title" : "MyRecord",
+        "description" : "Json schema for MyRecord",
+        "properties" : {
+          "id" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : ["string", "null"]
+          }
+        },
+        "required" : ["id"],
+        "additionalProperties" : false
+      }
+    )
+    id      = 2
+    version = 1
     references = [
       {
         name    = "example-reference"
