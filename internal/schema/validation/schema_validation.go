@@ -148,3 +148,11 @@ var ValidKafkaSubjectCompatibility = []string{"BACKWARD", "BACKWARD_TRANSITIVE",
 
 // Gateway Service Accounts.
 var ValidServiceAccountTypes = []string{"LOCAL", "EXTERNAL"}
+
+// Gateway Virtual Clusters.
+var ValidVirtualClusterACLModes = []string{"KAFKA_API", "REST_API"}
+var ValidVirtualClusterTypes = []string{"Standard", "Partner"}
+var ValidVirtualClusterACLsResourceTypes = []string{"ANY", "CLUSTER", "DELEGATION_TOKEN", "GROUP", "TOPIC", "TRANSACTIONAL_ID", "UNKNOWN"}
+var ValidVirtualClusterACLsPatternTypes = []string{"ANY", "LITERAL", "MATCH", "PREFIXED", "UNKNOWN"}
+var ValidVirtualClusterACLsOperations = []string{"ALL", "ALTER", "ALTER_CONFIGS", "CLUSTER_ACTION", "CREATE", "CREATE_TOKENS", "DELETE", "DESCRIBE", "DESCRIBE_CONFIGS", "DESCRIBE_TOKENS", "IDEMPOTENT_WRITE", "READ", "UNKNOWN", "WRITE"}
+var ValidVirtualClusterACLsPermissionTypes = []string{"ALLOW", "DENY"}

@@ -1,12 +1,10 @@
 package provider
 
 import (
-	"regexp"
-	"testing"
-	"time"
-
 	"github.com/conduktor/terraform-provider-conduktor/internal/client"
 	"github.com/conduktor/terraform-provider-conduktor/internal/test"
+	"regexp"
+	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
@@ -126,7 +124,7 @@ func TestAccConnectorV2Labels(t *testing.T) {
 	})
 }
 
-func TestAccConnectorV2ExampleResource(t *testing.T) {
+func TestAccConnectorV2ExampleSimpleResource(t *testing.T) {
 	v, err := fetchClientVersion(client.CONSOLE)
 	if err != nil {
 		t.Fatalf("Error fetching current version: %s", err)
@@ -152,12 +150,24 @@ func TestAccConnectorV2ExampleResource(t *testing.T) {
 					resource.TestCheckResourceAttr("conduktor_console_connector_v2.simple", "spec.config.file", "/etc/kafka/consumer.properties"),
 				),
 			},
+		},
+	})
+}
+
+func TestAccConnectorV2ExampleComplexResource(t *testing.T) {
+	v, err := fetchClientVersion(client.CONSOLE)
+	if err != nil {
+		t.Fatalf("Error fetching current version: %s", err)
+	}
+
+	test.CheckMinimumVersionRequirement(t, v, connectorMininumRecommendedVersion)
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { test.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+
+		Steps: []resource.TestStep{
 			// Create and Read from complex example
 			{
-				PreConfig: func() {
-					// Ensure the previous resource is fully created before starting the next one to avoid concurrency issues on Kafka Connect server.
-					time.Sleep(1 * time.Second)
-				},
 				Config: providerConfigConsole + test.TestAccExample(t, "resources", "conduktor_console_connector_v2", "complex.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("conduktor_console_connector_v2.complex", "name", "complex"),

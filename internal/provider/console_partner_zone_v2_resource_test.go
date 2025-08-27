@@ -1,10 +1,12 @@
 package provider
 
 import (
-	"testing"
-
+	"context"
+	"fmt"
 	"github.com/conduktor/terraform-provider-conduktor/internal/client"
+	"github.com/conduktor/terraform-provider-conduktor/internal/model/console"
 	"github.com/conduktor/terraform-provider-conduktor/internal/test"
+	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
@@ -123,6 +125,11 @@ func TestAccPartnerZoneV2ExampleResource(t *testing.T) {
 	}
 	test.CheckMinimumVersionRequirement(t, v, partnerZoneMininumGatewayVersion)
 
+	consoleClient, err := testClient(client.CONSOLE)
+	if err != nil {
+		t.Fatalf("Error creating console client: %s", err)
+	}
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { test.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
@@ -130,6 +137,9 @@ func TestAccPartnerZoneV2ExampleResource(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read from simple example
 			{
+				PreConfig: func() {
+					createBackingTopic(t, consoleClient, "kafka-topic", "gw-cluster")
+				},
 				Config: providerConfigConsole + test.TestAccExample(t, "resources", "conduktor_console_partner_zone_v2", "simple.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("conduktor_console_partner_zone_v2.simple", "name", "simple"),
@@ -149,6 +159,10 @@ func TestAccPartnerZoneV2ExampleResource(t *testing.T) {
 			},
 			// Create and Read from complex example
 			{
+				PreConfig: func() {
+					createBackingTopic(t, consoleClient, "internal-analytics", "gw-cluster")
+					createBackingTopic(t, consoleClient, "internal-customers", "gw-cluster")
+				},
 				Config: providerConfigConsole + test.TestAccExample(t, "resources", "conduktor_console_partner_zone_v2", "complex.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("conduktor_console_partner_zone_v2.complex", "name", "complex"),
@@ -163,11 +177,11 @@ func TestAccPartnerZoneV2ExampleResource(t *testing.T) {
 					resource.TestCheckResourceAttr("conduktor_console_partner_zone_v2.complex", "spec.authentication_mode.type", "PLAIN"),
 					resource.TestCheckResourceAttr("conduktor_console_partner_zone_v2.complex", "spec.authentication_mode.service_account", "external-partner"),
 					resource.TestCheckResourceAttr("conduktor_console_partner_zone_v2.complex", "spec.topics.#", "2"),
-					resource.TestCheckResourceAttr("conduktor_console_partner_zone_v2.complex", "spec.topics.0.name", "topic-a"),
-					resource.TestCheckResourceAttr("conduktor_console_partner_zone_v2.complex", "spec.topics.0.backing_topic", "kafka-topic-a"),
+					resource.TestCheckResourceAttr("conduktor_console_partner_zone_v2.complex", "spec.topics.0.name", "ext-analytics"),
+					resource.TestCheckResourceAttr("conduktor_console_partner_zone_v2.complex", "spec.topics.0.backing_topic", "internal-analytics"),
 					resource.TestCheckResourceAttr("conduktor_console_partner_zone_v2.complex", "spec.topics.0.permission", "WRITE"),
-					resource.TestCheckResourceAttr("conduktor_console_partner_zone_v2.complex", "spec.topics.1.name", "topic-b"),
-					resource.TestCheckResourceAttr("conduktor_console_partner_zone_v2.complex", "spec.topics.1.backing_topic", "kafka-topic-b"),
+					resource.TestCheckResourceAttr("conduktor_console_partner_zone_v2.complex", "spec.topics.1.name", "ext-customers"),
+					resource.TestCheckResourceAttr("conduktor_console_partner_zone_v2.complex", "spec.topics.1.backing_topic", "internal-customers"),
 					resource.TestCheckResourceAttr("conduktor_console_partner_zone_v2.complex", "spec.topics.1.permission", "READ"),
 					resource.TestCheckResourceAttr("conduktor_console_partner_zone_v2.complex", "spec.traffic_control_policies.max_produce_rate", "1000000"),
 					resource.TestCheckResourceAttr("conduktor_console_partner_zone_v2.complex", "spec.traffic_control_policies.max_consume_rate", "1000000"),
@@ -182,4 +196,27 @@ func TestAccPartnerZoneV2ExampleResource(t *testing.T) {
 			},
 		},
 	})
+}
+
+func createBackingTopic(t *testing.T, client *client.Client, name, cluster string) {
+	topicResource := console.TopicConsoleResource{
+		Kind:       console.TopicV2Kind,
+		ApiVersion: console.TopicV2ApiVersion,
+		Metadata: console.TopicConsoleMetadata{
+			Name:    name,
+			Cluster: cluster,
+		},
+		Spec: console.TopicConsoleSpec{
+			Partitions:        1,
+			ReplicationFactor: 1,
+			Configs: map[string]string{
+				"cleanup.policy": "delete",
+			},
+		},
+	}
+	apiPath := fmt.Sprintf("/public/kafka/v2/cluster/%s/topic", cluster)
+	_, err := client.Apply(context.Background(), apiPath, topicResource)
+	if err != nil {
+		t.Fatalf("Error creating backing topic: %s", err)
+	}
 }

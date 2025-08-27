@@ -25,15 +25,17 @@ metadata:
 spec:
   displayName: Gateway Cluster
   bootstrapServers: gateway:9094
-  # properties:
-  #   sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="admin" password="admin-secret";
+  properties:
+    sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="console" password="eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6ImNvbnNvbGUiLCJ2Y2x1c3RlciI6InBhc3N0aHJvdWdoIiwiZXhwIjoxOTEzNTI5OTI2fQ.PaSEJkxyeC6pUJk_piRavAQPxCyN3c7HDAjPkubH9ZI";
+    security.protocol: SASL_PLAINTEXT
+    sasl.mechanism: PLAIN
   color: '#FF0000'
   icon: icon
   kafkaFlavor:
     url: http://gateway:8888
     user: admin
     password: conduktor
-    virtualCluster: vcluster_sa
+    virtualCluster: passthrough
     type: Gateway
 ---
 apiVersion: v2

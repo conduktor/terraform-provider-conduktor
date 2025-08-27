@@ -72,11 +72,13 @@ This repository contains the Conduktor Terraform provider, which defines Condukt
 - [Console partner zone](./docs/resources/console_partner_zone_v2.md)
 - [Kafka clusters with schema registry](./docs/resources/console_kafka_cluster_v2.md)
 - [Kafka connect server](./docs/resources/console_kafka_connect_v2.md)
+- [KsqlDB cluster](./docs/resources/console_ksqldb_cluster_v2.md)
 
 ### Gateway resources
 
 - [Gateway service account](./docs/resources/gateway_service_account_v2.md)
 - [Gateway interceptor](./docs/resources/gateway_interceptor_v2.md)
+- [Gateway virtual cluster](./docs/resources/gateway_virtual_cluster_v2.md)
 
 ### Self-service resources
 
@@ -355,14 +357,12 @@ Need a resource to unblock a use case? [Feedback](https://support.conduktor.io/h
 We are currently reviewing the following resources:
 
 1. Console resources:
-  - [KsqlDBCluster](https://docs.conduktor.io/platform/reference/resource-reference/console/#ksqldbcluster)
   - [Alert](https://docs.conduktor.io/platform/reference/resource-reference/console/#alert)
 2. Kafka resources:
   - [Subject](https://docs.conduktor.io/platform/reference/resource-reference/kafka/#subject)
 3. Gateway resources:
   - [GatewayGroup](https://docs.conduktor.io/gateway/reference/resources-reference/#gatewaygroup)
   - [ConcentrationRule](https://docs.conduktor.io/gateway/reference/resources-reference/#concentrationrule)
-  - [VirtualCluster](https://docs.conduktor.io/gateway/reference/resources-reference/#virtualcluster)
   - [AliasTopic](https://docs.conduktor.io/gateway/reference/resources-reference/#aliastopic)
 
 > [!NOTE]
