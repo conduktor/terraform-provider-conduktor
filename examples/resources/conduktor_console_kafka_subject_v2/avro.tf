@@ -21,7 +21,5 @@ resource "conduktor_console_kafka_subject_v2" "avro" {
   ]
 }
 EOF
-    id            = 1
-    version       = 1
   }
 }

@@ -72,7 +72,6 @@ func ConsoleKafkaSubjectV2ResourceSchema(ctx context.Context) schema.Schema {
 						},
 					},
 					"id": schema.Int64Attribute{
-						Optional:            true,
 						Computed:            true,
 						Description:         "Kafka subject ID",
 						MarkdownDescription: "Kafka subject ID",
@@ -113,7 +112,6 @@ func ConsoleKafkaSubjectV2ResourceSchema(ctx context.Context) schema.Schema {
 						MarkdownDescription: "Kafka subject schema",
 					},
 					"version": schema.Int64Attribute{
-						Optional:            true,
 						Computed:            true,
 						Description:         "Kafka subject version",
 						MarkdownDescription: "Kafka subject version",

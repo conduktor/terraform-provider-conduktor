@@ -16,7 +16,5 @@ message MyRecord {
   string name = 3;
 }
 EOF
-    id            = 2
-    version       = 2
   }
 }

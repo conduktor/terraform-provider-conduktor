@@ -55,8 +55,6 @@ func TestKafkaSubjectV2ModelMapping(t *testing.T) {
 	assert.Equal(t, "kafka-cluster", internal.Metadata.Cluster)
 	assert.Equal(t, "JSON", internal.Spec.Format)
 	assert.Equal(t, "BACKWARD", internal.Spec.Compatibility)
-	assert.Equal(t, 2, internal.Spec.Id)
-	assert.Equal(t, 1, internal.Spec.Version)
 	assert.Equal(t, schemaValue, internal.Spec.Schema)
 	assert.Equal(t, expectedRefs, internal.Spec.References)
 
@@ -70,8 +68,6 @@ func TestKafkaSubjectV2ModelMapping(t *testing.T) {
 	assert.Equal(t, types.StringValue("kafka-cluster"), tfModel.Cluster)
 	assert.Equal(t, types.StringValue("JSON"), tfModel.Spec.Format)
 	assert.Equal(t, types.StringValue("BACKWARD"), tfModel.Spec.Compatibility)
-	assert.Equal(t, types.Int64Value(2), tfModel.Spec.Id)
-	assert.Equal(t, types.Int64Value(1), tfModel.Spec.Version)
 	assert.Equal(t, types.StringValue(schemaValue), tfModel.Spec.Schema)
 	var tfRefs []subject.ReferencesValue
 	diag := tfModel.Spec.References.ElementsAs(ctx, &tfRefs, false)
@@ -95,8 +91,6 @@ func TestKafkaSubjectV2ModelMapping(t *testing.T) {
 	assert.Equal(t, "kafka-cluster", internal2.Metadata.Cluster)
 	assert.Equal(t, "JSON", internal2.Spec.Format)
 	assert.Equal(t, "BACKWARD", internal2.Spec.Compatibility)
-	assert.Equal(t, 2, internal2.Spec.Id)
-	assert.Equal(t, 1, internal2.Spec.Version)
 	assert.Equal(t, schemaValue, internal2.Spec.Schema)
 	assert.Equal(t, expectedRefs, internal2.Spec.References)
 

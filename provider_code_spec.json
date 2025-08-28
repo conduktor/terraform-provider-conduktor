@@ -2034,7 +2034,7 @@
                   "name": "version",
                   "int64": {
                     "description": "Kafka subject version",
-                    "computed_optional_required": "computed_optional"
+                    "computed_optional_required": "computed"
                   }
                 },
                 {
@@ -2063,7 +2063,7 @@
                   "name": "id",
                   "int64": {
                     "description": "Kafka subject ID",
-                    "computed_optional_required": "computed_optional"
+                    "computed_optional_required": "computed"
                   }
                 },
                 {

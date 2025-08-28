@@ -19,7 +19,7 @@ This example creates a simple Kafka subject with minimal configuration.
 
 ### Kafka subject JSON
 This example creates a complex Kafka JSON subject with all available configuration.
-{{tffile "examples/resources/conduktor_console_kafka_subject_v2/json.tf"}}
+{{tffile "examples/resources/conduktor_console_kafka_subject_v2/complex.tf"}}
 
 ### Kafka subject PROTOBUFF
 This example creates a complex Kafka PROTOBUFF subject with all available configuration.
@@ -29,9 +29,7 @@ This example creates a complex Kafka PROTOBUFF subject with all available config
 This example creates a complex Kafka AVRO subject with all available configuration.
 {{tffile "examples/resources/conduktor_console_kafka_subject_v2/avro.tf"}}
 
-### Kafka subject from file
-This example creates a complex Kafka JSON subject with all available configuration.
-{{tffile "examples/resources/conduktor_console_kafka_subject_v2/json_file.tf"}}
+Note - we used inline schemas in these examples. However it is our suggestion that in production you keep the schemas in individual files.
 
 {{ .SchemaMarkdown }}
 

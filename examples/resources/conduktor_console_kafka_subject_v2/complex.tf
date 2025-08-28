@@ -54,8 +54,6 @@ resource "conduktor_console_kafka_subject_v2" "complex" {
         "additionalProperties" : false
       }
     )
-    id      = 2
-    version = 1
     references = [
       {
         name    = "example-reference"
