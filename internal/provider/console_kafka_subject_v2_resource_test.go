@@ -30,6 +30,27 @@ var schemaValuePretty = `{
   "additionalProperties": false
 }`
 
+var schemaAvroValuePretty = `{
+  "type": "record",
+  "name": "MyRecord",
+  "namespace": "com.mycompany",
+  "fields": [
+    {
+      "name": "id",
+      "type": "long"
+    }
+  ]
+}`
+
+// var schemaProtobuffValue = `syntax = "proto3";
+
+// message MyRecord {
+//   int32 id = 1;
+//   string createdAt = 2;
+//   string name = 3;
+// }
+// `
+
 func TestAccKafkaSubjectV2Resource(t *testing.T) {
 	resourceRef := "conduktor_console_kafka_subject_v2.test"
 	resource.Test(t, resource.TestCase{
@@ -109,6 +130,8 @@ func TestAccKafkaSubjectV2ResourceFileSchema(t *testing.T) {
 	test.CheckEnterpriseEnabled(t)
 	minimalRef := "conduktor_console_kafka_subject_v2.minimal"
 	complexRef := "conduktor_console_kafka_subject_v2.complex"
+	avroRef := "conduktor_console_kafka_subject_v2.avro"
+	// protobuffRef := "conduktor_console_kafka_subject_v2.protobuff"
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { test.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
@@ -146,6 +169,47 @@ func TestAccKafkaSubjectV2ResourceFileSchema(t *testing.T) {
 					resource.TestCheckResourceAttr(complexRef, "spec.references.0.name", "example-reference"),
 					resource.TestCheckResourceAttr(complexRef, "spec.references.0.subject", "minimal_subject"),
 					resource.TestCheckResourceAttr(complexRef, "spec.references.0.version", "1"),
+				),
+			},
+		},
+	})
+	// resource.Test(t, resource.TestCase{
+	// 	PreCheck:                 func() { test.TestAccPreCheck(t) },
+	// 	ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+	// 	Steps: []resource.TestStep{
+	// 		// Create and Read from protobuff example
+	// 		{
+	// 			Config: providerConfigConsole + test.TestAccExample(t, "resources", "conduktor_console_kafka_subject_v2", "protobuff.tf"),
+	// 			Check: resource.ComposeAggregateTestCheckFunc(
+	// 				resource.TestCheckResourceAttr(protobuffRef, "name", "protobuff.value"),
+	// 				resource.TestCheckResourceAttr(protobuffRef, "cluster", "kafka-cluster"),
+	// 				resource.TestCheckResourceAttr(protobuffRef, "labels.%", "2"),
+	// 				resource.TestCheckResourceAttr(protobuffRef, "labels.team", "test"),
+	// 				resource.TestCheckResourceAttr(protobuffRef, "labels.environment", "test"),
+	// 				resource.TestCheckResourceAttr(protobuffRef, "spec.format", "PROTOBUF"),
+	// 				resource.TestCheckResourceAttr(protobuffRef, "spec.compatibility", "BACKWARD"),
+	// 				resource.TestCheckResourceAttr(protobuffRef, "spec.schema", schemaProtobuffValue),
+	// 			),
+	// 		},
+	// 		// Delete testing automatically occurs in TestCase
+	// 	},
+	// })
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { test.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read from avro example
+			{
+				Config: providerConfigConsole + test.TestAccExample(t, "resources", "conduktor_console_kafka_subject_v2", "avro.tf"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(avroRef, "name", "avro.value"),
+					resource.TestCheckResourceAttr(avroRef, "cluster", "kafka-cluster"),
+					resource.TestCheckResourceAttr(avroRef, "labels.%", "2"),
+					resource.TestCheckResourceAttr(avroRef, "labels.team", "test"),
+					resource.TestCheckResourceAttr(avroRef, "labels.environment", "test"),
+					resource.TestCheckResourceAttr(avroRef, "spec.format", "AVRO"),
+					resource.TestCheckResourceAttr(avroRef, "spec.compatibility", "FORWARD_TRANSITIVE"),
+					testCheckJSONEquality(avroRef, "spec.schema", schemaAvroValuePretty),
 				),
 			},
 			// Delete testing automatically occurs in TestCase

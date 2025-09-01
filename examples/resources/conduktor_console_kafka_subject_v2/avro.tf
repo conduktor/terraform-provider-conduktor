@@ -1,5 +1,5 @@
 resource "conduktor_console_kafka_subject_v2" "avro" {
-  name    = "api-avro-example-subject.value"
+  name    = "avro.value"
   cluster = "kafka-cluster"
   labels = {
     "team"        = "test"
@@ -8,18 +8,18 @@ resource "conduktor_console_kafka_subject_v2" "avro" {
   spec = {
     format        = "AVRO"
     compatibility = "FORWARD_TRANSITIVE"
-    schema        = <<EOF
-{
-  "type": "record",
-  "name": "MyRecord",
-  "namespace": "com.mycompany",
-  "fields": [
-    {
-      "name": "id",
-      "type": "long"
-    }
-  ]
-}
-EOF
+    schema = jsonencode(
+      {
+        "type" : "record",
+        "name" : "MyRecord",
+        "namespace" : "com.mycompany",
+        "fields" : [
+          {
+            "name" : "id",
+            "type" : "long"
+          }
+        ]
+      }
+    )
   }
 }

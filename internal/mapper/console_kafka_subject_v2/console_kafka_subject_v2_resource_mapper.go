@@ -2,6 +2,7 @@ package console_kafka_subject_v2
 
 import (
 	"context"
+	"fmt"
 
 	mapper "github.com/conduktor/terraform-provider-conduktor/internal/mapper"
 	console "github.com/conduktor/terraform-provider-conduktor/internal/model/console"
@@ -28,12 +29,18 @@ func TFToInternalModel(ctx context.Context, r *subject.ConsoleKafkaSubjectV2Mode
 		return console.KafkaSubjectResource{}, err
 	}
 
+	// Normalize schema when converting from Terraform to internal model
+	normalizedSchema, err := normalizeAvroSchema(r.Spec.Schema.ValueString(), r.Spec.Format.ValueString())
+	if err != nil {
+		return console.KafkaSubjectResource{}, fmt.Errorf("failed to normalize schema: %w", err)
+	}
+
 	return console.NewKafkaSubjectResource(
 		r.Name.ValueString(),
 		r.Cluster.ValueString(),
 		mapper.MergeLabels(managedLabels, userLabels),
 		console.KafkaSubjectSpec{
-			Schema:        r.Spec.Schema.ValueString(),
+			Schema:        normalizedSchema,
 			Format:        r.Spec.Format.ValueString(),
 			Version:       int(r.Spec.Version.ValueInt64()),
 			Compatibility: r.Spec.Compatibility.ValueString(),
@@ -99,7 +106,13 @@ func specInternalModelToTerraform(ctx context.Context, r *console.KafkaSubjectSp
 	var typesMap = unknownSpecObjectValue.AttributeTypes(ctx)
 	var valuesMap = schema.ValueMapFromTypes(ctx, typesMap)
 
-	valuesMap["schema"] = schema.NewStringValue(r.Schema)
+	// Normalize schema before storing in state
+	normalizedSchema, err := normalizeAvroSchema(r.Schema, r.Format)
+	if err != nil {
+		return subject.SpecValue{}, fmt.Errorf("failed to normalize schema: %w", err)
+	}
+
+	valuesMap["schema"] = schema.NewStringValue(normalizedSchema)
 	valuesMap["format"] = schema.NewStringValue(r.Format)
 	valuesMap["version"] = types.Int64Value(int64(r.Version))
 	valuesMap["compatibility"] = schema.NewStringValue(r.Compatibility)
