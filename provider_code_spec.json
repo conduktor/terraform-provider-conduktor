@@ -2005,7 +2005,14 @@
                   "name": "schema",
                   "string": {
                     "description": "Kafka subject schema",
-                    "computed_optional_required": "required"
+                    "computed_optional_required": "required",
+                    "custom_type": {
+                      "import": {
+                        "path": "github.com/conduktor/terraform-provider-conduktor/internal/customtypes"
+                      },
+                      "type": "customtypes.SchemaNormalizedType{}",
+                      "value_type": "customtypes.SchemaNormalized"
+                    }
                   }
                 },
                 {

@@ -5,6 +5,7 @@ package resource_console_kafka_subject_v2
 import (
 	"context"
 	"fmt"
+	"github.com/conduktor/terraform-provider-conduktor/internal/customtypes"
 	"github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -107,6 +108,7 @@ func ConsoleKafkaSubjectV2ResourceSchema(ctx context.Context) schema.Schema {
 						MarkdownDescription: "Array of objects (SchemaReference)",
 					},
 					"schema": schema.StringAttribute{
+						CustomType:          customtypes.SchemaNormalizedType{},
 						Required:            true,
 						Description:         "Kafka subject schema",
 						MarkdownDescription: "Kafka subject schema",
@@ -245,12 +247,12 @@ func (t SpecType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue)
 		return nil, diags
 	}
 
-	schemaVal, ok := schemaAttribute.(basetypes.StringValue)
+	schemaVal, ok := schemaAttribute.(customtypes.SchemaNormalized)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`schema expected to be basetypes.StringValue, was: %T`, schemaAttribute))
+			fmt.Sprintf(`schema expected to be customtypes.SchemaNormalized, was: %T`, schemaAttribute))
 	}
 
 	versionAttribute, ok := attributes["version"]
@@ -431,12 +433,12 @@ func NewSpecValue(attributeTypes map[string]attr.Type, attributes map[string]att
 		return NewSpecValueUnknown(), diags
 	}
 
-	schemaVal, ok := schemaAttribute.(basetypes.StringValue)
+	schemaVal, ok := schemaAttribute.(customtypes.SchemaNormalized)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`schema expected to be basetypes.StringValue, was: %T`, schemaAttribute))
+			fmt.Sprintf(`schema expected to be customtypes.SchemaNormalized, was: %T`, schemaAttribute))
 	}
 
 	versionAttribute, ok := attributes["version"]
@@ -540,12 +542,12 @@ func (t SpecType) ValueType(ctx context.Context) attr.Value {
 var _ basetypes.ObjectValuable = SpecValue{}
 
 type SpecValue struct {
-	Compatibility basetypes.StringValue `tfsdk:"compatibility"`
-	Format        basetypes.StringValue `tfsdk:"format"`
-	Id            basetypes.Int64Value  `tfsdk:"id"`
-	References    basetypes.SetValue    `tfsdk:"references"`
-	Schema        basetypes.StringValue `tfsdk:"schema"`
-	Version       basetypes.Int64Value  `tfsdk:"version"`
+	Compatibility basetypes.StringValue        `tfsdk:"compatibility"`
+	Format        basetypes.StringValue        `tfsdk:"format"`
+	Id            basetypes.Int64Value         `tfsdk:"id"`
+	References    basetypes.SetValue           `tfsdk:"references"`
+	Schema        customtypes.SchemaNormalized `tfsdk:"schema"`
+	Version       basetypes.Int64Value         `tfsdk:"version"`
 	state         attr.ValueState
 }
 
@@ -683,7 +685,7 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 		"references": basetypes.SetType{
 			ElemType: ReferencesValue{}.Type(ctx),
 		},
-		"schema":  basetypes.StringType{},
+		"schema":  customtypes.SchemaNormalizedType{},
 		"version": basetypes.Int64Type{},
 	}
 
@@ -767,7 +769,7 @@ func (v SpecValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 		"references": basetypes.SetType{
 			ElemType: ReferencesValue{}.Type(ctx),
 		},
-		"schema":  basetypes.StringType{},
+		"schema":  customtypes.SchemaNormalizedType{},
 		"version": basetypes.Int64Type{},
 	}
 }

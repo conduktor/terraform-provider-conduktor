@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	ctlresource "github.com/conduktor/ctl/resource"
+	"github.com/conduktor/terraform-provider-conduktor/internal/customtypes"
 	console "github.com/conduktor/terraform-provider-conduktor/internal/model/console"
 	subject "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_console_kafka_subject_v2"
 	"github.com/conduktor/terraform-provider-conduktor/internal/test"
@@ -68,7 +69,7 @@ func TestKafkaSubjectV2ModelMapping(t *testing.T) {
 	assert.Equal(t, types.StringValue("kafka-cluster"), tfModel.Cluster)
 	assert.Equal(t, types.StringValue("JSON"), tfModel.Spec.Format)
 	assert.Equal(t, types.StringValue("BACKWARD"), tfModel.Spec.Compatibility)
-	assert.Equal(t, types.StringValue(schemaValue), tfModel.Spec.Schema)
+	assert.Equal(t, customtypes.NewSchemaNormalizedValue(schemaValue), tfModel.Spec.Schema)
 	var tfRefs []subject.ReferencesValue
 	diag := tfModel.Spec.References.ElementsAs(ctx, &tfRefs, false)
 	assert.False(t, diag.HasError())
