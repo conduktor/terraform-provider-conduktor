@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	jsoniter "github.com/json-iterator/go"
+	"golang.org/x/mod/semver"
 )
 
 func kafkaSubjectV2ApiPutPath(cluster string) string {
@@ -22,6 +23,9 @@ func kafkaSubjectV2ApiPutPath(cluster string) string {
 func kafkaSubjectV2ApiGetPath(cluster string, subjectName string) string {
 	return fmt.Sprintf("/public/kafka/v2/cluster/%s/subject/%s", cluster, subjectName)
 }
+
+// Version when this resource was introduced.
+const kafkaSubjectMininumVersion = "v1.29.0"
 
 var _ resource.Resource = &KafkaSubjectV2Resource{}
 var _ resource.ResourceWithImportState = &KafkaSubjectV2Resource{}
@@ -42,7 +46,7 @@ func (r *KafkaSubjectV2Resource) Schema(ctx context.Context, _ resource.SchemaRe
 	resp.Schema = schema.ConsoleKafkaSubjectV2ResourceSchema(ctx)
 }
 
-func (r *KafkaSubjectV2Resource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *KafkaSubjectV2Resource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -65,6 +69,19 @@ func (r *KafkaSubjectV2Resource) Configure(_ context.Context, req resource.Confi
 			"Console Client not configured. Please provide client configuration details for Console API and ensure you have set the right provider mode for this resource. \n"+
 				"More info here: \n"+
 				" - https://registry.terraform.io/providers/conduktor/conduktor/latest/docs",
+		)
+		return
+	}
+
+	consoleVersion, err := data.Client.GetAPIVersion(ctx, client.CONSOLE)
+	if err != nil {
+		resp.Diagnostics.AddError("Error fetching Console version", err.Error())
+		return
+	}
+	if semver.IsValid(consoleVersion) && semver.Compare(consoleVersion, kafkaSubjectMininumVersion) < 0 {
+		resp.Diagnostics.AddError(
+			"Minimum version requirement not met",
+			"This resource requires Conduktor Console API version "+kafkaSubjectMininumVersion+" or higher, but targeted Conduktor Console API is "+consoleVersion,
 		)
 		return
 	}
