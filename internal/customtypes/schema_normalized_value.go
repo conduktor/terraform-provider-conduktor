@@ -236,12 +236,21 @@ func isAvroSchema(schema string) bool {
 			return true
 		}
 
-		// Check for simple Avro type definition.
-		for _, primitive := range avroPrimitives {
-			typePattern := `"type":` + primitive
-			typePatternSpaced := `"type": ` + primitive
-			if strings.Contains(schema, typePattern) || strings.Contains(schema, typePatternSpaced) {
-				return true
+		// Check for simple Avro type definition - but only if it doesn't have extra fields
+		var parsed map[string]interface{}
+		if json.Unmarshal([]byte(schema), &parsed) == nil {
+			// If it has a "name" field, it's a named type (not a primitive)
+			if _, hasName := parsed["name"]; hasName {
+				return true // Named types are always AVRO
+			}
+
+			// For simple type definitions, check primitive patterns
+			for _, primitive := range avroPrimitives {
+				typePattern := `"type":` + primitive
+				typePatternSpaced := `"type": ` + primitive
+				if strings.Contains(schema, typePattern) || strings.Contains(schema, typePatternSpaced) {
+					return true
+				}
 			}
 		}
 	}
@@ -460,4 +469,21 @@ func NewSchemaNormalizedPointerValue(value *string) SchemaNormalized {
 	return SchemaNormalized{
 		StringValue: basetypes.NewStringPointerValue(value),
 	}
+}
+
+// Public wrapper functions for normalization (used by mappers)
+
+// NormalizeAvroSchema normalizes an AVRO schema to canonical form.
+func NormalizeAvroSchema(schema string) (string, error) {
+	return normalizeAvroSchema(schema)
+}
+
+// NormalizeProtobufSchema normalizes a PROTOBUF schema.
+func NormalizeProtobufSchema(schema string) (string, error) {
+	return normalizeProtobufSchema(schema)
+}
+
+// NormalizeJSONSchema normalizes a JSON schema.
+func NormalizeJSONSchema(schema string) (string, error) {
+	return normalizeJSONSchema(schema)
 }

@@ -2,6 +2,7 @@ package console_kafka_subject_v2
 
 import (
 	"context"
+	"strings"
 
 	"github.com/conduktor/terraform-provider-conduktor/internal/customtypes"
 	mapper "github.com/conduktor/terraform-provider-conduktor/internal/mapper"
@@ -34,7 +35,7 @@ func TFToInternalModel(ctx context.Context, r *subject.ConsoleKafkaSubjectV2Mode
 		r.Cluster.ValueString(),
 		mapper.MergeLabels(managedLabels, userLabels),
 		console.KafkaSubjectSpec{
-			Schema:        r.Spec.Schema.ValueString(),
+			Schema:        normalizeSchemaForStorage(r.Spec.Schema.ValueString(), r.Spec.Format.ValueString()),
 			Format:        r.Spec.Format.ValueString(),
 			Version:       int(r.Spec.Version.ValueInt64()),
 			Compatibility: r.Spec.Compatibility.ValueString(),
@@ -146,4 +147,25 @@ func referencesToSetValue(ctx context.Context, references []console.KafkaSubject
 		return basetypes.SetValue{}, mapper.WrapDiagError(diag, "references", mapper.IntoTerraform)
 	}
 	return referencesSet, nil
+}
+
+// normalizeSchemaForStorage normalizes a schema based on its format to match what Schema Registry returns.
+func normalizeSchemaForStorage(schema, format string) string {
+	// Use the same normalization logic as our custom type
+	switch strings.ToUpper(format) {
+	case "AVRO":
+		if normalized, err := customtypes.NormalizeAvroSchema(schema); err == nil {
+			return normalized
+		}
+	case "PROTOBUF":
+		if normalized, err := customtypes.NormalizeProtobufSchema(schema); err == nil {
+			return normalized
+		}
+	case "JSON":
+		if normalized, err := customtypes.NormalizeJSONSchema(schema); err == nil {
+			return normalized
+		}
+	}
+	// If normalization fails, return original
+	return schema
 }
