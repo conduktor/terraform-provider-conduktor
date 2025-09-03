@@ -82,16 +82,16 @@ jobs:
             license: v2
 
           # latest versions no license
-          - console: "1.36.1"
-            gateway: "3.11.0"
+          - console: "1.37.0"
+            gateway: "3.12.0"
             terraform:
                 version: "latest"
                 name: "TF-latest"
             license: free
 
           # latest versions with license
-          - console: "1.36.1"
-            gateway: "3.11.0"
+          - console: "1.37.0"
+            gateway: "3.12.0"
             terraform:
               version: "latest"
               name: "TF-latest"
