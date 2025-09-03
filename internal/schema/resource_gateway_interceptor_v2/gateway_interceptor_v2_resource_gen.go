@@ -612,12 +612,12 @@ func (t SpecType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue)
 		return nil, diags
 	}
 
-	configVal, ok := configAttribute.(basetypes.StringValue)
+	configVal, ok := configAttribute.(jsontypes.Normalized)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`config expected to be basetypes.StringValue, was: %T`, configAttribute))
+			fmt.Sprintf(`config expected to be jsontypes.Normalized, was: %T`, configAttribute))
 	}
 
 	pluginClassAttribute, ok := attributes["plugin_class"]
@@ -760,12 +760,12 @@ func NewSpecValue(attributeTypes map[string]attr.Type, attributes map[string]att
 		return NewSpecValueUnknown(), diags
 	}
 
-	configVal, ok := configAttribute.(basetypes.StringValue)
+	configVal, ok := configAttribute.(jsontypes.Normalized)
 
 	if !ok {
 		diags.AddError(
 			"Attribute Wrong Type",
-			fmt.Sprintf(`config expected to be basetypes.StringValue, was: %T`, configAttribute))
+			fmt.Sprintf(`config expected to be jsontypes.Normalized, was: %T`, configAttribute))
 	}
 
 	pluginClassAttribute, ok := attributes["plugin_class"]
@@ -886,7 +886,7 @@ var _ basetypes.ObjectValuable = SpecValue{}
 
 type SpecValue struct {
 	Comment     basetypes.StringValue `tfsdk:"comment"`
-	Config      basetypes.StringValue `tfsdk:"config"`
+	Config      jsontypes.Normalized  `tfsdk:"config"`
 	PluginClass basetypes.StringValue `tfsdk:"plugin_class"`
 	Priority    basetypes.Int64Value  `tfsdk:"priority"`
 	state       attr.ValueState
@@ -899,7 +899,7 @@ func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) 
 	var err error
 
 	attrTypes["comment"] = basetypes.StringType{}.TerraformType(ctx)
-	attrTypes["config"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["config"] = jsontypes.NormalizedType{}.TerraformType(ctx)
 	attrTypes["plugin_class"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["priority"] = basetypes.Int64Type{}.TerraformType(ctx)
 
@@ -972,7 +972,7 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 
 	attributeTypes := map[string]attr.Type{
 		"comment":      basetypes.StringType{},
-		"config":       basetypes.StringType{},
+		"config":       jsontypes.NormalizedType{},
 		"plugin_class": basetypes.StringType{},
 		"priority":     basetypes.Int64Type{},
 	}
@@ -1042,7 +1042,7 @@ func (v SpecValue) Type(ctx context.Context) attr.Type {
 func (v SpecValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 	return map[string]attr.Type{
 		"comment":      basetypes.StringType{},
-		"config":       basetypes.StringType{},
+		"config":       jsontypes.NormalizedType{},
 		"plugin_class": basetypes.StringType{},
 		"priority":     basetypes.Int64Type{},
 	}
