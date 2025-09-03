@@ -114,11 +114,11 @@ resource "conduktor_console_kafka_subject_v2" "complex" {
 }
 ```
 
-### Kafka subject PROTOBUFF
-This example creates a complex Kafka PROTOBUFF subject with all available configuration.
+### Kafka subject PROTOBUF
+This example creates a complex Kafka PROTOBUF subject with all available configuration.
 ```terraform
-resource "conduktor_console_kafka_subject_v2" "protobuff" {
-  name    = "protobuff.value"
+resource "conduktor_console_kafka_subject_v2" "protobuf" {
+  name    = "protobuf.value"
   cluster = "kafka-cluster"
   labels = {
     "team"        = "test"

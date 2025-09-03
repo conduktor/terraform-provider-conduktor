@@ -1,5 +1,5 @@
-resource "conduktor_console_kafka_subject_v2" "protobuff" {
-  name    = "protobuff.value"
+resource "conduktor_console_kafka_subject_v2" "protobuf" {
+  name    = "protobuf.value"
   cluster = "kafka-cluster"
   labels = {
     "team"        = "test"

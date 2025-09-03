@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/conduktor/terraform-provider-conduktor/internal/client"
 	"reflect"
+	"regexp"
 	"testing"
 
 	"github.com/conduktor/terraform-provider-conduktor/internal/test"
@@ -43,7 +44,7 @@ var schemaAvroValuePretty = `{
   ]
 }`
 
-var schemaProtobuffValue = `syntax = "proto3";
+var schemaProtobufValue = `syntax = "proto3";
 
 message MyRecord {
   int32 id = 1;
@@ -128,12 +129,26 @@ func TestAccKafkaSubjectV2Minimal(t *testing.T) {
 	})
 }
 
+func TestAccKafkaSubjectV2Errors(t *testing.T) {
+	checkMinimalVersion(t)
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { test.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config:      providerConfigConsole + test.TestAccTestdata(t, "console/kafka_subject_v2/resource_unknown_schema.tf"),
+				ExpectError: regexp.MustCompile(`Unknown Schema Format`),
+			},
+		},
+	})
+}
+
 func TestAccKafkaSubjectV2ExampleResource(t *testing.T) {
 	checkMinimalVersion(t)
 	minimalRef := "conduktor_console_kafka_subject_v2.minimal"
 	complexRef := "conduktor_console_kafka_subject_v2.complex"
 	avroRef := "conduktor_console_kafka_subject_v2.avro"
-	protobuffRef := "conduktor_console_kafka_subject_v2.protobuff"
+	protobufRef := "conduktor_console_kafka_subject_v2.protobuf"
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { test.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
@@ -179,18 +194,18 @@ func TestAccKafkaSubjectV2ExampleResource(t *testing.T) {
 		PreCheck:                 func() { test.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read from protobuff example
+			// Create and Read from protobuf example
 			{
-				Config: providerConfigConsole + test.TestAccExample(t, "resources", "conduktor_console_kafka_subject_v2", "protobuff.tf"),
+				Config: providerConfigConsole + test.TestAccExample(t, "resources", "conduktor_console_kafka_subject_v2", "protobuf.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr(protobuffRef, "name", "protobuff.value"),
-					resource.TestCheckResourceAttr(protobuffRef, "cluster", "kafka-cluster"),
-					resource.TestCheckResourceAttr(protobuffRef, "labels.%", "2"),
-					resource.TestCheckResourceAttr(protobuffRef, "labels.team", "test"),
-					resource.TestCheckResourceAttr(protobuffRef, "labels.environment", "test"),
-					resource.TestCheckResourceAttr(protobuffRef, "spec.format", "PROTOBUF"),
-					resource.TestCheckResourceAttr(protobuffRef, "spec.compatibility", "BACKWARD"),
-					resource.TestCheckResourceAttr(protobuffRef, "spec.schema", schemaProtobuffValue),
+					resource.TestCheckResourceAttr(protobufRef, "name", "protobuf.value"),
+					resource.TestCheckResourceAttr(protobufRef, "cluster", "kafka-cluster"),
+					resource.TestCheckResourceAttr(protobufRef, "labels.%", "2"),
+					resource.TestCheckResourceAttr(protobufRef, "labels.team", "test"),
+					resource.TestCheckResourceAttr(protobufRef, "labels.environment", "test"),
+					resource.TestCheckResourceAttr(protobufRef, "spec.format", "PROTOBUF"),
+					resource.TestCheckResourceAttr(protobufRef, "spec.compatibility", "BACKWARD"),
+					resource.TestCheckResourceAttr(protobufRef, "spec.schema", schemaProtobufValue),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
