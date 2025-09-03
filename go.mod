@@ -22,8 +22,9 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-// Use fork of terraform-plugin-codegen-frameworkon branch https://github.com/conduktor/terraform-plugin-codegen-framework/tree/cdk-fix-model-name-conflicts
-replace github.com/hashicorp/terraform-plugin-codegen-framework => github.com/conduktor/terraform-plugin-codegen-framework v0.0.0-20250718134729-0b4d3062e656
+// Use fork of terraform-plugin-codegen-framework on branch https://github.com/conduktor/terraform-plugin-codegen-framework/tree/cdk-fix-model-name-conflicts
+// To update : go get github.com/conduktor/terraform-plugin-codegen-framework@cdk-fix-model-name-conflicts
+replace github.com/hashicorp/terraform-plugin-codegen-framework => github.com/conduktor/terraform-plugin-codegen-framework v0.0.0-20250903125704-9ae40097cc8c
 
 // Use fork of terraform-plugin-codegen-spec on branch cdk-add-single_nested-custom_type_name-override
 replace github.com/hashicorp/terraform-plugin-codegen-spec => github.com/conduktor/terraform-plugin-codegen-spec v0.0.0-20250717105330-66d9fa40152d
