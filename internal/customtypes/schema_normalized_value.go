@@ -4,15 +4,17 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"regexp"
 	"sort"
 	"strings"
 
+	"github.com/emicklei/proto"
+	"github.com/hamba/avro/v2"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/attr/xattr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/function"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	"github.com/qri-io/jsonschema"
 )
 
 var (
@@ -96,6 +98,17 @@ func (v SchemaNormalized) ValidateAttribute(ctx context.Context, req xattr.Valid
 				"Given Value: "+schema+"\n",
 		)
 	}
+
+	format := detectSchemaFormat(v.ValueString())
+	if format == "UNKNOWN" {
+		resp.Diagnostics.AddAttributeError(
+			req.Path,
+			"Unknown Schema Format",
+			"The schema format could not be determined from the content. "+
+				"Ensure the schema is valid and in a supported format (AVRO, PROTOBUF, JSON).\n\n"+
+				"Given Value: "+schema+"\n",
+		)
+	}
 }
 
 // ValidateParameter implements function parameter validation.
@@ -110,6 +123,17 @@ func (v SchemaNormalized) ValidateParameter(ctx context.Context, req function.Va
 			req.Position,
 			"Invalid Schema String Value: "+
 				"A schema string value cannot be empty.\n\n"+
+				"Given Value: "+schema+"\n",
+		)
+	}
+
+	format := detectSchemaFormat(v.ValueString())
+	if format == "UNKNOWN" {
+		resp.Error = function.NewArgumentFuncError(
+			req.Position,
+			"Unknown Schema Format: "+
+				"The schema format could not be determined from the content. "+
+				"Ensure the schema is valid and in a supported format (AVRO, PROTOBUF, JSON).\n\n"+
 				"Given Value: "+schema+"\n",
 		)
 	}
@@ -138,7 +162,6 @@ func normalizeSchemaByFormat(schema, format string) (string, error) {
 	case "PROTOBUF":
 		return normalizeProtobufSchema(schema)
 	case "JSON":
-		// JSON schemas work fine as-is, just ensure consistent formatting.
 		return normalizeJSONSchema(schema)
 	default:
 		// Unknown format, return as-is.
@@ -165,282 +188,205 @@ func detectSchemaFormat(schemaStr string) string {
 		return "UNKNOWN"
 	}
 
-	// 1. Check for Protobuf patterns first.
+	// 1. Check for Protobuf first
 	if isProtobufSchema(trimmed) {
 		return "PROTOBUF"
 	}
 
-	// 2. Check for Avro patterns.
+	// 2. Check for AVRO schema
 	if isAvroSchema(trimmed) {
 		return "AVRO"
 	}
 
-	// 3. If it's valid JSON but not Avro, it's JSON schema
-	if isValidJSON(trimmed) {
+	// 3. Check for JSON Schema
+	if isJSONSchema(trimmed) {
 		return "JSON"
 	}
 
 	return "UNKNOWN"
 }
 
-// isProtobufSchema checks for protobuf syntax patterns.
+// isProtobufSchema checks if the string is a valid Protobuf schema.
 func isProtobufSchema(schema string) bool {
-	// Look for protobuf syntax declaration.
-	if strings.Contains(schema, `syntax =`) || strings.Contains(schema, `syntax=`) {
-		return true
-	}
+	reader := strings.NewReader(schema)
+	parser := proto.NewParser(reader)
 
-	// Look for other protobuf-specific patterns (and ensure it's not JSON).
-	if !strings.HasPrefix(schema, "{") && !strings.HasPrefix(schema, "[") {
-		if strings.Contains(schema, "message ") ||
-			strings.Contains(schema, "service ") ||
-			strings.Contains(schema, "enum ") {
-			return true
-		}
-	}
-
-	return false
+	// Try to parse as protobuf
+	_, err := parser.Parse()
+	return err == nil
 }
 
-// isAvroSchema checks for Avro schema patterns.
+// isAvroSchema checks if the string is a valid AVRO schema using hamba/avro library.
 func isAvroSchema(schema string) bool {
-	// Avro primitive types as strings.
-	avroPrimitives := []string{
-		`"null"`, `"boolean"`, `"int"`, `"long"`, `"float"`, `"double"`,
-		`"bytes"`, `"string"`, `"record"`, `"enum"`, `"array"`, `"map"`, `"union"`, `"fixed"`,
-	}
-
-	// Check if it's just a primitive type string.
-	for _, primitive := range avroPrimitives {
-		if schema == primitive {
-			return true
-		}
-	}
-
-	// If it's JSON, check for Avro-specific patterns.
-	if isValidJSON(schema) {
-		// Must have "type" field for Avro.
-		if !strings.Contains(schema, `"type"`) {
-			return false
-		}
-
-		// Check for Avro record pattern with fields.
-		if strings.Contains(schema, `"fields"`) &&
-			(strings.Contains(schema, `"type":"record"`) || strings.Contains(schema, `"type": "record"`)) {
-			return true
-		}
-
-		// Check for Avro enum pattern.
-		if strings.Contains(schema, `"symbols"`) &&
-			(strings.Contains(schema, `"type":"enum"`) || strings.Contains(schema, `"type": "enum"`)) {
-			return true
-		}
-
-		// Check for simple Avro type definition - but only if it doesn't have extra fields
-		var parsed map[string]interface{}
-		if json.Unmarshal([]byte(schema), &parsed) == nil {
-			// If it has a "name" field, it's a named type (not a primitive)
-			if _, hasName := parsed["name"]; hasName {
-				return true // Named types are always AVRO
-			}
-
-			// For simple type definitions, check primitive patterns
-			for _, primitive := range avroPrimitives {
-				typePattern := `"type":` + primitive
-				typePatternSpaced := `"type": ` + primitive
-				if strings.Contains(schema, typePattern) || strings.Contains(schema, typePatternSpaced) {
-					return true
-				}
-			}
-		}
-	}
-
-	return false
+	// Try to parse as AVRO schema
+	_, err := avro.Parse(schema)
+	return err == nil
 }
 
-// isValidJSON checks if a string is valid JSON.
-func isValidJSON(str string) bool {
-	var js interface{}
-	return json.Unmarshal([]byte(str), &js) == nil
+// isJSONSchema checks if the string is a valid JSON Schema.
+func isJSONSchema(schema string) bool {
+	// First check if it's valid JSON
+	var jsonData interface{}
+	if err := json.Unmarshal([]byte(schema), &jsonData); err != nil {
+		return false
+	}
+
+	// Try to parse as JSON Schema
+	rs := &jsonschema.Schema{}
+	if err := json.Unmarshal([]byte(schema), rs); err != nil {
+		return false
+	}
+
+	// Additional validation - check for common JSON Schema properties
+	var schemaMap map[string]interface{}
+	if err := json.Unmarshal([]byte(schema), &schemaMap); err != nil {
+		return false
+	}
+
+	// Look for JSON Schema indicators
+	hasSchemaProperty := false
+	hasJsonSchemaProps := false
+
+	for key := range schemaMap {
+		switch key {
+		case "$schema", "$id", "$ref":
+			hasSchemaProperty = true
+		case "type", "properties", "items", "additionalProperties", "required",
+			"minimum", "maximum", "pattern", "enum", "anyOf", "oneOf", "allOf":
+			hasJsonSchemaProps = true
+		}
+	}
+
+	// It's a JSON Schema if it has explicit schema markers or typical JSON Schema properties
+	return hasSchemaProperty || hasJsonSchemaProps
 }
 
-// normalizeAvroSchema normalizes Avro schema to canonical form.
+// normalizeAvroSchema normalizes AVRO schema using hamba/avro library.
 func normalizeAvroSchema(schemaStr string) (string, error) {
-	// If it's a primitive type string, return as-is.
-	if !strings.HasPrefix(strings.TrimSpace(schemaStr), "{") && !strings.HasPrefix(strings.TrimSpace(schemaStr), "[") {
-		return strings.TrimSpace(schemaStr), nil
-	}
-
-	var schema interface{}
-	if err := json.Unmarshal([]byte(schemaStr), &schema); err != nil {
-		return schemaStr, fmt.Errorf("failed to parse Avro schema JSON: %w", err)
-	}
-
-	normalized := normalizeAvroObject(schema)
-
-	// Marshal with consistent formatting (no indentation, sorted keys).
-	normalizedBytes, err := json.Marshal(normalized)
+	// Use hamba/avro to parse and normalize the schema
+	schema, err := avro.Parse(schemaStr)
 	if err != nil {
-		return schemaStr, fmt.Errorf("failed to marshal normalized Avro schema: %w", err)
+		return "", fmt.Errorf("failed to parse AVRO schema: %w", err)
 	}
 
-	return string(normalizedBytes), nil
-}
-
-// normalizeAvroObject recursively normalizes Avro schema objects.
-func normalizeAvroObject(obj interface{}) interface{} {
-	switch v := obj.(type) {
-	case map[string]interface{}:
-		return normalizeAvroMap(v)
-	case []interface{}:
-		result := make([]interface{}, len(v))
-		for i, item := range v {
-			result[i] = normalizeAvroObject(item)
-		}
-		return result
-	default:
-		return v
-	}
-}
-
-// normalizeAvroMap normalizes map according to Schema Registry canonical form rules.
-func normalizeAvroMap(m map[string]interface{}) map[string]interface{} {
-	result := make(map[string]interface{})
-
-	// Schema Registry canonical form field ordering: name, type, fields, symbols, items, values, size.
-	fieldOrder := []string{"name", "type", "fields", "symbols", "items", "values", "size"}
-
-	// Add ordered fields first.
-	for _, field := range fieldOrder {
-		if val, exists := m[field]; exists {
-			result[field] = normalizeAvroObject(val)
-		}
-	}
-
-	// Add remaining fields in alphabetical order.
-	var remainingFields []string
-	for key := range m {
-		found := false
-		for _, orderedField := range fieldOrder {
-			if key == orderedField {
-				found = true
-				break
-			}
-		}
-		if !found {
-			remainingFields = append(remainingFields, key)
-		}
-	}
-	sort.Strings(remainingFields)
-
-	for _, field := range remainingFields {
-		result[field] = normalizeAvroObject(m[field])
-	}
-
-	return result
+	// Get the canonical schema string representation
+	return schema.String(), nil
 }
 
 // normalizeProtobufSchema normalizes Protobuf schema.
 func normalizeProtobufSchema(schemaStr string) (string, error) {
-	// Normalize protobuf by: removing comments, normalizing whitespace, sorting imports.
-	lines := strings.Split(schemaStr, "\n")
-	var normalizedLines []string
-	var imports []string
-	inBlockComment := false
+	reader := strings.NewReader(schemaStr)
+	parser := proto.NewParser(reader)
 
-	for _, line := range lines {
-		trimmed := strings.TrimSpace(line)
-
-		// Skip empty lines.
-		if trimmed == "" {
-			continue
-		}
-
-		// Handle block comments.
-		if strings.Contains(line, "/*") {
-			inBlockComment = true
-		}
-		if strings.Contains(line, "*/") {
-			inBlockComment = false
-			continue
-		}
-		if inBlockComment {
-			continue
-		}
-
-		// Remove line comments.
-		if strings.Contains(trimmed, "//") {
-			parts := strings.SplitN(trimmed, "//", 2)
-			trimmed = strings.TrimSpace(parts[0])
-			if trimmed == "" {
-				continue
-			}
-		}
-
-		// Collect imports for sorting
-		if strings.HasPrefix(trimmed, "import ") {
-			imports = append(imports, trimmed)
-			continue
-		}
-
-		// Normalize field definitions.
-		trimmed = normalizeProtobufField(trimmed)
-
-		normalizedLines = append(normalizedLines, trimmed)
-	}
-
-	// Sort imports and add them at the beginning (after syntax).
-	sort.Strings(imports)
-
-	// Rebuild the schema.
-	var result []string
-	syntaxAdded := false
-
-	for _, line := range normalizedLines {
-		if strings.HasPrefix(line, "syntax ") && !syntaxAdded {
-			result = append(result, line)
-			// Add sorted imports after syntax.
-			result = append(result, imports...)
-			syntaxAdded = true
-		} else if !strings.HasPrefix(line, "syntax ") {
-			result = append(result, line)
-		}
-	}
-
-	// If no syntax was found, add imports at the beginning.
-	if !syntaxAdded && len(imports) > 0 {
-		result = append(imports, result...)
-	}
-
-	return strings.Join(result, "\n"), nil
-}
-
-// normalizeProtobufField normalizes protobuf field definitions.
-func normalizeProtobufField(field string) string {
-	// Normalize spacing around = and ;.
-	field = regexp.MustCompile(`\s*=\s*`).ReplaceAllString(field, " = ")
-	field = regexp.MustCompile(`\s*;\s*`).ReplaceAllString(field, ";")
-
-	// Ensure single space between type and field name.
-	field = regexp.MustCompile(`\s+`).ReplaceAllString(field, " ")
-
-	return strings.TrimSpace(field)
-}
-
-// normalizeJSONSchema normalizes JSON schema (basic normalization).
-func normalizeJSONSchema(schemaStr string) (string, error) {
-	var schema interface{}
-	if err := json.Unmarshal([]byte(schemaStr), &schema); err != nil {
-		return schemaStr, fmt.Errorf("failed to parse JSON schema: %w", err)
-	}
-
-	// Marshal with consistent formatting (no indentation, sorted keys)
-	normalizedBytes, err := json.Marshal(schema)
+	definition, err := parser.Parse()
 	if err != nil {
-		return schemaStr, fmt.Errorf("failed to marshal normalized JSON schema: %w", err)
+		return "", fmt.Errorf("failed to parse Protobuf schema: %w", err)
 	}
 
-	return string(normalizedBytes), nil
+	var result strings.Builder
+
+	// Handle syntax declaration
+	proto.Walk(definition, func(v proto.Visitee) {
+		switch element := v.(type) {
+		case *proto.Syntax:
+			result.WriteString(fmt.Sprintf("syntax = \"%s\";\n", element.Value))
+		}
+	})
+
+	// Collect and sort imports
+	var imports []string
+	proto.Walk(definition, func(v proto.Visitee) {
+		if imp, ok := v.(*proto.Import); ok {
+			imports = append(imports, fmt.Sprintf("import \"%s\";", imp.Filename))
+		}
+	})
+	sort.Strings(imports)
+	for _, imp := range imports {
+		result.WriteString(imp + "\n")
+	}
+
+	// Handle messages, services, enums with simplified approach
+	proto.Walk(definition, func(v proto.Visitee) {
+		switch element := v.(type) {
+		case *proto.Message:
+			result.WriteString(normalizeProtoMessage(element))
+		case *proto.Service:
+			result.WriteString(normalizeProtoService(element))
+		case *proto.Enum:
+			result.WriteString(normalizeProtoEnum(element))
+		}
+	})
+
+	return strings.TrimSpace(result.String()), nil
+}
+
+// normalizeProtoMessage normalizes a protobuf message definition.
+func normalizeProtoMessage(msg *proto.Message) string {
+	var result strings.Builder
+	result.WriteString(fmt.Sprintf("message %s {\n", msg.Name))
+
+	for _, element := range msg.Elements {
+		switch field := element.(type) {
+		case *proto.NormalField:
+			result.WriteString(fmt.Sprintf("%s %s = %d;\n", field.Type, field.Name, field.Sequence))
+		case *proto.MapField:
+			result.WriteString(fmt.Sprintf("map<%s, %s> %s = %d;\n", field.KeyType, field.Type, field.Name, field.Sequence))
+		case *proto.OneOfField:
+			result.WriteString(fmt.Sprintf("oneof %s {\n", field.Name))
+		}
+		result.WriteString("}\n")
+	}
+
+	result.WriteString("}\n")
+	return result.String()
+}
+
+// normalizeProtoService normalizes a protobuf service definition.
+func normalizeProtoService(svc *proto.Service) string {
+	var result strings.Builder
+	result.WriteString(fmt.Sprintf("service %s {\n", svc.Name))
+
+	for _, element := range svc.Elements {
+		if rpc, ok := element.(*proto.RPC); ok {
+			result.WriteString(fmt.Sprintf("rpc %s(%s) returns (%s);\n",
+				rpc.Name, rpc.RequestType, rpc.ReturnsType))
+		}
+	}
+
+	result.WriteString("}\n")
+	return result.String()
+}
+
+// normalizeProtoEnum normalizes a protobuf enum definition.
+func normalizeProtoEnum(enum *proto.Enum) string {
+	var result strings.Builder
+	result.WriteString(fmt.Sprintf("enum %s {\n", enum.Name))
+
+	for _, element := range enum.Elements {
+		if field, ok := element.(*proto.EnumField); ok {
+			result.WriteString(fmt.Sprintf("%s = %d;\n", field.Name, field.Integer))
+		}
+	}
+
+	result.WriteString("}\n")
+	return result.String()
+}
+
+// normalizeJSONSchema normalizes JSON schema to canonical form.
+func normalizeJSONSchema(schemaStr string) (string, error) {
+	// Parse the schema
+	rs := &jsonschema.Schema{}
+	if err := json.Unmarshal([]byte(schemaStr), rs); err != nil {
+		return "", fmt.Errorf("failed to parse JSON schema: %w", err)
+	}
+
+	// Marshal back to get consistent formatting
+	normalized, err := json.Marshal(rs)
+	if err != nil {
+		return "", fmt.Errorf("failed to normalize JSON schema: %w", err)
+	}
+
+	return string(normalized), nil
 }
 
 // NewSchemaNormalizedNull creates a SchemaNormalized with a null value.
@@ -471,19 +417,15 @@ func NewSchemaNormalizedPointerValue(value *string) SchemaNormalized {
 	}
 }
 
-// Public wrapper functions for normalization (used by mappers)
-
-// NormalizeAvroSchema normalizes an AVRO schema to canonical form.
+// Public wrapper functions for external use.
 func NormalizeAvroSchema(schema string) (string, error) {
 	return normalizeAvroSchema(schema)
 }
 
-// NormalizeProtobufSchema normalizes a PROTOBUF schema.
 func NormalizeProtobufSchema(schema string) (string, error) {
 	return normalizeProtobufSchema(schema)
 }
 
-// NormalizeJSONSchema normalizes a JSON schema.
 func NormalizeJSONSchema(schema string) (string, error) {
 	return normalizeJSONSchema(schema)
 }
