@@ -563,7 +563,7 @@ func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) 
 	attrTypes["references"] = basetypes.SetType{
 		ElemType: ReferencesValue{}.Type(ctx),
 	}.TerraformType(ctx)
-	attrTypes["schema"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["schema"] = customtypes.SchemaNormalizedType{}.TerraformType(ctx)
 	attrTypes["version"] = basetypes.Int64Type{}.TerraformType(ctx)
 
 	objectType := tftypes.Object{AttributeTypes: attrTypes}

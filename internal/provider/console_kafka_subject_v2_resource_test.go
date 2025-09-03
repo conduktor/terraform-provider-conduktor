@@ -3,6 +3,7 @@ package provider
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/conduktor/terraform-provider-conduktor/internal/client"
 	"reflect"
 	"testing"
 
@@ -52,6 +53,7 @@ message MyRecord {
 `
 
 func TestAccKafkaSubjectV2Resource(t *testing.T) {
+	checkMinimalVersion(t)
 	resourceRef := "conduktor_console_kafka_subject_v2.test"
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { test.TestAccPreCheck(t) },
@@ -105,7 +107,7 @@ func TestAccKafkaSubjectV2Resource(t *testing.T) {
 }
 
 func TestAccKafkaSubjectV2Minimal(t *testing.T) {
-	test.CheckEnterpriseEnabled(t)
+	checkMinimalVersion(t)
 	resourceRef := "conduktor_console_kafka_subject_v2.minimal"
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { test.TestAccPreCheck(t) },
@@ -126,8 +128,8 @@ func TestAccKafkaSubjectV2Minimal(t *testing.T) {
 	})
 }
 
-func TestAccKafkaSubjectV2ResourceFileSchema(t *testing.T) {
-	test.CheckEnterpriseEnabled(t)
+func TestAccKafkaSubjectV2ExampleResource(t *testing.T) {
+	checkMinimalVersion(t)
 	minimalRef := "conduktor_console_kafka_subject_v2.minimal"
 	complexRef := "conduktor_console_kafka_subject_v2.complex"
 	avroRef := "conduktor_console_kafka_subject_v2.avro"
@@ -248,4 +250,13 @@ func testCheckJSONEquality(resourceName, attributeName, expectedJSON string) res
 
 		return nil
 	}
+}
+
+func checkMinimalVersion(t *testing.T) {
+
+	v, err := fetchClientVersion(client.CONSOLE)
+	if err != nil {
+		t.Fatalf("Error fetching current version: %s", err)
+	}
+	test.CheckMinimumVersionRequirement(t, v, kafkaSubjectMininumVersion)
 }
