@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/conduktor/terraform-provider-conduktor/internal/client"
 	mapper "github.com/conduktor/terraform-provider-conduktor/internal/mapper/console_kafka_subject_v2"
@@ -117,22 +118,16 @@ func (r *KafkaSubjectV2Resource) Create(ctx context.Context, req resource.Create
 
 	tflog.Debug(ctx, fmt.Sprintf("Kafka subject created with result: %s", apply.UpsertResult))
 
-	var consoleRes = console.KafkaSubjectResource{}
-	err = consoleRes.FromRawJsonInterface(apply.Resource)
+	// Get back the resource to read fields populated by server like ID and Version
+	tflog.Debug(ctx, "Get created Kafka subject to update state")
+	newState, err := r.pollSubjectState(ctx, data.Cluster.ValueString(), data.Name.ValueString(), nil)
 	if err != nil {
-		resp.Diagnostics.AddError("Unmarshall Error", fmt.Sprintf("Response resource can't be cast as kafka subject : %v, got error: %s", apply.Resource, err))
-		return
-	}
-	tflog.Debug(ctx, fmt.Sprintf("New kafka subject state : %+v", consoleRes))
-
-	data, err = mapper.InternalModelToTerraform(ctx, &consoleRes)
-	if err != nil {
-		resp.Diagnostics.AddError("Model Error", fmt.Sprintf("Unable to read kafka subject, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read kafka subject after update, got error: %s", err))
 		return
 	}
 
 	// Save data into Terraform state
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &newState)...)
 }
 
 func (r *KafkaSubjectV2Resource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -146,50 +141,33 @@ func (r *KafkaSubjectV2Resource) Read(ctx context.Context, req resource.ReadRequ
 	}
 
 	tflog.Info(ctx, fmt.Sprintf("Read kafka subject named %s", data.Name.String()))
-	get, err := r.apiClient.Describe(ctx, kafkaSubjectV2ApiGetPath(data.Cluster.ValueString(), data.Name.ValueString()))
+
+	newState, err := r.getSubjectState(ctx, data.Cluster.ValueString(), data.Name.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read kafka subject, got error: %s", err))
 		return
 	}
 
-	if len(get) == 0 {
-		tflog.Debug(ctx, fmt.Sprintf("Kafka subject %s not found, removing from state", data.Name.String()))
-		resp.State.RemoveResource(ctx)
-		return
-	}
-
-	var consoleRes = console.KafkaSubjectResource{}
-	err = jsoniter.Unmarshal(get, &consoleRes)
-	if err != nil {
-		resp.Diagnostics.AddError("Parsing Error", fmt.Sprintf("Unable to read kafka subject, got error: %s", err))
-		return
-	}
-	tflog.Debug(ctx, fmt.Sprintf("New kafka subject state : %+v", consoleRes))
-
-	data, err = mapper.InternalModelToTerraform(ctx, &consoleRes)
-	if err != nil {
-		resp.Diagnostics.AddError("Model Error", fmt.Sprintf("Unable to read kafka subject, got error: %s", err))
-		return
-	}
-
 	// Save updated data into Terraform state
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &newState)...)
 }
 
 func (r *KafkaSubjectV2Resource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data schema.ConsoleKafkaSubjectV2Model
+	var plan schema.ConsoleKafkaSubjectV2Model
+	var state schema.ConsoleKafkaSubjectV2Model
 
 	// Read Terraform plan data into the model
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("Updating kafka subject named %s", data.Name.String()))
-	tflog.Trace(ctx, fmt.Sprintf("Update kafka subject with TF data: %+v", data))
+	tflog.Info(ctx, fmt.Sprintf("Updating kafka subject named %s", plan.Name.String()))
+	tflog.Trace(ctx, fmt.Sprintf("Update kafka subject with TF data: %+v", plan))
 
-	consoleResource, err := mapper.TFToInternalModel(ctx, &data)
+	consoleResource, err := mapper.TFToInternalModel(ctx, &plan)
 	if err != nil {
 		resp.Diagnostics.AddError("Model Error", fmt.Sprintf("Unable to create kafka subject, got error: %s", err))
 		return
@@ -203,22 +181,16 @@ func (r *KafkaSubjectV2Resource) Update(ctx context.Context, req resource.Update
 	}
 	tflog.Debug(ctx, fmt.Sprintf("Kafka subject updated with result: %s", apply))
 
-	var consoleRes = console.KafkaSubjectResource{}
-	err = consoleRes.FromRawJsonInterface(apply.Resource)
+	// Get back the resource to read fields populated by server like ID and Version
+	tflog.Debug(ctx, "Get created Kafka subject to update state")
+	newState, err := r.pollSubjectState(ctx, plan.Cluster.ValueString(), plan.Name.ValueString(), state.Spec.Version.ValueInt64Pointer())
 	if err != nil {
-		resp.Diagnostics.AddError("Unmarshall Error", fmt.Sprintf("Response resource can't be cast as kafka subject : %v, got error: %s", apply.Resource, err))
-		return
-	}
-	tflog.Debug(ctx, fmt.Sprintf("New kafka subject state : %+v", consoleRes))
-
-	data, err = mapper.InternalModelToTerraform(ctx, &consoleRes)
-	if err != nil {
-		resp.Diagnostics.AddError("Model Error", fmt.Sprintf("Unable to read kafka subject, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read kafka subject after update, got error: %s", err))
 		return
 	}
 
 	// Save updated data into Terraform state
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &newState)...)
 }
 
 func (r *KafkaSubjectV2Resource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -256,4 +228,62 @@ func (r *KafkaSubjectV2Resource) ImportState(ctx context.Context, req resource.I
 
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("cluster"), idParts[0])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("name"), idParts[1])...)
+}
+
+// Poll until the subject exists with a version greater than previousVersion.
+func (r *KafkaSubjectV2Resource) pollSubjectState(ctx context.Context, clusterName, subjectName string, previousVersion *int64) (schema.ConsoleKafkaSubjectV2Model, error) {
+	const maxRetries = 20
+	sleepTime := 100 * time.Millisecond
+	tflog.Debug(ctx, fmt.Sprintf("Polling kafka subject %s for version update every %dms for %d retries", subjectName, sleepTime.Milliseconds(), maxRetries))
+	for i := 0; i < maxRetries; i++ {
+		newState, err := r.getSubjectState(ctx, clusterName, subjectName)
+		if err != nil {
+			return schema.ConsoleKafkaSubjectV2Model{}, err
+		}
+
+		// If no previous version, return immediately (creation case)
+		if previousVersion == nil {
+			tflog.Debug(ctx, fmt.Sprintf("Kafka subject %s created", subjectName))
+			return newState, nil
+		}
+
+		// Check if version has been updated
+		if !newState.Spec.Version.IsNull() && !newState.Spec.Version.IsUnknown() {
+			currentVersion := *newState.Spec.Version.ValueInt64Pointer()
+			if currentVersion > *previousVersion {
+				tflog.Debug(ctx, fmt.Sprintf("Kafka subject %s updated, current version: %v, previous version: %v", subjectName, currentVersion, *previousVersion))
+				return newState, nil
+			}
+		}
+
+		tflog.Debug(ctx, fmt.Sprintf("Kafka subject %s not updated yet (attempt %d/%d), current version: %v, previous version: %v, sleep %s", subjectName, i+1, maxRetries, newState.Spec.Version, *previousVersion, sleepTime))
+		time.Sleep(sleepTime)
+	}
+
+	return schema.ConsoleKafkaSubjectV2Model{}, fmt.Errorf("timeout waiting for kafka subject %s to update after %d retries", subjectName, maxRetries)
+}
+
+// Get the current state of the subject from the API and convert it to the Terraform model.
+func (r *KafkaSubjectV2Resource) getSubjectState(ctx context.Context, clusterName, subjectName string) (schema.ConsoleKafkaSubjectV2Model, error) {
+	get, err := r.apiClient.Describe(ctx, kafkaSubjectV2ApiGetPath(clusterName, subjectName))
+	if err != nil {
+		return schema.ConsoleKafkaSubjectV2Model{}, fmt.Errorf("unable to read kafka subject after update, got error: %s", err)
+	}
+	if len(get) == 0 {
+		return schema.ConsoleKafkaSubjectV2Model{}, fmt.Errorf("unable to read kafka subject after update, got empty response")
+	}
+
+	var consoleRes = console.KafkaSubjectResource{}
+	err = jsoniter.Unmarshal(get, &consoleRes)
+	if err != nil {
+		return schema.ConsoleKafkaSubjectV2Model{}, fmt.Errorf("response resource can't be cast as kafka subject : %v, got error: %s", get, err)
+	}
+	tflog.Debug(ctx, fmt.Sprintf("New kafka subject state : %+v", consoleRes))
+
+	var newState schema.ConsoleKafkaSubjectV2Model
+	newState, err = mapper.InternalModelToTerraform(ctx, &consoleRes)
+	if err != nil {
+		return schema.ConsoleKafkaSubjectV2Model{}, fmt.Errorf("unable to read kafka subject, got error: %s", err)
+	}
+	return newState, nil
 }

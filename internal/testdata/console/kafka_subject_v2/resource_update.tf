@@ -8,10 +8,29 @@ resource "conduktor_console_kafka_subject_v2" "test" {
   spec = {
     format        = "JSON"
     compatibility = "BACKWARD"
-    schema        = "{\"$id\":\"https://mycompany.com/myrecord\",\"$schema\":\"https://json-schema.org/draft/2019-09/schema\",\"type\":\"object\",\"title\":\"MyRecord\",\"description\":\"Json schema for MyRecord\",\"properties\":{\"id\":{\"type\":\"string\"},\"name\":{\"type\":[\"string\",\"null\"]}},\"required\":[\"id\"],\"additionalProperties\":false}"
+    schema = jsonencode({
+      "$id"                  = "https://mycompany.com/myrecord"
+      "$schema"              = "https://json-schema.org/draft/2019-09/schema"
+      "additionalProperties" = false
+      "description"          = "Json schema for MyRecord"
+      "properties" = {
+        "id" = {
+          "type" = "string"
+        }
+        "name" = {
+          "type" = ["string", "null"]
+        }
+        "ext_ref" = {
+          "$ref" = "https://mycompany.com/example.json"
+        }
+      }
+      "required" = ["id"]
+      "title"    = "MyRecord"
+      "type"     = "object"
+    })
     references = [
       {
-        name    = "example-subject.value"
+        name    = "https://mycompany.com/example.json"
         subject = "example-subject.value"
         version = 1
       }

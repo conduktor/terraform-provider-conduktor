@@ -13,7 +13,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
-var schemaValue = "{\"$id\":\"https://mycompany.com/myrecord\",\"$schema\":\"https://json-schema.org/draft/2019-09/schema\",\"type\":\"object\",\"title\":\"MyRecord\",\"description\":\"Json schema for MyRecord\",\"properties\":{\"id\":{\"type\":\"string\"},\"name\":{\"type\":[\"string\",\"null\"]}},\"required\":[\"id\"],\"additionalProperties\":false}"
+var schemaValue = "{\"$id\":\"https://mycompany.com/myrecord\",\"$schema\":\"https://json-schema.org/draft/2019-09/schema\",\"additionalProperties\":false,\"description\":\"Json schema for MyRecord\",\"properties\":{\"id\":{\"type\":\"string\"},\"name\":{\"type\":[\"string\",\"null\"]}},\"required\":[\"id\"],\"title\":\"MyRecord\",\"type\":\"object\"}"
+var schemaValueUpdate = "{\"$id\":\"https://mycompany.com/myrecord\",\"$schema\":\"https://json-schema.org/draft/2019-09/schema\",\"additionalProperties\":false,\"description\":\"Json schema for MyRecord\",\"properties\":{\"ext_ref\":{\"$ref\":\"https://mycompany.com/example.json\"},\"id\":{\"type\":\"string\"},\"name\":{\"type\":[\"string\",\"null\"]}},\"required\":[\"id\"],\"title\":\"MyRecord\",\"type\":\"object\"}"
 var schemaValuePretty = `{
   "$id": "https://mycompany.com/myrecord",
   "$schema": "https://json-schema.org/draft/2019-09/schema",
@@ -81,7 +82,6 @@ func TestAccKafkaSubjectV2Resource(t *testing.T) {
 				ImportStateVerify:                    true,
 				ImportStateId:                        "kafka-cluster/api-json-example-subject.value",
 				ImportStateVerifyIdentifierAttribute: "name",
-				ImportStateVerifyIgnore:              []string{"spec.id", "spec.version"},
 			},
 			// Update and Read testing
 			{
@@ -94,9 +94,9 @@ func TestAccKafkaSubjectV2Resource(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceRef, "labels.environment", "test"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.format", "JSON"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.compatibility", "BACKWARD"),
-					resource.TestCheckResourceAttr(resourceRef, "spec.schema", schemaValue),
+					resource.TestCheckResourceAttr(resourceRef, "spec.schema", schemaValueUpdate),
 					resource.TestCheckResourceAttr(resourceRef, "spec.references.#", "1"),
-					resource.TestCheckResourceAttr(resourceRef, "spec.references.0.name", "example-subject.value"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.references.0.name", "https://mycompany.com/example.json"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.references.0.subject", "example-subject.value"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.references.0.version", "1"),
 				),

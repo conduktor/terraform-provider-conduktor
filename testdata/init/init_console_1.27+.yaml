@@ -18,10 +18,10 @@ spec:
   compatibility: BACKWARD
   schema: |
     {
-      "$id": "https://mycompany.com/myrecord",
+      "$id": "https://mycompany.com/example.json",
       "$schema": "https://json-schema.org/draft/2019-09/schema",
       "type": "object",
-      "title": "MyRecord",
+      "title": "Example",
       "description": "Json schema for MyRecord",
       "properties": {
         "id": {

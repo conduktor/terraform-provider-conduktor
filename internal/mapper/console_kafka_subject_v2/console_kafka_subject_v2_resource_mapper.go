@@ -28,6 +28,17 @@ func TFToInternalModel(ctx context.Context, r *subject.ConsoleKafkaSubjectV2Mode
 		return console.KafkaSubjectResource{}, err
 	}
 
+	var version *int
+	if !r.Spec.Version.IsNull() && !r.Spec.Version.IsUnknown() {
+		v := int(*r.Spec.Version.ValueInt64Pointer())
+		version = &v
+	}
+	var id *int
+	if !r.Spec.Id.IsNull() && !r.Spec.Id.IsUnknown() {
+		v := int(*r.Spec.Id.ValueInt64Pointer())
+		id = &v
+	}
+
 	return console.NewKafkaSubjectResource(
 		r.Name.ValueString(),
 		r.Cluster.ValueString(),
@@ -35,9 +46,9 @@ func TFToInternalModel(ctx context.Context, r *subject.ConsoleKafkaSubjectV2Mode
 		console.KafkaSubjectSpec{
 			Schema:        r.Spec.Schema.ValueString(),
 			Format:        r.Spec.Format.ValueString(),
-			Version:       int(r.Spec.Version.ValueInt64()),
+			Version:       version,
 			Compatibility: r.Spec.Compatibility.ValueString(),
-			Id:            int(r.Spec.Id.ValueInt64()),
+			Id:            id,
 			References:    references,
 		},
 	), nil
@@ -101,9 +112,21 @@ func specInternalModelToTerraform(ctx context.Context, r *console.KafkaSubjectSp
 
 	valuesMap["schema"] = customtypes.NewSchemaNormalizedValue(r.Schema)
 	valuesMap["format"] = schema.NewStringValue(r.Format)
-	valuesMap["version"] = types.Int64Value(int64(r.Version))
 	valuesMap["compatibility"] = schema.NewStringValue(r.Compatibility)
-	valuesMap["id"] = types.Int64Value(int64(r.Id))
+
+	versionValue := types.Int64Null()
+	if r.Version != nil {
+		version := int64(*r.Version)
+		versionValue = types.Int64Value(version)
+	}
+	valuesMap["version"] = versionValue
+
+	idValue := types.Int64Null()
+	if r.Id != nil {
+		id := int64(*r.Id)
+		idValue = types.Int64Value(id)
+	}
+	valuesMap["id"] = idValue
 
 	referencesValue, err := referencesToSetValue(ctx, r.References)
 	if err != nil {

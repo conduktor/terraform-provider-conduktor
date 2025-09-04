@@ -25,9 +25,9 @@ func (r KafkaSubjectMetadata) String() string {
 type KafkaSubjectSpec struct {
 	Schema        string                   `json:"schema"`
 	Format        string                   `json:"format"`
-	Version       int                      `json:"version,omitempty"`
+	Version       *int                     `json:"version,omitempty"`
 	Compatibility string                   `json:"compatibility,omitempty"`
-	Id            int                      `json:"id,omitempty"`
+	Id            *int                     `json:"id,omitempty"`
 	References    []KafkaSubjectReferences `json:"references,omitempty"`
 }
 
