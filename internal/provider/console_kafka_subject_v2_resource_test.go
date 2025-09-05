@@ -51,8 +51,7 @@ message MyRecord {
   int32 id = 1;
   string createdAt = 2;
   string name = 3;
-}
-`
+}`
 
 func TestAccKafkaSubjectV2Resource(t *testing.T) {
 	checkMinimalVersion(t)
@@ -232,8 +231,6 @@ func TestAccKafkaSubjectV2ExampleResource(t *testing.T) {
 			// Delete testing automatically occurs in TestCase
 		},
 	})
-
-	// TODO basic AVRO of {"name": "id", "type": "long"}
 }
 
 func testCheckJSONEquality(resourceName, attributeName, expectedJSON string) resource.TestCheckFunc {
