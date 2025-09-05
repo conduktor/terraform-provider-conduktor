@@ -164,6 +164,13 @@ func (r *KafkaSubjectV2Resource) Update(ctx context.Context, req resource.Update
 		return
 	}
 
+	// Check if schema is changed to determine if we need to poll for a new version
+	isSchemaSame, diag := state.Spec.Schema.StringSemanticEquals(ctx, plan.Spec.Schema)
+	if diag.HasError() {
+		resp.Diagnostics.Append(diag...)
+		return
+	}
+
 	tflog.Info(ctx, fmt.Sprintf("Updating kafka subject named %s", plan.Name.String()))
 	tflog.Trace(ctx, fmt.Sprintf("Update kafka subject with TF data: %+v", plan))
 
@@ -183,7 +190,12 @@ func (r *KafkaSubjectV2Resource) Update(ctx context.Context, req resource.Update
 
 	// Get back the resource to read fields populated by server like ID and Version
 	tflog.Debug(ctx, "Get created Kafka subject to update state")
-	newState, err := r.pollSubjectState(ctx, plan.Cluster.ValueString(), plan.Name.ValueString(), state.Spec.Version.ValueInt64Pointer())
+	previousVersion := state.Spec.Version.ValueInt64Pointer()
+	if isSchemaSame {
+		// If schema is unchanged no new version will be created skip polling for a new version
+		previousVersion = nil
+	}
+	newState, err := r.pollSubjectState(ctx, plan.Cluster.ValueString(), plan.Name.ValueString(), previousVersion)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read kafka subject after update, got error: %s", err))
 		return
