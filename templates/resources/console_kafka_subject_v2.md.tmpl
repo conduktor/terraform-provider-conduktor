@@ -46,3 +46,9 @@ Using the `terraform import` command:
 ```shell
 terraform import conduktor_console_kafka_subject_v2.example mini-cluster/import-subject
 ```
+
+## Known Issues and Limitations
+
+### External References in JSON Schema
+- **Use full URL `$id` for external references**: When using external `$ref` in JSON schema, always use the full URL `$id` to reference external schemas. If you use relative paths, Schema Registry will resolve them differently and modify the schema content, causing Terraform state comparison failures.
+- **Reference version updates require recreation**: Due to API limitations, updating the `version` field in `spec.references[]` will not properly update the schema. As a workaround, you must destroy and recreate the subject resource to update reference versions.
