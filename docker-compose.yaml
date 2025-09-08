@@ -61,7 +61,7 @@ services:
       test: ["CMD", "/opt/conduktor/scripts/healthcheck.sh"]
 
   redpanda:
-    image: docker.redpanda.com/redpandadata/redpanda:v22.3.11
+    image: docker.redpanda.com/redpandadata/redpanda:v24.3.18
     hostname: redpanda
     command:
       - redpanda

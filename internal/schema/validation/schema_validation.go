@@ -142,6 +142,10 @@ var ValidKafkaConnectSecurityTypes = []string{
 	SSLAuthKafkaConnectSecurity,
 }
 
+// Kafka Subject.
+var ValidKafkaSubjectFormat = []string{"JSON", "AVRO", "PROTOBUF"}
+var ValidKafkaSubjectCompatibility = []string{"BACKWARD", "BACKWARD_TRANSITIVE", "FORWARD", "FORWARD_TRANSITIVE", "FULL", "FULL_TRANSITIVE", "NONE"}
+
 // Gateway Service Accounts.
 var ValidServiceAccountTypes = []string{"LOCAL", "EXTERNAL"}
 

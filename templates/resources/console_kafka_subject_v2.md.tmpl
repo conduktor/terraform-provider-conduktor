@@ -1,0 +1,54 @@
+---
+page_title: "Conduktor : conduktor_console_kafka_subject_v2 "
+subcategory: "console/v2"
+description: |-
+    Resource for managing Kafka subjects definition linked to an existing Kafka schema cluster definition inside Conduktor Console.
+    This resource allows you to create, read, update and delete Kafka subjects connections from Conduktor Console.
+---
+
+# {{ .Name }}
+
+Resource for managing Kafka subjects definition linked to an existing Kafka schema cluster definition inside Conduktor Console.
+This resource allows you to create, read, update and delete Kafka subjects connections from Conduktor Console.
+
+## Example Usage
+
+### Minimal Kafka subject
+This example creates a simple Kafka subject with minimal configuration.
+{{tffile "examples/resources/conduktor_console_kafka_subject_v2/simple.tf"}}
+
+### Kafka subject JSON
+This example creates a complex Kafka JSON subject with all available configuration.
+{{tffile "examples/resources/conduktor_console_kafka_subject_v2/complex.tf"}}
+
+### Kafka subject PROTOBUF
+This example creates a complex Kafka PROTOBUF subject with all available configuration.
+{{tffile "examples/resources/conduktor_console_kafka_subject_v2/protobuf.tf"}}
+
+### Kafka subject AVRO
+This example creates a complex Kafka AVRO subject with all available configuration.
+{{tffile "examples/resources/conduktor_console_kafka_subject_v2/avro.tf"}}
+
+Note - we used inline schemas in these examples. However it is our suggestion that in production you keep the schemas in individual files.
+
+{{ .SchemaMarkdown }}
+
+## Import
+
+In order to import a Kafka subject, you need to know the Kafka cluster ID and the Kafka subject name.
+
+The import ID is constructed as follows: `< cluster_id >/< subject_name >`.
+
+For example, using an [`import` block](https://developer.hashicorp.com/terraform/language/import) :
+{{tffile "examples/resources/conduktor_console_kafka_subject_v2/import.tf"}}
+
+Using the `terraform import` command:
+```shell
+terraform import conduktor_console_kafka_subject_v2.example mini-cluster/import-subject
+```
+
+## Known Issues and Limitations
+
+### External References in JSON Schema
+- **Use full URL `$id` for external references**: When using external `$ref` in JSON schema, always use the full URL `$id` to reference external schemas. If you use relative paths, Schema Registry will resolve them differently and modify the schema content, causing Terraform state comparison failures.
+- **Reference version updates require recreation**: Due to API limitations, updating the `version` field in `spec.references[]` will not properly update the schema. As a workaround, you must destroy and recreate the subject resource to update reference versions.
