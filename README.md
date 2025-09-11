@@ -34,70 +34,9 @@
 
 This repository contains the Conduktor Terraform provider, which defines Conduktor resources so that they can be deployed using Infrastructure as Code (IaC).
 
-> [!WARNING]
-> - The Conduktor Terraform provider is currently in **Alpha**.
-> - It does not support all Console and Gateway resources yet. See our [resources roadmap](#resources-roadmap).
-> - Let us know if you have [feedback](https://support.conduktor.io/hc/en-gb/requests/new?ticket_form_id=17438365654417) or wish to be a design partner.
-
-**Table of Contents**
-- [Supported resources](#supported-resources)
-- [Install](#install)
-- [Usage/Examples](#usageexamples)
-  - [Provider authentication](#provider-authentication)
-    - [Conduktor Console](#conduktor-console)
-        - [API key](#api-key)
-        - [Admin credentials](#admin-credentials)
-    - [Conduktor Gateway](#conduktor-gateway)
-        - [Admin credentials](#admin-credentials-2)
-  - [Multi client configuration](#multi-client-configuration)
-- [Development](#development)
-  - [Requirements](#requirements)
-  - [Install git hooks](#install-git-hooks)
-  - [Building The Provider](#building-the-provider)
-    - [Build and install provider in local Terraform registry](#build-and-install-provider-in-local-terraform-registry)
-  - [Adding Dependencies](#adding-dependencies)
-  - [Codegen](#codegen)
-  - [Run acceptance tests](#run-acceptance-tests)
-  - [Misc](#misc)
-- [Resources Roadmap](#resources-roadmap)
-- [Contributing](#contributing)
-- [License](#license)
-
-## Supported resources
-
-### Console resources
-
-- [Console user](./docs/resources/console_user_v2.md)
-- [Console group](./docs/resources/console_group_v2.md)
-- [Console partner zone](./docs/resources/console_partner_zone_v2.md)
-- [Kafka clusters with schema registry](./docs/resources/console_kafka_cluster_v2.md)
-- [Kafka connect server](./docs/resources/console_kafka_connect_v2.md)
-- [KsqlDB cluster](./docs/resources/console_ksqldb_cluster_v2.md)
-
-### Gateway resources
-
-- [Gateway service account](./docs/resources/gateway_service_account_v2.md)
-- [Gateway interceptor](./docs/resources/gateway_interceptor_v2.md)
-- [Gateway virtual cluster](./docs/resources/gateway_virtual_cluster_v2.md)
-
-### Self-service resources
-
-- [Console application](./docs/resources/console_application_v1.md)
-- [Console application group](./docs/resources/console_application_group_v1.md)
-- [Console application instance](./docs/resources/console_application_instance_v1.md)
-- [Console application instance permission](./docs/resources/console_application_instance_permission_v1.md)
-- [Console service account](./docs/resources/console_service_account_v1.md)
-- [Console resource policy](./docs/resources/console_resource_policy_v1.md)
-- [Console topic policy](./docs/resources/console_topic_policy_v1.md)
-
-### Kafka resources
-- [Topic](./docs/resources/console_topic_v2.md)
-- [Connector](./docs/resources/console_connector_v2.md)
-- [Subject](./docs/resources/console_kafka_subject_v2.md)
-
-### Generic resource
-
-- [Generic](./docs/resources/generic.md) :warning: This resource is experimental and should be used with care.
+> [!NOTE]
+> The Conduktor Terraform provider may not support all latest features offered by Console or Gateway. See our current [supported resources](https://docs.conduktor.io/guide/conduktor-in-production/automate).
+> Full documentation on how to use and configure the provider can be found on the official [Terraform Registry](https://registry.terraform.io/providers/conduktor/conduktor/latest/docs) page.
 
 ## Install
 
@@ -159,14 +98,14 @@ resource "conduktor_console_group_v2" "qa" {
 
 You can find more examples in this repository inside [`example`](./examples/) directory.
 
-Examples can also be found in provider reference documentation available either in [`docs`](./docs/) directory or at [registry.terraform.io/conduktor/conduktor](https://registry.terraform.io/conduktor/conduktor/latest/docs)
+Examples can also be found in provider reference documentation available either in [`docs`](./docs/) directory or in the official [Terraform Registry](https://registry.terraform.io/providers/conduktor/conduktor/latest/docs) page.
 
 You can also check out our [documentation](https://docs.conduktor.io/) for resources reference and provider usage.
 
-### Provider authentication
+<details>
+<summary>Provider authentication</summary>
 
-> [!IMPORTANT]
-> It is required to specify the provider `mode` to use, as it will determine the authentication method.
+**NOTE**: It is required to specify the provider `mode` to use, as it will determine the authentication method.
 
 The provider can be used in two modes: `console` and `gateway`.
 
@@ -230,7 +169,10 @@ provider "conduktor" {
 ```
 Using environment variables `CDK_ADMIN_EMAIL` or `CDK_ADMIN_PASSWORD`.
 
-### Multi client configuration
+</details>
+
+<details>
+<summary>Multi client configuration</summary>
 
 Conduktor provider can also be configured to use multiple clients, each with its own authentication method.
 
@@ -262,6 +204,8 @@ resource "conduktor_gateway_service_account_v2" "gateway_sa" {
   # ...
 }
 ```
+
+</details>
 
 ## Development
 ### Requirements
@@ -348,25 +292,6 @@ make build      # run build
 make go-fmt     # run go fmt on the project
 make go-lint    # run golangci-lint linter
 ```
-
-## Resources Roadmap
-
-Future versions of the Conduktor Terraform provider will evolve to support more resources.
-
-Need a resource to unblock a use case? [Feedback](https://support.conduktor.io/hc/en-gb/requests/new?ticket_form_id=17438365654417) to the Product team directly.
-
-We are currently reviewing the following resources:
-
-1. Console resources:
-  - [Alert](https://docs.conduktor.io/platform/reference/resource-reference/console/#alert)
-2. Gateway resources:
-  - [GatewayGroup](https://docs.conduktor.io/gateway/reference/resources-reference/#gatewaygroup)
-  - [ConcentrationRule](https://docs.conduktor.io/gateway/reference/resources-reference/#concentrationrule)
-  - [AliasTopic](https://docs.conduktor.io/gateway/reference/resources-reference/#aliastopic)
-
-> [!NOTE]
->
-> This list is not exhaustive and can change depending on requests and needs.
 
 ## Contributing
 
