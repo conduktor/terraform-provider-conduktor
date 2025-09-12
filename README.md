@@ -35,8 +35,8 @@
 This repository contains the Conduktor Terraform provider, which defines Conduktor resources so that they can be deployed using Infrastructure as Code (IaC).
 
 > [!NOTE]
-> The Conduktor Terraform provider may not support all latest features offered by Console or Gateway. See our current [supported resources](https://docs.conduktor.io/guide/conduktor-in-production/automate).
-> Full documentation on how to use and configure the provider can be found on the official [Terraform Registry](https://registry.terraform.io/providers/conduktor/conduktor/latest/docs) page.
+> The Conduktor Terraform provider may not include the latest features. [Check out all the supported resources](https://docs.conduktor.io/guide/conduktor-in-production/automate).
+> [Find out how to use and configure the Conduktor provider](https://registry.terraform.io/providers/conduktor/conduktor/latest/docs).
 
 ## Install
 
