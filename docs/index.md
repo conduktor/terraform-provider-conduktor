@@ -9,10 +9,9 @@ description: |-
 
 The Conduktor provider is used to interact with the resources supported by Conduktor. The provider needs to be configured with the proper credentials before it can be used.
 
-> [!WARNING]
-> - The Conduktor Terraform provider is currently in **Alpha**.
-> - It does not support all Console and Gateway resources yet. See our [resources roadmap](https://github.com/conduktor/terraform-provider-conduktor/blob/main/README.md#resources-roadmap).
-> - Let us know if you have [feedback](https://product.conduktor.help/c/74-terraform-provider) or wish to be a design partner.
+## Note
+ - The Conduktor Terraform provider may not support all latest features offered by Console or Gateway. See our current [supported resources](https://docs.conduktor.io/guide/conduktor-in-production/automate).
+ - [Get in touch](https://conduktor.io/roadmap) if you have feedback or would like to help guide our roadmap.
 
 ## Example Usage
 
