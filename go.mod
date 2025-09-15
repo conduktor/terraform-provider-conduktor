@@ -9,7 +9,7 @@ require (
 	github.com/go-resty/resty/v2 v2.16.5
 	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/google/go-cmp v0.7.0
-	github.com/hamba/avro/v2 v2.29.0
+	github.com/hamba/avro/v2 v2.30.0
 	github.com/hashicorp/terraform-plugin-codegen-framework v0.4.1
 	github.com/hashicorp/terraform-plugin-docs v0.22.0
 	github.com/hashicorp/terraform-plugin-framework v1.15.1
