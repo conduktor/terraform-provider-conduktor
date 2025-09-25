@@ -3,7 +3,7 @@ module github.com/conduktor/terraform-provider-conduktor
 go 1.24.4
 
 require (
-	github.com/conduktor/ctl v0.6.2
+	github.com/conduktor/ctl v0.6.3
 	github.com/emicklei/proto v1.14.2
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-resty/resty/v2 v2.16.5
@@ -94,6 +94,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/posener/complete v1.2.3 // indirect
 	github.com/qri-io/jsonpointer v0.1.1 // indirect
+	github.com/sergi/go-diff v1.3.2-0.20230802210424-5b0b94c5c0d3 // indirect
 	github.com/shopspring/decimal v1.3.1 // indirect
 	github.com/spf13/cast v1.5.1 // indirect
 	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect
