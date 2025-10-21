@@ -21,7 +21,7 @@ require (
 	github.com/json-iterator/go v1.1.12
 	github.com/qri-io/jsonschema v0.2.1
 	github.com/stretchr/testify v1.11.1
-	golang.org/x/mod v0.28.0
+	golang.org/x/mod v0.29.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
