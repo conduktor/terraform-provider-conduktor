@@ -2,7 +2,10 @@ package customtypes
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"reflect"
+	"sort"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -90,7 +93,7 @@ func yamlEqual(s1, s2 string) (bool, error) {
 		return false, err
 	}
 
-	return s1 == s2, nil
+	return reflect.DeepEqual(s1, s2), nil
 }
 
 func normalizeYAMLString(yamlStr string) (string, error) {
@@ -101,12 +104,43 @@ func normalizeYAMLString(yamlStr string) (string, error) {
 		return "", err
 	}
 
+	sortSlices(temp)
 	yamlBytes, err := yaml.Marshal(&temp)
 	if err != nil {
 		return "", err
 	}
 
 	return string(yamlBytes), nil
+}
+
+// sortSlices walks the interface and sorts any slice it finds.
+func sortSlices(data any) {
+	switch v := data.(type) {
+	case map[string]any:
+		for _, val := range v {
+			sortSlices(val)
+		}
+	case map[any]any: // YAML allows non-string keys
+		for _, val := range v {
+			sortSlices(val)
+		}
+	case []any:
+		// 1. Normalize children first
+		for _, elem := range v {
+			sortSlices(elem)
+		}
+		// 2. Sort this slice
+		sort.Slice(v, func(i, j int) bool {
+			return getSortKey(v[i]) < getSortKey(v[j])
+		})
+	}
+}
+
+// getSortKey converts an item to a JSON string to establish a deterministic sort order.
+func getSortKey(v any) string {
+	// We use JSON here because it's fast and standard for simple data structures
+	b, _ := json.Marshal(v)
+	return string(b)
 }
 
 // ValidateAttribute implements attribute value validation. This type requires the value provided to be a String
