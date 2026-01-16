@@ -1,0 +1,35 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-yaml
+        args: ['--allow-multiple-documents']
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: detect-private-key
+      - id: detect-aws-credentials
+        args: ['--allow-missing-credentials']
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+  - repo: local
+    hooks:
+      - id: detect-secrets
+        name: Detect secrets
+        language: python
+        entry: detect-secrets-hook
+        args: ['--baseline', '.secrets.baseline']
+      - id: go-fmt
+        name: Run go fmt
+        language: system
+        entry: make go-fmt
+        pass_filenames: false
+      - id: tf-fmt
+        name: Run terraform fmt
+        language: system
+        entry: make tf-fmt
+        pass_filenames: false
+      - id: go-lint
+        name: Run go lint
+        language: system
+        entry: make go-lint
+        pass_filenames: false
