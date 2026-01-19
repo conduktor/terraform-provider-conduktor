@@ -11,13 +11,12 @@ repos:
         args: ['--allow-missing-credentials']
       - id: end-of-file-fixer
       - id: trailing-whitespace
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.0
+    hooks:
+      - id: gitleaks
   - repo: local
     hooks:
-      - id: detect-secrets
-        name: Detect secrets
-        language: python
-        entry: detect-secrets-hook
-        args: ['--baseline', '.secrets.baseline']
       - id: go-fmt
         name: Run go fmt
         language: system
