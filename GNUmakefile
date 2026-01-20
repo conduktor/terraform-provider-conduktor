@@ -12,7 +12,7 @@ export $(shell sed 's/=.*//' .env)
 # Include .envrc file if it exists
 ifneq (,$(wildcard .envrc))
   include .envrc
-  export $(shell grep -v '^#' .envrc | sed 's/export //')
+  export $(shell sed -e '/^\#/d' -e 's/export //' -e 's/=.*//' .envrc)
 endif
 
 default: testacc
@@ -21,9 +21,15 @@ default: testacc
 help: ## Prints help for targets with comments
 	@cat $(MAKEFILE_LIST) | grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-.PHONY: install-githooks
-install-githooks: ## Install git hooks
-	git config --local core.hooksPath .githooks
+.PHONY: install-pre-commit
+install-pre-commit: ## Install required tools and dependencies
+	@./scripts/install_dev_dependencies.sh
+
+.PHONY: setup-hooks
+setup-hooks: install-pre-commit ## Setup all git hooks and pre-commit
+	@command -v pre-commit >/dev/null 2>&1 || { echo "pre-commit not found. Run 'make install' first."; exit 1; }
+	@echo "[*] installing pre-commit hooks..."
+	@pre-commit install --install-hooks
 
 .PHONY: build
 build:	## Build the provider

@@ -213,13 +213,13 @@ resource "conduktor_gateway_service_account_v2" "gateway_sa" {
 - [Terraform](https://developer.hashicorp.com/terraform/downloads) >= 1.0
 - [Go](https://golang.org/doc/install) >= 1.23
 - [Docker](https://docs.docker.com/get-docker/) with compose to run acceptance tests locally
-- [Git hooks](#install-git-hooks) to format/lint code before committing
+- [Pre-commit](#install-pre-commit) to format/lint code before committing
 
 
-### Install git hooks
+### Install pre-commit
 Please install the git hooks to ensure that the code is formatted correctly and pass linter check before committing.
 
-Run `make install-githooks` to install the git hooks.
+Run `make install-pre-commit` to install the git hooks.
 
 ### Building The Provider
 
