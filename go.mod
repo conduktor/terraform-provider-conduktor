@@ -4,7 +4,7 @@ go 1.24.4
 
 require (
 	github.com/conduktor/ctl v0.6.3
-	github.com/emicklei/proto v1.14.2
+	github.com/emicklei/proto v1.14.3
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-resty/resty/v2 v2.17.1
 	github.com/golang-jwt/jwt/v5 v5.3.0
