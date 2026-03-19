@@ -166,7 +166,7 @@ jobs:
 
           make testacc
 
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: api-logs-CDK-${{ matrix.env.console }}-GW-${{ matrix.env.gateway }}-${{ matrix.env.license }}-${{ matrix.env.terraform.name }}
