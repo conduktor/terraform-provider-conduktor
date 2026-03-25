@@ -28,6 +28,10 @@ linters:
       - third_party$
       - builtin$
       - examples$
+  settings:
+    staticcheck:
+      checks:
+        - '-QF1012' # disable the rule https://staticcheck.dev/docs/checks/#QF1012 comming from generated code
 issues:
   max-issues-per-linter: 0
   max-same-issues: 0
