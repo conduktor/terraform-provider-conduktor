@@ -289,7 +289,7 @@ func normalizeProtobufSchema(schemaStr string) (string, error) {
 	proto.Walk(definition, func(v proto.Visitee) {
 		switch element := v.(type) {
 		case *proto.Syntax:
-			result.WriteString(fmt.Sprintf("syntax = \"%s\";\n", element.Value))
+			fmt.Fprintf(result, "syntax = \"%s\";\n", element.Value)
 		}
 	})
 
@@ -302,18 +302,18 @@ func normalizeProtobufSchema(schemaStr string) (string, error) {
 	})
 	sort.Strings(imports)
 	for _, imp := range imports {
-		result.WriteString(imp + "\n")
+		fmt.Fprint(result, imp + "\n")
 	}
 
 	// Handle messages, services, enums with simplified approach
 	proto.Walk(definition, func(v proto.Visitee) {
 		switch element := v.(type) {
 		case *proto.Message:
-			result.WriteString(normalizeProtoMessage(element))
+			fmt.Fprint(result, normalizeProtoMessage(element))
 		case *proto.Service:
-			result.WriteString(normalizeProtoService(element))
+			fmt.Fprint(result, normalizeProtoService(element))
 		case *proto.Enum:
-			result.WriteString(normalizeProtoEnum(element))
+			fmt.Fprint(result, normalizeProtoEnum(element))
 		}
 	})
 
@@ -323,52 +323,52 @@ func normalizeProtobufSchema(schemaStr string) (string, error) {
 // normalizeProtoMessage normalizes a protobuf message definition.
 func normalizeProtoMessage(msg *proto.Message) string {
 	var result strings.Builder
-	result.WriteString(fmt.Sprintf("message %s {\n", msg.Name))
+	fmt.Fprintf(result, "message %s {\n", msg.Name)
 
 	for _, element := range msg.Elements {
 		switch field := element.(type) {
 		case *proto.NormalField:
-			result.WriteString(fmt.Sprintf("%s %s = %d;\n", field.Type, field.Name, field.Sequence))
+			fmt.Fprintf(result, "%s %s = %d;\n", field.Type, field.Name, field.Sequence)
 		case *proto.MapField:
-			result.WriteString(fmt.Sprintf("map<%s, %s> %s = %d;\n", field.KeyType, field.Type, field.Name, field.Sequence))
+			fmt.Fprintf(result, "map<%s, %s> %s = %d;\n", field.KeyType, field.Type, field.Name, field.Sequence)
 		case *proto.OneOfField:
-			result.WriteString(fmt.Sprintf("oneof %s {\n", field.Name))
+			fmt.Fprintf(result, "oneof %s {\n", field.Name)
 		}
-		result.WriteString("}\n")
+		fmt.Fprint(result, "}\n")
 	}
 
-	result.WriteString("}\n")
+	fmt.Fprint(result, "}\n")
 	return result.String()
 }
 
 // normalizeProtoService normalizes a protobuf service definition.
 func normalizeProtoService(svc *proto.Service) string {
 	var result strings.Builder
-	result.WriteString(fmt.Sprintf("service %s {\n", svc.Name))
+	fmt.Fprintf(result, "service %s {\n", svc.Name)
 
 	for _, element := range svc.Elements {
 		if rpc, ok := element.(*proto.RPC); ok {
-			result.WriteString(fmt.Sprintf("rpc %s(%s) returns (%s);\n",
-				rpc.Name, rpc.RequestType, rpc.ReturnsType))
+			fmt.Fprintf(result, "rpc %s(%s) returns (%s);\n",
+				rpc.Name, rpc.RequestType, rpc.ReturnsType)
 		}
 	}
 
-	result.WriteString("}\n")
+	fmt.Fprint(result, "}\n")
 	return result.String()
 }
 
 // normalizeProtoEnum normalizes a protobuf enum definition.
 func normalizeProtoEnum(enum *proto.Enum) string {
 	var result strings.Builder
-	result.WriteString(fmt.Sprintf("enum %s {\n", enum.Name))
+	fmt.Fprintf(result, "enum %s {\n", enum.Name)
 
 	for _, element := range enum.Elements {
 		if field, ok := element.(*proto.EnumField); ok {
-			result.WriteString(fmt.Sprintf("%s = %d;\n", field.Name, field.Integer))
+			fmt.Fprintf(result, "%s = %d;\n", field.Name, field.Integer)
 		}
 	}
 
-	result.WriteString("}\n")
+	fmt.Fprint(result, "}\n")
 	return result.String()
 }
 
