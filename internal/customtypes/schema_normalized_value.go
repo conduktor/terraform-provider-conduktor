@@ -302,7 +302,7 @@ func normalizeProtobufSchema(schemaStr string) (string, error) {
 	})
 	sort.Strings(imports)
 	for _, imp := range imports {
-		fmt.Fprint(&result, imp + "\n")
+		fmt.Fprint(&result, imp+"\n")
 	}
 
 	// Handle messages, services, enums with simplified approach
