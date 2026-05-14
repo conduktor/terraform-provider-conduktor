@@ -7,6 +7,7 @@ import (
 	"github.com/conduktor/terraform-provider-conduktor/internal/client"
 	mapper "github.com/conduktor/terraform-provider-conduktor/internal/mapper/gateway_interceptor_v2"
 	gateway "github.com/conduktor/terraform-provider-conduktor/internal/model/gateway"
+	schemautils "github.com/conduktor/terraform-provider-conduktor/internal/schema"
 	schema "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_gateway_interceptor_v2"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -160,7 +161,25 @@ func (r *GatewayInterceptorV2Resource) Read(ctx context.Context, req resource.Re
 	}
 	tflog.Debug(ctx, fmt.Sprintf("New interceptor state : %+v", gatewayRes))
 
-	data, err = mapper.InternalModelToTerraform(ctx, &gatewayRes[0])
+	// Find the interceptor matching the exact scope from state
+	var matchedInterceptor *gateway.GatewayInterceptorResource
+	for i := range gatewayRes {
+		res := &gatewayRes[i]
+		scope := res.Metadata.Scope
+		if schemautils.NewStringValue(scope.VCluster).Equal(data.Scope.Vcluster) &&
+			schemautils.NewStringValue(scope.Username).Equal(data.Scope.Username) &&
+			schemautils.NewStringValue(scope.Group).Equal(data.Scope.Group) {
+			matchedInterceptor = res
+			break
+		}
+	}
+	if matchedInterceptor == nil {
+		tflog.Debug(ctx, fmt.Sprintf("Interceptor %s with matching scope not found, removing from state", data.Name.String()))
+		resp.State.RemoveResource(ctx)
+		return
+	}
+
+	data, err = mapper.InternalModelToTerraform(ctx, matchedInterceptor)
 	if err != nil {
 		resp.Diagnostics.AddError("Model Error", fmt.Sprintf("Unable to read interceptor, got error: %s", err))
 		return
