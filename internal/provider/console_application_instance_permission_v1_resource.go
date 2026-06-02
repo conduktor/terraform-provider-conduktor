@@ -17,6 +17,7 @@ import (
 
 const applicationInstancePermissionV1ApiPath = "/public/self-serve/v1/application-instance-permission"
 const applicationInstancePermissionMininumVersion = "v1.33.0"
+const applicationInstancePermissionEnterpriseOnlyVersion = "v1.43.0"
 
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &ApplicationInstancePermissionV1Resource{}
@@ -79,6 +80,11 @@ func (r *ApplicationInstancePermissionV1Resource) Configure(ctx context.Context,
 			"Minimum version requirement not met",
 			"This resource requires Conduktor Console API version "+applicationInstancePermissionMininumVersion+" but targeted Conduktor Console API is "+consoleVersion,
 		)
+		return
+	}
+
+	checkEnterprisePlanRequirement(ctx, data.Client, consoleVersion, applicationInstancePermissionEnterpriseOnlyVersion, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 

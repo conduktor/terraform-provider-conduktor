@@ -10,6 +10,7 @@ import (
 )
 
 func TestAccApplicationInstancePermissionV1Resource(t *testing.T) {
+	test.CheckEnterpriseEnabled(t)
 	v, err := fetchClientVersion(client.CONSOLE)
 	if err != nil {
 		t.Fatalf("Error fetching current version: %s", err)
@@ -65,6 +66,7 @@ func TestAccApplicationInstancePermissionV1Resource(t *testing.T) {
 }
 
 func TestAccApplicationInstancePermissionV1ExampleResource(t *testing.T) {
+	test.CheckEnterpriseEnabled(t)
 	v, err := fetchClientVersion(client.CONSOLE)
 	if err != nil {
 		t.Fatalf("Error fetching current version: %s", err)

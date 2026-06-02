@@ -15,6 +15,7 @@ import (
 )
 
 const applicationGroupV1ApiPath = "/public/self-serve/v1/application-group"
+const applicationGroupV1EnterpriseOnlyVersion = "v1.43.0"
 
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &ApplicationGroupV1Resource{}
@@ -61,6 +62,17 @@ func (r *ApplicationGroupV1Resource) Configure(ctx context.Context, req resource
 				"More info here: \n"+
 				" - https://registry.terraform.io/providers/conduktor/conduktor/latest/docs",
 		)
+		return
+	}
+
+	consoleVersion, err := data.Client.GetAPIVersion(ctx, client.CONSOLE)
+	if err != nil {
+		resp.Diagnostics.AddError("Error fetching Console version", err.Error())
+		return
+	}
+
+	checkEnterprisePlanRequirement(ctx, data.Client, consoleVersion, applicationGroupV1EnterpriseOnlyVersion, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 

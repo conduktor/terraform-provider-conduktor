@@ -8,8 +8,10 @@ import (
 	"github.com/conduktor/terraform-provider-conduktor/internal/client"
 	schemaUtils "github.com/conduktor/terraform-provider-conduktor/internal/schema"
 	schema "github.com/conduktor/terraform-provider-conduktor/internal/schema/provider_conduktor"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"golang.org/x/mod/semver"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/function"
@@ -198,4 +200,43 @@ func New(version, commit, date string) func() provider.Provider {
 			date:    date,
 		}
 	}
+}
+
+// checkEnterprisePlanRequirement checks if the Console license plan is compatible with
+// resources that became enterprise-only starting from a given version.
+// - On free plan + Console >= enterpriseOnlyVersion: adds an error diagnostic.
+// - On free plan + Console < enterpriseOnlyVersion: adds a warning diagnostic.
+// - On any other plan (enterprise, trial, console-monthly, passthrough-gateway): no diagnostic.
+// - On error fetching the plan: adds a warning diagnostic (graceful degradation).
+// Callers should check resp.Diagnostics.HasError() after calling this function.
+func checkEnterprisePlanRequirement(ctx context.Context, apiClient *client.Client, consoleVersion string, enterpriseOnlyVersion string, diagnostics *diag.Diagnostics) { //nolint:unparam // enterpriseOnlyVersion is parameterized for future per-resource version flexibility
+	consolePlan, err := apiClient.GetConsoleLicensePlan(ctx)
+	if err != nil {
+		diagnostics.AddWarning(
+			"Unable to check Console license plan",
+			"Could not determine Console license plan: "+err.Error()+". Enterprise license may be required for this resource.",
+		)
+		return
+	}
+
+	if consolePlan != "free" {
+		return
+	}
+
+	if semver.IsValid(consoleVersion) && semver.Compare(consoleVersion, enterpriseOnlyVersion) >= 0 {
+		diagnostics.AddError(
+			"Enterprise license required",
+			"This resource requires an Enterprise license on Conduktor Console version "+enterpriseOnlyVersion+" or later. "+
+				"Current Console is "+consoleVersion+" running on the Community (free) plan. "+
+				"Please upgrade to an Enterprise license to use this resource.",
+		)
+		return
+	}
+
+	diagnostics.AddWarning(
+		"Enterprise license will be required",
+		"This resource will require an Enterprise license starting from Conduktor Console version "+enterpriseOnlyVersion+". "+
+			"Current Console is "+consoleVersion+" running on the Community (free) plan. "+
+			"Please plan to upgrade to an Enterprise license.",
+	)
 }

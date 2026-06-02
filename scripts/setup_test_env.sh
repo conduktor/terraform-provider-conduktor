@@ -31,6 +31,9 @@ export CDK_USER=${CONSOLE_USER}
 export CDK_PASSWORD=${CONSOLE_PASSWORD}
 CDK_DEBUG=false go run github.com/conduktor/ctl@${CLI_VERSION} login # disable debug logs for the login
 go run github.com/conduktor/ctl@${CLI_VERSION} apply -f "${SCRIPT_DIR}"/../testdata/init/init_console.yaml
+if [[ -n "${CDK_LICENSE:-}" ]]; then # enterprise-only resources require a license on Console >= 1.43.0
+	go run github.com/conduktor/ctl@${CLI_VERSION} apply -f "${SCRIPT_DIR}"/../testdata/init/init_console_enterprise.yaml
+fi
 if [[ "${CONDUKTOR_CONSOLE_IMAGE}" != *"1.26.0"* ]];then # only applying some resources for newer console versions
 	go run github.com/conduktor/ctl@${CLI_VERSION} apply -f "${SCRIPT_DIR}"/../testdata/init/init_console_1.27+.yaml
 fi

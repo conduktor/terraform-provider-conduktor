@@ -10,6 +10,7 @@ import (
 )
 
 func TestAccResourcePolicyV1Resource(t *testing.T) {
+	test.CheckEnterpriseEnabled(t)
 	v, err := fetchClientVersion(client.CONSOLE)
 	if err != nil {
 		t.Fatalf("Error fetching current version: %s", err)
@@ -62,6 +63,7 @@ func TestAccResourcePolicyV1Resource(t *testing.T) {
 }
 
 func TestAccResourcePolicyV1Minimal(t *testing.T) {
+	test.CheckEnterpriseEnabled(t)
 	v, err := fetchClientVersion(client.CONSOLE)
 	if err != nil {
 		t.Fatalf("Error fetching current version: %s", err)
@@ -89,6 +91,7 @@ func TestAccResourcePolicyV1Minimal(t *testing.T) {
 }
 
 func TestAccResourcePolicyV1ExampleResource(t *testing.T) {
+	test.CheckEnterpriseEnabled(t)
 	v, err := fetchClientVersion(client.CONSOLE)
 	if err != nil {
 		t.Fatalf("Error fetching current version: %s", err)

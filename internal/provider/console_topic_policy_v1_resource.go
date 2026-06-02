@@ -14,10 +14,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	jsoniter "github.com/json-iterator/go"
+	"golang.org/x/mod/semver"
 )
 
 const topicPolicyV1ApiPath = "/public/self-serve/v1/topic-policy"
 const topicPolicyMininumVersion = "v1.30.0"
+const topicPolicyEnterpriseOnlyVersion = "v1.43.0"
 
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &TopicPolicyV1Resource{}
@@ -40,7 +42,7 @@ func (r *TopicPolicyV1Resource) Schema(ctx context.Context, _ resource.SchemaReq
 	resp.Schema = schema.ConsoleTopicPolicyV1ResourceSchema(ctx)
 }
 
-func (r *TopicPolicyV1Resource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *TopicPolicyV1Resource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -64,6 +66,24 @@ func (r *TopicPolicyV1Resource) Configure(_ context.Context, req resource.Config
 				"More info here: \n"+
 				" - https://registry.terraform.io/providers/conduktor/conduktor/latest/docs",
 		)
+		return
+	}
+
+	consoleVersion, err := data.Client.GetAPIVersion(ctx, client.CONSOLE)
+	if err != nil {
+		resp.Diagnostics.AddError("Error fetching Console version", err.Error())
+		return
+	}
+	if semver.IsValid(consoleVersion) && semver.Compare(consoleVersion, topicPolicyMininumVersion) < 0 {
+		resp.Diagnostics.AddError(
+			"Minimum version requirement not met",
+			"This resource requires Conduktor Console API version "+topicPolicyMininumVersion+" but targeted Conduktor Console API is "+consoleVersion,
+		)
+		return
+	}
+
+	checkEnterprisePlanRequirement(ctx, data.Client, consoleVersion, topicPolicyEnterpriseOnlyVersion, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 

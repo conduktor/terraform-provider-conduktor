@@ -338,3 +338,56 @@ func (client *Client) GetAPIVersion(ctx context.Context, mode Mode) (string, err
 	// Go module semver requires version to start with v.
 	return "v" + version, nil
 }
+
+// GetConsoleLicensePlan returns the Console license plan ("free" or "enterprise").
+// It first fetches the default org slug from GET /api/organizations,
+// then fetches the license info from GET /api/organizations/{slug}/platform-license.
+func (client *Client) GetConsoleLicensePlan(ctx context.Context) (string, error) {
+	// Get the default organization slug
+	orgsURL := client.BaseUrl + "/api/organizations"
+	orgsResp, err := client.Client.R().Get(orgsURL)
+	if err != nil {
+		return "", fmt.Errorf("error fetching organizations: %s", err)
+	} else if orgsResp.IsError() {
+		return "", fmt.Errorf("error fetching organizations: %s", ExtractApiError(orgsResp))
+	}
+	tflog.Trace(ctx, fmt.Sprintf("GET /api/organizations response : %s", string(orgsResp.Body())))
+
+	var orgs []map[string]any
+	err = json.Unmarshal(orgsResp.Body(), &orgs)
+	if err != nil {
+		return "", fmt.Errorf("error parsing organizations response: %s", err)
+	}
+	if len(orgs) == 0 {
+		return "", fmt.Errorf("no organizations found")
+	}
+
+	slug, ok := orgs[0]["slug"].(string)
+	if !ok || slug == "" {
+		return "", fmt.Errorf("no slug found in organization response")
+	}
+
+	// Fetch the license info for the organization
+	licensePath := fmt.Sprintf("/api/organizations/%s/platform-license", slug)
+	licenseURL := client.BaseUrl + licensePath
+	licenseResp, err := client.Client.R().Get(licenseURL)
+	if err != nil {
+		return "", fmt.Errorf("error fetching license info: %s", err)
+	} else if licenseResp.IsError() {
+		return "", fmt.Errorf("error fetching license info: %s", ExtractApiError(licenseResp))
+	}
+	tflog.Trace(ctx, fmt.Sprintf("GET %s response : %s", licensePath, string(licenseResp.Body())))
+
+	var licenseInfo map[string]any
+	err = json.Unmarshal(licenseResp.Body(), &licenseInfo)
+	if err != nil {
+		return "", fmt.Errorf("error parsing license response: %s", err)
+	}
+
+	plan, ok := licenseInfo["plan"].(string)
+	if !ok || plan == "" {
+		return "", fmt.Errorf("no plan found in license response")
+	}
+
+	return plan, nil
+}

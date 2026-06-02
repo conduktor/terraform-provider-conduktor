@@ -9,7 +9,7 @@ spec:
   bootstrapServers: redpanda:9092
   # properties:
   #   sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="admin" password="admin-secret";
-  color: '#FF0000'
+  color: "#FF0000"
   icon: icon
   schemaRegistry:
     type: "ConfluentLike"
@@ -29,7 +29,7 @@ spec:
     sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="console" password="eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6ImNvbnNvbGUiLCJ2Y2x1c3RlciI6InBhc3N0aHJvdWdoIiwiZXhwIjoxOTEzNTI5OTI2fQ.PaSEJkxyeC6pUJk_piRavAQPxCyN3c7HDAjPkubH9ZI";
     security.protocol: SASL_PLAINTEXT
     sasl.mechanism: PLAIN
-  color: '#FF0000'
+  color: "#FF0000"
   icon: icon
   kafkaFlavor:
     url: http://gateway:8888
@@ -47,44 +47,3 @@ spec:
   displayName: My kafka connect
   urls: http://kafka-connect:8083
   ignoreUntrustedCertificate: true
----
-apiVersion: v1
-kind: Application
-metadata:
-  name: myapp
-spec:
-  title: My Application
-  owner: admin
----
-apiVersion: v1
-kind: ApplicationInstance
-metadata:
-  name: my-app-instance
-  application: myapp
-spec:
-  cluster: kafka-cluster
-  resources:
-    - type: TOPIC
-      name: my-topic
-      patternType: LITERAL
----
-apiVersion: v1
-kind: ApplicationInstance
-metadata:
-  name: another-app-instance
-  application: myapp
-spec:
-  cluster: kafka-cluster
----
-apiVersion: v1
-kind: TopicPolicy
-metadata:
-  name: topic-policy
-spec:
-  policies:
-    my-policy:
-      constraint: OneOf
-      optional: true
-      values:
-        - value1
-        - value2
