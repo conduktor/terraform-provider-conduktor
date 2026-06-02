@@ -166,11 +166,6 @@ Required:
 - `certificate_chain` (String) KsqlDB cluster mTLS auth certificate chain PEM.
 - `key` (String, Sensitive) KsqlDB cluster mTLS auth private key PEM.
 
-
-
-
-
-
 ## Import
 
 In order to import a KsqlDB cluster connection into Conduktor, you need to know the Kafka cluster ID and the KsqlDB cluster ID.

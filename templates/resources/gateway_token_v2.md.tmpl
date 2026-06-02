@@ -10,7 +10,7 @@ description: |-
 # {{ .Name }}
 
 Resource for managing Conduktor Gateway tokens.
-This resource allows you to create and update tokens associated with service accounts in Conduktor Gateway.  
+This resource allows you to create and update tokens associated with service accounts in Conduktor Gateway.
 After the initial token creation the provider will subsequently verify the validity of the token by checking the expiry time, and if needed, will create a new one on the next apply.
 
 ## Example Usage
@@ -25,5 +25,4 @@ After the initial token creation the provider will subsequently verify the valid
 Token value is stored as output and in a local file
 {{tffile "examples/resources/conduktor_gateway_token_v2/output.tf"}}
 
-
-{{ .SchemaMarkdown }}
+{{ .SchemaMarkdown | trimspace }}

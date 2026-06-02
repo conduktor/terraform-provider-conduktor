@@ -166,12 +166,6 @@ Optional:
 - `host` (String) Host of the Kafka cluster. If not set it will default to '*'
 - `permission` (String) Permission Type for Access Control Entry. Valid values are: Deny, Allow. If not set it will default to Allow
 
-
-
-
-
-
-
 ## Import
 
 In order to import a Console Service Account into Conduktor, you need to know the Kafka cluster ID and the Service Account ID.

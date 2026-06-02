@@ -136,9 +136,6 @@ Optional:
 - `username` (String) The username the interceptor will be applied to. Optional parameter for defining the scope
 - `vcluster` (String) The name of the virtual cluster the interceptor will be applied to. Optional parameter for defining the scope
 
-
-
-
 ## Import
 
 In order to import an existing Conduktor Gateway interceptor, you need to know the interceptor's unique name.
