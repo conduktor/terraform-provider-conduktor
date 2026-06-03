@@ -99,8 +99,8 @@ func ConsoleGroupV2ResourceSchema(ctx context.Context) schema.Schema {
 								},
 								"ksqldb": schema.StringAttribute{
 									Optional:            true,
-									Description:         "Name of a valid Kafka Connect cluster, only required if resource_type is KSQLDB",
-									MarkdownDescription: "Name of a valid Kafka Connect cluster, only required if resource_type is KSQLDB",
+									Description:         "Name of a valid ksqlDB cluster, only required if resource_type is KSQLDB",
+									MarkdownDescription: "Name of a valid ksqlDB cluster, only required if resource_type is KSQLDB",
 								},
 								"name": schema.StringAttribute{
 									Optional:            true,
@@ -143,6 +143,9 @@ func ConsoleGroupV2ResourceSchema(ctx context.Context) schema.Schema {
 						Computed:            true,
 						Description:         "Set of all group permissions",
 						MarkdownDescription: "Set of all group permissions",
+						Validators: []validator.Set{
+							validation.PermissionResourceType(),
+						},
 					},
 				},
 				CustomType: SpecType{

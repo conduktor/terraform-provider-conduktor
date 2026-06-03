@@ -6,6 +6,7 @@ import (
 
 	"github.com/conduktor/terraform-provider-conduktor/internal/client"
 	mapper "github.com/conduktor/terraform-provider-conduktor/internal/mapper/console_group_v2"
+	"github.com/conduktor/terraform-provider-conduktor/internal/model"
 	console "github.com/conduktor/terraform-provider-conduktor/internal/model/console"
 	schema "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_console_group_v2"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -101,6 +102,9 @@ func (r *GroupV2Resource) Create(ctx context.Context, req resource.CreateRequest
 		resp.Diagnostics.AddError("Unmarshall Error", fmt.Sprintf("Response resource can't be cast as group : %v, got error: %s", apply.Resource, err))
 		return
 	}
+
+	// Merge response permissions with planned permissions to preserve fields stripped by the API.
+	consoleRes.Spec.Permissions = model.MergeWithPlannedPermissions(consoleResource.Spec.Permissions, consoleRes.Spec.Permissions)
 	tflog.Debug(ctx, fmt.Sprintf("New group state : %+v", consoleRes))
 
 	data, err = mapper.InternalModelToTerraform(ctx, &consoleRes)
@@ -187,6 +191,9 @@ func (r *GroupV2Resource) Update(ctx context.Context, req resource.UpdateRequest
 		resp.Diagnostics.AddError("Unmarshall Error", fmt.Sprintf("Response resource can't be cast as group : %v, got error: %s", apply.Resource, err))
 		return
 	}
+
+	// Merge response permissions with planned permissions to preserve fields stripped by the API.
+	consoleRes.Spec.Permissions = model.MergeWithPlannedPermissions(consoleResource.Spec.Permissions, consoleRes.Spec.Permissions)
 	tflog.Debug(ctx, fmt.Sprintf("New group state : %+v", consoleRes))
 
 	data, err = mapper.InternalModelToTerraform(ctx, &consoleRes)
