@@ -12,6 +12,11 @@ import (
 
 func TestAccTopicPolicyV1Resource(t *testing.T) {
 	test.CheckEnterpriseEnabled(t)
+	v, err := fetchClientVersion(client.CONSOLE)
+	if err != nil {
+		t.Fatalf("Error fetching current version: %s", err)
+	}
+	test.CheckMinimumVersionRequirement(t, v, topicPolicyMininumVersion)
 	resourceRef := "conduktor_console_topic_policy_v1.test"
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { test.TestAccPreCheck(t) },
@@ -52,6 +57,11 @@ func TestAccTopicPolicyV1Resource(t *testing.T) {
 
 func TestAccTopicPolicyV1Minimal(t *testing.T) {
 	test.CheckEnterpriseEnabled(t)
+	v, err := fetchClientVersion(client.CONSOLE)
+	if err != nil {
+		t.Fatalf("Error fetching current version: %s", err)
+	}
+	test.CheckMinimumVersionRequirement(t, v, topicPolicyMininumVersion)
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { test.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
@@ -72,6 +82,11 @@ func TestAccTopicPolicyV1Minimal(t *testing.T) {
 
 func TestAccTopicPolicyV1Constraints(t *testing.T) {
 	test.CheckEnterpriseEnabled(t)
+	v, err := fetchClientVersion(client.CONSOLE)
+	if err != nil {
+		t.Fatalf("Error fetching current version: %s", err)
+	}
+	test.CheckMinimumVersionRequirement(t, v, topicPolicyMininumVersion)
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { test.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
