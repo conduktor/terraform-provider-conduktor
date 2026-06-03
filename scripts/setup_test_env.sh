@@ -38,11 +38,17 @@ if [[ "${CONDUKTOR_CONSOLE_IMAGE}" != *"1.26.0"* ]];then # only applying some re
 	go run github.com/conduktor/ctl@${CLI_VERSION} apply -f "${SCRIPT_DIR}"/../testdata/init/init_console_1.27+.yaml
 fi
 
-echo "Logging in Gateway and applying setup"
-unset CDK_BASE_URL
-unset CDK_USER
-unset CDK_PASSWORD
-export CDK_GATEWAY_BASE_URL=${GW_URL}
-export CDK_GATEWAY_USER=${GW_USER}
-export CDK_GATEWAY_PASSWORD=${GW_PASSWORD}
-go run github.com/conduktor/ctl@${CLI_VERSION} apply -f "${SCRIPT_DIR}"/../testdata/init/init_gateway.yaml
+# Only seed gateway if the container is running and healthy
+GATEWAY_CONTAINER_ID=$(docker container ls -a --filter "name=conduktor-gateway" --filter "status=running" --format "{{.ID}}")
+if [ -n "$GATEWAY_CONTAINER_ID" ] && [ "$(docker inspect -f {{.State.Health.Status}} "$GATEWAY_CONTAINER_ID" 2>/dev/null)" = "healthy" ]; then
+	echo "Logging in Gateway and applying setup"
+	unset CDK_BASE_URL
+	unset CDK_USER
+	unset CDK_PASSWORD
+	export CDK_GATEWAY_BASE_URL=${GW_URL}
+	export CDK_GATEWAY_USER=${GW_USER}
+	export CDK_GATEWAY_PASSWORD=${GW_PASSWORD}
+	go run github.com/conduktor/ctl@${CLI_VERSION} apply -f "${SCRIPT_DIR}"/../testdata/init/init_gateway.yaml
+else
+	echo "Gateway container is not healthy, skipping Gateway setup"
+fi
