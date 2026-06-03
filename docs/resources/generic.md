@@ -121,8 +121,6 @@ spec:
 - `cluster` (String) Resource parent cluster (if any)
 
 
-
-
 ## Limitations
 
 Current limitation of this resource are :

@@ -103,7 +103,7 @@ resource "conduktor_gateway_service_account_v2" "gateway_sa" {
 
 ### Required
 
-- `mode` (String) The mode for the Terraform provider. When using one provider, can be set to either `console` or `gateway`. Alternatively for multi-provider configuration, set both providers with an an alias, and set the relevant alias at the resource level. May also be set using environment variable `CDK_PROVIDER_MODE`.  
+- `mode` (String) The mode for the Terraform provider. When using one provider, can be set to either `console` or `gateway`. Alternatively for multi-provider configuration, set both providers with an an alias, and set the relevant alias at the resource level. May also be set using environment variable `CDK_PROVIDER_MODE`.
 See [documentation](https://github.com/conduktor/terraform-provider-conduktor/blob/main/docs/index.md#multi-client-configuration-using-terraform-alias) for more information.
 
 ### Optional
@@ -116,5 +116,3 @@ See [documentation](https://github.com/conduktor/terraform-provider-conduktor/bl
 - `cert` (String) Cert in PEM format to authenticate using client certificates. May be set using environment variable `CDK_CONSOLE_CERT` or `CDK_CERT` for Console, `CDK_GATEWAY_CERT` or `CDK_CERT` for Gateway. Must be used with key. If key is provided, cert is required. Useful when Console is behind a reverse proxy with client certificate authentication.
 - `insecure` (Boolean) Skip TLS verification flag. May be set using environment variable `CDK_CONSOLE_INSECURE` or `CDK_INSECURE` for Console, `CDK_GATEWAY_INSECURE` or `CDK_INSECURE` for Gateway.
 - `key` (String) Key in PEM format to authenticate using client certificates. May be set using environment variable `CDK_CONSOLE_KEY` or `CDK_KEY` for Console, `CDK_GATEWAY_KEY` or `CDK_KEY` for Gateway. Must be used with cert. If cert is provided, key is required. Useful when Console is behind a reverse proxy with client certificate authentication.
-
-

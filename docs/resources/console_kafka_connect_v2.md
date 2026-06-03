@@ -217,11 +217,6 @@ Required:
 - `certificate_chain` (String) Kafka connect server mTLS auth certificate chain PEM.
 - `key` (String, Sensitive) Kafka connect server mTLS auth private key PEM.
 
-
-
-
-
-
 ## Import
 
 In order to import a Kafka Connect server connection into Conduktor, you need to know the Kafka cluster ID and the Kafka Connect server ID.

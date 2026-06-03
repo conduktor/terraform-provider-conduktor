@@ -3,12 +3,14 @@ repos:
     rev: v6.0.0
     hooks:
       - id: check-yaml
-        args: ['--allow-multiple-documents']
+        args: ["--allow-multiple-documents"]
       - id: check-added-large-files
       - id: check-merge-conflict
       - id: detect-private-key
+        # exclude kafka resources doc as they contain fake private key PEM for example purpose
+        exclude: "console_kafka_cluster_v2.md|console_ksqldb_cluster_v2.md|console_kafka_connect_v2.md"
       - id: detect-aws-credentials
-        args: ['--allow-missing-credentials']
+        args: ["--allow-missing-credentials"]
       - id: end-of-file-fixer
       - id: trailing-whitespace
   - repo: https://github.com/gitleaks/gitleaks

@@ -217,10 +217,6 @@ Required:
 - `subject` (String) subject required string
 - `version` (Number) version required integer
 
-
-
-
-
 ## Import
 
 In order to import a Kafka subject, you need to know the Kafka cluster ID and the Kafka subject name.
