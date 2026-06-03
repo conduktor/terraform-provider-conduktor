@@ -9,6 +9,7 @@ import (
 )
 
 func TestAccGatewayVirtualClusterV2Resource(t *testing.T) {
+	test.CheckEnterpriseEnabled(t)
 	v, err := fetchClientVersion(client.GATEWAY)
 	if err != nil {
 		t.Fatalf("Error fetching current version: %s", err)
@@ -80,6 +81,7 @@ func TestAccGatewayVirtualClusterV2Resource(t *testing.T) {
 }
 
 func TestAccVirtualClusterV2Minimal(t *testing.T) {
+	test.CheckEnterpriseEnabled(t)
 	v, err := fetchClientVersion(client.GATEWAY)
 	if err != nil {
 		t.Fatalf("Error fetching current version: %s", err)
@@ -103,6 +105,7 @@ func TestAccVirtualClusterV2Minimal(t *testing.T) {
 }
 
 func TestAccVirtualClusterV2ExampleResource(t *testing.T) {
+	test.CheckEnterpriseEnabled(t)
 	v, err := fetchClientVersion(client.GATEWAY)
 	if err != nil {
 		t.Fatalf("Error fetching current version: %s", err)

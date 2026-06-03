@@ -1,15 +1,17 @@
 package provider
 
 import (
-	"github.com/conduktor/terraform-provider-conduktor/internal/client"
-	"github.com/conduktor/terraform-provider-conduktor/internal/test"
 	"regexp"
 	"testing"
+
+	"github.com/conduktor/terraform-provider-conduktor/internal/client"
+	"github.com/conduktor/terraform-provider-conduktor/internal/test"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func TestAccConnectorV2Resource(t *testing.T) {
+	test.CheckEnterpriseEnabled(t) // skip when no license because Gateway will likely not be up
 	v, err := fetchClientVersion(client.CONSOLE)
 	if err != nil {
 		t.Fatalf("Error fetching current version: %s", err)
@@ -70,6 +72,7 @@ func TestAccConnectorV2Resource(t *testing.T) {
 }
 
 func TestAccConnectorV2Minimal(t *testing.T) {
+	test.CheckEnterpriseEnabled(t) // skip when no license because Gateway will likely not be up
 	v, err := fetchClientVersion(client.CONSOLE)
 	if err != nil {
 		t.Fatalf("Error fetching current version: %s", err)
@@ -99,6 +102,7 @@ func TestAccConnectorV2Minimal(t *testing.T) {
 }
 
 func TestAccConnectorV2Labels(t *testing.T) {
+	test.CheckEnterpriseEnabled(t) // skip when no license because Gateway will likely not be up
 	v, err := fetchClientVersion(client.CONSOLE)
 	if err != nil {
 		t.Fatalf("Error fetching current version: %s", err)
@@ -125,6 +129,7 @@ func TestAccConnectorV2Labels(t *testing.T) {
 }
 
 func TestAccConnectorV2ExampleSimpleResource(t *testing.T) {
+	test.CheckEnterpriseEnabled(t) // skip when no license because Gateway will likely not be up
 	v, err := fetchClientVersion(client.CONSOLE)
 	if err != nil {
 		t.Fatalf("Error fetching current version: %s", err)
@@ -155,6 +160,7 @@ func TestAccConnectorV2ExampleSimpleResource(t *testing.T) {
 }
 
 func TestAccConnectorV2ExampleComplexResource(t *testing.T) {
+	test.CheckEnterpriseEnabled(t) // skip when no license because Gateway will likely not be up
 	v, err := fetchClientVersion(client.CONSOLE)
 	if err != nil {
 		t.Fatalf("Error fetching current version: %s", err)

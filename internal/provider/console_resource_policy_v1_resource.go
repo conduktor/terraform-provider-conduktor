@@ -17,6 +17,7 @@ import (
 
 const resourcePolicyV1ApiPath = "/public/self-serve/v1/resource-policy"
 const resourcePolicyMininumVersion = "v1.34.0"
+const resourcePolicyEnterpriseOnlyVersion = "v1.43.0"
 
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &ResourcePolicyV1Resource{}
@@ -79,6 +80,11 @@ func (r *ResourcePolicyV1Resource) Configure(ctx context.Context, req resource.C
 			"Minimum version requirement not met",
 			"This resource requires Conduktor Console API version "+resourcePolicyMininumVersion+" but targeted Conduktor Console API is "+consoleVersion,
 		)
+		return
+	}
+
+	checkEnterprisePlanRequirement(ctx, data.Client, consoleVersion, resourcePolicyEnterpriseOnlyVersion, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 

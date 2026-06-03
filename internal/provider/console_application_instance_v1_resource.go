@@ -12,10 +12,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	jsoniter "github.com/json-iterator/go"
+	"golang.org/x/mod/semver"
 )
 
 const applicationInstanceV1ApiPath = "/public/self-serve/v1/application-instance"
 const appInstanceMininumVersion = "v1.31.0"
+const appInstanceEnterpriseOnlyVersion = "v1.43.0"
 
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &ApplicationInstanceV1Resource{}
@@ -62,6 +64,24 @@ func (r *ApplicationInstanceV1Resource) Configure(ctx context.Context, req resou
 				"More info here: \n"+
 				" - https://registry.terraform.io/providers/conduktor/conduktor/latest/docs",
 		)
+		return
+	}
+
+	consoleVersion, err := data.Client.GetAPIVersion(ctx, client.CONSOLE)
+	if err != nil {
+		resp.Diagnostics.AddError("Error fetching Console version", err.Error())
+		return
+	}
+	if semver.IsValid(consoleVersion) && semver.Compare(consoleVersion, appInstanceMininumVersion) < 0 {
+		resp.Diagnostics.AddError(
+			"Minimum version requirement not met",
+			"This resource requires Conduktor Console API version "+appInstanceMininumVersion+" but targeted Conduktor Console API is "+consoleVersion,
+		)
+		return
+	}
+
+	checkEnterprisePlanRequirement(ctx, data.Client, consoleVersion, appInstanceEnterpriseOnlyVersion, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 

@@ -10,6 +10,7 @@ import (
 )
 
 func TestAccApplicationInstanceV1Resource(t *testing.T) {
+	test.CheckEnterpriseEnabled(t)
 	v, err := fetchClientVersion(client.CONSOLE)
 	if err != nil {
 		t.Fatalf("Error fetching current version: %s", err)
@@ -69,6 +70,7 @@ func TestAccApplicationInstanceV1Resource(t *testing.T) {
 // This test contains a resource definition for creating an application instance targeting specifically Conduktor Console v1.34.
 // Currently used to test the new `spec.policy_ref` field.
 func TestAccApplicationInstanceV1Resource2(t *testing.T) {
+	test.CheckEnterpriseEnabled(t)
 	v, err := fetchClientVersion(client.CONSOLE)
 	if err != nil {
 		t.Fatalf("Error fetching current version: %s", err)
@@ -99,6 +101,7 @@ func TestAccApplicationInstanceV1Resource2(t *testing.T) {
 }
 
 func TestAccApplicationInstanceV1Minimal(t *testing.T) {
+	test.CheckEnterpriseEnabled(t)
 	v, err := fetchClientVersion(client.CONSOLE)
 	if err != nil {
 		t.Fatalf("Error fetching current version: %s", err)
@@ -123,6 +126,7 @@ func TestAccApplicationInstanceV1Minimal(t *testing.T) {
 }
 
 func TestAccApplicationInstanceV1ExampleResource(t *testing.T) {
+	test.CheckEnterpriseEnabled(t)
 	v, err := fetchClientVersion(client.CONSOLE)
 	if err != nil {
 		t.Fatalf("Error fetching current version: %s", err)

@@ -1,0 +1,43 @@
+# Enterprise-only init manifests.
+# These resources require an Enterprise license on Console >= 1.43.0.
+---
+apiVersion: v1
+kind: Application
+metadata:
+  name: myapp
+spec:
+  title: My Application
+  owner: admin
+---
+apiVersion: v1
+kind: ApplicationInstance
+metadata:
+  name: my-app-instance
+  application: myapp
+spec:
+  cluster: kafka-cluster
+  resources:
+    - type: TOPIC
+      name: my-topic
+      patternType: LITERAL
+---
+apiVersion: v1
+kind: ApplicationInstance
+metadata:
+  name: another-app-instance
+  application: myapp
+spec:
+  cluster: kafka-cluster
+---
+apiVersion: v1
+kind: TopicPolicy
+metadata:
+  name: topic-policy
+spec:
+  policies:
+    my-policy:
+      constraint: OneOf
+      optional: true
+      values:
+        - value1
+        - value2

@@ -9,6 +9,7 @@ import (
 )
 
 func TestAccApplicationGroupV1Resource(t *testing.T) {
+	test.CheckEnterpriseEnabled(t)
 	resourceRef := "conduktor_console_application_group_v1.test"
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { test.TestAccPreCheck(t) },
@@ -73,6 +74,7 @@ func TestAccApplicationGroupV1Resource(t *testing.T) {
 }
 
 func TestAccApplicationGroupV1Minimal(t *testing.T) {
+	test.CheckEnterpriseEnabled(t)
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { test.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
@@ -92,6 +94,7 @@ func TestAccApplicationGroupV1Minimal(t *testing.T) {
 }
 
 func TestAccApplicationGroupV1ExampleResource(t *testing.T) {
+	test.CheckEnterpriseEnabled(t)
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { test.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,

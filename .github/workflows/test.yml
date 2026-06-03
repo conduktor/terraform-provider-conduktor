@@ -77,21 +77,21 @@ jobs:
           - console: "1.26.0"
             gateway: "3.5.2"
             terraform:
-               version: "1.0.*"
-               name: "TF-1.0"
+              version: "1.0.*"
+              name: "TF-1.0"
             license: v2
 
           # latest versions no license
-          - console: "1.40.0"
-            gateway: "3.15.0"
+          - console: "1.45.1"
+            gateway: "3.15.0" # latest Gateway version that support no license startup
             terraform:
-                version: "latest"
-                name: "TF-latest"
+              version: "latest"
+              name: "TF-latest"
             license: free
 
           # latest versions with license
-          - console: "1.40.0"
-            gateway: "3.15.0"
+          - console: "1.45.1"
+            gateway: "3.19.1"
             terraform:
               version: "latest"
               name: "TF-latest"
@@ -135,7 +135,7 @@ jobs:
           elif [[ "${{ matrix.env.license }}" == "v3" ]]; then
             license="${{ secrets.TEST_LICENSE_V3 }}"
           fi
-          
+
           # only set license if it is not empty
           # can be empty for free tier testing, dependabot or external PRs
           # Note : old versions of Console fail health probe if license is set emtpy
