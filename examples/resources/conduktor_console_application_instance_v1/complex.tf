@@ -36,10 +36,13 @@ resource "conduktor_console_application_instance_v1" "complex" {
         name           = "legacy-click."
         pattern_type   = "PREFIXED"
         ownership_mode = "LIMITED"
+      },
+      {
+        type         = "TRANSACTIONAL_ID"
+        name         = "click."
+        pattern_type = "PREFIXED"
       }
     ]
     application_managed_service_account = false
   }
 }
-
-

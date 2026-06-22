@@ -256,7 +256,7 @@
                       {
                         "name": "type",
                         "string": {
-                          "description": "Type of the resource, valid values are: TOPIC, CONSUMER_GROUP, SUBJECT, CONNECTOR",
+                          "description": "Type of the resource, valid values are: TOPIC, CONSUMER_GROUP, SUBJECT, CONNECTOR, TRANSACTIONAL_ID",
                           "computed_optional_required": "required",
                           "validators": [
                             {
@@ -513,7 +513,7 @@
                         {
                           "name": "type",
                           "string": {
-                            "description": "Type of the resource, valid values are: TOPIC, CONSUMER_GROUP, SUBJECT, CONNECTOR",
+                            "description": "Type of the resource, valid values are: TOPIC, CONSUMER_GROUP, SUBJECT, CONNECTOR, TRANSACTIONAL_ID",
                             "computed_optional_required": "required",
                             "validators": [
                               {

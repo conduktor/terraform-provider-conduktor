@@ -84,8 +84,8 @@ func ConsoleApplicationInstancePermissionV1ResourceSchema(ctx context.Context) s
 							},
 							"type": schema.StringAttribute{
 								Required:            true,
-								Description:         "Type of the resource, valid values are: TOPIC, CONSUMER_GROUP, SUBJECT, CONNECTOR",
-								MarkdownDescription: "Type of the resource, valid values are: TOPIC, CONSUMER_GROUP, SUBJECT, CONNECTOR",
+								Description:         "Type of the resource, valid values are: TOPIC, CONSUMER_GROUP, SUBJECT, CONNECTOR, TRANSACTIONAL_ID",
+								MarkdownDescription: "Type of the resource, valid values are: TOPIC, CONSUMER_GROUP, SUBJECT, CONNECTOR, TRANSACTIONAL_ID",
 								Validators: []validator.String{
 									stringvalidator.OneOf(validation.ValidResourceTypes...),
 								},
