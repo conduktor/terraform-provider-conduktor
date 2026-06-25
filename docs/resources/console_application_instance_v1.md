@@ -77,6 +77,11 @@ resource "conduktor_console_application_instance_v1" "complex" {
         name           = "legacy-click."
         pattern_type   = "PREFIXED"
         ownership_mode = "LIMITED"
+      },
+      {
+        type         = "TRANSACTIONAL_ID"
+        name         = "click."
+        pattern_type = "PREFIXED"
       }
     ]
     application_managed_service_account = false
@@ -116,7 +121,7 @@ Required:
 
 - `name` (String) Name of the resource
 - `pattern_type` (String) Pattern type for the resource, valid values are: LITERAL, PREFIXED
-- `type` (String) Type of the resource, valid values are: TOPIC, CONSUMER_GROUP, SUBJECT, CONNECTOR
+- `type` (String) Type of the resource, valid values are: TOPIC, CONSUMER_GROUP, SUBJECT, CONNECTOR, TRANSACTIONAL_ID
 
 Optional:
 

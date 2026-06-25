@@ -72,7 +72,7 @@ Required:
 
 - `name` (String) Name of the resource. Must reference any sub-resource of app_instance
 - `pattern_type` (String) Pattern type for the resource, valid values are: LITERAL, PREFIXED
-- `type` (String) Type of the resource, valid values are: TOPIC, CONSUMER_GROUP, SUBJECT, CONNECTOR
+- `type` (String) Type of the resource, valid values are: TOPIC, CONSUMER_GROUP, SUBJECT, CONNECTOR, TRANSACTIONAL_ID
 
 Optional:
 

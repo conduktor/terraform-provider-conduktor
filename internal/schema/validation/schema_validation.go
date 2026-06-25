@@ -75,7 +75,7 @@ var ValidAppGroupPermissions = []string{
 var ValidProviderMode = []string{"console", "gateway"}
 
 // Console Application Instance.
-var ValidResourceTypes = []string{"TOPIC", "CONSUMER_GROUP", "SUBJECT", "CONNECTOR"}
+var ValidResourceTypes = []string{"TOPIC", "CONSUMER_GROUP", "SUBJECT", "CONNECTOR", "TRANSACTIONAL_ID"}
 var ValidPatternTypes = []string{"LITERAL", "PREFIXED"} // This seems to be a duplicate of ValidPermissionPatternTypes, keeping separate for now to avoid confusion.
 var ValidOwnershipModes = []string{"ALL", "LIMITED"}
 var ValidCatalogVisibilities = []string{"PRIVATE", "PUBLIC"}
