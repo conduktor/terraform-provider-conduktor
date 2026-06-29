@@ -49,6 +49,7 @@ func TestAccGenericResource(t *testing.T) {
 // Alert v3 is scoped by a metadata query param (here: user), so this checks the
 // param is propagated on every verb (#186). User-scoped needs no extra fixtures.
 func TestAccGenericAlertResource(t *testing.T) {
+	test.CheckEnterpriseEnabled(t)
 	v, err := fetchClientVersion(client.CONSOLE)
 	if err != nil {
 		t.Fatalf("Error fetching current version: %s", err)
