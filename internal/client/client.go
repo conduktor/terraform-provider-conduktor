@@ -182,8 +182,13 @@ func (client *Client) ApplyGeneric(ctx context.Context, cliResource ctlresource.
 
 	url := client.BaseUrl + applyPath.Path
 
-	tflog.Trace(ctx, fmt.Sprintf("PUT on %s body : %s", applyPath, string(cliResource.Json)))
 	builder := client.Client.R().SetBody(cliResource.Json)
+	// Required query params for kinds scoped by metadata, e.g. Alert v3 (#186).
+	for _, queryParam := range applyPath.QueryParams {
+		builder = builder.SetQueryParam(queryParam.Name, queryParam.Value)
+	}
+
+	tflog.Trace(ctx, fmt.Sprintf("PUT on %s body : %s", url, string(cliResource.Json)))
 	resp, err := builder.Put(url)
 	if err != nil {
 		return "", err
