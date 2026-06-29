@@ -3,9 +3,13 @@ package provider
 import (
 	"testing"
 
+	"github.com/conduktor/terraform-provider-conduktor/internal/client"
 	"github.com/conduktor/terraform-provider-conduktor/internal/test"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
+
+// Alert v3 was introduced in Console 1.30.
+const alertV3MinimumVersion = "v1.30.0"
 
 func TestAccGenericResource(t *testing.T) {
 	resourceRef := "conduktor_generic.embedded"
@@ -45,6 +49,12 @@ func TestAccGenericResource(t *testing.T) {
 // Alert v3 is scoped by a metadata query param (here: user), so this checks the
 // param is propagated on every verb (#186). User-scoped needs no extra fixtures.
 func TestAccGenericAlertResource(t *testing.T) {
+	v, err := fetchClientVersion(client.CONSOLE)
+	if err != nil {
+		t.Fatalf("Error fetching current version: %s", err)
+	}
+	test.CheckMinimumVersionRequirement(t, v, alertV3MinimumVersion)
+
 	resourceRef := "conduktor_generic.alert"
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { test.TestAccPreCheck(t) },
