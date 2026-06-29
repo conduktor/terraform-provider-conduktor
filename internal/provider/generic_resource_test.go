@@ -42,6 +42,46 @@ func TestAccGenericResource(t *testing.T) {
 	})
 }
 
+// Alert v3 is scoped by a metadata query param (here: user), so this checks the
+// param is propagated on every verb (#186). User-scoped needs no extra fixtures.
+func TestAccGenericAlertResource(t *testing.T) {
+	resourceRef := "conduktor_generic.alert"
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { test.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create + Read
+			{
+				Config: providerConfigConsole + test.TestAccTestdata(t, "generic_resource_create_alert.tf"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceRef, "name", "test-generic-alert"),
+					resource.TestCheckResourceAttr(resourceRef, "kind", "Alert"),
+					resource.TestCheckResourceAttr(resourceRef, "version", "v3"),
+					resource.TestCheckResourceAttrWith(resourceRef, "manifest",
+						test.TestCheckResourceAttrContainsStringsFunc(
+							"\"user\": \"admin@conduktor.io\"",
+							"\"type\": \"TopicAlert\"",
+							"\"threshold\": 100",
+						)),
+				),
+			},
+			// Update + Read (threshold 100 -> 500)
+			{
+				Config: providerConfigConsole + test.TestAccTestdata(t, "generic_resource_update_alert.tf"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceRef, "name", "test-generic-alert"),
+					resource.TestCheckResourceAttrWith(resourceRef, "manifest",
+						test.TestCheckResourceAttrContainsStringsFunc(
+							"\"user\": \"admin@conduktor.io\"",
+							"\"threshold\": 500",
+						)),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
 func TestAccGenericExample2Resource(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { test.TestAccPreCheck(t) },

@@ -3,6 +3,9 @@ package provider
 import (
 	"context"
 	"fmt"
+	"net/url"
+	"strings"
+
 	"github.com/conduktor/terraform-provider-conduktor/internal/customtypes"
 
 	ctlresource "github.com/conduktor/ctl/resource"
@@ -145,14 +148,22 @@ func (r *GenericResource) Read(ctx context.Context, req resource.ReadRequest, re
 
 	tflog.Trace(ctx, fmt.Sprintf("New resource JSON state : %s", string(firstResource.Json)))
 
-	// goyaml.FutureLineWrap()
-	var outBytes []byte
-	outBytes, err = yaml.JSONToYAML(firstResource.Json)
+	outBytes, err := yaml.JSONToYAML(firstResource.Json)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Generic, got error: %s", err))
 		return
 	}
 	yamlString := string(outBytes)
+
+	// Keep only user-declared fields so server-computed ones (promQl, updatedAt...)
+	// don't cause a perpetual diff. Best-effort: fall back to the raw response.
+	if prior := data.Manifest.ValueString(); strings.TrimSpace(prior) != "" {
+		if reconciled, rerr := reconcileManifest(prior, yamlString); rerr != nil {
+			tflog.Warn(ctx, fmt.Sprintf("Unable to reconcile Generic manifest, using raw response: %s", rerr))
+		} else {
+			yamlString = reconciled
+		}
+	}
 	tflog.Trace(ctx, fmt.Sprintf("New resource YAML state : %s", yamlString))
 
 	data.Kind = schemaUtils.NewStringValue(firstResource.Kind)
@@ -249,8 +260,89 @@ func resourcePath(data schema.GenericModel) (string, error) {
 	if cluster != "" {
 		parentPath = append(parentPath, cluster)
 	}
-	// TODO support console alerts v3 query params https://github.com/conduktor/ctl/pull/78
-	parentQueryValues := []string{}
 
-	return kind.DescribePath(parentPath, parentQueryValues, data.Name.ValueString()).Path, nil
+	// Kinds scoped by metadata query params instead of a path segment, e.g. Alert
+	// v3's appInstance/group/user (#186). Sized-but-empty values keep DescribePath
+	// happy; the resolved params are appended to the final path.
+	queryParams, err := parentQueryParams(kind, data.Manifest.ValueString())
+	if err != nil {
+		return "", err
+	}
+
+	describe := kind.DescribePath(parentPath, make([]string, len(kind.GetParentQueryFlag())), data.Name.ValueString())
+	return appendQueryParams(describe.Path, queryParams), nil
+}
+
+// parentQueryParams extracts the kind's parent query params from the manifest
+// metadata, reusing ctl's Kind.ApplyPath (the same extraction Create uses).
+func parentQueryParams(kind ctlschema.Kind, manifest string) ([]ctlschema.QueryParam, error) {
+	if len(kind.GetParentQueryFlag()) == 0 || strings.TrimSpace(manifest) == "" {
+		return nil, nil
+	}
+
+	cliResources, err := ctlresource.FromYamlByte([]byte(manifest), true)
+	if err != nil {
+		return nil, err
+	}
+	if len(cliResources) == 0 {
+		return nil, nil
+	}
+
+	applyInfo, err := kind.ApplyPath(&cliResources[0])
+	if err != nil {
+		return nil, err
+	}
+	return applyInfo.QueryParams, nil
+}
+
+// appendQueryParams appends the given query parameters to the path, URL-encoded.
+func appendQueryParams(path string, params []ctlschema.QueryParam) string {
+	if len(params) == 0 {
+		return path
+	}
+	values := url.Values{}
+	for _, param := range params {
+		values.Add(param.Name, param.Value)
+	}
+	return path + "?" + values.Encode()
+}
+
+// reconcileManifest overlays the API manifest onto the prior one, returning YAML
+// that keeps only the fields the user declared. Both inputs are YAML.
+func reconcileManifest(priorManifest, apiManifest string) (string, error) {
+	var prior, api map[string]any
+	if err := yaml.Unmarshal([]byte(priorManifest), &prior); err != nil {
+		return "", err
+	}
+	if err := yaml.Unmarshal([]byte(apiManifest), &api); err != nil {
+		return "", err
+	}
+
+	out, err := yaml.Marshal(overlay(prior, api))
+	if err != nil {
+		return "", err
+	}
+	return string(out), nil
+}
+
+// overlay keeps only the keys present in prior, taking values from api (recursing
+// into nested maps to still detect drift on declared fields). Keys missing from api
+// keep their prior value; api-only keys (server-computed) are dropped.
+func overlay(prior, api map[string]any) map[string]any {
+	result := make(map[string]any, len(prior))
+	for key, priorVal := range prior {
+		apiVal, ok := api[key]
+		if !ok {
+			result[key] = priorVal
+			continue
+		}
+		priorMap, priorIsMap := priorVal.(map[string]any)
+		apiMap, apiIsMap := apiVal.(map[string]any)
+		if priorIsMap && apiIsMap {
+			result[key] = overlay(priorMap, apiMap)
+		} else {
+			result[key] = apiVal
+		}
+	}
+	return result
 }
