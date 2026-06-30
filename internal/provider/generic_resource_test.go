@@ -3,9 +3,13 @@ package provider
 import (
 	"testing"
 
+	"github.com/conduktor/terraform-provider-conduktor/internal/client"
 	"github.com/conduktor/terraform-provider-conduktor/internal/test"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
+
+// Alert v3 was introduced in Console 1.30.
+const alertV3MinimumVersion = "v1.30.0"
 
 func TestAccGenericResource(t *testing.T) {
 	resourceRef := "conduktor_generic.embedded"
@@ -35,6 +39,53 @@ func TestAccGenericResource(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceRef, "version", "v2"),
 					resource.TestCheckResourceAttrWith(resourceRef, "manifest",
 						test.TestCheckResourceAttrContainsStringsFunc("\"name\": \"jim.halpert@dunder.mifflin.com\"", "\"firstName\": \"Tim\"", "\"lastName\": \"Canterbury\"")),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+// Alert v3 is scoped by a metadata query param (here: user), so this checks the
+// param is propagated on every verb (#186). User-scoped needs no extra fixtures.
+func TestAccGenericAlertResource(t *testing.T) {
+	test.CheckEnterpriseEnabled(t)
+	v, err := fetchClientVersion(client.CONSOLE)
+	if err != nil {
+		t.Fatalf("Error fetching current version: %s", err)
+	}
+	test.CheckMinimumVersionRequirement(t, v, alertV3MinimumVersion)
+
+	resourceRef := "conduktor_generic.alert"
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { test.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create + Read
+			{
+				Config: providerConfigConsole + test.TestAccTestdata(t, "generic_resource_create_alert.tf"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceRef, "name", "test-generic-alert"),
+					resource.TestCheckResourceAttr(resourceRef, "kind", "Alert"),
+					resource.TestCheckResourceAttr(resourceRef, "version", "v3"),
+					resource.TestCheckResourceAttrWith(resourceRef, "manifest",
+						test.TestCheckResourceAttrContainsStringsFunc(
+							"\"user\": \"admin@conduktor.io\"",
+							"\"type\": \"TopicAlert\"",
+							"\"threshold\": 100",
+						)),
+				),
+			},
+			// Update + Read (threshold 100 -> 500)
+			{
+				Config: providerConfigConsole + test.TestAccTestdata(t, "generic_resource_update_alert.tf"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceRef, "name", "test-generic-alert"),
+					resource.TestCheckResourceAttrWith(resourceRef, "manifest",
+						test.TestCheckResourceAttrContainsStringsFunc(
+							"\"user\": \"admin@conduktor.io\"",
+							"\"threshold\": 500",
+						)),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
