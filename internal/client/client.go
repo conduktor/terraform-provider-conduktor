@@ -349,14 +349,14 @@ func (client *Client) GetAPIVersion(ctx context.Context, mode Mode) (string, err
 // then fetches the license info from GET /api/organizations/{slug}/platform-license.
 func (client *Client) GetConsoleLicensePlan(ctx context.Context) (string, error) {
 	// Get the default organization slug
-	orgsURL := client.BaseUrl + "/api/organizations"
+	orgsURL := client.BaseUrl + "/organizations"
 	orgsResp, err := client.Client.R().Get(orgsURL)
 	if err != nil {
 		return "", fmt.Errorf("error fetching organizations: %s", err)
 	} else if orgsResp.IsError() {
 		return "", fmt.Errorf("error fetching organizations: %s", ExtractApiError(orgsResp))
 	}
-	tflog.Trace(ctx, fmt.Sprintf("GET /api/organizations response : %s", string(orgsResp.Body())))
+	tflog.Trace(ctx, fmt.Sprintf("GET /organizations response : %s", string(orgsResp.Body())))
 
 	var orgs []map[string]any
 	err = json.Unmarshal(orgsResp.Body(), &orgs)
@@ -373,7 +373,7 @@ func (client *Client) GetConsoleLicensePlan(ctx context.Context) (string, error)
 	}
 
 	// Fetch the license info for the organization
-	licensePath := fmt.Sprintf("/api/organizations/%s/platform-license", slug)
+	licensePath := fmt.Sprintf("/organizations/%s/platform-license", slug)
 	licenseURL := client.BaseUrl + licensePath
 	licenseResp, err := client.Client.R().Get(licenseURL)
 	if err != nil {
