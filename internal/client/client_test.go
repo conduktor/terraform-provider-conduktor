@@ -19,15 +19,15 @@ func TestGetConsoleLicensePlan_NoDoubleApiPrefix(t *testing.T) {
 		case "/api/organizations":
 			orgsHit = true
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode([]map[string]any{{"slug": "my-org"}})
+			_ = json.NewEncoder(w).Encode([]map[string]any{{"slug": "my-org"}})
 		case "/api/organizations/my-org/platform-license":
 			licenseHit = true
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(map[string]any{"plan": "enterprise"})
+			_ = json.NewEncoder(w).Encode(map[string]any{"plan": "enterprise"})
 		default:
 			// Return HTML like Console SPA does for unmatched routes — this is what triggers the bug
 			w.Header().Set("Content-Type", "text/html")
-			w.Write([]byte("<html>not found</html>"))
+			_, _ = w.Write([]byte("<html>not found</html>"))
 		}
 	}))
 	defer ts.Close()
