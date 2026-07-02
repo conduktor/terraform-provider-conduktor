@@ -345,8 +345,8 @@ func (client *Client) GetAPIVersion(ctx context.Context, mode Mode) (string, err
 }
 
 // GetConsoleLicensePlan returns the Console license plan ("free" or "enterprise").
-// It first fetches the default org slug from GET /api/organizations,
-// then fetches the license info from GET /api/organizations/{slug}/platform-license.
+// It first fetches the default org slug from GET /organizations,
+// then fetches the license info from GET /organizations/{slug}/platform-license.
 func (client *Client) GetConsoleLicensePlan(ctx context.Context) (string, error) {
 	// Get the default organization slug
 	orgsURL := client.BaseUrl + "/organizations"
