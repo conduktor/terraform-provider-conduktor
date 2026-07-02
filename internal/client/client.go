@@ -356,7 +356,7 @@ func (client *Client) GetConsoleLicensePlan(ctx context.Context) (string, error)
 	} else if orgsResp.IsError() {
 		return "", fmt.Errorf("error fetching organizations: %s", ExtractApiError(orgsResp))
 	}
-	tflog.Trace(ctx, fmt.Sprintf("GET /organizations response : %s", string(orgsResp.Body())))
+	tflog.Trace(ctx, fmt.Sprintf("GET /api/organizations response : %s", string(orgsResp.Body())))
 
 	var orgs []map[string]any
 	err = json.Unmarshal(orgsResp.Body(), &orgs)
