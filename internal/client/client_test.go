@@ -6,8 +6,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-
-	"github.com/go-resty/resty/v2"
 )
 
 func TestGetConsoleLicensePlan_NoDoubleApiPrefix(t *testing.T) {
@@ -32,9 +30,14 @@ func TestGetConsoleLicensePlan_NoDoubleApiPrefix(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	c := &Client{
-		BaseUrl: ts.URL + "/api",
-		Client:  resty.New(),
+	// Use Make so uniformizeBaseUrl is in the callstack — it appends /api to the base URL,
+	// which is the real production path. Passing ts.URL (no /api) verifies the fix end-to-end.
+	c, err := Make(context.Background(), CONSOLE, ApiParameter{
+		BaseUrl: ts.URL,
+		ApiKey:  "test-key",
+	}, "test")
+	if err != nil {
+		t.Fatalf("failed to create client: %v", err)
 	}
 
 	plan, err := c.GetConsoleLicensePlan(context.Background())
@@ -49,5 +52,23 @@ func TestGetConsoleLicensePlan_NoDoubleApiPrefix(t *testing.T) {
 	}
 	if !licenseHit {
 		t.Error("GET /api/organizations/my-org/platform-license was never called — double /api prefix likely")
+	}
+}
+
+func TestUniformizeBaseUrl(t *testing.T) {
+	cases := []struct {
+		input    string
+		expected string
+	}{
+		{"https://console.example.com", "https://console.example.com/api"},
+		{"https://console.example.com/", "https://console.example.com/api"},
+		{"https://console.example.com/api", "https://console.example.com/api"},
+		{"https://console.example.com/api/", "https://console.example.com/api"},
+	}
+	for _, tc := range cases {
+		got := uniformizeBaseUrl(tc.input)
+		if got != tc.expected {
+			t.Errorf("uniformizeBaseUrl(%q) = %q, want %q", tc.input, got, tc.expected)
+		}
 	}
 }
