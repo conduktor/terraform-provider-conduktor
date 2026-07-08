@@ -74,6 +74,38 @@ func ConsoleApplicationGroupV1ResourceSchema(ctx context.Context) schema.Schema 
 						MarkdownDescription: "Set of external groups from SSO mapped to this group",
 						Default:             setdefault.StaticValue(basetypes.NewSetValueMust(types.StringType, []attr.Value{})),
 					},
+					"instance_permissions": schema.SetNestedAttribute{
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"app_instance": schema.StringAttribute{
+									Required:            true,
+									Description:         "Reference to the application instance",
+									MarkdownDescription: "Reference to the application instance",
+									Validators: []validator.String{
+										stringvalidator.RegexMatches(regexp.MustCompile("^[0-9a-z\\_\\-]+$"), ""),
+									},
+								},
+								"permissions": schema.SetAttribute{
+									ElementType:         types.StringType,
+									Optional:            true,
+									Description:         "Set of instance-level permissions to grant. Valid values are: applicationInstancePermissionRequestAccess, applicationInstancePermissionGrantAccess, applicationInstanceApiKeyManage, applicationInstancePermissionProposeAccess, serviceAccountManage",
+									MarkdownDescription: "Set of instance-level permissions to grant. Valid values are: applicationInstancePermissionRequestAccess, applicationInstancePermissionGrantAccess, applicationInstanceApiKeyManage, applicationInstancePermissionProposeAccess, serviceAccountManage",
+									Validators: []validator.Set{
+										setvalidator.ValueStringsAre(stringvalidator.OneOf(validation.ValidAppGroupInstancePermissions...)),
+									},
+								},
+							},
+							CustomType: InstancePermissionsType{
+								ObjectType: types.ObjectType{
+									AttrTypes: InstancePermissionsValue{}.AttributeTypes(ctx),
+								},
+							},
+						},
+						Optional:            true,
+						Computed:            true,
+						Description:         "Set of instance-level permissions granted to this group on application instances",
+						MarkdownDescription: "Set of instance-level permissions granted to this group on application instances",
+					},
 					"members": schema.SetAttribute{
 						ElementType:         types.StringType,
 						Optional:            true,
@@ -267,6 +299,24 @@ func (t SpecType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue)
 			fmt.Sprintf(`external_groups expected to be basetypes.SetValue, was: %T`, externalGroupsAttribute))
 	}
 
+	instancePermissionsAttribute, ok := attributes["instance_permissions"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`instance_permissions is missing from object`)
+
+		return nil, diags
+	}
+
+	instancePermissionsVal, ok := instancePermissionsAttribute.(basetypes.SetValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`instance_permissions expected to be basetypes.SetValue, was: %T`, instancePermissionsAttribute))
+	}
+
 	membersAttribute, ok := attributes["members"]
 
 	if !ok {
@@ -330,6 +380,7 @@ func (t SpecType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue)
 		DisplayName:               displayNameVal,
 		ExternalGroupRegex:        externalGroupRegexVal,
 		ExternalGroups:            externalGroupsVal,
+		InstancePermissions:       instancePermissionsVal,
 		Members:                   membersVal,
 		MembersFromExternalGroups: membersFromExternalGroupsVal,
 		Permissions:               permissionsVal,
@@ -472,6 +523,24 @@ func NewSpecValue(attributeTypes map[string]attr.Type, attributes map[string]att
 			fmt.Sprintf(`external_groups expected to be basetypes.SetValue, was: %T`, externalGroupsAttribute))
 	}
 
+	instancePermissionsAttribute, ok := attributes["instance_permissions"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`instance_permissions is missing from object`)
+
+		return NewSpecValueUnknown(), diags
+	}
+
+	instancePermissionsVal, ok := instancePermissionsAttribute.(basetypes.SetValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`instance_permissions expected to be basetypes.SetValue, was: %T`, instancePermissionsAttribute))
+	}
+
 	membersAttribute, ok := attributes["members"]
 
 	if !ok {
@@ -535,6 +604,7 @@ func NewSpecValue(attributeTypes map[string]attr.Type, attributes map[string]att
 		DisplayName:               displayNameVal,
 		ExternalGroupRegex:        externalGroupRegexVal,
 		ExternalGroups:            externalGroupsVal,
+		InstancePermissions:       instancePermissionsVal,
 		Members:                   membersVal,
 		MembersFromExternalGroups: membersFromExternalGroupsVal,
 		Permissions:               permissionsVal,
@@ -614,6 +684,7 @@ type SpecValue struct {
 	DisplayName               basetypes.StringValue `tfsdk:"display_name"`
 	ExternalGroupRegex        basetypes.SetValue    `tfsdk:"external_group_regex"`
 	ExternalGroups            basetypes.SetValue    `tfsdk:"external_groups"`
+	InstancePermissions       basetypes.SetValue    `tfsdk:"instance_permissions"`
 	Members                   basetypes.SetValue    `tfsdk:"members"`
 	MembersFromExternalGroups basetypes.SetValue    `tfsdk:"members_from_external_groups"`
 	Permissions               basetypes.SetValue    `tfsdk:"permissions"`
@@ -621,7 +692,7 @@ type SpecValue struct {
 }
 
 func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
-	attrTypes := make(map[string]tftypes.Type, 7)
+	attrTypes := make(map[string]tftypes.Type, 8)
 
 	var val tftypes.Value
 	var err error
@@ -633,6 +704,9 @@ func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) 
 	}.TerraformType(ctx)
 	attrTypes["external_groups"] = basetypes.SetType{
 		ElemType: types.StringType,
+	}.TerraformType(ctx)
+	attrTypes["instance_permissions"] = basetypes.SetType{
+		ElemType: InstancePermissionsValue{}.Type(ctx),
 	}.TerraformType(ctx)
 	attrTypes["members"] = basetypes.SetType{
 		ElemType: types.StringType,
@@ -648,7 +722,7 @@ func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) 
 
 	switch v.state {
 	case attr.ValueStateKnown:
-		vals := make(map[string]tftypes.Value, 7)
+		vals := make(map[string]tftypes.Value, 8)
 
 		val, err = v.Description.ToTerraformValue(ctx)
 
@@ -681,6 +755,14 @@ func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) 
 		}
 
 		vals["external_groups"] = val
+
+		val, err = v.InstancePermissions.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["instance_permissions"] = val
 
 		val, err = v.Members.ToTerraformValue(ctx)
 
@@ -735,6 +817,35 @@ func (v SpecValue) String() string {
 func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
+	instancePermissions := types.SetValueMust(
+		InstancePermissionsType{
+			basetypes.ObjectType{
+				AttrTypes: InstancePermissionsValue{}.AttributeTypes(ctx),
+			},
+		},
+		v.InstancePermissions.Elements(),
+	)
+
+	if v.InstancePermissions.IsNull() {
+		instancePermissions = types.SetNull(
+			InstancePermissionsType{
+				basetypes.ObjectType{
+					AttrTypes: InstancePermissionsValue{}.AttributeTypes(ctx),
+				},
+			},
+		)
+	}
+
+	if v.InstancePermissions.IsUnknown() {
+		instancePermissions = types.SetUnknown(
+			InstancePermissionsType{
+				basetypes.ObjectType{
+					AttrTypes: InstancePermissionsValue{}.AttributeTypes(ctx),
+				},
+			},
+		)
+	}
+
 	permissions := types.SetValueMust(
 		PermissionsType{
 			basetypes.ObjectType{
@@ -786,6 +897,9 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 			"external_groups": basetypes.SetType{
 				ElemType: types.StringType,
 			},
+			"instance_permissions": basetypes.SetType{
+				ElemType: InstancePermissionsValue{}.Type(ctx),
+			},
 			"members": basetypes.SetType{
 				ElemType: types.StringType,
 			},
@@ -819,6 +933,9 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 			},
 			"external_groups": basetypes.SetType{
 				ElemType: types.StringType,
+			},
+			"instance_permissions": basetypes.SetType{
+				ElemType: InstancePermissionsValue{}.Type(ctx),
 			},
 			"members": basetypes.SetType{
 				ElemType: types.StringType,
@@ -854,6 +971,9 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 			"external_groups": basetypes.SetType{
 				ElemType: types.StringType,
 			},
+			"instance_permissions": basetypes.SetType{
+				ElemType: InstancePermissionsValue{}.Type(ctx),
+			},
 			"members": basetypes.SetType{
 				ElemType: types.StringType,
 			},
@@ -888,6 +1008,9 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 			"external_groups": basetypes.SetType{
 				ElemType: types.StringType,
 			},
+			"instance_permissions": basetypes.SetType{
+				ElemType: InstancePermissionsValue{}.Type(ctx),
+			},
 			"members": basetypes.SetType{
 				ElemType: types.StringType,
 			},
@@ -908,6 +1031,9 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 		},
 		"external_groups": basetypes.SetType{
 			ElemType: types.StringType,
+		},
+		"instance_permissions": basetypes.SetType{
+			ElemType: InstancePermissionsValue{}.Type(ctx),
 		},
 		"members": basetypes.SetType{
 			ElemType: types.StringType,
@@ -935,6 +1061,7 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 			"display_name":                 v.DisplayName,
 			"external_group_regex":         externalGroupRegexVal,
 			"external_groups":              externalGroupsVal,
+			"instance_permissions":         instancePermissions,
 			"members":                      membersVal,
 			"members_from_external_groups": membersFromExternalGroupsVal,
 			"permissions":                  permissions,
@@ -974,6 +1101,10 @@ func (v SpecValue) Equal(o attr.Value) bool {
 		return false
 	}
 
+	if !v.InstancePermissions.Equal(other.InstancePermissions) {
+		return false
+	}
+
 	if !v.Members.Equal(other.Members) {
 		return false
 	}
@@ -1007,6 +1138,9 @@ func (v SpecValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 		"external_groups": basetypes.SetType{
 			ElemType: types.StringType,
 		},
+		"instance_permissions": basetypes.SetType{
+			ElemType: InstancePermissionsValue{}.Type(ctx),
+		},
 		"members": basetypes.SetType{
 			ElemType: types.StringType,
 		},
@@ -1015,6 +1149,412 @@ func (v SpecValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 		},
 		"permissions": basetypes.SetType{
 			ElemType: PermissionsValue{}.Type(ctx),
+		},
+	}
+}
+
+var _ basetypes.ObjectTypable = InstancePermissionsType{}
+
+type InstancePermissionsType struct {
+	basetypes.ObjectType
+}
+
+func (t InstancePermissionsType) Equal(o attr.Type) bool {
+	other, ok := o.(InstancePermissionsType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t InstancePermissionsType) String() string {
+	return "InstancePermissionsType"
+}
+
+func (t InstancePermissionsType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	appInstanceAttribute, ok := attributes["app_instance"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`app_instance is missing from object`)
+
+		return nil, diags
+	}
+
+	appInstanceVal, ok := appInstanceAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`app_instance expected to be basetypes.StringValue, was: %T`, appInstanceAttribute))
+	}
+
+	permissionsAttribute, ok := attributes["permissions"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`permissions is missing from object`)
+
+		return nil, diags
+	}
+
+	permissionsVal, ok := permissionsAttribute.(basetypes.SetValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`permissions expected to be basetypes.SetValue, was: %T`, permissionsAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return InstancePermissionsValue{
+		AppInstance: appInstanceVal,
+		Permissions: permissionsVal,
+		state:       attr.ValueStateKnown,
+	}, diags
+}
+
+func NewInstancePermissionsValueNull() InstancePermissionsValue {
+	return InstancePermissionsValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewInstancePermissionsValueUnknown() InstancePermissionsValue {
+	return InstancePermissionsValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewInstancePermissionsValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (InstancePermissionsValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing InstancePermissionsValue Attribute Value",
+				"While creating a InstancePermissionsValue value, a missing attribute value was detected. "+
+					"A InstancePermissionsValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("InstancePermissionsValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid InstancePermissionsValue Attribute Type",
+				"While creating a InstancePermissionsValue value, an invalid attribute value was detected. "+
+					"A InstancePermissionsValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("InstancePermissionsValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("InstancePermissionsValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra InstancePermissionsValue Attribute Value",
+				"While creating a InstancePermissionsValue value, an extra attribute value was detected. "+
+					"A InstancePermissionsValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra InstancePermissionsValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewInstancePermissionsValueUnknown(), diags
+	}
+
+	appInstanceAttribute, ok := attributes["app_instance"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`app_instance is missing from object`)
+
+		return NewInstancePermissionsValueUnknown(), diags
+	}
+
+	appInstanceVal, ok := appInstanceAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`app_instance expected to be basetypes.StringValue, was: %T`, appInstanceAttribute))
+	}
+
+	permissionsAttribute, ok := attributes["permissions"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`permissions is missing from object`)
+
+		return NewInstancePermissionsValueUnknown(), diags
+	}
+
+	permissionsVal, ok := permissionsAttribute.(basetypes.SetValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`permissions expected to be basetypes.SetValue, was: %T`, permissionsAttribute))
+	}
+
+	if diags.HasError() {
+		return NewInstancePermissionsValueUnknown(), diags
+	}
+
+	return InstancePermissionsValue{
+		AppInstance: appInstanceVal,
+		Permissions: permissionsVal,
+		state:       attr.ValueStateKnown,
+	}, diags
+}
+
+func NewInstancePermissionsValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) InstancePermissionsValue {
+	object, diags := NewInstancePermissionsValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewInstancePermissionsValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t InstancePermissionsType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewInstancePermissionsValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewInstancePermissionsValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewInstancePermissionsValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewInstancePermissionsValueMust(InstancePermissionsValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t InstancePermissionsType) ValueType(ctx context.Context) attr.Value {
+	return InstancePermissionsValue{}
+}
+
+var _ basetypes.ObjectValuable = InstancePermissionsValue{}
+
+type InstancePermissionsValue struct {
+	AppInstance basetypes.StringValue `tfsdk:"app_instance"`
+	Permissions basetypes.SetValue    `tfsdk:"permissions"`
+	state       attr.ValueState
+}
+
+func (v InstancePermissionsValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 2)
+
+	var val tftypes.Value
+	var err error
+
+	attrTypes["app_instance"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["permissions"] = basetypes.SetType{
+		ElemType: types.StringType,
+	}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 2)
+
+		val, err = v.AppInstance.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["app_instance"] = val
+
+		val, err = v.Permissions.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["permissions"] = val
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v InstancePermissionsValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v InstancePermissionsValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v InstancePermissionsValue) String() string {
+	return "InstancePermissionsValue"
+}
+
+func (v InstancePermissionsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	var permissionsVal basetypes.SetValue
+	switch {
+	case v.Permissions.IsUnknown():
+		permissionsVal = types.SetUnknown(types.StringType)
+	case v.Permissions.IsNull():
+		permissionsVal = types.SetNull(types.StringType)
+	default:
+		var d diag.Diagnostics
+		permissionsVal, d = types.SetValue(types.StringType, v.Permissions.Elements())
+		diags.Append(d...)
+	}
+
+	if diags.HasError() {
+		return types.ObjectUnknown(map[string]attr.Type{
+			"app_instance": basetypes.StringType{},
+			"permissions": basetypes.SetType{
+				ElemType: types.StringType,
+			},
+		}), diags
+	}
+
+	attributeTypes := map[string]attr.Type{
+		"app_instance": basetypes.StringType{},
+		"permissions": basetypes.SetType{
+			ElemType: types.StringType,
+		},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{
+			"app_instance": v.AppInstance,
+			"permissions":  permissionsVal,
+		})
+
+	return objVal, diags
+}
+
+func (v InstancePermissionsValue) Equal(o attr.Value) bool {
+	other, ok := o.(InstancePermissionsValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	if !v.AppInstance.Equal(other.AppInstance) {
+		return false
+	}
+
+	if !v.Permissions.Equal(other.Permissions) {
+		return false
+	}
+
+	return true
+}
+
+func (v InstancePermissionsValue) Type(ctx context.Context) attr.Type {
+	return InstancePermissionsType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v InstancePermissionsValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"app_instance": basetypes.StringType{},
+		"permissions": basetypes.SetType{
+			ElemType: types.StringType,
 		},
 	}
 }

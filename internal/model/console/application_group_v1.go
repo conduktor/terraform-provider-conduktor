@@ -30,14 +30,20 @@ type ApplicationGroupPermission struct {
 	Permissions    []string `json:"permissions"`
 }
 
+type ApplicationGroupInstancePermission struct {
+	AppInstance string   `json:"appInstance"`
+	Permissions []string `json:"permissions"`
+}
+
 type ApplicationGroupSpec struct {
-	DisplayName               string                       `json:"displayName"`
-	Description               string                       `json:"description,omitempty"`
-	Permissions               []ApplicationGroupPermission `json:"permissions"`
-	Members                   []string                     `json:"members"`
-	ExternalGroups            []string                     `json:"externalGroups"`
-	ExternalGroupRegex        []string                     `json:"externalGroupRegex,omitempty"`
-	MembersFromExternalGroups []string                     `json:"membersFromExternalGroups"`
+	DisplayName               string                               `json:"displayName"`
+	Description               string                               `json:"description,omitempty"`
+	Permissions               []ApplicationGroupPermission         `json:"permissions"`
+	InstancePermissions       []ApplicationGroupInstancePermission `json:"instancePermissions,omitempty"`
+	Members                   []string                             `json:"members"`
+	ExternalGroups            []string                             `json:"externalGroups"`
+	ExternalGroupRegex        []string                             `json:"externalGroupRegex,omitempty"`
+	MembersFromExternalGroups []string                             `json:"membersFromExternalGroups"`
 }
 
 type ApplicationGroupConsoleResource struct {

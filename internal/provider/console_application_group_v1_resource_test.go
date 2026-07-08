@@ -32,6 +32,10 @@ func TestAccApplicationGroupV1Resource(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceRef, "spec.permissions.0.name", "*"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.permissions.0.permissions.#", "1"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.permissions.0.permissions.0", "topicViewConfig"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.instance_permissions.#", "1"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.instance_permissions.0.app_instance", "my-app-instance"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.instance_permissions.0.permissions.#", "1"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.instance_permissions.0.permissions.0", "applicationInstancePermissionGrantAccess"),
 				),
 			},
 			// Importing matches the state of the previous step.
