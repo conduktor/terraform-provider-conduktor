@@ -117,6 +117,10 @@ Required:
 
 - `authorization` (Attributes) Service Account authorization. One of `aiven`, `kafka` (see [below for nested schema](#nestedatt--spec--authorization))
 
+Optional:
+
+- `schema_registry_authorization` (Attributes) Schema Registry ACLs for this service account. Only available when Conduktor Schema Registry Proxy is configured on the cluster. Added in Console 1.45.0. (see [below for nested schema](#nestedatt--spec--schema_registry_authorization))
+
 <a id="nestedatt--spec--authorization"></a>
 ### Nested Schema for `spec.authorization`
 
@@ -165,6 +169,28 @@ Optional:
 - `connect_cluster` (String) Valid Kafka Connect Cluster refrence
 - `host` (String) Host of the Kafka cluster. If not set it will default to '*'
 - `permission` (String) Permission Type for Access Control Entry. Valid values are: Deny, Allow. If not set it will default to Allow
+
+
+
+
+<a id="nestedatt--spec--schema_registry_authorization"></a>
+### Nested Schema for `spec.schema_registry_authorization`
+
+Required:
+
+- `acls` (Attributes Set) Set of Schema Registry ACLs to apply on the service account (see [below for nested schema](#nestedatt--spec--schema_registry_authorization--acls))
+
+<a id="nestedatt--spec--schema_registry_authorization--acls"></a>
+### Nested Schema for `spec.schema_registry_authorization.acls`
+
+Required:
+
+- `name` (String) Schema Registry resource name
+- `pattern_type` (String) Schema Registry resource pattern type. Valid values are: LITERAL, PREFIXED
+
+Optional:
+
+- `operations` (Set of String) Set of operations to apply on the resource. Valid values are: Read, Write
 
 ## Import
 

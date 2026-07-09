@@ -16,7 +16,6 @@ func TestAccServiceAccountV1Resource(t *testing.T) {
 		t.Fatalf("Error fetching current version: %s", err)
 	}
 	test.CheckMinimumVersionRequirement(t, v, consoleServiceAccountMininumVersion)
-
 	resourceRef := "conduktor_console_service_account_v1.test"
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { test.TestAccPreCheck(t) },
@@ -34,6 +33,22 @@ func TestAccServiceAccountV1Resource(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceRef, "spec.authorization.kafka.acls.0.operations.#", "1"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.authorization.kafka.acls.0.operations.0", "Write"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.authorization.kafka.acls.0.type", "TOPIC"),
+				),
+			},
+			// Create and Read testing with schema_registry_authorization (v1.45.0+)
+			// Skipped: requires a cluster with Conduktor Schema Registry Proxy enabled,
+			// which is not available in the standard test environment.
+			{
+				SkipFunc: func() (bool, error) { return true, nil },
+				Config:   providerConfigConsole + test.TestAccTestdata(t, "console/service_account_v1/resource_create_schema_registry.tf"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceRef, "name", "test-service-account"),
+					resource.TestCheckResourceAttr(resourceRef, "cluster", "kafka-cluster"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.authorization.kafka.acls.#", "1"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.schema_registry_authorization.acls.#", "1"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.schema_registry_authorization.acls.0.name", "test-subject"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.schema_registry_authorization.acls.0.pattern_type", "LITERAL"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.schema_registry_authorization.acls.0.operations.#", "2"),
 				),
 			},
 			//Importing matches the state of the previous step.

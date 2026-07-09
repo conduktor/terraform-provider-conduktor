@@ -3242,6 +3242,84 @@
                       }
                     ]
                   }
+                },
+                {
+                  "name": "schema_registry_authorization",
+                  "single_nested": {
+                    "description": "Schema Registry ACLs for this service account. Only available when Conduktor Schema Registry Proxy is configured on the cluster. Added in Console 1.45.0.",
+                    "computed_optional_required": "optional",
+                    "attributes": [
+                      {
+                        "name": "acls",
+                        "set_nested": {
+                          "custom_type_name": "schema_registry_acls",
+                          "description": "Set of Schema Registry ACLs to apply on the service account",
+                          "computed_optional_required": "required",
+                          "nested_object": {
+                            "attributes": [
+                              {
+                                "name": "name",
+                                "string": {
+                                  "description": "Schema Registry resource name",
+                                  "computed_optional_required": "required"
+                                }
+                              },
+                              {
+                                "name": "pattern_type",
+                                "string": {
+                                  "description": "Schema Registry resource pattern type. Valid values are: LITERAL, PREFIXED",
+                                  "computed_optional_required": "required",
+                                  "validators": [
+                                    {
+                                      "custom": {
+                                        "imports": [
+                                          {
+                                            "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                          },
+                                          {
+                                            "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
+                                          }
+                                        ],
+                                        "schema_definition": "stringvalidator.OneOf(validation.ValidServiceAccountSchemaRegistryPatternType...)"
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "name": "operations",
+                                "set": {
+                                  "description": "Set of operations to apply on the resource. Valid values are: Read, Write",
+                                  "computed_optional_required": "optional",
+                                  "element_type": {
+                                    "string": {}
+                                  },
+                                  "validators": [
+                                    {
+                                      "custom": {
+                                        "imports": [
+                                          {
+                                            "path": "github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
+                                          },
+                                          {
+                                            "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                          },
+                                          {
+                                            "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
+                                          }
+                                        ],
+                                        "schema_definition": "setvalidator.ValueStringsAre(stringvalidator.OneOf(validation.ValidServiceAccountSchemaRegistryOperations...))"
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  }
                 }
               ]
             }

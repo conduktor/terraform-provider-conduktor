@@ -51,11 +51,83 @@ func specInternalModelToTerraform(ctx context.Context, r *console.ServiceAccount
 	}
 	valuesMap["authorization"] = authValue
 
+	schemaRegistryAuth, err := schemaRegistryAuthorizationInternalModelToTerraform(ctx, r.SchemaRegistryAuthorization)
+	if err != nil {
+		return serviceacc.SpecValue{}, err
+	}
+	schemaRegistryAuthValue, diag := schemaRegistryAuth.ToObjectValue(ctx)
+	if diag.HasError() {
+		return serviceacc.SpecValue{}, mapper.WrapDiagError(diag, "schema_registry_authorization", mapper.IntoTerraform)
+	}
+	valuesMap["schema_registry_authorization"] = schemaRegistryAuthValue
+
 	value, diag := serviceacc.NewSpecValue(typesMap, valuesMap)
 	if diag.HasError() {
 		return serviceacc.SpecValue{}, mapper.WrapDiagError(diag, "spec", mapper.IntoTerraform)
 	}
 	return value, nil
+}
+
+func schemaRegistryAuthorizationInternalModelToTerraform(ctx context.Context, r *console.ServiceAccountSchemaRegistryAuthorization) (serviceacc.SchemaRegistryAuthorizationValue, error) {
+	if r == nil {
+		return serviceacc.NewSchemaRegistryAuthorizationValueNull(), nil
+	}
+
+	unknownObjValue, diag := serviceacc.NewSchemaRegistryAuthorizationValueUnknown().ToObjectValue(ctx)
+	if diag.HasError() {
+		return serviceacc.SchemaRegistryAuthorizationValue{}, mapper.WrapDiagError(diag, "schema_registry_authorization", mapper.IntoTerraform)
+	}
+	var typesMap = unknownObjValue.AttributeTypes(ctx)
+	var valuesMap = schema.ValueMapFromTypes(ctx, typesMap)
+
+	acls, err := schemaRegistryAclsArrayToSetValue(ctx, r.ACLs)
+	if err != nil {
+		return serviceacc.SchemaRegistryAuthorizationValue{}, err
+	}
+	valuesMap["acls"] = acls
+
+	value, diag := serviceacc.NewSchemaRegistryAuthorizationValue(typesMap, valuesMap)
+	if diag.HasError() {
+		return serviceacc.SchemaRegistryAuthorizationValue{}, mapper.WrapDiagError(diag, "schema_registry_authorization", mapper.IntoTerraform)
+	}
+	return value, nil
+}
+
+func schemaRegistryAclsArrayToSetValue(ctx context.Context, arr []console.ServiceAccountSchemaRegistryACL) (basetypes.SetValue, error) {
+	var aclsList basetypes.SetValue
+	var tfACLs []attr.Value
+	var diag diag.Diagnostics
+
+	for _, p := range arr {
+		operations, diag := schema.StringArrayToSetValue(p.Operations)
+		if diag.HasError() {
+			return basetypes.SetValue{}, mapper.WrapDiagError(diag, "schema_registry_authorization.acls.operations", mapper.IntoTerraform)
+		}
+
+		attrTypes := map[string]attr.Type{
+			"name":         basetypes.StringType{},
+			"pattern_type": basetypes.StringType{},
+			"operations":   operations.Type(ctx),
+		}
+		attrValues := map[string]attr.Value{
+			"name":         schema.NewStringValue(p.Name),
+			"pattern_type": schema.NewStringValue(p.PatternType),
+			"operations":   operations,
+		}
+
+		aclObj, diag := serviceacc.NewSchemaRegistryAclsValue(attrTypes, attrValues)
+		if diag.HasError() {
+			return basetypes.SetValue{}, mapper.WrapDiagError(diag, "schema_registry_authorization.acls", mapper.IntoTerraform)
+		}
+		tfACLs = append(tfACLs, aclObj)
+	}
+
+	aclsList, diag = types.SetValue(serviceacc.SchemaRegistryAclsValue{}.Type(ctx), tfACLs)
+	if diag.HasError() {
+		return basetypes.SetValue{}, mapper.WrapDiagError(diag, "schema_registry_authorization.acls", mapper.IntoTerraform)
+	}
+
+	return aclsList, nil
 }
 
 func authorizationInternalModelToTerraform(ctx context.Context, r *console.ServiceAccountAuthorization) (serviceacc.AuthorizationValue, error) {
