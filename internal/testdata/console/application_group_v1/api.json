@@ -45,6 +45,15 @@
         "resourceType": "TOPIC"
       }
     ],
+    "instancePermissions": [
+      {
+        "appInstance": "test-application-dev",
+        "permissions": [
+          "applicationInstanceApiKeyManage",
+          "applicationInstancePermissionGrantAccess"
+        ]
+      }
+    ],
     "members": [
       "tatum@conduktor.io"
     ],

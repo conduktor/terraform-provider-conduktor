@@ -16,6 +16,7 @@ import (
 
 const applicationGroupV1ApiPath = "/public/self-serve/v1/application-group"
 const applicationGroupV1EnterpriseOnlyVersion = "v1.43.0"
+const applicationGroupV1InstancePermissionsMinVersion = "v1.44.0"
 
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &ApplicationGroupV1Resource{}

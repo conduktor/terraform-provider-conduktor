@@ -43,6 +43,12 @@ func TFToInternalModel(ctx context.Context, r *appgroup.ConsoleApplicationGroupV
 		return console.ApplicationGroupConsoleResource{}, err
 	}
 
+	// InstancePermissions
+	instancePermissions, err := SetValueToApplicationGroupInstancePermissionArray(ctx, r.Spec.InstancePermissions)
+	if err != nil {
+		return console.ApplicationGroupConsoleResource{}, err
+	}
+
 	return console.NewApplicationGroupConsoleResource(
 		r.Name.ValueString(),
 		r.Application.ValueString(),
@@ -54,6 +60,7 @@ func TFToInternalModel(ctx context.Context, r *appgroup.ConsoleApplicationGroupV
 			Members:                   members,
 			MembersFromExternalGroups: membersFromExternalGroups,
 			Permissions:               permissions,
+			InstancePermissions:       instancePermissions,
 		},
 	), nil
 
@@ -85,6 +92,11 @@ func InternalModelToTerraform(ctx context.Context, r *console.ApplicationGroupCo
 		return appgroup.ConsoleApplicationGroupV1Model{}, err
 	}
 
+	instancePermissionsList, err := ApplicationGroupInstancePermissionArrayToSetValue(ctx, r.Spec.InstancePermissions)
+	if err != nil {
+		return appgroup.ConsoleApplicationGroupV1Model{}, err
+	}
+
 	specValue, diag := appgroup.NewSpecValue(
 		map[string]attr.Type{
 			"description":                  basetypes.StringType{},
@@ -94,6 +106,7 @@ func InternalModelToTerraform(ctx context.Context, r *console.ApplicationGroupCo
 			"members":                      membersList.Type(ctx),
 			"members_from_external_groups": membersFromExternalGroupsList.Type(ctx),
 			"permissions":                  permissionsList.Type(ctx),
+			"instance_permissions":         instancePermissionsList.Type(ctx),
 		},
 		map[string]attr.Value{
 			"description":                  schema.NewStringValue(r.Spec.Description),
@@ -103,6 +116,7 @@ func InternalModelToTerraform(ctx context.Context, r *console.ApplicationGroupCo
 			"members":                      membersList,
 			"members_from_external_groups": membersFromExternalGroupsList,
 			"permissions":                  permissionsList,
+			"instance_permissions":         instancePermissionsList,
 		},
 	)
 	if diag.HasError() {
@@ -188,4 +202,65 @@ func SetValueToApplicationGroupPermissionArray(ctx context.Context, set basetype
 		}
 	}
 	return permission, nil
+}
+
+// Parse an ApplicationGroupInstancePermissions Array into a Set.
+func ApplicationGroupInstancePermissionArrayToSetValue(ctx context.Context, arr []console.ApplicationGroupInstancePermission) (basetypes.SetValue, error) {
+	var tfInstancePermissions []attr.Value
+	var diag diag.Diagnostics
+
+	for _, p := range arr {
+		flagsList, diag := schema.StringArrayToSetValue(p.Permissions)
+		if diag.HasError() {
+			return basetypes.SetValue{}, mapper.WrapDiagError(diag, "instance_permissions.permissions", mapper.IntoTerraform)
+		}
+
+		attrTypes := map[string]attr.Type{
+			"app_instance": basetypes.StringType{},
+			"permissions":  flagsList.Type(ctx),
+		}
+		attrValues := map[string]attr.Value{
+			"app_instance": schema.NewStringValue(p.AppInstance),
+			"permissions":  flagsList,
+		}
+
+		instancePermObj, diag := appgroup.NewInstancePermissionsValue(attrTypes, attrValues)
+		if diag.HasError() {
+			return basetypes.SetValue{}, mapper.WrapDiagError(diag, "instance_permissions", mapper.IntoTerraform)
+		}
+		tfInstancePermissions = append(tfInstancePermissions, instancePermObj)
+	}
+
+	instancePermissionsList, diag := types.SetValue(appgroup.InstancePermissionsValue{}.Type(ctx), tfInstancePermissions)
+	if diag.HasError() {
+		return basetypes.SetValue{}, mapper.WrapDiagError(diag, "instance_permissions", mapper.IntoTerraform)
+	}
+
+	return instancePermissionsList, nil
+}
+
+// Parse a Set into an array of ApplicationGroupInstancePermissions.
+func SetValueToApplicationGroupInstancePermissionArray(ctx context.Context, set basetypes.SetValue) ([]console.ApplicationGroupInstancePermission, error) {
+	instancePermissions := make([]console.ApplicationGroupInstancePermission, 0)
+	var diag diag.Diagnostics
+
+	if !set.IsNull() && !set.IsUnknown() {
+		var tfInstancePermissions []appgroup.InstancePermissionsValue
+		diag = set.ElementsAs(ctx, &tfInstancePermissions, false)
+		if diag.HasError() {
+			return nil, mapper.WrapDiagError(diag, "instance_permissions", mapper.FromTerraform)
+		}
+		for _, p := range tfInstancePermissions {
+			flags, diag := schema.SetValueToStringArray(ctx, p.Permissions)
+			if diag.HasError() {
+				return nil, mapper.WrapDiagError(diag, "instance_permissions.permissions", mapper.FromTerraform)
+			}
+
+			instancePermissions = append(instancePermissions, console.ApplicationGroupInstancePermission{
+				AppInstance: p.AppInstance.ValueString(),
+				Permissions: flags,
+			})
+		}
+	}
+	return instancePermissions, nil
 }

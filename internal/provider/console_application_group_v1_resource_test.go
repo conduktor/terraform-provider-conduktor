@@ -3,21 +3,28 @@ package provider
 import (
 	"testing"
 
+	"github.com/conduktor/terraform-provider-conduktor/internal/client"
 	"github.com/conduktor/terraform-provider-conduktor/internal/test"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"golang.org/x/mod/semver"
 )
 
 func TestAccApplicationGroupV1Resource(t *testing.T) {
 	test.CheckEnterpriseEnabled(t)
+	v, err := fetchClientVersion(client.CONSOLE)
+	if err != nil {
+		t.Fatalf("Error fetching current version: %s", err)
+	}
+	instancePermissionsSupported := !semver.IsValid(v) || semver.Compare(v, applicationGroupV1InstancePermissionsMinVersion) >= 0
 	resourceRef := "conduktor_console_application_group_v1.test"
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { test.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
-			// Create and Read testing
+			// Create and Read testing (without instance_permissions for pre-v1.44.0 compatibility)
 			{
-				Config: providerConfigConsole + test.TestAccTestdata(t, "console/application_group_v1/resource_create.tf"),
+				Config: providerConfigConsole + test.TestAccTestdata(t, "console/application_group_v1/resource_create_no_instance_permissions.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceRef, "name", "myappgroup"),
 					resource.TestCheckResourceAttr(resourceRef, "application", "myapp"),
@@ -32,6 +39,30 @@ func TestAccApplicationGroupV1Resource(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceRef, "spec.permissions.0.name", "*"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.permissions.0.permissions.#", "1"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.permissions.0.permissions.0", "topicViewConfig"),
+				),
+			},
+			// Create and Read testing with instance_permissions (v1.44.0+)
+			{
+				SkipFunc: func() (bool, error) { return !instancePermissionsSupported, nil },
+				Config:   providerConfigConsole + test.TestAccTestdata(t, "console/application_group_v1/resource_create.tf"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceRef, "name", "myappgroup"),
+					resource.TestCheckResourceAttr(resourceRef, "application", "myapp"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.display_name", "My Application Group"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.description", "test"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.external_groups.#", "1"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.external_groups.0", "mygroup"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.permissions.#", "1"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.permissions.0.app_instance", "my-app-instance"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.permissions.0.resource_type", "TOPIC"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.permissions.0.pattern_type", "LITERAL"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.permissions.0.name", "*"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.permissions.0.permissions.#", "1"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.permissions.0.permissions.0", "topicViewConfig"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.instance_permissions.#", "1"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.instance_permissions.0.app_instance", "my-app-instance"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.instance_permissions.0.permissions.#", "1"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.instance_permissions.0.permissions.0", "applicationInstancePermissionGrantAccess"),
 				),
 			},
 			// Importing matches the state of the previous step.
