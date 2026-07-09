@@ -96,12 +96,25 @@ Optional:
 - `description` (String) Description of the application group
 - `external_group_regex` (Set of String) Set of regex to be applied to external groups. NOTE: this field has been introduced with Console `1.36.0` and it will not work with previous versions
 - `external_groups` (Set of String) Set of external groups from SSO mapped to this group
+- `instance_permissions` (Attributes Set) Set of instance-level permissions granted to this group on application instances (see [below for nested schema](#nestedatt--spec--instance_permissions))
 - `members` (Set of String) Set of members of the group
 - `permissions` (Attributes Set) Set of all group permissions (see [below for nested schema](#nestedatt--spec--permissions))
 
 Read-Only:
 
 - `members_from_external_groups` (Set of String) Set of members of the group (managed by backend, ReadOnly in Terraform)
+
+<a id="nestedatt--spec--instance_permissions"></a>
+### Nested Schema for `spec.instance_permissions`
+
+Required:
+
+- `app_instance` (String) Reference to the application instance
+
+Optional:
+
+- `permissions` (Set of String) Set of instance-level permissions to grant. Valid values are: applicationInstancePermissionRequestAccess, applicationInstancePermissionGrantAccess, applicationInstanceApiKeyManage, applicationInstancePermissionProposeAccess, serviceAccountManage
+
 
 <a id="nestedatt--spec--permissions"></a>
 ### Nested Schema for `spec.permissions`

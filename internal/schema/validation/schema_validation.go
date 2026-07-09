@@ -71,6 +71,14 @@ var ValidAppGroupPermissions = []string{
 	"topicDataQualityManage",
 }
 
+var ValidAppGroupInstancePermissions = []string{
+	"applicationInstancePermissionRequestAccess",
+	"applicationInstancePermissionGrantAccess",
+	"applicationInstanceApiKeyManage",
+	"applicationInstancePermissionProposeAccess",
+	"serviceAccountManage",
+}
+
 // Provider modes.
 var ValidProviderMode = []string{"console", "gateway"}
 

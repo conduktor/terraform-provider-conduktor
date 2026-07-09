@@ -71,6 +71,14 @@ func TestApplicationGroupV1ModelMapping(t *testing.T) {
 	}
 	assert.Equal(t, expectedInternalResources, internal.Spec.Permissions)
 
+	expectedInstancePermissions := []console.ApplicationGroupInstancePermission{
+		{
+			AppInstance: "test-application-dev",
+			Permissions: []string{"applicationInstanceApiKeyManage", "applicationInstancePermissionGrantAccess"},
+		},
+	}
+	assert.Equal(t, expectedInstancePermissions, internal.Spec.InstancePermissions)
+
 	// convert to terraform model
 	tfModel, err := InternalModelToTerraform(ctx, &internal)
 	if err != nil {
@@ -105,6 +113,7 @@ func TestApplicationGroupV1ModelMapping(t *testing.T) {
 	assert.Equal(t, []string{".*"}, internal2.Spec.ExternalGroupRegex)
 	assert.Equal(t, []string{"tatum@conduktor.io"}, internal2.Spec.Members)
 	assert.Equal(t, expectedInternalResources, internal2.Spec.Permissions)
+	assert.Equal(t, expectedInstancePermissions, internal2.Spec.InstancePermissions)
 	assert.Equal(t, internal, internal2)
 
 	// convert back to ctl model

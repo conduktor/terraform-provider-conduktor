@@ -928,6 +928,67 @@
                       ]
                     }
                   }
+                },
+                {
+                  "name": "instance_permissions",
+                  "set_nested": {
+                    "description": "Set of instance-level permissions granted to this group on application instances",
+                    "computed_optional_required": "computed_optional",
+                    "nested_object": {
+                      "attributes": [
+                        {
+                          "name": "app_instance",
+                          "string": {
+                            "description": "Reference to the application instance",
+                            "computed_optional_required": "required",
+                            "validators": [
+                              {
+                                "custom": {
+                                  "imports": [
+                                    {
+                                      "path": "regexp"
+                                    },
+                                    {
+                                      "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                    }
+                                  ],
+                                  "schema_definition": "stringvalidator.RegexMatches(regexp.MustCompile(\"^[0-9a-z\\\\_\\\\-]+$\"), \"\")"
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "name": "permissions",
+                          "set": {
+                            "description": "Set of instance-level permissions to grant. Valid values are: applicationInstancePermissionRequestAccess, applicationInstancePermissionGrantAccess, applicationInstanceApiKeyManage, applicationInstancePermissionProposeAccess, serviceAccountManage",
+                            "computed_optional_required": "optional",
+                            "element_type": {
+                              "string": {}
+                            },
+                            "validators": [
+                              {
+                                "custom": {
+                                  "imports": [
+                                    {
+                                      "path": "github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
+                                    },
+                                    {
+                                      "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                    },
+                                    {
+                                      "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
+                                    }
+                                  ],
+                                  "schema_definition": "setvalidator.ValueStringsAre(stringvalidator.OneOf(validation.ValidAppGroupInstancePermissions ...))"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
                 }
               ]
             }

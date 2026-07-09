@@ -15,11 +15,5 @@ resource "conduktor_console_application_group_v1" "test" {
         permissions   = ["topicViewConfig"]
       },
     ]
-    instance_permissions = [
-      {
-        app_instance = "my-app-instance"
-        permissions  = ["applicationInstancePermissionGrantAccess"]
-      },
-    ]
   }
 }
