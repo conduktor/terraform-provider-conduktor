@@ -32,7 +32,7 @@ type ApplicationGroupPermission struct {
 
 type ApplicationGroupInstancePermission struct {
 	AppInstance string   `json:"appInstance"`
-	Permissions []string `json:"permissions"`
+	Permissions []string `json:"permissions,omitempty"`
 }
 
 type ApplicationGroupSpec struct {
