@@ -105,6 +105,7 @@ func ConsoleApplicationGroupV1ResourceSchema(ctx context.Context) schema.Schema 
 						Computed:            true,
 						Description:         "Set of instance-level permissions granted to this group on application instances",
 						MarkdownDescription: "Set of instance-level permissions granted to this group on application instances",
+						Default:             setdefault.StaticValue(types.SetValueMust(InstancePermissionsValue{}.Type(ctx), []attr.Value{})),
 					},
 					"members": schema.SetAttribute{
 						ElementType:         types.StringType,
