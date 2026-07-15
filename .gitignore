@@ -38,3 +38,6 @@ website/vendor
 
 # ingore binary build
 terraform-provider-conduktor
+
+# local manual testing sandbox
+local-test/
