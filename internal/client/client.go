@@ -23,9 +23,20 @@ const (
 	GATEWAY Mode = "Gateway"
 )
 
+// AuthMethod records how a Client authenticated, so callers can reason about
+// which APIs are reachable (e.g. the internal /organizations endpoints are only
+// available with credential auth, not with an API key).
+type AuthMethod string
+
+const (
+	AuthMethodApiKey      AuthMethod = "api_key"
+	AuthMethodCredentials AuthMethod = "credentials"
+)
+
 type Client struct {
-	BaseUrl string
-	Client  *resty.Client
+	BaseUrl    string
+	Client     *resty.Client
+	AuthMethod AuthMethod
 }
 
 type LoginResult struct {
@@ -63,9 +74,15 @@ func Make(ctx context.Context, mode Mode, apiParameter ApiParameter, providerVer
 	// Enable http client debug logs when provider log is set to TRACE
 	restyClient.SetDebug(TraceLogEnabled())
 
+	authMethod := AuthMethodCredentials
+	if mode == CONSOLE && apiParameter.ApiKey != "" {
+		authMethod = AuthMethodApiKey
+	}
+
 	return &Client{
-		BaseUrl: apiParameter.BaseUrl,
-		Client:  restyClient,
+		BaseUrl:    apiParameter.BaseUrl,
+		Client:     restyClient,
+		AuthMethod: authMethod,
 	}, nil
 }
 
