@@ -210,6 +210,12 @@ func New(version, commit, date string) func() provider.Provider {
 // - On error fetching the plan: adds a warning diagnostic (graceful degradation).
 // Callers should check resp.Diagnostics.HasError() after calling this function.
 func checkEnterprisePlanRequirement(ctx context.Context, apiClient *client.Client, consoleVersion string, enterpriseOnlyVersion string, diagnostics *diag.Diagnostics) { //nolint:unparam // enterpriseOnlyVersion is parameterized for future per-resource version flexibility
+	// TODO remove this guard when a public API endpoint exposes the license plan for API tokens.
+	if apiClient.AuthMethod != client.AuthMethodCredentials {
+		tflog.Debug(ctx, "Skipping Console license plan check: not available with API token authentication. The API will still enforce the Enterprise license requirement at apply time.")
+		return
+	}
+
 	consolePlan, err := apiClient.GetConsoleLicensePlan(ctx)
 	if err != nil {
 		diagnostics.AddWarning(

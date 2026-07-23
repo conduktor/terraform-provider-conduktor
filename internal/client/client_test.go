@@ -55,6 +55,35 @@ func TestGetConsoleLicensePlan_NoDoubleApiPrefix(t *testing.T) {
 	}
 }
 
+func TestMakeAuthMethod(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Console credential auth logs in against /login before any resource call.
+		if r.URL.Path == "/api/login" {
+			w.Header().Set("Content-Type", "application/json")
+			_ = json.NewEncoder(w).Encode(map[string]any{"access_token": "minted-token"})
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer ts.Close()
+
+	apiKeyClient, err := Make(context.Background(), CONSOLE, ApiParameter{BaseUrl: ts.URL, ApiKey: "test-key"}, "test")
+	if err != nil {
+		t.Fatalf("failed to create api-key client: %v", err)
+	}
+	if apiKeyClient.AuthMethod != AuthMethodApiKey {
+		t.Errorf("expected AuthMethodApiKey, got %q", apiKeyClient.AuthMethod)
+	}
+
+	credClient, err := Make(context.Background(), CONSOLE, ApiParameter{BaseUrl: ts.URL, CdkUser: "admin", CdkPassword: "secret"}, "test")
+	if err != nil {
+		t.Fatalf("failed to create credential client: %v", err)
+	}
+	if credClient.AuthMethod != AuthMethodCredentials {
+		t.Errorf("expected AuthMethodCredentials, got %q", credClient.AuthMethod)
+	}
+}
+
 func TestUniformizeBaseUrl(t *testing.T) {
 	cases := []struct {
 		input    string

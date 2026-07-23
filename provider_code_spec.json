@@ -987,6 +987,19 @@
                           }
                         }
                       ]
+                    },
+                    "default": {
+                      "custom": {
+                        "imports": [
+                          {
+                            "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
+                          },
+                          {
+                            "path": "github.com/hashicorp/terraform-plugin-framework/types"
+                          }
+                        ],
+                        "schema_definition": "setdefault.StaticValue(types.SetValueMust(InstancePermissionsValue{}.Type(ctx), []attr.Value{}))"
+                      }
                     }
                   }
                 }
