@@ -101,6 +101,69 @@ func TestServiceAccountV1KafkaModelMapping(t *testing.T) {
 	}
 }
 
+func TestServiceAccountV1SchemaRegistryModelMapping(t *testing.T) {
+	ctx := context.Background()
+
+	jsonServiceAccountV1Resource := []byte(test.TestAccTestdata(t, "console/service_account_v1/schema_registry_api.json"))
+
+	ctlResource := ctlresource.Resource{}
+	err := ctlResource.UnmarshalJSON(jsonServiceAccountV1Resource)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	assert.Equal(t, "ServiceAccount", ctlResource.Kind)
+	assert.Equal(t, "v1", ctlResource.Version)
+	assert.Equal(t, "sa-schema-registry", ctlResource.Name)
+
+	// convert into internal model
+	internal, err := console.NewServiceAccountResourceFromClientResource(ctlResource)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	assert.Equal(t, "sa-schema-registry", internal.Metadata.Name)
+	assert.Equal(t, "my-kafka-cluster", internal.Metadata.Cluster)
+	assert.NotNil(t, internal.Spec.SchemaRegistryAuthorization)
+	expectedSRACLs := []console.ServiceAccountSchemaRegistryACL{
+		{
+			Name:        "my-subject",
+			PatternType: "LITERAL",
+			Operations:  []string{"Read", "Write"},
+		},
+	}
+	assert.Equal(t, expectedSRACLs, internal.Spec.SchemaRegistryAuthorization.ACLs)
+
+	// convert to terraform model
+	tfModel, err := InternalModelToTerraform(ctx, &internal)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	assert.Equal(t, false, tfModel.Spec.SchemaRegistryAuthorization.IsNull())
+	assert.Equal(t, false, tfModel.Spec.SchemaRegistryAuthorization.IsUnknown())
+
+	// convert back to internal model
+	internal2, err := TFToInternalModel(ctx, &tfModel)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	assert.NotNil(t, internal2.Spec.SchemaRegistryAuthorization)
+	assert.Equal(t, expectedSRACLs, internal2.Spec.SchemaRegistryAuthorization.ACLs)
+
+	// convert back to ctl model
+	ctlResource2, err := internal2.ToClientResource()
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	// compare without json
+	if !cmp.Equal(ctlResource, ctlResource2, cmpopts.IgnoreFields(ctlresource.Resource{}, "Json")) {
+		t.Errorf("expected %+v, got %+v", ctlResource, ctlResource2)
+	}
+}
+
 func TestServiceAccountV1AivenModelMapping(t *testing.T) {
 	ctx := context.Background()
 
