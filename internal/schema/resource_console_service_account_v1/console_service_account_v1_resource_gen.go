@@ -192,6 +192,54 @@ func ConsoleServiceAccountV1ResourceSchema(ctx context.Context) schema.Schema {
 						Description:         "Service Account authorization. One of `aiven`, `kafka`",
 						MarkdownDescription: "Service Account authorization. One of `aiven`, `kafka`",
 					},
+					"schema_registry_authorization": schema.SingleNestedAttribute{
+						Attributes: map[string]schema.Attribute{
+							"acls": schema.SetNestedAttribute{
+								NestedObject: schema.NestedAttributeObject{
+									Attributes: map[string]schema.Attribute{
+										"name": schema.StringAttribute{
+											Required:            true,
+											Description:         "Schema Registry resource name",
+											MarkdownDescription: "Schema Registry resource name",
+										},
+										"operations": schema.SetAttribute{
+											ElementType:         types.StringType,
+											Optional:            true,
+											Description:         "Set of operations to apply on the resource. Valid values are: Read, Write",
+											MarkdownDescription: "Set of operations to apply on the resource. Valid values are: Read, Write",
+											Validators: []validator.Set{
+												setvalidator.ValueStringsAre(stringvalidator.OneOf(validation.ValidServiceAccountSchemaRegistryOperations...)),
+											},
+										},
+										"pattern_type": schema.StringAttribute{
+											Required:            true,
+											Description:         "Schema Registry resource pattern type. Valid values are: LITERAL, PREFIXED",
+											MarkdownDescription: "Schema Registry resource pattern type. Valid values are: LITERAL, PREFIXED",
+											Validators: []validator.String{
+												stringvalidator.OneOf(validation.ValidServiceAccountSchemaRegistryPatternType...),
+											},
+										},
+									},
+									CustomType: SchemaRegistryAclsType{
+										ObjectType: types.ObjectType{
+											AttrTypes: SchemaRegistryAclsValue{}.AttributeTypes(ctx),
+										},
+									},
+								},
+								Required:            true,
+								Description:         "Set of Schema Registry ACLs to apply on the service account",
+								MarkdownDescription: "Set of Schema Registry ACLs to apply on the service account",
+							},
+						},
+						CustomType: SchemaRegistryAuthorizationType{
+							ObjectType: types.ObjectType{
+								AttrTypes: SchemaRegistryAuthorizationValue{}.AttributeTypes(ctx),
+							},
+						},
+						Optional:            true,
+						Description:         "Schema Registry ACLs for this service account. Only available when Conduktor Schema Registry Proxy is configured on the cluster. Added in Console 1.45.0.",
+						MarkdownDescription: "Schema Registry ACLs for this service account. Only available when Conduktor Schema Registry Proxy is configured on the cluster. Added in Console 1.45.0.",
+					},
 				},
 				CustomType: SpecType{
 					ObjectType: types.ObjectType{
@@ -257,13 +305,32 @@ func (t SpecType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue)
 			fmt.Sprintf(`authorization expected to be basetypes.ObjectValue, was: %T`, authorizationAttribute))
 	}
 
+	schemaRegistryAuthorizationAttribute, ok := attributes["schema_registry_authorization"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`schema_registry_authorization is missing from object`)
+
+		return nil, diags
+	}
+
+	schemaRegistryAuthorizationVal, ok := schemaRegistryAuthorizationAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`schema_registry_authorization expected to be basetypes.ObjectValue, was: %T`, schemaRegistryAuthorizationAttribute))
+	}
+
 	if diags.HasError() {
 		return nil, diags
 	}
 
 	return SpecValue{
-		Authorization: authorizationVal,
-		state:         attr.ValueStateKnown,
+		Authorization:               authorizationVal,
+		SchemaRegistryAuthorization: schemaRegistryAuthorizationVal,
+		state:                       attr.ValueStateKnown,
 	}, diags
 }
 
@@ -348,13 +415,32 @@ func NewSpecValue(attributeTypes map[string]attr.Type, attributes map[string]att
 			fmt.Sprintf(`authorization expected to be basetypes.ObjectValue, was: %T`, authorizationAttribute))
 	}
 
+	schemaRegistryAuthorizationAttribute, ok := attributes["schema_registry_authorization"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`schema_registry_authorization is missing from object`)
+
+		return NewSpecValueUnknown(), diags
+	}
+
+	schemaRegistryAuthorizationVal, ok := schemaRegistryAuthorizationAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`schema_registry_authorization expected to be basetypes.ObjectValue, was: %T`, schemaRegistryAuthorizationAttribute))
+	}
+
 	if diags.HasError() {
 		return NewSpecValueUnknown(), diags
 	}
 
 	return SpecValue{
-		Authorization: authorizationVal,
-		state:         attr.ValueStateKnown,
+		Authorization:               authorizationVal,
+		SchemaRegistryAuthorization: schemaRegistryAuthorizationVal,
+		state:                       attr.ValueStateKnown,
 	}, diags
 }
 
@@ -426,12 +512,13 @@ func (t SpecType) ValueType(ctx context.Context) attr.Value {
 var _ basetypes.ObjectValuable = SpecValue{}
 
 type SpecValue struct {
-	Authorization basetypes.ObjectValue `tfsdk:"authorization"`
-	state         attr.ValueState
+	Authorization               basetypes.ObjectValue `tfsdk:"authorization"`
+	SchemaRegistryAuthorization basetypes.ObjectValue `tfsdk:"schema_registry_authorization"`
+	state                       attr.ValueState
 }
 
 func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
-	attrTypes := make(map[string]tftypes.Type, 1)
+	attrTypes := make(map[string]tftypes.Type, 2)
 
 	var val tftypes.Value
 	var err error
@@ -439,12 +526,15 @@ func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) 
 	attrTypes["authorization"] = basetypes.ObjectType{
 		AttrTypes: AuthorizationValue{}.AttributeTypes(ctx),
 	}.TerraformType(ctx)
+	attrTypes["schema_registry_authorization"] = basetypes.ObjectType{
+		AttrTypes: SchemaRegistryAuthorizationValue{}.AttributeTypes(ctx),
+	}.TerraformType(ctx)
 
 	objectType := tftypes.Object{AttributeTypes: attrTypes}
 
 	switch v.state {
 	case attr.ValueStateKnown:
-		vals := make(map[string]tftypes.Value, 1)
+		vals := make(map[string]tftypes.Value, 2)
 
 		val, err = v.Authorization.ToTerraformValue(ctx)
 
@@ -453,6 +543,14 @@ func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) 
 		}
 
 		vals["authorization"] = val
+
+		val, err = v.SchemaRegistryAuthorization.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["schema_registry_authorization"] = val
 
 		if err := tftypes.ValidateValue(objectType, vals); err != nil {
 			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
@@ -504,9 +602,33 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 		)
 	}
 
+	var schemaRegistryAuthorizationVal basetypes.ObjectValue
+
+	if v.SchemaRegistryAuthorization.IsNull() {
+		schemaRegistryAuthorizationVal = types.ObjectNull(
+			SchemaRegistryAuthorizationValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if v.SchemaRegistryAuthorization.IsUnknown() {
+		schemaRegistryAuthorizationVal = types.ObjectUnknown(
+			SchemaRegistryAuthorizationValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if !v.SchemaRegistryAuthorization.IsNull() && !v.SchemaRegistryAuthorization.IsUnknown() {
+		schemaRegistryAuthorizationVal = types.ObjectValueMust(
+			SchemaRegistryAuthorizationValue{}.AttributeTypes(ctx),
+			v.SchemaRegistryAuthorization.Attributes(),
+		)
+	}
+
 	attributeTypes := map[string]attr.Type{
 		"authorization": basetypes.ObjectType{
 			AttrTypes: AuthorizationValue{}.AttributeTypes(ctx),
+		},
+		"schema_registry_authorization": basetypes.ObjectType{
+			AttrTypes: SchemaRegistryAuthorizationValue{}.AttributeTypes(ctx),
 		},
 	}
 
@@ -521,7 +643,8 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 	objVal, diags := types.ObjectValue(
 		attributeTypes,
 		map[string]attr.Value{
-			"authorization": authorizationVal,
+			"authorization":                 authorizationVal,
+			"schema_registry_authorization": schemaRegistryAuthorizationVal,
 		})
 
 	return objVal, diags
@@ -546,6 +669,10 @@ func (v SpecValue) Equal(o attr.Value) bool {
 		return false
 	}
 
+	if !v.SchemaRegistryAuthorization.Equal(other.SchemaRegistryAuthorization) {
+		return false
+	}
+
 	return true
 }
 
@@ -561,6 +688,9 @@ func (v SpecValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 	return map[string]attr.Type{
 		"authorization": basetypes.ObjectType{
 			AttrTypes: AuthorizationValue{}.AttributeTypes(ctx),
+		},
+		"schema_registry_authorization": basetypes.ObjectType{
+			AttrTypes: SchemaRegistryAuthorizationValue{}.AttributeTypes(ctx),
 		},
 	}
 }
@@ -2833,5 +2963,826 @@ func (v KafkaAclsValue) AttributeTypes(ctx context.Context) map[string]attr.Type
 		"pattern_type": basetypes.StringType{},
 		"permission":   basetypes.StringType{},
 		"type":         basetypes.StringType{},
+	}
+}
+
+var _ basetypes.ObjectTypable = SchemaRegistryAuthorizationType{}
+
+type SchemaRegistryAuthorizationType struct {
+	basetypes.ObjectType
+}
+
+func (t SchemaRegistryAuthorizationType) Equal(o attr.Type) bool {
+	other, ok := o.(SchemaRegistryAuthorizationType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t SchemaRegistryAuthorizationType) String() string {
+	return "SchemaRegistryAuthorizationType"
+}
+
+func (t SchemaRegistryAuthorizationType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	aclsAttribute, ok := attributes["acls"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`acls is missing from object`)
+
+		return nil, diags
+	}
+
+	aclsVal, ok := aclsAttribute.(basetypes.SetValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`acls expected to be basetypes.SetValue, was: %T`, aclsAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return SchemaRegistryAuthorizationValue{
+		Acls:  aclsVal,
+		state: attr.ValueStateKnown,
+	}, diags
+}
+
+func NewSchemaRegistryAuthorizationValueNull() SchemaRegistryAuthorizationValue {
+	return SchemaRegistryAuthorizationValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewSchemaRegistryAuthorizationValueUnknown() SchemaRegistryAuthorizationValue {
+	return SchemaRegistryAuthorizationValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewSchemaRegistryAuthorizationValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (SchemaRegistryAuthorizationValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing SchemaRegistryAuthorizationValue Attribute Value",
+				"While creating a SchemaRegistryAuthorizationValue value, a missing attribute value was detected. "+
+					"A SchemaRegistryAuthorizationValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("SchemaRegistryAuthorizationValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid SchemaRegistryAuthorizationValue Attribute Type",
+				"While creating a SchemaRegistryAuthorizationValue value, an invalid attribute value was detected. "+
+					"A SchemaRegistryAuthorizationValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("SchemaRegistryAuthorizationValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("SchemaRegistryAuthorizationValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra SchemaRegistryAuthorizationValue Attribute Value",
+				"While creating a SchemaRegistryAuthorizationValue value, an extra attribute value was detected. "+
+					"A SchemaRegistryAuthorizationValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra SchemaRegistryAuthorizationValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewSchemaRegistryAuthorizationValueUnknown(), diags
+	}
+
+	aclsAttribute, ok := attributes["acls"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`acls is missing from object`)
+
+		return NewSchemaRegistryAuthorizationValueUnknown(), diags
+	}
+
+	aclsVal, ok := aclsAttribute.(basetypes.SetValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`acls expected to be basetypes.SetValue, was: %T`, aclsAttribute))
+	}
+
+	if diags.HasError() {
+		return NewSchemaRegistryAuthorizationValueUnknown(), diags
+	}
+
+	return SchemaRegistryAuthorizationValue{
+		Acls:  aclsVal,
+		state: attr.ValueStateKnown,
+	}, diags
+}
+
+func NewSchemaRegistryAuthorizationValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) SchemaRegistryAuthorizationValue {
+	object, diags := NewSchemaRegistryAuthorizationValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewSchemaRegistryAuthorizationValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t SchemaRegistryAuthorizationType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewSchemaRegistryAuthorizationValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewSchemaRegistryAuthorizationValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewSchemaRegistryAuthorizationValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewSchemaRegistryAuthorizationValueMust(SchemaRegistryAuthorizationValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t SchemaRegistryAuthorizationType) ValueType(ctx context.Context) attr.Value {
+	return SchemaRegistryAuthorizationValue{}
+}
+
+var _ basetypes.ObjectValuable = SchemaRegistryAuthorizationValue{}
+
+type SchemaRegistryAuthorizationValue struct {
+	Acls  basetypes.SetValue `tfsdk:"acls"`
+	state attr.ValueState
+}
+
+func (v SchemaRegistryAuthorizationValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 1)
+
+	var val tftypes.Value
+	var err error
+
+	attrTypes["acls"] = basetypes.SetType{
+		ElemType: SchemaRegistryAclsValue{}.Type(ctx),
+	}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 1)
+
+		val, err = v.Acls.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["acls"] = val
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v SchemaRegistryAuthorizationValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v SchemaRegistryAuthorizationValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v SchemaRegistryAuthorizationValue) String() string {
+	return "SchemaRegistryAuthorizationValue"
+}
+
+func (v SchemaRegistryAuthorizationValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	acls := types.SetValueMust(
+		SchemaRegistryAclsType{
+			basetypes.ObjectType{
+				AttrTypes: SchemaRegistryAclsValue{}.AttributeTypes(ctx),
+			},
+		},
+		v.Acls.Elements(),
+	)
+
+	if v.Acls.IsNull() {
+		acls = types.SetNull(
+			SchemaRegistryAclsType{
+				basetypes.ObjectType{
+					AttrTypes: SchemaRegistryAclsValue{}.AttributeTypes(ctx),
+				},
+			},
+		)
+	}
+
+	if v.Acls.IsUnknown() {
+		acls = types.SetUnknown(
+			SchemaRegistryAclsType{
+				basetypes.ObjectType{
+					AttrTypes: SchemaRegistryAclsValue{}.AttributeTypes(ctx),
+				},
+			},
+		)
+	}
+
+	attributeTypes := map[string]attr.Type{
+		"acls": basetypes.SetType{
+			ElemType: SchemaRegistryAclsValue{}.Type(ctx),
+		},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{
+			"acls": acls,
+		})
+
+	return objVal, diags
+}
+
+func (v SchemaRegistryAuthorizationValue) Equal(o attr.Value) bool {
+	other, ok := o.(SchemaRegistryAuthorizationValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	if !v.Acls.Equal(other.Acls) {
+		return false
+	}
+
+	return true
+}
+
+func (v SchemaRegistryAuthorizationValue) Type(ctx context.Context) attr.Type {
+	return SchemaRegistryAuthorizationType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v SchemaRegistryAuthorizationValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"acls": basetypes.SetType{
+			ElemType: SchemaRegistryAclsValue{}.Type(ctx),
+		},
+	}
+}
+
+var _ basetypes.ObjectTypable = SchemaRegistryAclsType{}
+
+type SchemaRegistryAclsType struct {
+	basetypes.ObjectType
+}
+
+func (t SchemaRegistryAclsType) Equal(o attr.Type) bool {
+	other, ok := o.(SchemaRegistryAclsType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t SchemaRegistryAclsType) String() string {
+	return "SchemaRegistryAclsType"
+}
+
+func (t SchemaRegistryAclsType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	nameAttribute, ok := attributes["name"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`name is missing from object`)
+
+		return nil, diags
+	}
+
+	nameVal, ok := nameAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`name expected to be basetypes.StringValue, was: %T`, nameAttribute))
+	}
+
+	operationsAttribute, ok := attributes["operations"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`operations is missing from object`)
+
+		return nil, diags
+	}
+
+	operationsVal, ok := operationsAttribute.(basetypes.SetValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`operations expected to be basetypes.SetValue, was: %T`, operationsAttribute))
+	}
+
+	patternTypeAttribute, ok := attributes["pattern_type"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`pattern_type is missing from object`)
+
+		return nil, diags
+	}
+
+	patternTypeVal, ok := patternTypeAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`pattern_type expected to be basetypes.StringValue, was: %T`, patternTypeAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return SchemaRegistryAclsValue{
+		Name:        nameVal,
+		Operations:  operationsVal,
+		PatternType: patternTypeVal,
+		state:       attr.ValueStateKnown,
+	}, diags
+}
+
+func NewSchemaRegistryAclsValueNull() SchemaRegistryAclsValue {
+	return SchemaRegistryAclsValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewSchemaRegistryAclsValueUnknown() SchemaRegistryAclsValue {
+	return SchemaRegistryAclsValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewSchemaRegistryAclsValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (SchemaRegistryAclsValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing SchemaRegistryAclsValue Attribute Value",
+				"While creating a SchemaRegistryAclsValue value, a missing attribute value was detected. "+
+					"A SchemaRegistryAclsValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("SchemaRegistryAclsValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid SchemaRegistryAclsValue Attribute Type",
+				"While creating a SchemaRegistryAclsValue value, an invalid attribute value was detected. "+
+					"A SchemaRegistryAclsValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("SchemaRegistryAclsValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("SchemaRegistryAclsValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra SchemaRegistryAclsValue Attribute Value",
+				"While creating a SchemaRegistryAclsValue value, an extra attribute value was detected. "+
+					"A SchemaRegistryAclsValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra SchemaRegistryAclsValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewSchemaRegistryAclsValueUnknown(), diags
+	}
+
+	nameAttribute, ok := attributes["name"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`name is missing from object`)
+
+		return NewSchemaRegistryAclsValueUnknown(), diags
+	}
+
+	nameVal, ok := nameAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`name expected to be basetypes.StringValue, was: %T`, nameAttribute))
+	}
+
+	operationsAttribute, ok := attributes["operations"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`operations is missing from object`)
+
+		return NewSchemaRegistryAclsValueUnknown(), diags
+	}
+
+	operationsVal, ok := operationsAttribute.(basetypes.SetValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`operations expected to be basetypes.SetValue, was: %T`, operationsAttribute))
+	}
+
+	patternTypeAttribute, ok := attributes["pattern_type"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`pattern_type is missing from object`)
+
+		return NewSchemaRegistryAclsValueUnknown(), diags
+	}
+
+	patternTypeVal, ok := patternTypeAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`pattern_type expected to be basetypes.StringValue, was: %T`, patternTypeAttribute))
+	}
+
+	if diags.HasError() {
+		return NewSchemaRegistryAclsValueUnknown(), diags
+	}
+
+	return SchemaRegistryAclsValue{
+		Name:        nameVal,
+		Operations:  operationsVal,
+		PatternType: patternTypeVal,
+		state:       attr.ValueStateKnown,
+	}, diags
+}
+
+func NewSchemaRegistryAclsValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) SchemaRegistryAclsValue {
+	object, diags := NewSchemaRegistryAclsValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewSchemaRegistryAclsValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t SchemaRegistryAclsType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewSchemaRegistryAclsValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewSchemaRegistryAclsValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewSchemaRegistryAclsValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewSchemaRegistryAclsValueMust(SchemaRegistryAclsValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t SchemaRegistryAclsType) ValueType(ctx context.Context) attr.Value {
+	return SchemaRegistryAclsValue{}
+}
+
+var _ basetypes.ObjectValuable = SchemaRegistryAclsValue{}
+
+type SchemaRegistryAclsValue struct {
+	Name        basetypes.StringValue `tfsdk:"name"`
+	Operations  basetypes.SetValue    `tfsdk:"operations"`
+	PatternType basetypes.StringValue `tfsdk:"pattern_type"`
+	state       attr.ValueState
+}
+
+func (v SchemaRegistryAclsValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 3)
+
+	var val tftypes.Value
+	var err error
+
+	attrTypes["name"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["operations"] = basetypes.SetType{
+		ElemType: types.StringType,
+	}.TerraformType(ctx)
+	attrTypes["pattern_type"] = basetypes.StringType{}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 3)
+
+		val, err = v.Name.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["name"] = val
+
+		val, err = v.Operations.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["operations"] = val
+
+		val, err = v.PatternType.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["pattern_type"] = val
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v SchemaRegistryAclsValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v SchemaRegistryAclsValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v SchemaRegistryAclsValue) String() string {
+	return "SchemaRegistryAclsValue"
+}
+
+func (v SchemaRegistryAclsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	var operationsVal basetypes.SetValue
+	switch {
+	case v.Operations.IsUnknown():
+		operationsVal = types.SetUnknown(types.StringType)
+	case v.Operations.IsNull():
+		operationsVal = types.SetNull(types.StringType)
+	default:
+		var d diag.Diagnostics
+		operationsVal, d = types.SetValue(types.StringType, v.Operations.Elements())
+		diags.Append(d...)
+	}
+
+	if diags.HasError() {
+		return types.ObjectUnknown(map[string]attr.Type{
+			"name": basetypes.StringType{},
+			"operations": basetypes.SetType{
+				ElemType: types.StringType,
+			},
+			"pattern_type": basetypes.StringType{},
+		}), diags
+	}
+
+	attributeTypes := map[string]attr.Type{
+		"name": basetypes.StringType{},
+		"operations": basetypes.SetType{
+			ElemType: types.StringType,
+		},
+		"pattern_type": basetypes.StringType{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{
+			"name":         v.Name,
+			"operations":   operationsVal,
+			"pattern_type": v.PatternType,
+		})
+
+	return objVal, diags
+}
+
+func (v SchemaRegistryAclsValue) Equal(o attr.Value) bool {
+	other, ok := o.(SchemaRegistryAclsValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	if !v.Name.Equal(other.Name) {
+		return false
+	}
+
+	if !v.Operations.Equal(other.Operations) {
+		return false
+	}
+
+	if !v.PatternType.Equal(other.PatternType) {
+		return false
+	}
+
+	return true
+}
+
+func (v SchemaRegistryAclsValue) Type(ctx context.Context) attr.Type {
+	return SchemaRegistryAclsType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v SchemaRegistryAclsValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"name": basetypes.StringType{},
+		"operations": basetypes.SetType{
+			ElemType: types.StringType,
+		},
+		"pattern_type": basetypes.StringType{},
 	}
 }
