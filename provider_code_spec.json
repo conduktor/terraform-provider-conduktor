@@ -2990,7 +2990,7 @@
                   "name": "rules",
                   "set_nested": {
                     "description": "Set of all rules to apply on the resource.",
-                    "computed_optional_required": "required",
+                    "computed_optional_required": "optional",
                     "nested_object": {
                       "attributes": [
                         {
