@@ -106,6 +106,8 @@ var ValidServiceAccountKafkaType = []string{"CLUSTER", "CONSUMER_GROUP", "DELEGA
 var ValidServiceAccountKafkaPatternType = []string{"LITERAL", "PREFIXED"}
 var ValidServiceAccountKafkaOperations = []string{"All", "Alter", "AlterConfigs", "ClusterAction", "Create", "CreateTokens", "Delete", "Describe", "DescribeConfigs", "DescribeTokens", "IdempotentWrite", "Read", "Unknown", "Write"}
 var ValidServiceAccountKafkaPermission = []string{"Deny", "Allow"}
+var ValidServiceAccountSchemaRegistryPatternType = []string{"LITERAL", "PREFIXED"}
+var ValidServiceAccountSchemaRegistryOperations = []string{"Read", "Write"}
 
 var ConfluentKafkaFlavor = "Confluent"
 var AivenKafkaFlavor = "Aiven"
