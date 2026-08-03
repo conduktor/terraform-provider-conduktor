@@ -1,6 +1,15 @@
 package validation
 
+// ValidPermissions mirrors the Console builtin role registry
+// (io.conduktor.permission.repository.BuiltinRole in console-plus). Keep it in
+// sync when roles are added there; a role missing here is rejected client-side
+// at `terraform plan` before any API call. App-group-instance permissions
+// (applicationInstance*, applicationResource*, serviceAccountManage) are
+// intentionally excluded — they belong to ValidAppGroupInstancePermissions.
 var ValidPermissions = []string{
+	"viewer",
+	"editor",
+	"clusterAdmin",
 	"clusterViewBroker",
 	"clusterEditSRCompatibility",
 	"clusterEditBroker",
@@ -9,8 +18,13 @@ var ValidPermissions = []string{
 	"kafkaConnectorViewConfig",
 	"kafkaConnectorStatus",
 	"kafkaConnectorEditConfig",
-	"kafkaConnectorDelete",
 	"kafkaConnectorCreate",
+	"kafkaConnectorUpdate",
+	"kafkaConnectorDelete",
+	"kafkaConnectorStop",
+	"kafkaConnectorOffsetsView",
+	"kafkaConnectorOffsetsManage",
+	"kafkaConnectorMetadataManage",
 	"kafkaConnectPauseResume",
 	"kafkaConnectRestart",
 	"ksqldbAccess",
@@ -18,19 +32,25 @@ var ValidPermissions = []string{
 	"consumerGroupReset",
 	"consumerGroupDelete",
 	"consumerGroupCreate",
+	"consumerGroupMetadataManage",
 	"auditLogView",
 	"taasView",
+	"taasManage",
+	"testingView",
 	"certificateManage",
 	"userManage",
-	"clusterConnectionsManage",
-	"notificationChannelManage",
-	"datamaskingView",
 	"userView",
+	"clusterConnectionsManage",
+	"notificationChannelView",
+	"notificationChannelManage",
+	"alertManage",
+	"datamaskingView",
 	"datamaskingManage",
 	"subjectCreateUpdate",
 	"subjectEditCompatibility",
 	"subjectDelete",
 	"subjectView",
+	"subjectMetadataManage",
 	"topicViewConfig",
 	"topicEmpty",
 	"topicConsume",
@@ -40,8 +60,13 @@ var ValidPermissions = []string{
 	"topicAddPartition",
 	"topicDelete",
 	"topicDataQualityManage",
+	"topicMetadataManage",
+	"dataQualityPolicyManage",
 	"chargebackManage",
+	"chargebackView",
 	"sqlManage",
+	"flinkManage",
+	"computePoolRun",
 }
 
 var ValidAppGroupPermissions = []string{
