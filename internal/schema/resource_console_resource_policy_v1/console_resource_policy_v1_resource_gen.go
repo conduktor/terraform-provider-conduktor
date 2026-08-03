@@ -68,7 +68,7 @@ func ConsoleResourcePolicyV1ResourceSchema(ctx context.Context) schema.Schema {
 								},
 							},
 						},
-						Required:            true,
+						Optional:            true,
 						Description:         "Set of all rules to apply on the resource.",
 						MarkdownDescription: "Set of all rules to apply on the resource.",
 					},

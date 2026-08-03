@@ -31,7 +31,18 @@ func (r ServiceAccountMetadata) String() string {
 }
 
 type ServiceAccountSpec struct {
-	Authorization *ServiceAccountAuthorization `json:"authorization"`
+	Authorization               *ServiceAccountAuthorization               `json:"authorization"`
+	SchemaRegistryAuthorization *ServiceAccountSchemaRegistryAuthorization `json:"schemaRegistryAuthorization,omitempty"`
+}
+
+type ServiceAccountSchemaRegistryAuthorization struct {
+	ACLs []ServiceAccountSchemaRegistryACL `json:"acls"`
+}
+
+type ServiceAccountSchemaRegistryACL struct {
+	Name        string   `json:"name"`
+	PatternType string   `json:"patternType"`
+	Operations  []string `json:"operations,omitempty"`
 }
 
 type ServiceAccountAuthorization struct {

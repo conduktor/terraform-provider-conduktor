@@ -28,7 +28,7 @@ type ResourcePolicyConsoleRule struct {
 type ResourcePolicyConsoleSpec struct {
 	TargetKind  string                      `json:"targetKind"`
 	Description string                      `json:"description,omitempty"`
-	Rules       []ResourcePolicyConsoleRule `json:"rules"`
+	Rules       []ResourcePolicyConsoleRule `json:"rules,omitempty"`
 }
 
 type ResourcePolicyConsoleResource struct {
