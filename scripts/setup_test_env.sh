@@ -33,6 +33,14 @@ CDK_DEBUG=false go run github.com/conduktor/ctl@${CLI_VERSION} login # disable d
 go run github.com/conduktor/ctl@${CLI_VERSION} apply -f "${SCRIPT_DIR}"/../testdata/init/init_console.yaml
 if [[ -n "${CDK_LICENSE:-}" ]]; then # enterprise-only resources require a license on Console >= 1.43.0
 	go run github.com/conduktor/ctl@${CLI_VERSION} apply -f "${SCRIPT_DIR}"/../testdata/init/init_console_enterprise.yaml
+
+	# The deprecated TopicPolicy kind is removed from Console 1.47.0, only seed it up to 1.46.2.
+	# Non-release tags (e.g. "nightly") version-sort after any release, so they are skipped too.
+	if printf '%s\n1.46.2\n' "${CONDUKTOR_CONSOLE_IMAGE##*:}" | sort -VC; then
+		go run github.com/conduktor/ctl@${CLI_VERSION} apply -f "${SCRIPT_DIR}"/../testdata/init/init_console_topic_policy.yaml
+	else
+		echo "Skipping deprecated TopicPolicy setup, not supported by Console ${CONDUKTOR_CONSOLE_IMAGE##*:}"
+	fi
 fi
 if [[ "${CONDUKTOR_CONSOLE_IMAGE}" != *"1.26.0"* ]];then # only applying some resources for newer console versions
 	go run github.com/conduktor/ctl@${CLI_VERSION} apply -f "${SCRIPT_DIR}"/../testdata/init/init_console_1.27+.yaml

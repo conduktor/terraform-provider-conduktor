@@ -1,0 +1,16 @@
+# Deprecated TopicPolicy init manifests.
+# TopicPolicy requires an Enterprise license on Console >= 1.43.0 and is removed from Console 1.47.0,
+# so this file is only applied on Console <= 1.46.2 (see scripts/setup_test_env.sh).
+---
+apiVersion: v1
+kind: TopicPolicy
+metadata:
+  name: topic-policy
+spec:
+  policies:
+    my-policy:
+      constraint: OneOf
+      optional: true
+      values:
+        - value1
+        - value2

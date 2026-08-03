@@ -28,16 +28,3 @@ metadata:
   application: myapp
 spec:
   cluster: kafka-cluster
----
-apiVersion: v1
-kind: TopicPolicy
-metadata:
-  name: topic-policy
-spec:
-  policies:
-    my-policy:
-      constraint: OneOf
-      optional: true
-      values:
-        - value1
-        - value2

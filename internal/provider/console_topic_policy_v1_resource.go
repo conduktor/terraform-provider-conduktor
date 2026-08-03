@@ -21,6 +21,9 @@ const topicPolicyV1ApiPath = "/public/self-serve/v1/topic-policy"
 const topicPolicyMininumVersion = "v1.30.0"
 const topicPolicyEnterpriseOnlyVersion = "v1.43.0"
 
+// Last Console version exposing the TopicPolicy API. The kind is removed in Console 1.47.0.
+const topicPolicyMaximumVersion = "v1.46.2"
+
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &TopicPolicyV1Resource{}
 var _ resource.ResourceWithImportState = &TopicPolicyV1Resource{}
@@ -78,6 +81,14 @@ func (r *TopicPolicyV1Resource) Configure(ctx context.Context, req resource.Conf
 		resp.Diagnostics.AddError(
 			"Minimum version requirement not met",
 			"This resource requires Conduktor Console API version "+topicPolicyMininumVersion+" but targeted Conduktor Console API is "+consoleVersion,
+		)
+		return
+	}
+	if semver.IsValid(consoleVersion) && semver.Compare(consoleVersion, topicPolicyMaximumVersion) > 0 {
+		resp.Diagnostics.AddError(
+			"Maximum version requirement exceeded",
+			"This resource is deprecated and removed from Conduktor Console API after version "+topicPolicyMaximumVersion+" but targeted Conduktor Console API is "+consoleVersion+".\n"+
+				"Use conduktor_console_resource_policy_v1 instead. See https://docs.conduktor.io/guide/release-notes#migrate-topic-policies for more information.",
 		)
 		return
 	}
