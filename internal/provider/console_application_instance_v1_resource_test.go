@@ -132,14 +132,18 @@ func TestAccApplicationInstanceV1ExampleResource(t *testing.T) {
 		t.Fatalf("Error fetching current version: %s", err)
 	}
 	test.CheckMinimumVersionRequirement(t, v, appInstanceMininumVersion)
+	// The complex example references a policy by name, created here instead of in the example HCL to keep it out of the docs.
+	test.CheckMinimumVersionRequirement(t, v, resourcePolicyMininumVersion)
+	policyDependency := test.TestAccTestdata(t, "console/application_instance_v1/resource_policy_dependency.tf")
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { test.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 
 		Steps: []resource.TestStep{
 			// Create and Read from simple example
+			// The policy is created in this first step so it already exists when the complex example references it.
 			{
-				Config: providerConfigConsole + test.TestAccExample(t, "resources", "conduktor_console_application_instance_v1", "simple.tf"),
+				Config: providerConfigConsole + policyDependency + test.TestAccExample(t, "resources", "conduktor_console_application_instance_v1", "simple.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.simple", "name", "simple"),
 					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.simple", "application", "myapp"),
@@ -153,7 +157,7 @@ func TestAccApplicationInstanceV1ExampleResource(t *testing.T) {
 			},
 			// Create and Read from complex example
 			{
-				Config: providerConfigConsole + test.TestAccExample(t, "resources", "conduktor_console_application_instance_v1", "complex.tf"),
+				Config: providerConfigConsole + policyDependency + test.TestAccExample(t, "resources", "conduktor_console_application_instance_v1", "complex.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.complex", "name", "complex"),
 					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.complex", "application", "myapp"),
