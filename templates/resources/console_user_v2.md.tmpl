@@ -11,6 +11,8 @@ description: |-
 Resource for managing Conduktor users.
 This resource allows you to create, read, update and delete users in Conduktor.
 
+~> **Default platform permissions:** When a user first signs in through SSO or LDAP, Console automatically grants a set of default `PLATFORM` view permissions: `userView`, `datamaskingView`, `taasView` and `notificationChannelView`. Users created through Terraform or the API do **not** receive these automatically. To make a Terraform-managed user match one created via SSO/LDAP login, declare them explicitly in `spec.permissions`. `notificationChannelView` requires provider `v1.4.0` or later.
+
 ## Example Usage
 
 ### Simple user without permissions
