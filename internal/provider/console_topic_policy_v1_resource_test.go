@@ -17,6 +17,7 @@ func TestAccTopicPolicyV1Resource(t *testing.T) {
 		t.Fatalf("Error fetching current version: %s", err)
 	}
 	test.CheckMinimumVersionRequirement(t, v, topicPolicyMininumVersion)
+	test.CheckMaximumVersionRequirement(t, v, topicPolicyMaximumVersion)
 	resourceRef := "conduktor_console_topic_policy_v1.test"
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { test.TestAccPreCheck(t) },
@@ -62,6 +63,7 @@ func TestAccTopicPolicyV1Minimal(t *testing.T) {
 		t.Fatalf("Error fetching current version: %s", err)
 	}
 	test.CheckMinimumVersionRequirement(t, v, topicPolicyMininumVersion)
+	test.CheckMaximumVersionRequirement(t, v, topicPolicyMaximumVersion)
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { test.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
@@ -87,6 +89,7 @@ func TestAccTopicPolicyV1Constraints(t *testing.T) {
 		t.Fatalf("Error fetching current version: %s", err)
 	}
 	test.CheckMinimumVersionRequirement(t, v, topicPolicyMininumVersion)
+	test.CheckMaximumVersionRequirement(t, v, topicPolicyMaximumVersion)
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { test.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
@@ -108,6 +111,7 @@ func TestAccTopicPolicyV1ExampleResource(t *testing.T) {
 	}
 
 	test.CheckMinimumVersionRequirement(t, v, topicPolicyMininumVersion)
+	test.CheckMaximumVersionRequirement(t, v, topicPolicyMaximumVersion)
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { test.TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,

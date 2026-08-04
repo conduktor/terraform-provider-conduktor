@@ -2,8 +2,9 @@
 page_title: "Conduktor : conduktor_console_topic_policy_v1 "
 subcategory: "self-serve/v1"
 description: |-
-    Resource for managing Conduktor Console self service topic policies.
+    DEPRECATED - Resource for managing Conduktor Console self service topic policies.
     This resource allows you to create, read, update and delete topic policies in Conduktor.
+    Removed from the Conduktor Console API in version 1.47.0, use conduktor_console_resource_policy_v1 instead.
 ---
 
 # conduktor_console_topic_policy_v1
@@ -11,9 +12,18 @@ description: |-
 Resource for managing Conduktor topic policies.
 This resource allows you to create, read, update and delete topic policies in Conduktor.
 
+## DEPRECATED
+This resource is **deprecated** and the `TopicPolicy` API is **removed from Conduktor Console in version `1.47.0`**.
+
+Use [`conduktor_console_resource_policy_v1`](https://registry.terraform.io/providers/conduktor/conduktor/latest/docs/resources/console_resource_policy_v1)
+instead, which supersedes topic policies and also supports other resource types.
+
+Targeting a Conduktor Console newer than `1.46.2` with this resource fails at plan time.
+
 ## WARNING
-Minimum requirement for this resource:
- - Conduktor Console version `1.30.0`.
+Version requirements for this resource:
+ - Minimum Conduktor Console version `1.30.0`.
+ - Maximum Conduktor Console version `1.46.2`.
 
 Usage of this resource with older Console version might produce errors since the API might not support all types of constraints
 
