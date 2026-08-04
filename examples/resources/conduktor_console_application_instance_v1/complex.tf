@@ -5,7 +5,7 @@ resource "conduktor_console_application_instance_v1" "complex" {
   spec = {
     cluster         = "kafka-cluster"
     service_account = "my-service-account"
-    topic_policy_ref = [
+    policy_ref = [
       "topic-policy"
     ]
     default_catalog_visibility = "PUBLIC"

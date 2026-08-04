@@ -73,6 +73,16 @@ func CheckMinimumVersionRequirement(t *testing.T, version string, minimumVersion
 	}
 }
 
+// Check if version meets maximum requirement, used for resources removed from the API.
+// NOTE: Version has to start with v, e.g. "v1.2.3".
+func CheckMaximumVersionRequirement(t *testing.T, version string, maximumVersion string) {
+	// If version is not valid we assume it's an unreleased version. (e.g. main-xxxxxx or nightly)
+	// In this case we assume it's a newer API than any release, so it's past the maximum and we skip the tests.
+	if !semver.IsValid(version) || semver.Compare(version, maximumVersion) > 0 {
+		t.Skip("Skipping tests as API doesn't meet maximum version requirements")
+	}
+}
+
 // Provider configuration pre-checks.
 func TestAccPreCheck(t *testing.T) {
 	// check that the environment variables are set
