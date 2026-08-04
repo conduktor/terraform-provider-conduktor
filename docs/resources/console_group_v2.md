@@ -11,6 +11,8 @@ description: |-
 Resource for managing Conduktor groups.
 This resource allows you to create, read, update and delete groups in Conduktor.
 
+~> **Default platform permissions:** When a user first signs in through SSO or LDAP, Console automatically grants a set of default `PLATFORM` view permissions: `userView`, `datamaskingView`, `taasView` and `notificationChannelView`. Groups (and users) created through Terraform or the API do **not** receive these automatically. To grant them to a Terraform-managed group, declare them explicitly in `spec.permissions`. `notificationChannelView` requires provider `v1.4.0` or later.
+
 ## Example Usage
 
 ### Simple group without members or permissions
