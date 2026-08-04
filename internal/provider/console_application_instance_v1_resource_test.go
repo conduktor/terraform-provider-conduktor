@@ -190,6 +190,12 @@ func TestAccApplicationInstanceV1ExampleResource(t *testing.T) {
 					resource.TestCheckResourceAttr("conduktor_console_application_instance_v1.complex", "spec.application_managed_service_account", "false"),
 				),
 			},
+			// Destroy the application instances before the policy they reference, the API rejects deleting a policy
+			// that is still referenced. Terraform can't order this itself because the examples refer to the policy
+			// by name rather than by resource reference.
+			{
+				Config: providerConfigConsole + policyDependency,
+			},
 		},
 	})
 }
