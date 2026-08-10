@@ -107,10 +107,17 @@ func ConsoleConnectorV2ResourceSchema(ctx context.Context) schema.Schema {
 				Attributes: map[string]schema.Attribute{
 					"config": schema.MapAttribute{
 						ElementType:         types.StringType,
-						Optional:            true,
-						Computed:            true,
+						Required:            true,
 						Description:         "Must be valid Kafka Connect Connector configs",
 						MarkdownDescription: "Must be valid Kafka Connect Connector configs",
+					},
+					"initial_state": schema.StringAttribute{
+						Optional:            true,
+						Description:         "Initial state of the connector after creation or update. Valid values are RUNNING, PAUSED, STOPPED. NOTE: this field has been introduced with Console 1.46.0 and it will not work with previous versions",
+						MarkdownDescription: "Initial state of the connector after creation or update. Valid values are RUNNING, PAUSED, STOPPED. NOTE: this field has been introduced with Console 1.46.0 and it will not work with previous versions",
+						Validators: []validator.String{
+							stringvalidator.OneOf("RUNNING", "PAUSED", "STOPPED"),
+						},
 					},
 				},
 				CustomType: SpecType{
@@ -559,13 +566,32 @@ func (t SpecType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue)
 			fmt.Sprintf(`config expected to be basetypes.MapValue, was: %T`, configAttribute))
 	}
 
+	initialStateAttribute, ok := attributes["initial_state"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`initial_state is missing from object`)
+
+		return nil, diags
+	}
+
+	initialStateVal, ok := initialStateAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`initial_state expected to be basetypes.StringValue, was: %T`, initialStateAttribute))
+	}
+
 	if diags.HasError() {
 		return nil, diags
 	}
 
 	return SpecValue{
-		Config: configVal,
-		state:  attr.ValueStateKnown,
+		Config:       configVal,
+		InitialState: initialStateVal,
+		state:        attr.ValueStateKnown,
 	}, diags
 }
 
@@ -650,13 +676,32 @@ func NewSpecValue(attributeTypes map[string]attr.Type, attributes map[string]att
 			fmt.Sprintf(`config expected to be basetypes.MapValue, was: %T`, configAttribute))
 	}
 
+	initialStateAttribute, ok := attributes["initial_state"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`initial_state is missing from object`)
+
+		return NewSpecValueUnknown(), diags
+	}
+
+	initialStateVal, ok := initialStateAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`initial_state expected to be basetypes.StringValue, was: %T`, initialStateAttribute))
+	}
+
 	if diags.HasError() {
 		return NewSpecValueUnknown(), diags
 	}
 
 	return SpecValue{
-		Config: configVal,
-		state:  attr.ValueStateKnown,
+		Config:       configVal,
+		InitialState: initialStateVal,
+		state:        attr.ValueStateKnown,
 	}, diags
 }
 
@@ -728,12 +773,13 @@ func (t SpecType) ValueType(ctx context.Context) attr.Value {
 var _ basetypes.ObjectValuable = SpecValue{}
 
 type SpecValue struct {
-	Config basetypes.MapValue `tfsdk:"config"`
-	state  attr.ValueState
+	Config       basetypes.MapValue    `tfsdk:"config"`
+	InitialState basetypes.StringValue `tfsdk:"initial_state"`
+	state        attr.ValueState
 }
 
 func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
-	attrTypes := make(map[string]tftypes.Type, 1)
+	attrTypes := make(map[string]tftypes.Type, 2)
 
 	var val tftypes.Value
 	var err error
@@ -741,12 +787,13 @@ func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) 
 	attrTypes["config"] = basetypes.MapType{
 		ElemType: types.StringType,
 	}.TerraformType(ctx)
+	attrTypes["initial_state"] = basetypes.StringType{}.TerraformType(ctx)
 
 	objectType := tftypes.Object{AttributeTypes: attrTypes}
 
 	switch v.state {
 	case attr.ValueStateKnown:
-		vals := make(map[string]tftypes.Value, 1)
+		vals := make(map[string]tftypes.Value, 2)
 
 		val, err = v.Config.ToTerraformValue(ctx)
 
@@ -755,6 +802,14 @@ func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) 
 		}
 
 		vals["config"] = val
+
+		val, err = v.InitialState.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["initial_state"] = val
 
 		if err := tftypes.ValidateValue(objectType, vals); err != nil {
 			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
@@ -802,6 +857,7 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 			"config": basetypes.MapType{
 				ElemType: types.StringType,
 			},
+			"initial_state": basetypes.StringType{},
 		}), diags
 	}
 
@@ -809,6 +865,7 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 		"config": basetypes.MapType{
 			ElemType: types.StringType,
 		},
+		"initial_state": basetypes.StringType{},
 	}
 
 	if v.IsNull() {
@@ -822,7 +879,8 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 	objVal, diags := types.ObjectValue(
 		attributeTypes,
 		map[string]attr.Value{
-			"config": configVal,
+			"config":        configVal,
+			"initial_state": v.InitialState,
 		})
 
 	return objVal, diags
@@ -847,6 +905,10 @@ func (v SpecValue) Equal(o attr.Value) bool {
 		return false
 	}
 
+	if !v.InitialState.Equal(other.InitialState) {
+		return false
+	}
+
 	return true
 }
 
@@ -863,5 +925,6 @@ func (v SpecValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 		"config": basetypes.MapType{
 			ElemType: types.StringType,
 		},
+		"initial_state": basetypes.StringType{},
 	}
 }

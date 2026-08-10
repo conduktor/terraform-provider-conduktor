@@ -1197,10 +1197,29 @@
                   "name": "config",
                   "map": {
                     "description": "Must be valid Kafka Connect Connector configs",
-                    "computed_optional_required": "computed_optional",
+                    "computed_optional_required": "required",
                     "element_type": {
                       "string": {}
                     }
+                  }
+                },
+                {
+                  "name": "initial_state",
+                  "string": {
+                    "description": "Initial state of the connector after creation or update. Valid values are RUNNING, PAUSED, STOPPED. NOTE: this field has been introduced with Console 1.46.0 and it will not work with previous versions",
+                    "computed_optional_required": "optional",
+                    "validators": [
+                      {
+                        "custom": {
+                          "imports": [
+                            {
+                              "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                            }
+                          ],
+                          "schema_definition": "stringvalidator.OneOf(\"RUNNING\", \"PAUSED\", \"STOPPED\")"
+                        }
+                      }
+                    ]
                   }
                 }
               ]
