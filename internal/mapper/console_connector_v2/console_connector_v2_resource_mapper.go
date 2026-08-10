@@ -73,12 +73,7 @@ func InternalModelToTerraform(ctx context.Context, r *console.ConnectorConsoleRe
 		return connector.ConsoleConnectorV2Model{}, err
 	}
 
-	var initialState basetypes.StringValue
-	if r.Spec.InitialState == "" {
-		initialState = basetypes.NewStringNull()
-	} else {
-		initialState = schema.NewStringValue(r.Spec.InitialState)
-	}
+	initialState := schema.NewStringValue(r.Spec.InitialState)
 
 	specValue, diag := connector.NewSpecValue(
 		map[string]attr.Type{
