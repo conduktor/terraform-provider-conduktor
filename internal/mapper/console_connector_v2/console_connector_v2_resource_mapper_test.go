@@ -44,7 +44,7 @@ func TestConnectorV2ModelMapping(t *testing.T) {
 		"connection.url":                     "jdbc:mysql://127.0.0.1:3306/sample?verifyServerCertificate=false&useSSL=true&requireSSL=true",
 		"consumer.override.sasl.jaas.config": "o.a.k.s.s.ScramLoginModule required username='<user>' password='<password>';",
 	}
-	assert.Equal(t, map[string]any{"config": config, "initialState": "RUNNING"}, ctlResource.Spec)
+	assert.Equal(t, map[string]any{"config": config}, ctlResource.Spec)
 
 	assert.Equal(t, jsonConnectorV2Resource, ctlResource.Json)
 
@@ -68,7 +68,6 @@ func TestConnectorV2ModelMapping(t *testing.T) {
 	assert.Equal(t, int64(500), internal.Metadata.AutoRestart.FrequencySeconds)
 	assert.Equal(t, true, internal.Metadata.AutoRestart.Enabled)
 	assert.Equal(t, "io.connect.jdbc.JdbcSourceConnector", internal.Spec.Config["connector.class"])
-	assert.Equal(t, "RUNNING", internal.Spec.InitialState)
 	assert.Equal(t, "1", internal.Spec.Config["tasks.max"])
 	assert.Equal(t, "click.pageviews", internal.Spec.Config["topic"])
 	assert.Equal(t, "jdbc:mysql://127.0.0.1:3306/sample?verifyServerCertificate=false&useSSL=true&requireSSL=true", internal.Spec.Config["connection.url"])
@@ -95,7 +94,6 @@ func TestConnectorV2ModelMapping(t *testing.T) {
 	assert.Equal(t, types.StringValue("This is a connector"), tfModel.Description)
 	assert.Equal(t, types.Int64Value(500), tfModel.AutoRestart.FrequencySeconds)
 	assert.Equal(t, types.BoolValue(true), tfModel.AutoRestart.Enabled)
-	assert.Equal(t, types.StringValue("RUNNING"), tfModel.Spec.InitialState)
 	assert.Equal(t, false, tfModel.Spec.Config.IsNull())
 	assert.Equal(t, false, tfModel.Spec.Config.IsUnknown())
 
@@ -119,7 +117,6 @@ func TestConnectorV2ModelMapping(t *testing.T) {
 	assert.Equal(t, int64(500), internal2.Metadata.AutoRestart.FrequencySeconds)
 	assert.Equal(t, true, internal2.Metadata.AutoRestart.Enabled)
 	assert.Equal(t, "io.connect.jdbc.JdbcSourceConnector", internal2.Spec.Config["connector.class"])
-	assert.Equal(t, "RUNNING", internal2.Spec.InitialState)
 	assert.Equal(t, "1", internal2.Spec.Config["tasks.max"])
 	assert.Equal(t, "click.pageviews", internal2.Spec.Config["topic"])
 	assert.Equal(t, "jdbc:mysql://127.0.0.1:3306/sample?verifyServerCertificate=false&useSSL=true&requireSSL=true", internal2.Spec.Config["connection.url"])

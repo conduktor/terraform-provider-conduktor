@@ -91,10 +91,6 @@ Required:
 
 - `config` (Map of String) Must be valid Kafka Connect Connector configs
 
-Optional:
-
-- `initial_state` (String) Initial state of the connector after creation or update. Valid values are RUNNING, PAUSED, STOPPED. NOTE: this field has been introduced with Console 1.46.0 and it will not work with previous versions
-
 
 <a id="nestedatt--auto_restart"></a>
 ### Nested Schema for `auto_restart`

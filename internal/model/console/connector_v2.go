@@ -31,8 +31,7 @@ func (r ConnectorConsoleMetadata) String() string {
 }
 
 type ConnectorConsoleSpec struct {
-	Config       map[string]string `json:"config"`
-	InitialState string            `json:"initialState,omitempty"`
+	Config map[string]string `json:"config"`
 }
 
 type ConnectorConsoleResource struct {

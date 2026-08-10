@@ -26,7 +26,6 @@
       "topic": "click.pageviews",
       "connection.url": "jdbc:mysql://127.0.0.1:3306/sample?verifyServerCertificate=false&useSSL=true&requireSSL=true",
       "consumer.override.sasl.jaas.config": "o.a.k.s.s.ScramLoginModule required username='<user>' password='<password>';"
-    },
-    "initialState": "RUNNING"
+    }
   }
 }
