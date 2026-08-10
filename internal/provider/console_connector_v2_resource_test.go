@@ -38,7 +38,6 @@ func TestAccConnectorV2Resource(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceRef, "spec.config.tasks.max", "1"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.config.topic", "click.pageviews"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.config.file", "/etc/kafka/consumer.properties"),
-					resource.TestCheckResourceAttr(resourceRef, "spec.initial_state", "RUNNING"),
 				),
 			},
 			// Importing matches the state of the previous step.
@@ -65,7 +64,6 @@ func TestAccConnectorV2Resource(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceRef, "spec.config.tasks.max", "2"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.config.topic", "click.pageviews.new"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.config.file", "/etc/kafka/producer.properties"),
-					resource.TestCheckResourceAttr(resourceRef, "spec.initial_state", "PAUSED"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase

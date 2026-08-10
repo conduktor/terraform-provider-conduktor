@@ -17,6 +17,5 @@ resource "conduktor_console_connector_v2" "test" {
       "topic"           = "click.pageviews"
       "file"            = "/etc/kafka/consumer.properties"
     }
-    initial_state = "RUNNING"
   }
 }
