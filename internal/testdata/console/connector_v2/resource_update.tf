@@ -17,5 +17,6 @@ resource "conduktor_console_connector_v2" "test" {
       "topic"           = "click.pageviews.new"
       "file"            = "/etc/kafka/producer.properties"
     }
+    initial_state = "PAUSED"
   }
 }
