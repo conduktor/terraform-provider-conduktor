@@ -62,8 +62,9 @@ go-lint: tools ## Run Golang linters
 	@go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GO_LINT_VERSION) run
 
 .PHONY: pull_test_assets
-pull_test_assets: ## Pull test docker images
-	@docker compose -f "$(CURDIR)/docker-compose.yaml" pull --quiet
+pull_test_assets: ## Pull test docker images (and build custom images)
+	@docker compose -f "$(CURDIR)/docker-compose.yaml" pull --quiet --ignore-buildable
+	@docker compose -f "$(CURDIR)/docker-compose.yaml" build --quiet
 
 .PHONY: start_test_env
 start_test_env: ## Start test environment
