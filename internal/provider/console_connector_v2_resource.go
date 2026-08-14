@@ -31,6 +31,9 @@ const connectorMininumVersion = "v1.26.0"
 // More details here : https://docs.conduktor.io/guide/release-notes#changes-to-conduktor-io-labels
 const connectorMininumRecommendedVersion = "v1.29.0"
 
+// Version when initialState was added to the connector spec.
+const connectorInitialStateMinimumVersion = "v1.46.0"
+
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &ConnectorV2Resource{}
 var _ resource.ResourceWithImportState = &ConnectorV2Resource{}

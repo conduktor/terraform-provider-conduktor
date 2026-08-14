@@ -78,9 +78,7 @@ test: ## Run acceptance tests only (no setup or cleanup)
 # Run acceptance tests
 .PHONY: testacc
 testacc: start_test_env ## Start test environment, run acceptance tests and clean up
-	@trap '$(MAKE) clean' EXIT
-
-	$(MAKE) test
+	@trap '$(MAKE) clean' EXIT; $(MAKE) test
 
 .PHONY: clean
 clean: ## Clean up test environment

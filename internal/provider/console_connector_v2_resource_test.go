@@ -16,7 +16,8 @@ func TestAccConnectorV2Resource(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error fetching current version: %s", err)
 	}
-	test.CheckMinimumVersionRequirement(t, v, connectorMininumRecommendedVersion)
+	// resource_create.tf and resource_update.tf use initial_state which requires Console 1.46.0+
+	test.CheckMinimumVersionRequirement(t, v, connectorInitialStateMinimumVersion)
 
 	resourceRef := "conduktor_console_connector_v2.test"
 	resource.Test(t, resource.TestCase{
@@ -38,6 +39,7 @@ func TestAccConnectorV2Resource(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceRef, "spec.config.tasks.max", "1"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.config.topic", "click.pageviews"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.config.file", "/etc/kafka/consumer.properties"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.initial_state", "RUNNING"),
 				),
 			},
 			// Importing matches the state of the previous step.
@@ -64,6 +66,7 @@ func TestAccConnectorV2Resource(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceRef, "spec.config.tasks.max", "2"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.config.topic", "click.pageviews.new"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.config.file", "/etc/kafka/producer.properties"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.initial_state", "PAUSED"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
