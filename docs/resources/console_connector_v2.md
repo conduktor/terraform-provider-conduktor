@@ -93,7 +93,7 @@ Required:
 
 Optional:
 
-- `initial_state` (String) Initial state of the connector after creation or update. Valid values are RUNNING, PAUSED, STOPPED. NOTE: this field has been introduced with Console 1.46.0 and it will not work with previous versions
+- `initial_state` (String) Initial state of the connector on creation. Valid values are RUNNING, PAUSED, STOPPED. NOTE: requires Console 1.46.0+ and Kafka Connect 3.7.0+ (KIP-980). Only applied on creation, not updates.
 
 
 <a id="nestedatt--auto_restart"></a>

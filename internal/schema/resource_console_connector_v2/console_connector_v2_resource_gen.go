@@ -113,8 +113,8 @@ func ConsoleConnectorV2ResourceSchema(ctx context.Context) schema.Schema {
 					},
 					"initial_state": schema.StringAttribute{
 						Optional:            true,
-						Description:         "Initial state of the connector after creation or update. Valid values are RUNNING, PAUSED, STOPPED. NOTE: this field has been introduced with Console 1.46.0 and it will not work with previous versions",
-						MarkdownDescription: "Initial state of the connector after creation or update. Valid values are RUNNING, PAUSED, STOPPED. NOTE: this field has been introduced with Console 1.46.0 and it will not work with previous versions",
+						Description:         "Initial state of the connector on creation. Valid values are RUNNING, PAUSED, STOPPED. NOTE: requires Console 1.46.0+ and Kafka Connect 3.7.0+ (KIP-980). Only applied on creation, not updates.",
+						MarkdownDescription: "Initial state of the connector on creation. Valid values are RUNNING, PAUSED, STOPPED. NOTE: requires Console 1.46.0+ and Kafka Connect 3.7.0+ (KIP-980). Only applied on creation, not updates.",
 						Validators: []validator.String{
 							stringvalidator.OneOf("RUNNING", "PAUSED", "STOPPED"),
 						},
