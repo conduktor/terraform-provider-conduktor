@@ -8,6 +8,7 @@ import (
 	"github.com/conduktor/terraform-provider-conduktor/internal/test"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"golang.org/x/mod/semver"
 )
 
 func TestAccConnectorV2Resource(t *testing.T) {
@@ -17,6 +18,8 @@ func TestAccConnectorV2Resource(t *testing.T) {
 		t.Fatalf("Error fetching current version: %s", err)
 	}
 	test.CheckMinimumVersionRequirement(t, v, connectorMininumRecommendedVersion)
+	// initial_state requires Console 1.46.0+ and Kafka Connect 3.7.0+ (KIP-980)
+	initialStateSupported := !semver.IsValid(v) || semver.Compare(v, "v1.46.0") >= 0
 
 	resourceRef := "conduktor_console_connector_v2.test"
 	resource.Test(t, resource.TestCase{
@@ -64,6 +67,14 @@ func TestAccConnectorV2Resource(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceRef, "spec.config.tasks.max", "2"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.config.topic", "click.pageviews.new"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.config.file", "/etc/kafka/producer.properties"),
+				),
+			},
+			// Create with initial_state (requires Console 1.46.0+ and Kafka Connect 3.7.0+)
+			{
+				SkipFunc: func() (bool, error) { return !initialStateSupported, nil },
+				Config:   providerConfigConsole + test.TestAccTestdata(t, "console/connector_v2/resource_initial_state.tf"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceRef, "spec.initial_state", "RUNNING"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
