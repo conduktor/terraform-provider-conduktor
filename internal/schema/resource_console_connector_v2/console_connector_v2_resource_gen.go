@@ -5,6 +5,7 @@ package resource_console_connector_v2
 import (
 	"context"
 	"fmt"
+	"github.com/conduktor/terraform-provider-conduktor/internal/planmodifiers"
 	"github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -115,6 +116,9 @@ func ConsoleConnectorV2ResourceSchema(ctx context.Context) schema.Schema {
 						Optional:            true,
 						Description:         "Initial state of the connector on creation. Valid values are RUNNING, PAUSED, STOPPED. NOTE: requires Console 1.46.0+ and Kafka Connect 3.7.0+ (KIP-980). Only applied on creation, not updates.",
 						MarkdownDescription: "Initial state of the connector on creation. Valid values are RUNNING, PAUSED, STOPPED. NOTE: requires Console 1.46.0+ and Kafka Connect 3.7.0+ (KIP-980). Only applied on creation, not updates.",
+						PlanModifiers: []planmodifier.String{
+							planmodifiers.AlwaysUseStateForString(),
+						},
 						Validators: []validator.String{
 							stringvalidator.OneOf("RUNNING", "PAUSED", "STOPPED"),
 						},

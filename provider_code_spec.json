@@ -1208,6 +1208,18 @@
                   "string": {
                     "description": "Initial state of the connector on creation. Valid values are RUNNING, PAUSED, STOPPED. NOTE: requires Console 1.46.0+ and Kafka Connect 3.7.0+ (KIP-980). Only applied on creation, not updates.",
                     "computed_optional_required": "optional",
+                    "plan_modifiers": [
+                      {
+                        "custom": {
+                          "imports": [
+                            {
+                              "path": "github.com/conduktor/terraform-provider-conduktor/internal/planmodifiers"
+                            }
+                          ],
+                          "schema_definition": "planmodifiers.AlwaysUseStateForString()"
+                        }
+                      }
+                    ],
                     "validators": [
                       {
                         "custom": {
