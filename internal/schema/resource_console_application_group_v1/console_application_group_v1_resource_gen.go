@@ -32,7 +32,7 @@ func ConsoleApplicationGroupV1ResourceSchema(ctx context.Context) schema.Schema 
 				Description:         "Reference to the application this group belongs to",
 				MarkdownDescription: "Reference to the application this group belongs to",
 				Validators: []validator.String{
-					stringvalidator.RegexMatches(regexp.MustCompile("^[0-9a-z\\_\\-]+$"), ""),
+					stringvalidator.RegexMatches(regexp.MustCompile("^[0-9a-z\\_\\-.]+$"), ""),
 				},
 			},
 			"name": schema.StringAttribute{
@@ -43,7 +43,7 @@ func ConsoleApplicationGroupV1ResourceSchema(ctx context.Context) schema.Schema 
 					stringplanmodifier.RequiresReplace(),
 				},
 				Validators: []validator.String{
-					stringvalidator.RegexMatches(regexp.MustCompile("^[0-9a-z\\_\\-]+$"), ""),
+					stringvalidator.RegexMatches(regexp.MustCompile("^[0-9a-z\\_\\-.]+$"), ""),
 				},
 			},
 			"spec": schema.SingleNestedAttribute{
@@ -82,7 +82,7 @@ func ConsoleApplicationGroupV1ResourceSchema(ctx context.Context) schema.Schema 
 									Description:         "Reference to the application instance",
 									MarkdownDescription: "Reference to the application instance",
 									Validators: []validator.String{
-										stringvalidator.RegexMatches(regexp.MustCompile("^[0-9a-z\\_\\-]+$"), ""),
+										stringvalidator.RegexMatches(regexp.MustCompile("^[0-9a-z\\_\\-.]+$"), ""),
 									},
 								},
 								"permissions": schema.SetAttribute{
@@ -133,7 +133,7 @@ func ConsoleApplicationGroupV1ResourceSchema(ctx context.Context) schema.Schema 
 									Description:         "Reference to the application instance this group belongs to",
 									MarkdownDescription: "Reference to the application instance this group belongs to",
 									Validators: []validator.String{
-										stringvalidator.RegexMatches(regexp.MustCompile("^[0-9a-z\\_\\-]+$"), ""),
+										stringvalidator.RegexMatches(regexp.MustCompile("^[0-9a-z\\_\\-.]+$"), ""),
 									},
 								},
 								"connect_cluster": schema.StringAttribute{

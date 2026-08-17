@@ -30,7 +30,7 @@ func ConsoleServiceAccountV1ResourceSchema(ctx context.Context) schema.Schema {
 				Description:         "Reference to the application instance this service account is associated with",
 				MarkdownDescription: "Reference to the application instance this service account is associated with",
 				Validators: []validator.String{
-					stringvalidator.RegexMatches(regexp.MustCompile("^[0-9a-z\\_\\-]+$"), ""),
+					stringvalidator.RegexMatches(regexp.MustCompile("^[0-9a-z\\_\\-.]+$"), ""),
 				},
 			},
 			"cluster": schema.StringAttribute{
@@ -52,7 +52,7 @@ func ConsoleServiceAccountV1ResourceSchema(ctx context.Context) schema.Schema {
 					stringplanmodifier.RequiresReplace(),
 				},
 				Validators: []validator.String{
-					stringvalidator.RegexMatches(regexp.MustCompile("^[0-9a-z\\_\\-]+$"), ""),
+					stringvalidator.RegexMatches(regexp.MustCompile("^[0-9a-z\\_\\-.]+$"), ""),
 				},
 			},
 			"spec": schema.SingleNestedAttribute{
