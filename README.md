@@ -38,6 +38,12 @@ This repository contains the Conduktor Terraform provider, which defines Condukt
 > The Conduktor Terraform provider may not include the latest features. [Check out all the supported resources](https://docs.conduktor.io/guide/conduktor-in-production/automate).
 > [Find out how to use and configure the Conduktor provider](https://registry.terraform.io/providers/conduktor/conduktor/latest/docs).
 
+### Minimal version supported by current provider
+
+* Terraform : [1.0.0](https://developer.hashicorp.com/terraform/enterprise/releases/1.0.x#1-0-0)
+* Conduktor Console : [1.26.0](https://docs.conduktor.io/guide/release-notes/archive#console-1-26-0)
+* Condukor Gateway : [3.11.0](https://docs.conduktor.io/guide/release-notes?tags=Gateway#gateway-3-11-0)
+
 ## Install
 
 Provider should be installed automatically with `terraform init`, but it's recommended to pin a specific version or range of versions using the following [`required_providers` configuration](https://developer.hashicorp.com/terraform/language/providers/requirements) :
