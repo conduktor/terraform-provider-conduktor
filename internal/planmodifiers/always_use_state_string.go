@@ -27,11 +27,11 @@ func (m *alwaysUseStateForStringModifier) MarkdownDescription(ctx context.Contex
 
 // PlanModifyString implements the plan modification logic.
 func (m *alwaysUseStateForStringModifier) PlanModifyString(ctx context.Context, req planmodifier.StringRequest, resp *planmodifier.StringResponse) {
-	// If there's no state value, don't modify the plan (first apply)
+	// If there's no state value, don't modify the plan (first apply).
 	if req.StateValue.IsNull() {
 		return
 	}
 
-	// Always use the state value, so API not returning this field doesn't cause a diff
+	// Always use the state value, so API not returning this field doesn't cause a diff.
 	resp.PlanValue = req.StateValue
 }

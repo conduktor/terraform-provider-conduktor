@@ -182,11 +182,18 @@ func (r *ConnectorV2Resource) Read(ctx context.Context, req resource.ReadRequest
 	}
 	tflog.Debug(ctx, fmt.Sprintf("New connector state : %+v", consoleRes))
 
+	// Preserve prior state value for initial_state: the API never returns this
+	// field on reads (it is a creation-only hint). Overwriting it with the empty
+	// API response would cause a perpetual diff against the config.
+	priorInitialState := data.Spec.InitialState
+
 	data, err = mapper.InternalModelToTerraform(ctx, &consoleRes)
 	if err != nil {
 		resp.Diagnostics.AddError("Model Error", fmt.Sprintf("Unable to read connector, got error: %s", err))
 		return
 	}
+
+	data.Spec.InitialState = priorInitialState
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
