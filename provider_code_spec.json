@@ -251,7 +251,7 @@
                   "name": "resource",
                   "single_nested": {
                     "description": "Resources associated with this application instance permission",
-                    "computed_optional_required": "computed_optional",
+                    "computed_optional_required": "required",
                     "attributes": [
                       {
                         "name": "type",
@@ -318,7 +318,7 @@
                   "name": "user_permission",
                   "string": {
                     "description": "Permission applied to the user, valid values are: NONE, READ, WRITE",
-                    "computed_optional_required": "required",
+                    "computed_optional_required": "optional",
                     "validators": [
                       {
                         "custom": {
@@ -340,7 +340,7 @@
                   "name": "service_account_permission",
                   "string": {
                     "description": "Permission applied to the service account, valid values are: NONE, READ, WRITE",
-                    "computed_optional_required": "required",
+                    "computed_optional_required": "optional",
                     "validators": [
                       {
                         "custom": {

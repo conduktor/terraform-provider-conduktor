@@ -58,12 +58,12 @@ resource "conduktor_console_application_instance_permission_v1" "complex" {
 Required:
 
 - `granted_to` (String) Reference to an application instance. Must be on the same Kafka cluster as app_instance
-- `service_account_permission` (String) Permission applied to the service account, valid values are: NONE, READ, WRITE
-- `user_permission` (String) Permission applied to the user, valid values are: NONE, READ, WRITE
+- `resource` (Attributes) Resources associated with this application instance permission (see [below for nested schema](#nestedatt--spec--resource))
 
 Optional:
 
-- `resource` (Attributes) Resources associated with this application instance permission (see [below for nested schema](#nestedatt--spec--resource))
+- `service_account_permission` (String) Permission applied to the service account, valid values are: NONE, READ, WRITE
+- `user_permission` (String) Permission applied to the user, valid values are: NONE, READ, WRITE
 
 <a id="nestedatt--spec--resource"></a>
 ### Nested Schema for `spec.resource`

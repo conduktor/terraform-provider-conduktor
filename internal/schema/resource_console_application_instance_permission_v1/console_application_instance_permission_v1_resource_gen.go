@@ -96,13 +96,12 @@ func ConsoleApplicationInstancePermissionV1ResourceSchema(ctx context.Context) s
 								AttrTypes: ResourceValue{}.AttributeTypes(ctx),
 							},
 						},
-						Optional:            true,
-						Computed:            true,
+						Required:            true,
 						Description:         "Resources associated with this application instance permission",
 						MarkdownDescription: "Resources associated with this application instance permission",
 					},
 					"service_account_permission": schema.StringAttribute{
-						Required:            true,
+						Optional:            true,
 						Description:         "Permission applied to the service account, valid values are: NONE, READ, WRITE",
 						MarkdownDescription: "Permission applied to the service account, valid values are: NONE, READ, WRITE",
 						Validators: []validator.String{
@@ -110,7 +109,7 @@ func ConsoleApplicationInstancePermissionV1ResourceSchema(ctx context.Context) s
 						},
 					},
 					"user_permission": schema.StringAttribute{
-						Required:            true,
+						Optional:            true,
 						Description:         "Permission applied to the user, valid values are: NONE, READ, WRITE",
 						MarkdownDescription: "Permission applied to the user, valid values are: NONE, READ, WRITE",
 						Validators: []validator.String{
