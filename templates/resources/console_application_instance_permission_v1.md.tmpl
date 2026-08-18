@@ -18,8 +18,9 @@ Minimum requirement for this resource:
 Usage of this resource with older Console version might result in unexpected behavior.
 
 ## NOTE
- - `spec.permission` has been deprecated and won't be supported by this terraform provider plugin
- - Use `spec.user_permission` and `spec.service_account_permission` instead
+ - `spec.permission` and `spec.user_permission`/`spec.service_account_permission` are mutually exclusive — you must use one approach or the other:
+   - Set `spec.permission` alone to apply the same permission to both users and service accounts.
+   - Set `spec.user_permission` and `spec.service_account_permission` together to control them independently. Both must be specified if either is set.
 
 ## Example Usage
 
