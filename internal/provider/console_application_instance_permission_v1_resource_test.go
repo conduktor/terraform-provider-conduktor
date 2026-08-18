@@ -38,11 +38,14 @@ func TestAccApplicationInstancePermissionV1Resource(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceRef, "spec.granted_to", "my-app-instance"),
 				),
 			},
-			// Importing matches the state of the previous step.
+			// Importing: spec.permission is a write-only shortcut — the API expands it into
+			// user_permission+service_account_permission and never returns it directly,
+			// so imported state will show the expanded fields rather than permission.
 			{
 				ResourceName:                         resourceRef,
 				ImportState:                          true,
 				ImportStateVerify:                    true,
+				ImportStateVerifyIgnore:              []string{"spec.permission"},
 				ImportStateId:                        "appinstance-permission",
 				ImportStateVerifyIdentifierAttribute: "name",
 			},
