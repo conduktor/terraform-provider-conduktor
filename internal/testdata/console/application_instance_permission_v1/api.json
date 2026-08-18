@@ -13,7 +13,6 @@
       "patternType": "PREFIXED",
       "connectCluster": "connectCluster"
     },
-    "permission": "READ",
     "userPermission": "READ",
     "serviceAccountPermission": "READ",
     "grantedTo": "appinstance"
