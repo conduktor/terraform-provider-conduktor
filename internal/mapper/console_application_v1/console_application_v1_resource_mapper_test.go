@@ -28,7 +28,7 @@ func TestApplicationV1ModelMapping(t *testing.T) {
 	assert.Equal(t, "Application", ctlResource.Kind)
 	assert.Equal(t, "v1", ctlResource.Version)
 	assert.Equal(t, "application", ctlResource.Name)
-	assert.Equal(t, map[string]any{"title": "application title", "description": "application description", "owner": "application owner"}, ctlResource.Spec)
+	assert.Equal(t, map[string]any{"title": "application title", "description": "application description", "owner": "application owner", "policyRef": []any{"my-policy"}}, ctlResource.Spec)
 	assert.Equal(t, jsonApplicationV1Resource, ctlResource.Json)
 
 	// convert into internal model
@@ -43,6 +43,7 @@ func TestApplicationV1ModelMapping(t *testing.T) {
 	assert.Equal(t, "application title", internal.Spec.Title)
 	assert.Equal(t, "application description", internal.Spec.Description)
 	assert.Equal(t, "application owner", internal.Spec.Owner)
+	assert.Equal(t, []string{"my-policy"}, internal.Spec.PolicyRef)
 
 	// convert to terraform model
 	tfModel, err := InternalModelToTerraform(ctx, &internal)
@@ -54,6 +55,9 @@ func TestApplicationV1ModelMapping(t *testing.T) {
 	assert.Equal(t, types.StringValue("application title"), tfModel.Spec.Title)
 	assert.Equal(t, types.StringValue("application description"), tfModel.Spec.Description)
 	assert.Equal(t, types.StringValue("application owner"), tfModel.Spec.Owner)
+	// policy_ref is a set — check it contains the expected element
+	policyRefElems := tfModel.Spec.PolicyRef.Elements()
+	assert.Len(t, policyRefElems, 1)
 
 	// convert back to internal model
 	internal2, err := TFToInternalModel(ctx, &tfModel)
@@ -67,6 +71,7 @@ func TestApplicationV1ModelMapping(t *testing.T) {
 	assert.Equal(t, "application title", internal2.Spec.Title)
 	assert.Equal(t, "application description", internal2.Spec.Description)
 	assert.Equal(t, "application owner", internal2.Spec.Owner)
+	assert.Equal(t, []string{"my-policy"}, internal2.Spec.PolicyRef)
 	assert.Equal(t, internal, internal2)
 
 	// convert back to ctl model
