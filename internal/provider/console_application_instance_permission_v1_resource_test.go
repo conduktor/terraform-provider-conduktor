@@ -9,6 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
+// TestAccApplicationInstancePermissionV1Resource tests the permission shortcut field,
+// which sets both user and service account permissions to the same value.
 func TestAccApplicationInstancePermissionV1Resource(t *testing.T) {
 	test.CheckEnterpriseEnabled(t)
 	v, err := fetchClientVersion(client.CONSOLE)
@@ -32,8 +34,7 @@ func TestAccApplicationInstancePermissionV1Resource(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceRef, "spec.resource.type", "TOPIC"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.resource.name", "my-topic"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.resource.pattern_type", "LITERAL"),
-					resource.TestCheckResourceAttr(resourceRef, "spec.user_permission", "READ"),
-					resource.TestCheckResourceAttr(resourceRef, "spec.service_account_permission", "WRITE"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.permission", "READ"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.granted_to", "my-app-instance"),
 				),
 			},
@@ -56,6 +57,64 @@ func TestAccApplicationInstancePermissionV1Resource(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceRef, "spec.resource.name", "my-topic"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.resource.pattern_type", "LITERAL"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.permission", "WRITE"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.granted_to", "my-app-instance"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+// TestAccApplicationInstancePermissionV1UserSAResource tests setting user_permission
+// and service_account_permission independently.
+func TestAccApplicationInstancePermissionV1UserSAResource(t *testing.T) {
+	test.CheckEnterpriseEnabled(t)
+	v, err := fetchClientVersion(client.CONSOLE)
+	if err != nil {
+		t.Fatalf("Error fetching current version: %s", err)
+	}
+	test.CheckMinimumVersionRequirement(t, v, applicationInstancePermissionMininumVersion)
+
+	resourceRef := "conduktor_console_application_instance_permission_v1.test"
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { test.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read testing
+			{
+				Config: providerConfigConsole + test.TestAccTestdata(t, "console/application_instance_permission_v1/resource_create_user_sa.tf"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceRef, "name", "appinstance-permission"),
+					resource.TestCheckResourceAttr(resourceRef, "application", "myapp"),
+					resource.TestCheckResourceAttr(resourceRef, "app_instance", "my-app-instance"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.resource.type", "TOPIC"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.resource.name", "my-topic"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.resource.pattern_type", "LITERAL"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.user_permission", "READ"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.service_account_permission", "WRITE"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.granted_to", "my-app-instance"),
+				),
+			},
+			// Importing matches the state of the previous step.
+			{
+				ResourceName:                         resourceRef,
+				ImportState:                          true,
+				ImportStateVerify:                    true,
+				ImportStateId:                        "appinstance-permission",
+				ImportStateVerifyIdentifierAttribute: "name",
+			},
+			// Update and Read testing
+			{
+				Config: providerConfigConsole + test.TestAccTestdata(t, "console/application_instance_permission_v1/resource_update_user_sa.tf"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceRef, "name", "appinstance-permission"),
+					resource.TestCheckResourceAttr(resourceRef, "application", "myapp"),
+					resource.TestCheckResourceAttr(resourceRef, "app_instance", "my-app-instance"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.resource.type", "TOPIC"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.resource.name", "my-topic"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.resource.pattern_type", "LITERAL"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.user_permission", "WRITE"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.service_account_permission", "READ"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.granted_to", "my-app-instance"),
 				),
 			},

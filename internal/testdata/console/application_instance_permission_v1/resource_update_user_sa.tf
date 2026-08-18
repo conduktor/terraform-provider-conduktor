@@ -9,7 +9,8 @@ resource "conduktor_console_application_instance_permission_v1" "test" {
       name         = "my-topic"
       pattern_type = "LITERAL"
     }
-    permission = "READ"
-    granted_to = "my-app-instance"
+    user_permission            = "WRITE"
+    service_account_permission = "READ"
+    granted_to                 = "my-app-instance"
   }
 }
