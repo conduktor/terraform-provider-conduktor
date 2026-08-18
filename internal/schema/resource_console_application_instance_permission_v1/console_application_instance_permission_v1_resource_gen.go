@@ -30,7 +30,7 @@ func ConsoleApplicationInstancePermissionV1ResourceSchema(ctx context.Context) s
 				Description:         "Reference to the application instance this permission belongs to",
 				MarkdownDescription: "Reference to the application instance this permission belongs to",
 				Validators: []validator.String{
-					stringvalidator.RegexMatches(regexp.MustCompile("^[0-9a-z\\_\\-]+$"), ""),
+					stringvalidator.RegexMatches(regexp.MustCompile("^[0-9a-z\\_\\-.]+$"), ""),
 				},
 			},
 			"application": schema.StringAttribute{
@@ -38,7 +38,7 @@ func ConsoleApplicationInstancePermissionV1ResourceSchema(ctx context.Context) s
 				Description:         "Reference to the application this permission belongs to",
 				MarkdownDescription: "Reference to the application this permission belongs to",
 				Validators: []validator.String{
-					stringvalidator.RegexMatches(regexp.MustCompile("^[0-9a-z\\_\\-]+$"), ""),
+					stringvalidator.RegexMatches(regexp.MustCompile("^[0-9a-z\\_\\-.]+$"), ""),
 				},
 			},
 			"name": schema.StringAttribute{
@@ -49,7 +49,7 @@ func ConsoleApplicationInstancePermissionV1ResourceSchema(ctx context.Context) s
 					stringplanmodifier.RequiresReplace(),
 				},
 				Validators: []validator.String{
-					stringvalidator.RegexMatches(regexp.MustCompile("^[0-9a-z\\_\\-]+$"), ""),
+					stringvalidator.RegexMatches(regexp.MustCompile("^[0-9a-z\\_\\-.]+$"), ""),
 				},
 			},
 			"spec": schema.SingleNestedAttribute{
@@ -59,7 +59,7 @@ func ConsoleApplicationInstancePermissionV1ResourceSchema(ctx context.Context) s
 						Description:         "Reference to an application instance. Must be on the same Kafka cluster as app_instance",
 						MarkdownDescription: "Reference to an application instance. Must be on the same Kafka cluster as app_instance",
 						Validators: []validator.String{
-							stringvalidator.RegexMatches(regexp.MustCompile("^[0-9a-z\\_\\-]+$"), ""),
+							stringvalidator.RegexMatches(regexp.MustCompile("^[0-9a-z\\_\\-.]+$"), ""),
 						},
 					},
 					"resource": schema.SingleNestedAttribute{

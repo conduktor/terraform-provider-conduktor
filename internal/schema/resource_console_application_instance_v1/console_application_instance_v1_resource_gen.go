@@ -29,7 +29,7 @@ func ConsoleApplicationInstanceV1ResourceSchema(ctx context.Context) schema.Sche
 				Description:         "Reference to the application this instance belongs to",
 				MarkdownDescription: "Reference to the application this instance belongs to",
 				Validators: []validator.String{
-					stringvalidator.RegexMatches(regexp.MustCompile("^[0-9a-z\\_\\-]+$"), ""),
+					stringvalidator.RegexMatches(regexp.MustCompile("^[0-9a-z\\_\\-.]+$"), ""),
 				},
 			},
 			"name": schema.StringAttribute{
@@ -40,7 +40,7 @@ func ConsoleApplicationInstanceV1ResourceSchema(ctx context.Context) schema.Sche
 					stringplanmodifier.RequiresReplace(),
 				},
 				Validators: []validator.String{
-					stringvalidator.RegexMatches(regexp.MustCompile("^[0-9a-z\\_\\-]+$"), ""),
+					stringvalidator.RegexMatches(regexp.MustCompile("^[0-9a-z\\_\\-.]+$"), ""),
 				},
 			},
 			"spec": schema.SingleNestedAttribute{
