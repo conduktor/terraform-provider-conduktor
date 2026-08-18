@@ -8,6 +8,7 @@ import (
 	mapper "github.com/conduktor/terraform-provider-conduktor/internal/mapper/console_application_instance_permission_v1"
 	console "github.com/conduktor/terraform-provider-conduktor/internal/model/console"
 	schema "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_console_application_instance_permission_v1"
+	"github.com/hashicorp/terraform-plugin-framework-validators/resourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -22,6 +23,7 @@ const applicationInstancePermissionEnterpriseOnlyVersion = "v1.43.0"
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &ApplicationInstancePermissionV1Resource{}
 var _ resource.ResourceWithImportState = &ApplicationInstancePermissionV1Resource{}
+var _ resource.ResourceWithConfigValidators = &ApplicationInstancePermissionV1Resource{}
 
 func NewApplicationInstancePermissionV1Resource() resource.Resource {
 	return &ApplicationInstancePermissionV1Resource{}
@@ -38,6 +40,19 @@ func (r *ApplicationInstancePermissionV1Resource) Metadata(ctx context.Context, 
 
 func (r *ApplicationInstancePermissionV1Resource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.ConsoleApplicationInstancePermissionV1ResourceSchema(ctx)
+}
+
+func (r *ApplicationInstancePermissionV1Resource) ConfigValidators(_ context.Context) []resource.ConfigValidator {
+	specPermission := path.MatchRoot("spec").AtName("permission")
+	specUserPermission := path.MatchRoot("spec").AtName("user_permission")
+	specServiceAccountPermission := path.MatchRoot("spec").AtName("service_account_permission")
+	return []resource.ConfigValidator{
+		// permission is mutually exclusive with user_permission and service_account_permission
+		resourcevalidator.Conflicting(specPermission, specUserPermission),
+		resourcevalidator.Conflicting(specPermission, specServiceAccountPermission),
+		// user_permission and service_account_permission must be set together
+		resourcevalidator.RequiredTogether(specUserPermission, specServiceAccountPermission),
+	}
 }
 
 func (r *ApplicationInstancePermissionV1Resource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {

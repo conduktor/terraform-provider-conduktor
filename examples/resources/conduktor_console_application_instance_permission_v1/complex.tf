@@ -9,7 +9,6 @@ resource "conduktor_console_application_instance_permission_v1" "complex" {
       name         = "my-topic"
       pattern_type = "LITERAL"
     }
-    permission                 = "READ"
     user_permission            = "WRITE"
     service_account_permission = "NONE"
     granted_to                 = "another-app-instance"
