@@ -18,7 +18,7 @@ Minimum requirement for this resource:
 Usage of this resource with older Console version might result in unexpected behavior.
 
 ## NOTE
- - `spec.permission` and `spec.user_permission`/`spec.service_account_permission` are mutually exclusive — you must use one approach or the other:
+ - `spec.permission` is a shortcut for setting both `spec.user_permission` and `spec.service_account_permission` to the same value. The two approaches are mutually exclusive:
    - Set `spec.permission` alone to apply the same permission to both users and service accounts.
    - Set `spec.user_permission` and `spec.service_account_permission` together to control them independently. Both must be specified if either is set.
 
