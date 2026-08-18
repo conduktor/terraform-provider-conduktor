@@ -18,9 +18,7 @@ Minimum requirement for this resource:
 Usage of this resource with older Console version might result in unexpected behavior.
 
 ## NOTE
- - `spec.permission` is a shortcut for setting both `spec.user_permission` and `spec.service_account_permission` to the same value. The two approaches are mutually exclusive:
-   - Set `spec.permission` alone (`READ` or `WRITE`) to apply the same permission to both users and service accounts.
-   - Set `spec.user_permission` and `spec.service_account_permission` together (`READ`, `WRITE`, or `NONE`) to control them independently — use `NONE` to grant access to one but not the other. Both must be specified if either is set.
+ - `spec.permission` exists in the Conduktor API but is intentionally not supported by this provider. Use `spec.user_permission` and `spec.service_account_permission` instead — they map 1:1 to state and avoid the plan drift that `spec.permission` introduces (the API expands it server-side into two fields and never returns it directly).
 
 ## Example Usage
 
@@ -60,10 +58,6 @@ Required:
 
 - `granted_to` (String) Reference to an application instance. Must be on the same Kafka cluster as app_instance
 - `resource` (Attributes) Resources associated with this application instance permission (see [below for nested schema](#nestedatt--spec--resource))
-
-Optional:
-
-- `permission` (String) Permission applied to both user and service account, valid values are: READ, WRITE
 - `service_account_permission` (String) Permission applied to the service account, valid values are: NONE, READ, WRITE
 - `user_permission` (String) Permission applied to the user, valid values are: NONE, READ, WRITE
 

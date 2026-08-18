@@ -26,7 +26,6 @@ func TFToInternalModel(ctx context.Context, r *permission.ConsoleApplicationInst
 		},
 		console.ApplicationInstancePermissionConsoleSpec{
 			Resource:                 resource,
-			Permission:               r.Spec.Permission.ValueString(),
 			UserPermission:           r.Spec.UserPermission.ValueString(),
 			ServiceAccountPermission: r.Spec.ServiceAccountPermission.ValueString(),
 			GrantedTo:                r.Spec.GrantedTo.ValueString(),
@@ -45,14 +44,12 @@ func InternalModelToTerraform(ctx context.Context, r *console.ApplicationInstanc
 	specValue, diag := permission.NewSpecValue(
 		map[string]attr.Type{
 			"resource":                   resource.Type(ctx),
-			"permission":                 basetypes.StringType{},
 			"user_permission":            basetypes.StringType{},
 			"service_account_permission": basetypes.StringType{},
 			"granted_to":                 basetypes.StringType{},
 		},
 		map[string]attr.Value{
 			"resource":                   resource,
-			"permission":                 schema.NewStringValue(r.Spec.Permission),
 			"user_permission":            schema.NewStringValue(r.Spec.UserPermission),
 			"service_account_permission": schema.NewStringValue(r.Spec.ServiceAccountPermission),
 			"granted_to":                 schema.NewStringValue(r.Spec.GrantedTo),
