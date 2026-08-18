@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/resourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	jsoniter "github.com/json-iterator/go"
 	"golang.org/x/mod/semver"
@@ -106,6 +107,18 @@ func (r *ApplicationInstancePermissionV1Resource) Configure(ctx context.Context,
 	r.apiClient = data.Client
 }
 
+// normalizePermissionFields reconciles the API response with the planned permission fields.
+// The API expands spec.permission into userPermission+serviceAccountPermission server-side and
+// never returns spec.permission directly. If the plan used spec.permission, restore it in state
+// and clear user_permission/service_account_permission to avoid a perpetual diff.
+func normalizePermissionFields(planned, result *schema.ConsoleApplicationInstancePermissionV1Model) {
+	if !planned.Spec.Permission.IsNull() && !planned.Spec.Permission.IsUnknown() {
+		result.Spec.Permission = planned.Spec.Permission
+		result.Spec.UserPermission = basetypes.NewStringNull()
+		result.Spec.ServiceAccountPermission = basetypes.NewStringNull()
+	}
+}
+
 func (r *ApplicationInstancePermissionV1Resource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data schema.ConsoleApplicationInstancePermissionV1Model
 
@@ -142,11 +155,13 @@ func (r *ApplicationInstancePermissionV1Resource) Create(ctx context.Context, re
 	}
 	tflog.Debug(ctx, fmt.Sprintf("New application instance permission state : %+v", consoleRes))
 
-	data, err = mapper.InternalModelToTerraform(ctx, &consoleRes)
+	result, err := mapper.InternalModelToTerraform(ctx, &consoleRes)
 	if err != nil {
 		resp.Diagnostics.AddError("Model Error", fmt.Sprintf("Unable to read application instance permission, got error: %s", err))
 		return
 	}
+	normalizePermissionFields(&data, &result)
+	data = result
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -183,11 +198,13 @@ func (r *ApplicationInstancePermissionV1Resource) Read(ctx context.Context, req 
 	}
 	tflog.Debug(ctx, fmt.Sprintf("New application instance permission state : %+v", consoleRes))
 
-	data, err = mapper.InternalModelToTerraform(ctx, &consoleRes)
+	result, err := mapper.InternalModelToTerraform(ctx, &consoleRes)
 	if err != nil {
 		resp.Diagnostics.AddError("Model Error", fmt.Sprintf("Unable to read application instance permission, got error: %s", err))
 		return
 	}
+	normalizePermissionFields(&data, &result)
+	data = result
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -228,11 +245,14 @@ func (r *ApplicationInstancePermissionV1Resource) Update(ctx context.Context, re
 	}
 	tflog.Debug(ctx, fmt.Sprintf("New application instance permission state : %+v", consoleRes))
 
-	data, err = mapper.InternalModelToTerraform(ctx, &consoleRes)
+	result, err := mapper.InternalModelToTerraform(ctx, &consoleRes)
 	if err != nil {
 		resp.Diagnostics.AddError("Model Error", fmt.Sprintf("Unable to read application instance permission, got error: %s", err))
 		return
 	}
+	normalizePermissionFields(&data, &result)
+	data = result
+
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
