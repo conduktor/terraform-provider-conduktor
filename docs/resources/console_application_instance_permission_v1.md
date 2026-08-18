@@ -62,6 +62,7 @@ Required:
 
 Optional:
 
+- `permission` (String) Permission applied to both user and service account, valid values are: READ, WRITE
 - `service_account_permission` (String) Permission applied to the service account, valid values are: NONE, READ, WRITE
 - `user_permission` (String) Permission applied to the user, valid values are: NONE, READ, WRITE
 

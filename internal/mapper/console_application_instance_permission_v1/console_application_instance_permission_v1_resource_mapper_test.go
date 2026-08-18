@@ -49,6 +49,7 @@ func TestApplicationInstancePermissionV1ModelMapping(t *testing.T) {
 		ConnectCluster: "connectCluster",
 	}
 	assert.Equal(t, expectedInternalResource, internal.Spec.Resource)
+	assert.Equal(t, "READ", internal.Spec.Permission)
 	assert.Equal(t, "READ", internal.Spec.UserPermission)
 	assert.Equal(t, "READ", internal.Spec.ServiceAccountPermission)
 	assert.Equal(t, "appinstance", internal.Spec.GrantedTo)
@@ -64,6 +65,7 @@ func TestApplicationInstancePermissionV1ModelMapping(t *testing.T) {
 	assert.Equal(t, types.StringValue("appinstance"), tfModel.AppInstance)
 	assert.Equal(t, false, tfModel.Spec.Resource.IsNull())
 	assert.Equal(t, false, tfModel.Spec.Resource.IsUnknown())
+	assert.Equal(t, types.StringValue("READ"), tfModel.Spec.Permission)
 	assert.Equal(t, types.StringValue("READ"), tfModel.Spec.UserPermission)
 	assert.Equal(t, types.StringValue("READ"), tfModel.Spec.ServiceAccountPermission)
 	assert.Equal(t, types.StringValue("appinstance"), tfModel.Spec.GrantedTo)
@@ -80,6 +82,7 @@ func TestApplicationInstancePermissionV1ModelMapping(t *testing.T) {
 	assert.Equal(t, "app", internal2.Metadata.Application)
 	assert.Equal(t, "appinstance", internal2.Metadata.AppInstance)
 	assert.Equal(t, expectedInternalResource, internal2.Spec.Resource)
+	assert.Equal(t, "READ", internal2.Spec.Permission)
 	assert.Equal(t, "READ", internal2.Spec.UserPermission)
 	assert.Equal(t, "READ", internal2.Spec.ServiceAccountPermission)
 	assert.Equal(t, "appinstance", internal2.Spec.GrantedTo)

@@ -315,6 +315,25 @@
                   }
                 },
                 {
+                  "name": "permission",
+                  "string": {
+                    "description": "Permission applied to both user and service account, valid values are: READ, WRITE",
+                    "computed_optional_required": "optional",
+                    "validators": [
+                      {
+                        "custom": {
+                          "imports": [
+                            {
+                              "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                            }
+                          ],
+                          "schema_definition": "stringvalidator.OneOf(\"READ\", \"WRITE\")"
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
                   "name": "user_permission",
                   "string": {
                     "description": "Permission applied to the user, valid values are: NONE, READ, WRITE",

@@ -31,8 +31,9 @@ type AppInstancePermissionResource struct {
 
 type ApplicationInstancePermissionConsoleSpec struct {
 	Resource                 AppInstancePermissionResource `json:"resource"`
-	UserPermission           string                        `json:"userPermission"`
-	ServiceAccountPermission string                        `json:"serviceAccountPermission"`
+	Permission               string                        `json:"permission,omitempty"`
+	UserPermission           string                        `json:"userPermission,omitempty"`
+	ServiceAccountPermission string                        `json:"serviceAccountPermission,omitempty"`
 	GrantedTo                string                        `json:"grantedTo"`
 }
 

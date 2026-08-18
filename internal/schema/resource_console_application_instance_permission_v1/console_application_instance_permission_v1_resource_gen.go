@@ -62,6 +62,14 @@ func ConsoleApplicationInstancePermissionV1ResourceSchema(ctx context.Context) s
 							stringvalidator.RegexMatches(regexp.MustCompile("^[0-9a-z\\_\\-.]+$"), ""),
 						},
 					},
+					"permission": schema.StringAttribute{
+						Optional:            true,
+						Description:         "Permission applied to both user and service account, valid values are: READ, WRITE",
+						MarkdownDescription: "Permission applied to both user and service account, valid values are: READ, WRITE",
+						Validators: []validator.String{
+							stringvalidator.OneOf("READ", "WRITE"),
+						},
+					},
 					"resource": schema.SingleNestedAttribute{
 						Attributes: map[string]schema.Attribute{
 							"connect_cluster": schema.StringAttribute{
@@ -183,6 +191,24 @@ func (t SpecType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue)
 			fmt.Sprintf(`granted_to expected to be basetypes.StringValue, was: %T`, grantedToAttribute))
 	}
 
+	permissionAttribute, ok := attributes["permission"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`permission is missing from object`)
+
+		return nil, diags
+	}
+
+	permissionVal, ok := permissionAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`permission expected to be basetypes.StringValue, was: %T`, permissionAttribute))
+	}
+
 	resourceAttribute, ok := attributes["resource"]
 
 	if !ok {
@@ -243,6 +269,7 @@ func (t SpecType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue)
 
 	return SpecValue{
 		GrantedTo:                grantedToVal,
+		Permission:               permissionVal,
 		Resource:                 resourceVal,
 		ServiceAccountPermission: serviceAccountPermissionVal,
 		UserPermission:           userPermissionVal,
@@ -331,6 +358,24 @@ func NewSpecValue(attributeTypes map[string]attr.Type, attributes map[string]att
 			fmt.Sprintf(`granted_to expected to be basetypes.StringValue, was: %T`, grantedToAttribute))
 	}
 
+	permissionAttribute, ok := attributes["permission"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`permission is missing from object`)
+
+		return NewSpecValueUnknown(), diags
+	}
+
+	permissionVal, ok := permissionAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`permission expected to be basetypes.StringValue, was: %T`, permissionAttribute))
+	}
+
 	resourceAttribute, ok := attributes["resource"]
 
 	if !ok {
@@ -391,6 +436,7 @@ func NewSpecValue(attributeTypes map[string]attr.Type, attributes map[string]att
 
 	return SpecValue{
 		GrantedTo:                grantedToVal,
+		Permission:               permissionVal,
 		Resource:                 resourceVal,
 		ServiceAccountPermission: serviceAccountPermissionVal,
 		UserPermission:           userPermissionVal,
@@ -467,6 +513,7 @@ var _ basetypes.ObjectValuable = SpecValue{}
 
 type SpecValue struct {
 	GrantedTo                basetypes.StringValue `tfsdk:"granted_to"`
+	Permission               basetypes.StringValue `tfsdk:"permission"`
 	Resource                 basetypes.ObjectValue `tfsdk:"resource"`
 	ServiceAccountPermission basetypes.StringValue `tfsdk:"service_account_permission"`
 	UserPermission           basetypes.StringValue `tfsdk:"user_permission"`
@@ -474,12 +521,13 @@ type SpecValue struct {
 }
 
 func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
-	attrTypes := make(map[string]tftypes.Type, 4)
+	attrTypes := make(map[string]tftypes.Type, 5)
 
 	var val tftypes.Value
 	var err error
 
 	attrTypes["granted_to"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["permission"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["resource"] = basetypes.ObjectType{
 		AttrTypes: ResourceValue{}.AttributeTypes(ctx),
 	}.TerraformType(ctx)
@@ -490,7 +538,7 @@ func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) 
 
 	switch v.state {
 	case attr.ValueStateKnown:
-		vals := make(map[string]tftypes.Value, 4)
+		vals := make(map[string]tftypes.Value, 5)
 
 		val, err = v.GrantedTo.ToTerraformValue(ctx)
 
@@ -499,6 +547,14 @@ func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) 
 		}
 
 		vals["granted_to"] = val
+
+		val, err = v.Permission.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["permission"] = val
 
 		val, err = v.Resource.ToTerraformValue(ctx)
 
@@ -576,6 +632,7 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 
 	attributeTypes := map[string]attr.Type{
 		"granted_to": basetypes.StringType{},
+		"permission": basetypes.StringType{},
 		"resource": basetypes.ObjectType{
 			AttrTypes: ResourceValue{}.AttributeTypes(ctx),
 		},
@@ -595,6 +652,7 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 		attributeTypes,
 		map[string]attr.Value{
 			"granted_to":                 v.GrantedTo,
+			"permission":                 v.Permission,
 			"resource":                   resourceVal,
 			"service_account_permission": v.ServiceAccountPermission,
 			"user_permission":            v.UserPermission,
@@ -619,6 +677,10 @@ func (v SpecValue) Equal(o attr.Value) bool {
 	}
 
 	if !v.GrantedTo.Equal(other.GrantedTo) {
+		return false
+	}
+
+	if !v.Permission.Equal(other.Permission) {
 		return false
 	}
 
@@ -648,6 +710,7 @@ func (v SpecValue) Type(ctx context.Context) attr.Type {
 func (v SpecValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 	return map[string]attr.Type{
 		"granted_to": basetypes.StringType{},
+		"permission": basetypes.StringType{},
 		"resource": basetypes.ObjectType{
 			AttrTypes: ResourceValue{}.AttributeTypes(ctx),
 		},
