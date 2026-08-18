@@ -67,7 +67,7 @@ jobs:
         env:
           # minimal versions no license
           - console: "1.26.0"
-            gateway: "3.5.2"
+            gateway: "3.11.0"
             terraform:
               version: "1.0.*"
               name: "TF-1.0"
@@ -75,7 +75,7 @@ jobs:
 
           # minimal versions with license
           - console: "1.26.0"
-            gateway: "3.5.2"
+            gateway: "3.11.0"
             terraform:
               version: "1.0.*"
               name: "TF-1.0"

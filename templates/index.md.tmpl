@@ -13,6 +13,11 @@ The Conduktor provider is used to interact with the resources supported by Condu
  - The Conduktor Terraform provider may not include the latest features. [Check out all the supported resources](https://docs.conduktor.io/guide/conduktor-in-production/automate).
  - You can also [request a feature](https://conduktor.io/roadmap).
 
+## Minimal versions supported
+
+* Conduktor Console : [1.26.0](https://docs.conduktor.io/guide/release-notes/archive#console-1-26-0)
+* Condukor Gateway : [3.11.0](https://docs.conduktor.io/guide/release-notes?tags=Gateway#gateway-3-11-0)
+
 ## Example Usage
 
 ### Console client only
