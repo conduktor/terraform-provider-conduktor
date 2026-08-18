@@ -5,6 +5,6 @@ resource "conduktor_console_application_v1" "test" {
     title       = "My Application"
     description = "My Application description"
     owner       = "admin"
+    policy_ref  = ["my-policy"]
   }
 }
-

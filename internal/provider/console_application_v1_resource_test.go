@@ -41,6 +41,7 @@ func TestAccApplicationV1Resource(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceRef, "spec.title", "My Application"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.description", "My Application description"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.owner", "admin"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.policy_ref.#", "1"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -63,6 +64,7 @@ func TestAccApplicationV1ExampleResource(t *testing.T) {
 					resource.TestCheckResourceAttr("conduktor_console_application_v1.example", "spec.title", "Complex Application"),
 					resource.TestCheckResourceAttr("conduktor_console_application_v1.example", "spec.description", "Complex Application description"),
 					resource.TestCheckResourceAttr("conduktor_console_application_v1.example", "spec.owner", "admin"),
+					resource.TestCheckResourceAttr("conduktor_console_application_v1.example", "spec.policy_ref.#", "1"),
 				),
 			},
 		},
