@@ -113,10 +113,6 @@ func (r *ApplicationV1Resource) Create(ctx context.Context, req resource.CreateR
 		resp.Diagnostics.AddError("Unmarshall Error", fmt.Sprintf("Response resource can't be cast as application : %v, got error: %s", apply.Resource, err))
 		return
 	}
-	// Older Console versions (< 1.35.0) do not echo back policyRef — restore from plan.
-	if len(consoleRes.Spec.PolicyRef) == 0 && len(consoleResource.Spec.PolicyRef) > 0 {
-		consoleRes.Spec.PolicyRef = consoleResource.Spec.PolicyRef
-	}
 	tflog.Debug(ctx, fmt.Sprintf("New application state : %+v", consoleRes))
 
 	data, err = mapper.InternalModelToTerraform(ctx, &consoleRes)
@@ -202,10 +198,6 @@ func (r *ApplicationV1Resource) Update(ctx context.Context, req resource.UpdateR
 	if err != nil {
 		resp.Diagnostics.AddError("Unmarshall Error", fmt.Sprintf("Response resource can't be cast as application : %v, got error: %s", apply.Resource, err))
 		return
-	}
-	// Older Console versions (< 1.35.0) do not echo back policyRef — restore from plan.
-	if len(consoleRes.Spec.PolicyRef) == 0 && len(consoleResource.Spec.PolicyRef) > 0 {
-		consoleRes.Spec.PolicyRef = consoleResource.Spec.PolicyRef
 	}
 	tflog.Debug(ctx, fmt.Sprintf("New application state : %+v", consoleRes))
 
