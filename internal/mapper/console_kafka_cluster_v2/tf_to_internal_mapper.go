@@ -45,6 +45,11 @@ func specTFToInternalModel(ctx context.Context, r *schema.SpecValue) (console.Ka
 		return console.KafkaClusterSpec{}, err
 	}
 
+	policiesRef, diag := schemaUtils.SetValueToStringArray(ctx, r.PoliciesRef)
+	if diag.HasError() {
+		return console.KafkaClusterSpec{}, mapper.WrapDiagError(diag, "policies_ref", mapper.FromTerraform)
+	}
+
 	return console.KafkaClusterSpec{
 		DisplayName:                r.DisplayName.ValueString(),
 		BootstrapServers:           r.BootstrapServers.ValueString(),
@@ -53,6 +58,7 @@ func specTFToInternalModel(ctx context.Context, r *schema.SpecValue) (console.Ka
 		IgnoreUntrustedCertificate: r.IgnoreUntrustedCertificate.ValueBool(),
 		Properties:                 properties,
 		KafkaFlavor:                kafkaFlavor,
+		PoliciesRef:                policiesRef,
 		SchemaRegistry:             schemaRegistry,
 	}, nil
 }

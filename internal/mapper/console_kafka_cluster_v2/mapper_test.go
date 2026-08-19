@@ -228,6 +228,7 @@ func TestMinimalKafkaClusterV2ModelMapping(t *testing.T) {
 	assert.Equal(t, "", internal.Spec.Color)
 	assert.Equal(t, "", internal.Spec.Icon)
 	assert.Equal(t, map[string]string(nil), internal.Spec.Properties)
+	assert.Equal(t, []string{"test-policy"}, internal.Spec.PoliciesRef)
 	assert.Equal(t, (*model.SchemaRegistry)(nil), internal.Spec.SchemaRegistry)
 	assert.Equal(t, (*console.KafkaFlavor)(nil), internal.Spec.KafkaFlavor)
 
@@ -245,6 +246,7 @@ func TestMinimalKafkaClusterV2ModelMapping(t *testing.T) {
 	assert.Equal(t, types.StringNull(), tfModel.Spec.Color)
 	assert.Equal(t, types.StringNull(), tfModel.Spec.Icon)
 	assert.Equal(t, types.BoolValue(false), tfModel.Spec.IgnoreUntrustedCertificate)
+	assert.Equal(t, false, tfModel.Spec.PoliciesRef.IsNull())
 	assert.Equal(t, true, tfModel.Spec.KafkaFlavor.IsNull())
 	assert.Equal(t, true, tfModel.Spec.SchemaRegistry.IsNull())
 

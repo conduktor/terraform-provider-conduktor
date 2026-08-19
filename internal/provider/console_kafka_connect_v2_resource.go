@@ -15,6 +15,8 @@ import (
 	"strings"
 )
 
+const kafkaConnectPoliciesRefMinimumVersion = "v1.42.0"
+
 func kafkaConnectV2ApiPutPath(cluster string) string {
 	return fmt.Sprintf("/public/console/v2/cluster/%s/kafka-connect", cluster)
 }

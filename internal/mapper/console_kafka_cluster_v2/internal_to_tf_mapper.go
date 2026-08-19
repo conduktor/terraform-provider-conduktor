@@ -51,6 +51,16 @@ func specInternalModelToTerraform(ctx context.Context, r *console.KafkaClusterSp
 	}
 	valuesMap["properties"] = properties
 
+	policiesRef := basetypes.NewSetNull(basetypes.StringType{})
+	if r.PoliciesRef != nil {
+		policiesRefVal, policiesRefDiag := schemaUtils.StringArrayToSetValue(r.PoliciesRef)
+		if policiesRefDiag.HasError() {
+			return schema.SpecValue{}, mapper.WrapDiagError(policiesRefDiag, "policies_ref", mapper.IntoTerraform)
+		}
+		policiesRef = policiesRefVal
+	}
+	valuesMap["policies_ref"] = policiesRef
+
 	kafkaFlavor, err := kafkaFlavorInternalModelToTerraform(ctx, r.KafkaFlavor)
 	if err != nil {
 		return schema.SpecValue{}, err

@@ -5,6 +5,7 @@ package resource_console_kafka_connect_v2
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -72,6 +73,15 @@ func ConsoleKafkaConnectV2ResourceSchema(ctx context.Context) schema.Schema {
 						Description:         "Ignore untrusted certificate for Kafka connect server requests",
 						MarkdownDescription: "Ignore untrusted certificate for Kafka connect server requests",
 						Default:             booldefault.StaticBool(false),
+					},
+					"policies_ref": schema.SetAttribute{
+						ElementType:         types.StringType,
+						Optional:            true,
+						Description:         "References to resource policies to apply to this Kafka Connect cluster. NOTE: this field has been introduced with Console 1.42.0 and will not work with previous versions",
+						MarkdownDescription: "References to resource policies to apply to this Kafka Connect cluster. NOTE: this field has been introduced with Console 1.42.0 and will not work with previous versions",
+						Validators: []validator.Set{
+							setvalidator.ValueStringsAre(stringvalidator.RegexMatches(regexp.MustCompile("^[0-9a-z_\\-.]+$"), "policy name must match ^[0-9a-z_\\-.]+$")),
+						},
 					},
 					"security": schema.SingleNestedAttribute{
 						Attributes: map[string]schema.Attribute{
@@ -254,6 +264,24 @@ func (t SpecType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue)
 			fmt.Sprintf(`ignore_untrusted_certificate expected to be basetypes.BoolValue, was: %T`, ignoreUntrustedCertificateAttribute))
 	}
 
+	policiesRefAttribute, ok := attributes["policies_ref"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`policies_ref is missing from object`)
+
+		return nil, diags
+	}
+
+	policiesRefVal, ok := policiesRefAttribute.(basetypes.SetValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`policies_ref expected to be basetypes.SetValue, was: %T`, policiesRefAttribute))
+	}
+
 	securityAttribute, ok := attributes["security"]
 
 	if !ok {
@@ -298,6 +326,7 @@ func (t SpecType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue)
 		DisplayName:                displayNameVal,
 		Headers:                    headersVal,
 		IgnoreUntrustedCertificate: ignoreUntrustedCertificateVal,
+		PoliciesRef:                policiesRefVal,
 		Security:                   securityVal,
 		Urls:                       urlsVal,
 		state:                      attr.ValueStateKnown,
@@ -421,6 +450,24 @@ func NewSpecValue(attributeTypes map[string]attr.Type, attributes map[string]att
 			fmt.Sprintf(`ignore_untrusted_certificate expected to be basetypes.BoolValue, was: %T`, ignoreUntrustedCertificateAttribute))
 	}
 
+	policiesRefAttribute, ok := attributes["policies_ref"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`policies_ref is missing from object`)
+
+		return NewSpecValueUnknown(), diags
+	}
+
+	policiesRefVal, ok := policiesRefAttribute.(basetypes.SetValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`policies_ref expected to be basetypes.SetValue, was: %T`, policiesRefAttribute))
+	}
+
 	securityAttribute, ok := attributes["security"]
 
 	if !ok {
@@ -465,6 +512,7 @@ func NewSpecValue(attributeTypes map[string]attr.Type, attributes map[string]att
 		DisplayName:                displayNameVal,
 		Headers:                    headersVal,
 		IgnoreUntrustedCertificate: ignoreUntrustedCertificateVal,
+		PoliciesRef:                policiesRefVal,
 		Security:                   securityVal,
 		Urls:                       urlsVal,
 		state:                      attr.ValueStateKnown,
@@ -542,13 +590,14 @@ type SpecValue struct {
 	DisplayName                basetypes.StringValue `tfsdk:"display_name"`
 	Headers                    basetypes.MapValue    `tfsdk:"headers"`
 	IgnoreUntrustedCertificate basetypes.BoolValue   `tfsdk:"ignore_untrusted_certificate"`
+	PoliciesRef                basetypes.SetValue    `tfsdk:"policies_ref"`
 	Security                   basetypes.ObjectValue `tfsdk:"security"`
 	Urls                       basetypes.StringValue `tfsdk:"urls"`
 	state                      attr.ValueState
 }
 
 func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
-	attrTypes := make(map[string]tftypes.Type, 5)
+	attrTypes := make(map[string]tftypes.Type, 6)
 
 	var val tftypes.Value
 	var err error
@@ -558,6 +607,9 @@ func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) 
 		ElemType: types.StringType,
 	}.TerraformType(ctx)
 	attrTypes["ignore_untrusted_certificate"] = basetypes.BoolType{}.TerraformType(ctx)
+	attrTypes["policies_ref"] = basetypes.SetType{
+		ElemType: types.StringType,
+	}.TerraformType(ctx)
 	attrTypes["security"] = basetypes.ObjectType{
 		AttrTypes: SecurityValue{}.AttributeTypes(ctx),
 	}.TerraformType(ctx)
@@ -567,7 +619,7 @@ func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) 
 
 	switch v.state {
 	case attr.ValueStateKnown:
-		vals := make(map[string]tftypes.Value, 5)
+		vals := make(map[string]tftypes.Value, 6)
 
 		val, err = v.DisplayName.ToTerraformValue(ctx)
 
@@ -592,6 +644,14 @@ func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) 
 		}
 
 		vals["ignore_untrusted_certificate"] = val
+
+		val, err = v.PoliciesRef.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["policies_ref"] = val
 
 		val, err = v.Security.ToTerraformValue(ctx)
 
@@ -678,6 +738,38 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 				ElemType: types.StringType,
 			},
 			"ignore_untrusted_certificate": basetypes.BoolType{},
+			"policies_ref": basetypes.SetType{
+				ElemType: types.StringType,
+			},
+			"security": basetypes.ObjectType{
+				AttrTypes: SecurityValue{}.AttributeTypes(ctx),
+			},
+			"urls": basetypes.StringType{},
+		}), diags
+	}
+
+	var policiesRefVal basetypes.SetValue
+	switch {
+	case v.PoliciesRef.IsUnknown():
+		policiesRefVal = types.SetUnknown(types.StringType)
+	case v.PoliciesRef.IsNull():
+		policiesRefVal = types.SetNull(types.StringType)
+	default:
+		var d diag.Diagnostics
+		policiesRefVal, d = types.SetValue(types.StringType, v.PoliciesRef.Elements())
+		diags.Append(d...)
+	}
+
+	if diags.HasError() {
+		return types.ObjectUnknown(map[string]attr.Type{
+			"display_name": basetypes.StringType{},
+			"headers": basetypes.MapType{
+				ElemType: types.StringType,
+			},
+			"ignore_untrusted_certificate": basetypes.BoolType{},
+			"policies_ref": basetypes.SetType{
+				ElemType: types.StringType,
+			},
 			"security": basetypes.ObjectType{
 				AttrTypes: SecurityValue{}.AttributeTypes(ctx),
 			},
@@ -691,6 +783,9 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 			ElemType: types.StringType,
 		},
 		"ignore_untrusted_certificate": basetypes.BoolType{},
+		"policies_ref": basetypes.SetType{
+			ElemType: types.StringType,
+		},
 		"security": basetypes.ObjectType{
 			AttrTypes: SecurityValue{}.AttributeTypes(ctx),
 		},
@@ -711,6 +806,7 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 			"display_name":                 v.DisplayName,
 			"headers":                      headersVal,
 			"ignore_untrusted_certificate": v.IgnoreUntrustedCertificate,
+			"policies_ref":                 policiesRefVal,
 			"security":                     securityVal,
 			"urls":                         v.Urls,
 		})
@@ -745,6 +841,10 @@ func (v SpecValue) Equal(o attr.Value) bool {
 		return false
 	}
 
+	if !v.PoliciesRef.Equal(other.PoliciesRef) {
+		return false
+	}
+
 	if !v.Security.Equal(other.Security) {
 		return false
 	}
@@ -771,6 +871,9 @@ func (v SpecValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 			ElemType: types.StringType,
 		},
 		"ignore_untrusted_certificate": basetypes.BoolType{},
+		"policies_ref": basetypes.SetType{
+			ElemType: types.StringType,
+		},
 		"security": basetypes.ObjectType{
 			AttrTypes: SecurityValue{}.AttributeTypes(ctx),
 		},

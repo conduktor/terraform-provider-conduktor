@@ -4,6 +4,7 @@ import (
 	"regexp"
 	"testing"
 
+	"github.com/conduktor/terraform-provider-conduktor/internal/client"
 	"github.com/conduktor/terraform-provider-conduktor/internal/test"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -188,6 +189,34 @@ func TestAccKafkaConnectV2ExampleResource(t *testing.T) {
 					resource.TestCheckResourceAttr(bearerResourceRef, "spec.security.bearer_token.token", "token"),
 				),
 			},
+		},
+	})
+}
+
+func TestAccKafkaConnectV2PoliciesRef(t *testing.T) {
+	test.CheckEnterpriseEnabled(t)
+	v, err := fetchClientVersion(client.CONSOLE)
+	if err != nil {
+		t.Fatalf("Error fetching current version: %s", err)
+	}
+	test.CheckMinimumVersionRequirement(t, v, kafkaConnectPoliciesRefMinimumVersion)
+
+	resourceRef := "conduktor_console_kafka_connect_v2.test_policies_ref"
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { test.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read testing
+			{
+				Config: providerConfigConsole + test.TestAccTestdata(t, "console/kafka_connect_v2/resource_policies_ref.tf"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceRef, "name", "kafka-connect-with-policies"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.display_name", "Kafka Connect With Policies"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.urls", "http://localhost:8083"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.policies_ref.#", "1"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
 		},
 	})
 }
