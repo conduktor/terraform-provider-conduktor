@@ -4,6 +4,5 @@ resource "conduktor_console_application_v1" "example" {
     title       = "Complex Application"
     description = "Complex Application description"
     owner       = "admin"
-    policy_ref  = ["my-policy"]
   }
 }
