@@ -21,9 +21,10 @@ func (r ApplicationConsoleMetadata) String() string {
 }
 
 type ApplicationConsoleSpec struct {
-	Description string `json:"description,omitempty"`
-	Title       string `json:"title"`
-	Owner       string `json:"owner"`
+	Description string   `json:"description,omitempty"`
+	Title       string   `json:"title"`
+	Owner       string   `json:"owner"`
+	PolicyRef   []string `json:"policyRef,omitempty"`
 }
 
 type ApplicationConsoleResource struct {

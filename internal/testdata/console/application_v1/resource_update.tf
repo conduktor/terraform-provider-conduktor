@@ -7,4 +7,3 @@ resource "conduktor_console_application_v1" "test" {
     owner       = "admin"
   }
 }
-
