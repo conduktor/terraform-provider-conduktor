@@ -7,8 +7,8 @@ repos:
       - id: check-added-large-files
       - id: check-merge-conflict
       - id: detect-private-key
-        # exclude kafka resources doc as they contain fake private key PEM for example purpose
-        exclude: "console_kafka_cluster_v2.md|console_ksqldb_cluster_v2.md|console_kafka_connect_v2.md"
+        # exclude kafka resources doc/tests as they contain fake private key PEM for example purpose
+        exclude: "console_kafka_cluster_v2.md|console_ksqldb_cluster_v2.md|console_kafka_connect_v2.md|console_kafka_cluster_v2_resource_test.go|console_ksqldb_cluster_v2_resource_test.go|console_kafka_connect_v2_resource_test.go"
       - id: detect-aws-credentials
         args: ["--allow-missing-credentials"]
       - id: end-of-file-fixer

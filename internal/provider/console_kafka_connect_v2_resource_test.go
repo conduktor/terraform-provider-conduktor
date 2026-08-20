@@ -10,6 +10,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
+const kafkaConnectPoliciesRefMinimumVersion = "v1.42.0"
+
 func TestAccKafkaConnectV2Resource(t *testing.T) {
 	resourceRef := "conduktor_console_kafka_connect_v2.test"
 	resource.Test(t, resource.TestCase{
