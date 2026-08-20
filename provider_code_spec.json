@@ -2043,6 +2043,37 @@
                       }
                     ]
                   }
+                },
+                {
+                  "name": "policies_ref",
+                  "set": {
+                    "description": "References to resource policies to apply to this Kafka cluster. NOTE: this field has been introduced with Console 1.42.0 and will not work with previous versions",
+                    "computed_optional_required": "optional",
+                    "element_type": {
+                      "string": {}
+                    },
+                    "validators": [
+                      {
+                        "custom": {
+                          "imports": [
+                            {
+                              "path": "regexp"
+                            },
+                            {
+                              "path": "github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
+                            },
+                            {
+                              "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                            },
+                            {
+                              "path": "github.com/hashicorp/terraform-plugin-framework/schema/validator"
+                            }
+                          ],
+                          "schema_definition": "setvalidator.ValueStringsAre(stringvalidator.RegexMatches(regexp.MustCompile(\"^[0-9a-z_\\\\-.]+$\"), \"policy name must match ^[0-9a-z_\\\\-.]+$\"))"
+                        }
+                      }
+                    ]
+                  }
                 }
               ]
             }
@@ -2426,6 +2457,37 @@
                               }
                             }
                           ]
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "policies_ref",
+                  "set": {
+                    "description": "References to resource policies to apply to this Kafka Connect cluster. NOTE: this field has been introduced with Console 1.42.0 and will not work with previous versions",
+                    "computed_optional_required": "optional",
+                    "element_type": {
+                      "string": {}
+                    },
+                    "validators": [
+                      {
+                        "custom": {
+                          "imports": [
+                            {
+                              "path": "regexp"
+                            },
+                            {
+                              "path": "github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
+                            },
+                            {
+                              "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                            },
+                            {
+                              "path": "github.com/hashicorp/terraform-plugin-framework/schema/validator"
+                            }
+                          ],
+                          "schema_definition": "setvalidator.ValueStringsAre(stringvalidator.RegexMatches(regexp.MustCompile(\"^[0-9a-z_\\\\-.]+$\"), \"policy name must match ^[0-9a-z_\\\\-.]+$\"))"
                         }
                       }
                     ]

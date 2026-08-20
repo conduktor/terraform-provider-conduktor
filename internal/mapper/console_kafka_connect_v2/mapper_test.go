@@ -50,6 +50,7 @@ func TestKafkaConnectV2ModelMapping(t *testing.T) {
 	}, internal.Spec.Headers)
 	assert.Equal(t, "some_user", internal.Spec.Security.BasicAuth.Username)
 	assert.Equal(t, "some_password", internal.Spec.Security.BasicAuth.Password)
+	assert.Equal(t, []string{"test-policy"}, internal.Spec.PoliciesRef)
 
 	// convert to terraform model
 	tfModel, err := InternalModelToTerraform(ctx, &internal)
@@ -84,6 +85,7 @@ func TestKafkaConnectV2ModelMapping(t *testing.T) {
 	}, internal2.Spec.Headers)
 	assert.Equal(t, "some_user", internal2.Spec.Security.BasicAuth.Username)
 	assert.Equal(t, "some_password", internal2.Spec.Security.BasicAuth.Password)
+	assert.Equal(t, []string{"test-policy"}, internal2.Spec.PoliciesRef)
 	assert.Equal(t, internal, internal2)
 
 	// convert back to ctl model
