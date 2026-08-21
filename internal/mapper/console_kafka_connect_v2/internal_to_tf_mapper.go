@@ -59,6 +59,15 @@ func specInternalModelToTerraform(ctx context.Context, r *console.KafkaConnectSp
 	}
 	valuesMap["security"] = securityValue
 
+	policiesRef := basetypes.NewSetNull(basetypes.StringType{})
+	if r.PoliciesRef != nil {
+		policiesRef, diag = schemaUtils.StringArrayToSetValue(r.PoliciesRef)
+		if diag.HasError() {
+			return schema.SpecValue{}, mapper.WrapDiagError(diag, "policies_ref", mapper.IntoTerraform)
+		}
+	}
+	valuesMap["policies_ref"] = policiesRef
+
 	value, diag := schema.NewSpecValue(typesMap, valuesMap)
 	if diag.HasError() {
 		return schema.SpecValue{}, mapper.WrapDiagError(diag, "spec", mapper.IntoTerraform)

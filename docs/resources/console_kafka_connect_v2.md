@@ -181,6 +181,7 @@ Optional:
 
 - `headers` (Map of String) Key-Value HTTP headers to add to requests
 - `ignore_untrusted_certificate` (Boolean) Ignore untrusted certificate for Kafka connect server requests
+- `policies_ref` (Set of String) References to resource policies to apply to this Kafka Connect cluster. NOTE: this field has been introduced with Console 1.42.0 and will not work with previous versions
 - `security` (Attributes) Kafka connect server security configuration. One of `basic_auth`, `bearer_token`, `ssl_auth` (see [below for nested schema](#nestedatt--spec--security))
 
 <a id="nestedatt--spec--security"></a>

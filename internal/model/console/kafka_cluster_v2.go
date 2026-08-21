@@ -27,6 +27,7 @@ type KafkaClusterSpec struct {
 	Icon                       string                `json:"icon,omitempty"`
 	IgnoreUntrustedCertificate bool                  `json:"ignoreUntrustedCertificate"`
 	KafkaFlavor                *KafkaFlavor          `json:"kafkaFlavor,omitempty"`
+	PoliciesRef                []string              `json:"policiesRef,omitempty"`
 	Properties                 map[string]string     `json:"properties,omitempty"`
 	SchemaRegistry             *model.SchemaRegistry `json:"schemaRegistry,omitempty"`
 }

@@ -47,12 +47,18 @@ func specTFToInternalModel(ctx context.Context, r *schema.SpecValue) (console.Ka
 		return console.KafkaConnectSpec{}, err
 	}
 
+	policiesRef, diag := schemaUtils.SetValueToStringArray(ctx, r.PoliciesRef)
+	if diag.HasError() {
+		return console.KafkaConnectSpec{}, mapper.WrapDiagError(diag, "policies_ref", mapper.FromTerraform)
+	}
+
 	return console.KafkaConnectSpec{
 		DisplayName:                r.DisplayName.ValueString(),
 		Urls:                       r.Urls.ValueString(),
 		IgnoreUntrustedCertificate: r.IgnoreUntrustedCertificate.ValueBool(),
 		Headers:                    headers,
 		Security:                   security,
+		PoliciesRef:                policiesRef,
 	}, nil
 }
 

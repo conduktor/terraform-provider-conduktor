@@ -5,6 +5,7 @@ package resource_console_application_v1
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -45,6 +46,15 @@ func ConsoleApplicationV1ResourceSchema(ctx context.Context) schema.Schema {
 						Required:            true,
 						Description:         "Application owner, must be a valid Console Group id",
 						MarkdownDescription: "Application owner, must be a valid Console Group id",
+					},
+					"policy_ref": schema.SetAttribute{
+						ElementType:         types.StringType,
+						Optional:            true,
+						Description:         "References to resource policies to apply to this application. NOTE: this field has been introduced with Console 1.35.0 and will not work with previous versions",
+						MarkdownDescription: "References to resource policies to apply to this application. NOTE: this field has been introduced with Console 1.35.0 and will not work with previous versions",
+						Validators: []validator.Set{
+							setvalidator.ValueStringsAre(stringvalidator.RegexMatches(regexp.MustCompile("^[0-9a-z_\\-.]+$"), "policy name must match ^[0-9a-z_\\-.]+$")),
+						},
 					},
 					"title": schema.StringAttribute{
 						Required:            true,
@@ -131,6 +141,24 @@ func (t SpecType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue)
 			fmt.Sprintf(`owner expected to be basetypes.StringValue, was: %T`, ownerAttribute))
 	}
 
+	policyRefAttribute, ok := attributes["policy_ref"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`policy_ref is missing from object`)
+
+		return nil, diags
+	}
+
+	policyRefVal, ok := policyRefAttribute.(basetypes.SetValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`policy_ref expected to be basetypes.SetValue, was: %T`, policyRefAttribute))
+	}
+
 	titleAttribute, ok := attributes["title"]
 
 	if !ok {
@@ -156,6 +184,7 @@ func (t SpecType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue)
 	return SpecValue{
 		Description: descriptionVal,
 		Owner:       ownerVal,
+		PolicyRef:   policyRefVal,
 		Title:       titleVal,
 		state:       attr.ValueStateKnown,
 	}, diags
@@ -260,6 +289,24 @@ func NewSpecValue(attributeTypes map[string]attr.Type, attributes map[string]att
 			fmt.Sprintf(`owner expected to be basetypes.StringValue, was: %T`, ownerAttribute))
 	}
 
+	policyRefAttribute, ok := attributes["policy_ref"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`policy_ref is missing from object`)
+
+		return NewSpecValueUnknown(), diags
+	}
+
+	policyRefVal, ok := policyRefAttribute.(basetypes.SetValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`policy_ref expected to be basetypes.SetValue, was: %T`, policyRefAttribute))
+	}
+
 	titleAttribute, ok := attributes["title"]
 
 	if !ok {
@@ -285,6 +332,7 @@ func NewSpecValue(attributeTypes map[string]attr.Type, attributes map[string]att
 	return SpecValue{
 		Description: descriptionVal,
 		Owner:       ownerVal,
+		PolicyRef:   policyRefVal,
 		Title:       titleVal,
 		state:       attr.ValueStateKnown,
 	}, diags
@@ -360,25 +408,29 @@ var _ basetypes.ObjectValuable = SpecValue{}
 type SpecValue struct {
 	Description basetypes.StringValue `tfsdk:"description"`
 	Owner       basetypes.StringValue `tfsdk:"owner"`
+	PolicyRef   basetypes.SetValue    `tfsdk:"policy_ref"`
 	Title       basetypes.StringValue `tfsdk:"title"`
 	state       attr.ValueState
 }
 
 func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
-	attrTypes := make(map[string]tftypes.Type, 3)
+	attrTypes := make(map[string]tftypes.Type, 4)
 
 	var val tftypes.Value
 	var err error
 
 	attrTypes["description"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["owner"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["policy_ref"] = basetypes.SetType{
+		ElemType: types.StringType,
+	}.TerraformType(ctx)
 	attrTypes["title"] = basetypes.StringType{}.TerraformType(ctx)
 
 	objectType := tftypes.Object{AttributeTypes: attrTypes}
 
 	switch v.state {
 	case attr.ValueStateKnown:
-		vals := make(map[string]tftypes.Value, 3)
+		vals := make(map[string]tftypes.Value, 4)
 
 		val, err = v.Description.ToTerraformValue(ctx)
 
@@ -395,6 +447,14 @@ func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) 
 		}
 
 		vals["owner"] = val
+
+		val, err = v.PolicyRef.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["policy_ref"] = val
 
 		val, err = v.Title.ToTerraformValue(ctx)
 
@@ -433,10 +493,36 @@ func (v SpecValue) String() string {
 func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
+	var policyRefVal basetypes.SetValue
+	switch {
+	case v.PolicyRef.IsUnknown():
+		policyRefVal = types.SetUnknown(types.StringType)
+	case v.PolicyRef.IsNull():
+		policyRefVal = types.SetNull(types.StringType)
+	default:
+		var d diag.Diagnostics
+		policyRefVal, d = types.SetValue(types.StringType, v.PolicyRef.Elements())
+		diags.Append(d...)
+	}
+
+	if diags.HasError() {
+		return types.ObjectUnknown(map[string]attr.Type{
+			"description": basetypes.StringType{},
+			"owner":       basetypes.StringType{},
+			"policy_ref": basetypes.SetType{
+				ElemType: types.StringType,
+			},
+			"title": basetypes.StringType{},
+		}), diags
+	}
+
 	attributeTypes := map[string]attr.Type{
 		"description": basetypes.StringType{},
 		"owner":       basetypes.StringType{},
-		"title":       basetypes.StringType{},
+		"policy_ref": basetypes.SetType{
+			ElemType: types.StringType,
+		},
+		"title": basetypes.StringType{},
 	}
 
 	if v.IsNull() {
@@ -452,6 +538,7 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 		map[string]attr.Value{
 			"description": v.Description,
 			"owner":       v.Owner,
+			"policy_ref":  policyRefVal,
 			"title":       v.Title,
 		})
 
@@ -481,6 +568,10 @@ func (v SpecValue) Equal(o attr.Value) bool {
 		return false
 	}
 
+	if !v.PolicyRef.Equal(other.PolicyRef) {
+		return false
+	}
+
 	if !v.Title.Equal(other.Title) {
 		return false
 	}
@@ -500,6 +591,9 @@ func (v SpecValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 	return map[string]attr.Type{
 		"description": basetypes.StringType{},
 		"owner":       basetypes.StringType{},
-		"title":       basetypes.StringType{},
+		"policy_ref": basetypes.SetType{
+			ElemType: types.StringType,
+		},
+		"title": basetypes.StringType{},
 	}
 }

@@ -27,6 +27,7 @@ type KafkaConnectSpec struct {
 	IgnoreUntrustedCertificate bool                  `json:"ignoreUntrustedCertificate"`
 	Headers                    map[string]string     `json:"headers,omitempty"`
 	Security                   *KafkaConnectSecurity `json:"security,omitempty"`
+	PoliciesRef                []string              `json:"policiesRef,omitempty"`
 }
 
 type KafkaConnectSecurityType string
