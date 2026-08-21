@@ -87,9 +87,13 @@ resource "conduktor_console_connector_v2" "complex" {
 <a id="nestedatt--spec"></a>
 ### Nested Schema for `spec`
 
-Optional:
+Required:
 
 - `config` (Map of String) Must be valid Kafka Connect Connector configs
+
+Optional:
+
+- `initial_state` (String) Initial state of the connector on creation. Valid values are RUNNING, PAUSED, STOPPED. NOTE: requires Console 1.46.0+ and Kafka Connect 3.7.0+ (KIP-980). Only applied on creation, not updates.
 
 
 <a id="nestedatt--auto_restart"></a>

@@ -92,7 +92,10 @@ services:
       - 19644:9644
 
   kafka-connect:
-    image: confluentinc/cp-kafka-connect:7.2.1
+    image: confluentinc/cp-kafka-connect:7.7.1
+    build:
+      context: docker/kafka-connect
+      dockerfile: Dockerfile
     hostname: kafka-connect
     ports:
       - "8083:8083"

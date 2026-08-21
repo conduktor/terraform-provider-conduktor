@@ -41,3 +41,4 @@ terraform-provider-conduktor
 
 # local manual testing sandbox
 local-test/
+docs/superpowers/

@@ -44,7 +44,8 @@ func TFToInternalModel(ctx context.Context, r *connector.ConsoleConnectorV2Model
 			AutoRestart:    autoRestart,
 		},
 		console.ConnectorConsoleSpec{
-			Config: config,
+			Config:       config,
+			InitialState: r.Spec.InitialState.ValueString(),
 		},
 	), nil
 }
@@ -74,10 +75,12 @@ func InternalModelToTerraform(ctx context.Context, r *console.ConnectorConsoleRe
 
 	specValue, diag := connector.NewSpecValue(
 		map[string]attr.Type{
-			"config": config.Type(ctx),
+			"config":        config.Type(ctx),
+			"initial_state": basetypes.StringType{},
 		},
 		map[string]attr.Value{
-			"config": config,
+			"config":        config,
+			"initial_state": schema.NewStringValue(r.Spec.InitialState),
 		},
 	)
 	if diag.HasError() {

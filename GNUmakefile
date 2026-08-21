@@ -62,8 +62,9 @@ go-lint: tools ## Run Golang linters
 	@go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GO_LINT_VERSION) run
 
 .PHONY: pull_test_assets
-pull_test_assets: ## Pull test docker images
-	@docker compose -f "$(CURDIR)/docker-compose.yaml" pull --quiet
+pull_test_assets: ## Pull test docker images (and build custom images)
+	@docker compose -f "$(CURDIR)/docker-compose.yaml" pull --quiet --ignore-buildable
+	@docker compose -f "$(CURDIR)/docker-compose.yaml" build --quiet
 
 .PHONY: start_test_env
 start_test_env: ## Start test environment
@@ -78,9 +79,7 @@ test: ## Run acceptance tests only (no setup or cleanup)
 # Run acceptance tests
 .PHONY: testacc
 testacc: start_test_env ## Start test environment, run acceptance tests and clean up
-	@trap '$(MAKE) clean' EXIT
-
-	$(MAKE) test
+	@trap '$(MAKE) clean' EXIT; $(MAKE) test
 
 .PHONY: clean
 clean: ## Clean up test environment
