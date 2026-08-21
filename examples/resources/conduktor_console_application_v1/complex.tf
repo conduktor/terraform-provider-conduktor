@@ -6,4 +6,3 @@ resource "conduktor_console_application_v1" "example" {
     owner       = "admin"
   }
 }
-

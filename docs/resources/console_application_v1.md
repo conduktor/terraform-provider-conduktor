@@ -44,3 +44,4 @@ Required:
 Optional:
 
 - `description` (String) Application description
+- `policy_ref` (Set of String) References to resource policies to apply to this application. NOTE: this field has been introduced with Console 1.35.0 and will not work with previous versions

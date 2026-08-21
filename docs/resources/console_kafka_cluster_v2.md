@@ -230,6 +230,7 @@ Optional:
 - `icon` (String) Kafka cluster icon. List of available icons can be found [here](https://docs.conduktor.io/platform/reference/resource-reference/console/#icon-sets)
 - `ignore_untrusted_certificate` (Boolean) Ignore untrusted certificate for Kafka cluster
 - `kafka_flavor` (Attributes) Kafka flavor configuration. One of `confluent`, `aiven`, `gateway` (see [below for nested schema](#nestedatt--spec--kafka_flavor))
+- `policies_ref` (Set of String) References to resource policies to apply to this Kafka cluster. NOTE: this field has been introduced with Console 1.42.0 and will not work with previous versions
 - `properties` (Map of String) Kafka cluster properties
 - `schema_registry` (Attributes) Schema registry configuration. One of `confluent_like`, `glue` (see [below for nested schema](#nestedatt--spec--schema_registry))
 

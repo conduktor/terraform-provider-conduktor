@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
+	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -193,6 +194,15 @@ func ConsoleKafkaClusterV2ResourceSchema(ctx context.Context) schema.Schema {
 						Optional:            true,
 						Description:         "Kafka flavor configuration. One of `confluent`, `aiven`, `gateway`",
 						MarkdownDescription: "Kafka flavor configuration. One of `confluent`, `aiven`, `gateway`",
+					},
+					"policies_ref": schema.SetAttribute{
+						ElementType:         types.StringType,
+						Optional:            true,
+						Description:         "References to resource policies to apply to this Kafka cluster. NOTE: this field has been introduced with Console 1.42.0 and will not work with previous versions",
+						MarkdownDescription: "References to resource policies to apply to this Kafka cluster. NOTE: this field has been introduced with Console 1.42.0 and will not work with previous versions",
+						Validators: []validator.Set{
+							setvalidator.ValueStringsAre(stringvalidator.RegexMatches(regexp.MustCompile("^[0-9a-z_\\-.]+$"), "policy name must match ^[0-9a-z_\\-.]+$")),
+						},
 					},
 					"properties": schema.MapAttribute{
 						ElementType:         types.StringType,
@@ -599,6 +609,24 @@ func (t SpecType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue)
 			fmt.Sprintf(`kafka_flavor expected to be basetypes.ObjectValue, was: %T`, kafkaFlavorAttribute))
 	}
 
+	policiesRefAttribute, ok := attributes["policies_ref"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`policies_ref is missing from object`)
+
+		return nil, diags
+	}
+
+	policiesRefVal, ok := policiesRefAttribute.(basetypes.SetValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`policies_ref expected to be basetypes.SetValue, was: %T`, policiesRefAttribute))
+	}
+
 	propertiesAttribute, ok := attributes["properties"]
 
 	if !ok {
@@ -646,6 +674,7 @@ func (t SpecType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue)
 		Icon:                       iconVal,
 		IgnoreUntrustedCertificate: ignoreUntrustedCertificateVal,
 		KafkaFlavor:                kafkaFlavorVal,
+		PoliciesRef:                policiesRefVal,
 		Properties:                 propertiesVal,
 		SchemaRegistry:             schemaRegistryVal,
 		state:                      attr.ValueStateKnown,
@@ -823,6 +852,24 @@ func NewSpecValue(attributeTypes map[string]attr.Type, attributes map[string]att
 			fmt.Sprintf(`kafka_flavor expected to be basetypes.ObjectValue, was: %T`, kafkaFlavorAttribute))
 	}
 
+	policiesRefAttribute, ok := attributes["policies_ref"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`policies_ref is missing from object`)
+
+		return NewSpecValueUnknown(), diags
+	}
+
+	policiesRefVal, ok := policiesRefAttribute.(basetypes.SetValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`policies_ref expected to be basetypes.SetValue, was: %T`, policiesRefAttribute))
+	}
+
 	propertiesAttribute, ok := attributes["properties"]
 
 	if !ok {
@@ -870,6 +917,7 @@ func NewSpecValue(attributeTypes map[string]attr.Type, attributes map[string]att
 		Icon:                       iconVal,
 		IgnoreUntrustedCertificate: ignoreUntrustedCertificateVal,
 		KafkaFlavor:                kafkaFlavorVal,
+		PoliciesRef:                policiesRefVal,
 		Properties:                 propertiesVal,
 		SchemaRegistry:             schemaRegistryVal,
 		state:                      attr.ValueStateKnown,
@@ -950,13 +998,14 @@ type SpecValue struct {
 	Icon                       basetypes.StringValue `tfsdk:"icon"`
 	IgnoreUntrustedCertificate basetypes.BoolValue   `tfsdk:"ignore_untrusted_certificate"`
 	KafkaFlavor                basetypes.ObjectValue `tfsdk:"kafka_flavor"`
+	PoliciesRef                basetypes.SetValue    `tfsdk:"policies_ref"`
 	Properties                 basetypes.MapValue    `tfsdk:"properties"`
 	SchemaRegistry             basetypes.ObjectValue `tfsdk:"schema_registry"`
 	state                      attr.ValueState
 }
 
 func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
-	attrTypes := make(map[string]tftypes.Type, 8)
+	attrTypes := make(map[string]tftypes.Type, 9)
 
 	var val tftypes.Value
 	var err error
@@ -969,6 +1018,9 @@ func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) 
 	attrTypes["kafka_flavor"] = basetypes.ObjectType{
 		AttrTypes: KafkaFlavorValue{}.AttributeTypes(ctx),
 	}.TerraformType(ctx)
+	attrTypes["policies_ref"] = basetypes.SetType{
+		ElemType: types.StringType,
+	}.TerraformType(ctx)
 	attrTypes["properties"] = basetypes.MapType{
 		ElemType: types.StringType,
 	}.TerraformType(ctx)
@@ -980,7 +1032,7 @@ func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) 
 
 	switch v.state {
 	case attr.ValueStateKnown:
-		vals := make(map[string]tftypes.Value, 8)
+		vals := make(map[string]tftypes.Value, 9)
 
 		val, err = v.BootstrapServers.ToTerraformValue(ctx)
 
@@ -1029,6 +1081,14 @@ func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) 
 		}
 
 		vals["kafka_flavor"] = val
+
+		val, err = v.PoliciesRef.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["policies_ref"] = val
 
 		val, err = v.Properties.ToTerraformValue(ctx)
 
@@ -1117,6 +1177,40 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 		)
 	}
 
+	var policiesRefVal basetypes.SetValue
+	switch {
+	case v.PoliciesRef.IsUnknown():
+		policiesRefVal = types.SetUnknown(types.StringType)
+	case v.PoliciesRef.IsNull():
+		policiesRefVal = types.SetNull(types.StringType)
+	default:
+		var d diag.Diagnostics
+		policiesRefVal, d = types.SetValue(types.StringType, v.PoliciesRef.Elements())
+		diags.Append(d...)
+	}
+
+	if diags.HasError() {
+		return types.ObjectUnknown(map[string]attr.Type{
+			"bootstrap_servers":            basetypes.StringType{},
+			"color":                        basetypes.StringType{},
+			"display_name":                 basetypes.StringType{},
+			"icon":                         basetypes.StringType{},
+			"ignore_untrusted_certificate": basetypes.BoolType{},
+			"kafka_flavor": basetypes.ObjectType{
+				AttrTypes: KafkaFlavorValue{}.AttributeTypes(ctx),
+			},
+			"policies_ref": basetypes.SetType{
+				ElemType: types.StringType,
+			},
+			"properties": basetypes.MapType{
+				ElemType: types.StringType,
+			},
+			"schema_registry": basetypes.ObjectType{
+				AttrTypes: SchemaRegistryValue{}.AttributeTypes(ctx),
+			},
+		}), diags
+	}
+
 	var propertiesVal basetypes.MapValue
 	switch {
 	case v.Properties.IsUnknown():
@@ -1139,6 +1233,9 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 			"kafka_flavor": basetypes.ObjectType{
 				AttrTypes: KafkaFlavorValue{}.AttributeTypes(ctx),
 			},
+			"policies_ref": basetypes.SetType{
+				ElemType: types.StringType,
+			},
 			"properties": basetypes.MapType{
 				ElemType: types.StringType,
 			},
@@ -1156,6 +1253,9 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 		"ignore_untrusted_certificate": basetypes.BoolType{},
 		"kafka_flavor": basetypes.ObjectType{
 			AttrTypes: KafkaFlavorValue{}.AttributeTypes(ctx),
+		},
+		"policies_ref": basetypes.SetType{
+			ElemType: types.StringType,
 		},
 		"properties": basetypes.MapType{
 			ElemType: types.StringType,
@@ -1182,6 +1282,7 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 			"icon":                         v.Icon,
 			"ignore_untrusted_certificate": v.IgnoreUntrustedCertificate,
 			"kafka_flavor":                 kafkaFlavorVal,
+			"policies_ref":                 policiesRefVal,
 			"properties":                   propertiesVal,
 			"schema_registry":              schemaRegistryVal,
 		})
@@ -1228,6 +1329,10 @@ func (v SpecValue) Equal(o attr.Value) bool {
 		return false
 	}
 
+	if !v.PoliciesRef.Equal(other.PoliciesRef) {
+		return false
+	}
+
 	if !v.Properties.Equal(other.Properties) {
 		return false
 	}
@@ -1256,6 +1361,9 @@ func (v SpecValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 		"ignore_untrusted_certificate": basetypes.BoolType{},
 		"kafka_flavor": basetypes.ObjectType{
 			AttrTypes: KafkaFlavorValue{}.AttributeTypes(ctx),
+		},
+		"policies_ref": basetypes.SetType{
+			ElemType: types.StringType,
 		},
 		"properties": basetypes.MapType{
 			ElemType: types.StringType,
