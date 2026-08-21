@@ -282,7 +282,7 @@
                   "name": "resource",
                   "single_nested": {
                     "description": "Resources associated with this application instance permission",
-                    "computed_optional_required": "computed_optional",
+                    "computed_optional_required": "required",
                     "attributes": [
                       {
                         "name": "type",

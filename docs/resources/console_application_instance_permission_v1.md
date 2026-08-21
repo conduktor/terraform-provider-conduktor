@@ -18,8 +18,7 @@ Minimum requirement for this resource:
 Usage of this resource with older Console version might result in unexpected behavior.
 
 ## NOTE
- - `spec.permission` has been deprecated and won't be supported by this terraform provider plugin
- - Use `spec.user_permission` and `spec.service_account_permission` instead
+ - `spec.permission` exists in the Conduktor API but is intentionally not supported by this provider. Use `spec.user_permission` and `spec.service_account_permission` instead — they map 1:1 to state and avoid the plan drift that `spec.permission` introduces (the API expands it server-side into two fields and never returns it directly).
 
 ## Example Usage
 
@@ -58,12 +57,9 @@ resource "conduktor_console_application_instance_permission_v1" "complex" {
 Required:
 
 - `granted_to` (String) Reference to an application instance. Must be on the same Kafka cluster as app_instance
+- `resource` (Attributes) Resources associated with this application instance permission (see [below for nested schema](#nestedatt--spec--resource))
 - `service_account_permission` (String) Permission applied to the service account, valid values are: NONE, READ, WRITE
 - `user_permission` (String) Permission applied to the user, valid values are: NONE, READ, WRITE
-
-Optional:
-
-- `resource` (Attributes) Resources associated with this application instance permission (see [below for nested schema](#nestedatt--spec--resource))
 
 <a id="nestedatt--spec--resource"></a>
 ### Nested Schema for `spec.resource`
