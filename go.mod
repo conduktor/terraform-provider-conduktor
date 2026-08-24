@@ -20,7 +20,7 @@ require (
 	github.com/hashicorp/terraform-plugin-testing v1.16.0
 	github.com/json-iterator/go v1.1.12
 	github.com/qri-io/jsonschema v0.2.1
-	github.com/stretchr/testify v1.11.1
+	github.com/stretchr/testify v1.12.1
 	golang.org/x/mod v0.38.0
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -48,7 +48,6 @@ require (
 	github.com/bmatcuk/doublestar/v4 v4.10.0 // indirect
 	github.com/buger/jsonparser v1.1.2 // indirect
 	github.com/cloudflare/circl v1.6.3 // indirect
-	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dprotaso/go-yit v0.0.0-20240618133044-5a0af90af097 // indirect
 	github.com/fatih/color v1.18.0 // indirect
 	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
@@ -91,7 +90,6 @@ require (
 	github.com/oklog/run v1.2.0 // indirect
 	github.com/onsi/gomega v1.28.1 // indirect
 	github.com/pb33f/libopenapi v0.17.0 // indirect
-	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/posener/complete v1.2.3 // indirect
 	github.com/qri-io/jsonpointer v0.1.1 // indirect
 	github.com/sergi/go-diff v1.3.2-0.20230802210424-5b0b94c5c0d3 // indirect
@@ -109,6 +107,7 @@ require (
 	github.com/yuin/goldmark-meta v1.1.0 // indirect
 	github.com/zclconf/go-cty v1.18.1 // indirect
 	go.abhg.dev/goldmark/frontmatter v0.2.0 // indirect
+	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/crypto v0.53.0 // indirect
 	golang.org/x/exp v0.0.0-20240213143201-ec583247a57a // indirect
 	golang.org/x/net v0.56.0 // indirect
