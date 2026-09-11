@@ -1904,7 +1904,8 @@
                                           "name": "private_key",
                                           "string": {
                                             "description": "Glue Schema registry AWS private key.",
-                                            "computed_optional_required": "required"
+                                            "computed_optional_required": "required",
+                                            "sensitive": true
                                           }
                                         }
                                       ]

@@ -388,7 +388,7 @@ Required:
 Required:
 
 - `certificate` (String) Glue Schema registry AWS certificate.
-- `private_key` (String) Glue Schema registry AWS private key.
+- `private_key` (String, Sensitive) Glue Schema registry AWS private key.
 - `profile_arn` (String) Glue Schema registry AWS profile ARN.
 - `role_arn` (String) Glue Schema registry AWS role ARN.
 - `trust_anchor_arn` (String) Glue Schema registry AWS trust anchor ARN.
