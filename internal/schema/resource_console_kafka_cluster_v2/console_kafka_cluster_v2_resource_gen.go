@@ -388,6 +388,7 @@ func ConsoleKafkaClusterV2ResourceSchema(ctx context.Context) schema.Schema {
 													},
 													"private_key": schema.StringAttribute{
 														Required:            true,
+														Sensitive:           true,
 														Description:         "Glue Schema registry AWS private key.",
 														MarkdownDescription: "Glue Schema registry AWS private key.",
 													},
