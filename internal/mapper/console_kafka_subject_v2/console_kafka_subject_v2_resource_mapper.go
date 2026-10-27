@@ -128,6 +128,8 @@ func specInternalModelToTerraform(ctx context.Context, r *console.KafkaSubjectSp
 	}
 	valuesMap["id"] = idValue
 
+	valuesMap["guid"] = schema.NewStringValue(r.Guid)
+
 	referencesValue, err := referencesToSetValue(ctx, r.References)
 	if err != nil {
 		return subject.SpecValue{}, err
