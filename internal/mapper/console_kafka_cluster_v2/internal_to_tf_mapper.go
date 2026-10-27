@@ -7,6 +7,8 @@ import (
 	console "github.com/conduktor/terraform-provider-conduktor/internal/model/console"
 	schemaUtils "github.com/conduktor/terraform-provider-conduktor/internal/schema"
 	schema "github.com/conduktor/terraform-provider-conduktor/internal/schema/resource_console_kafka_cluster_v2"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
@@ -81,11 +83,95 @@ func specInternalModelToTerraform(ctx context.Context, r *console.KafkaClusterSp
 	}
 	valuesMap["schema_registry"] = schemaRegistryValue
 
+	clientMetricsCollectors, err := clientMetricsCollectorsInternalModelToTerraform(ctx, r.ClientMetricsCollectors)
+	if err != nil {
+		return schema.SpecValue{}, err
+	}
+	valuesMap["client_metrics_collectors"] = clientMetricsCollectors
+
 	value, diag := schema.NewSpecValue(typesMap, valuesMap)
 	if diag.HasError() {
 		return schema.SpecValue{}, mapper.WrapDiagError(diag, "spec", mapper.IntoTerraform)
 	}
 	return value, nil
+}
+
+func clientMetricsCollectorsInternalModelToTerraform(ctx context.Context, collectors []console.ClientMetricsCollector) (basetypes.ListValue, error) {
+	if len(collectors) == 0 {
+		return basetypes.NewListNull(schema.ClientMetricsCollectorsValue{}.Type(ctx)), nil
+	}
+
+	elemType := schema.ClientMetricsCollectorsValue{}.Type(ctx)
+	elems := make([]attr.Value, 0, len(collectors))
+
+	for _, c := range collectors {
+		var cmcTypesMap = schema.NewClientMetricsCollectorsValueNull().AttributeTypes(ctx)
+		var cmcValuesMap = schemaUtils.ValueMapFromTypes(ctx, cmcTypesMap)
+
+		cmcValuesMap["url"] = schemaUtils.NewStringValue(c.Url)
+		cmcValuesMap["ignore_untrusted_certificate"] = basetypes.NewBoolValue(c.IgnoreUntrustedCertificate)
+		cmcValuesMap["vcluster"] = schemaUtils.NewStringValue(c.Vcluster)
+
+		if c.Security != nil {
+			secTypesMap := schema.NewCmcSecurityValueNull().AttributeTypes(ctx)
+			secValuesMap := schemaUtils.ValueMapFromTypes(ctx, secTypesMap)
+
+			if c.Security.BasicAuth != nil {
+				var baTypesMap = schema.NewCmcBasicAuthValueNull().AttributeTypes(ctx)
+				var baValuesMap = schemaUtils.ValueMapFromTypes(ctx, baTypesMap)
+				baValuesMap["username"] = schemaUtils.NewStringValue(c.Security.BasicAuth.Username)
+				baValuesMap["password"] = schemaUtils.NewStringValue(c.Security.BasicAuth.Password)
+				var diag diag.Diagnostics
+				secValuesMap["basic_auth"], diag = types.ObjectValue(baTypesMap, baValuesMap)
+				if diag.HasError() {
+					return basetypes.ListValue{}, mapper.WrapDiagError(diag, "client_metrics_collectors.security.basic_auth", mapper.IntoTerraform)
+				}
+			}
+
+			if c.Security.BearerToken != nil {
+				var btTypesMap = schema.NewCmcBearerTokenValueNull().AttributeTypes(ctx)
+				var btValuesMap = schemaUtils.ValueMapFromTypes(ctx, btTypesMap)
+				btValuesMap["token"] = schemaUtils.NewStringValue(c.Security.BearerToken.Token)
+				var diag diag.Diagnostics
+				secValuesMap["bearer_token"], diag = types.ObjectValue(btTypesMap, btValuesMap)
+				if diag.HasError() {
+					return basetypes.ListValue{}, mapper.WrapDiagError(diag, "client_metrics_collectors.security.bearer_token", mapper.IntoTerraform)
+				}
+			}
+
+			if c.Security.NoSecurity != nil {
+				var nsTypesMap = schema.NewCmcNoSecurityValueNull().AttributeTypes(ctx)
+				var nsValuesMap = schemaUtils.ValueMapFromTypes(ctx, nsTypesMap)
+				var diag diag.Diagnostics
+				secValuesMap["no_security"], diag = types.ObjectValue(nsTypesMap, nsValuesMap)
+				if diag.HasError() {
+					return basetypes.ListValue{}, mapper.WrapDiagError(diag, "client_metrics_collectors.security.no_security", mapper.IntoTerraform)
+				}
+			}
+
+			secValue, diag := schema.NewCmcSecurityValue(secTypesMap, secValuesMap)
+			if diag.HasError() {
+				return basetypes.ListValue{}, mapper.WrapDiagError(diag, "client_metrics_collectors.security", mapper.IntoTerraform)
+			}
+			secObjectValue, diag := secValue.ToObjectValue(ctx)
+			if diag.HasError() {
+				return basetypes.ListValue{}, mapper.WrapDiagError(diag, "client_metrics_collectors.security", mapper.IntoTerraform)
+			}
+			cmcValuesMap["security"] = secObjectValue
+		}
+
+		cmcValue, diag := schema.NewClientMetricsCollectorsValue(cmcTypesMap, cmcValuesMap)
+		if diag.HasError() {
+			return basetypes.ListValue{}, mapper.WrapDiagError(diag, "client_metrics_collectors", mapper.IntoTerraform)
+		}
+		elems = append(elems, cmcValue)
+	}
+
+	listValue, diag := types.ListValue(elemType, elems)
+	if diag.HasError() {
+		return basetypes.ListValue{}, mapper.WrapDiagError(diag, "client_metrics_collectors", mapper.IntoTerraform)
+	}
+	return listValue, nil
 }
 
 func kafkaFlavorInternalModelToTerraform(ctx context.Context, r *console.KafkaFlavor) (schema.KafkaFlavorValue, error) {

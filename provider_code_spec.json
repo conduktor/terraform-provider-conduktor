@@ -2106,6 +2106,110 @@
                       }
                     ]
                   }
+                },
+                {
+                  "name": "client_metrics_collectors",
+                  "list_nested": {
+                    "description": "List of external metrics collector endpoints (e.g. Prometheus/Grafana) that Conduktor Console will push Kafka client metrics to.",
+                    "computed_optional_required": "optional",
+                    "nested_object": {
+                      "attributes": [
+                        {
+                          "name": "url",
+                          "string": {
+                            "description": "URL of the metrics collector endpoint",
+                            "computed_optional_required": "required"
+                          }
+                        },
+                        {
+                          "name": "ignore_untrusted_certificate",
+                          "bool": {
+                            "description": "If true, TLS certificate errors will be ignored when connecting to this metrics collector",
+                            "computed_optional_required": "computed_optional",
+                            "default": {
+                              "custom": {
+                                "imports": [
+                                  {
+                                    "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+                                  }
+                                ],
+                                "schema_definition": "booldefault.StaticBool(false)"
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "name": "vcluster",
+                          "string": {
+                            "description": "Optional virtual cluster name to scope this metrics collector",
+                            "computed_optional_required": "optional"
+                          }
+                        },
+                        {
+                          "name": "security",
+                          "single_nested": {
+                            "custom_type_name": "cmc_security",
+                            "description": "Authentication for the metrics collector endpoint. Set exactly one of basic_auth, bearer_token, or no_security.",
+                            "computed_optional_required": "optional",
+                            "attributes": [
+                              {
+                                "name": "basic_auth",
+                                "single_nested": {
+                                  "custom_type_name": "cmc_basic_auth",
+                                  "description": "HTTP Basic authentication",
+                                  "computed_optional_required": "optional",
+                                  "attributes": [
+                                    {
+                                      "name": "username",
+                                      "string": {
+                                        "description": "Username",
+                                        "computed_optional_required": "required"
+                                      }
+                                    },
+                                    {
+                                      "name": "password",
+                                      "string": {
+                                        "description": "Password",
+                                        "computed_optional_required": "required",
+                                        "sensitive": true
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "name": "bearer_token",
+                                "single_nested": {
+                                  "custom_type_name": "cmc_bearer_token",
+                                  "description": "Bearer token authentication",
+                                  "computed_optional_required": "optional",
+                                  "attributes": [
+                                    {
+                                      "name": "token",
+                                      "string": {
+                                        "description": "Bearer token value",
+                                        "computed_optional_required": "required",
+                                        "sensitive": true
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "name": "no_security",
+                                "single_nested": {
+                                  "custom_type_name": "cmc_no_security",
+                                  "description": "No authentication",
+                                  "computed_optional_required": "optional",
+                                  "attributes": []
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
                 }
               ]
             }
