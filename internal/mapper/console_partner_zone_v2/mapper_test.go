@@ -46,6 +46,8 @@ func TestPartnerZoneV2ModelMapping(t *testing.T) {
 		"key": "value",
 	}, internal.Metadata.Labels)
 	assert.Equal(t, "mycluster", internal.Spec.Cluster)
+	assert.Equal(t, "underlying-kafka-cluster", internal.Spec.UnderlyingCluster)
+	assert.Equal(t, "partner-vcluster", internal.Spec.VclusterName)
 	assert.Equal(t, "Partner Zone", internal.Spec.DisplayName)
 	assert.Equal(t, "This is a partner zone", internal.Spec.Description)
 	assert.Equal(t, "https://partnerzone.example.com", internal.Spec.Url)
@@ -101,6 +103,8 @@ func TestPartnerZoneV2ModelMapping(t *testing.T) {
 	assert.Equal(t, types.StringValue("partner-zone"), tfModel.Name)
 	assert.Equal(t, labels, tfModel.Labels)
 	assert.Equal(t, types.StringValue("mycluster"), tfModel.Spec.Cluster)
+	assert.Equal(t, types.StringValue("underlying-kafka-cluster"), tfModel.Spec.UnderlyingCluster)
+	assert.Equal(t, types.StringValue("partner-vcluster"), tfModel.Spec.VclusterName)
 	assert.Equal(t, types.StringValue("This is a partner zone"), tfModel.Spec.Description)
 	assert.Equal(t, types.StringValue("Partner Zone"), tfModel.Spec.DisplayName)
 	assert.Equal(t, false, tfModel.Spec.AuthenticationMode.IsNull())
@@ -121,6 +125,8 @@ func TestPartnerZoneV2ModelMapping(t *testing.T) {
 		"key": "value",
 	}, internal2.Metadata.Labels)
 	assert.Equal(t, "mycluster", internal2.Spec.Cluster)
+	assert.Equal(t, "underlying-kafka-cluster", internal2.Spec.UnderlyingCluster)
+	assert.Equal(t, "partner-vcluster", internal2.Spec.VclusterName)
 	assert.Equal(t, "This is a partner zone", internal2.Spec.Description)
 	assert.Equal(t, "Partner Zone", internal2.Spec.DisplayName)
 	assert.Equal(t, expectedTopics, internal2.Spec.Topics)

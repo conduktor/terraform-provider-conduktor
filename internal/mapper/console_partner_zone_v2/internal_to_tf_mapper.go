@@ -42,6 +42,8 @@ func specInternalModelToTerraform(ctx context.Context, r *console.PartnerZoneCon
 	var valuesMap = schema.ValueMapFromTypes(ctx, typesMap)
 
 	valuesMap["cluster"] = schema.NewStringValue(r.Cluster)
+	valuesMap["underlying_cluster"] = schema.NewStringValue(r.UnderlyingCluster)
+	valuesMap["vcluster_name"] = schema.NewStringValue(r.VclusterName)
 	valuesMap["display_name"] = schema.NewStringValue(r.DisplayName)
 	valuesMap["description"] = schema.NewStringValue(r.Description)
 	valuesMap["url"] = schema.NewStringValue(r.Url)
