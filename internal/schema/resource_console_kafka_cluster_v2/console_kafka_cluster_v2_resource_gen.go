@@ -52,6 +52,101 @@ func ConsoleKafkaClusterV2ResourceSchema(ctx context.Context) schema.Schema {
 						Description:         "List of bootstrap servers for the Kafka cluster separated by comma",
 						MarkdownDescription: "List of bootstrap servers for the Kafka cluster separated by comma",
 					},
+					"client_metrics_collectors": schema.ListNestedAttribute{
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"ignore_untrusted_certificate": schema.BoolAttribute{
+									Optional:            true,
+									Computed:            true,
+									Description:         "If true, TLS certificate errors will be ignored when connecting to this metrics collector",
+									MarkdownDescription: "If true, TLS certificate errors will be ignored when connecting to this metrics collector",
+									Default:             booldefault.StaticBool(false),
+								},
+								"security": schema.SingleNestedAttribute{
+									Attributes: map[string]schema.Attribute{
+										"basic_auth": schema.SingleNestedAttribute{
+											Attributes: map[string]schema.Attribute{
+												"password": schema.StringAttribute{
+													Required:            true,
+													Sensitive:           true,
+													Description:         "Password",
+													MarkdownDescription: "Password",
+												},
+												"username": schema.StringAttribute{
+													Required:            true,
+													Description:         "Username",
+													MarkdownDescription: "Username",
+												},
+											},
+											CustomType: CmcBasicAuthType{
+												ObjectType: types.ObjectType{
+													AttrTypes: CmcBasicAuthValue{}.AttributeTypes(ctx),
+												},
+											},
+											Optional:            true,
+											Description:         "HTTP Basic authentication",
+											MarkdownDescription: "HTTP Basic authentication",
+										},
+										"bearer_token": schema.SingleNestedAttribute{
+											Attributes: map[string]schema.Attribute{
+												"token": schema.StringAttribute{
+													Required:            true,
+													Sensitive:           true,
+													Description:         "Bearer token value",
+													MarkdownDescription: "Bearer token value",
+												},
+											},
+											CustomType: CmcBearerTokenType{
+												ObjectType: types.ObjectType{
+													AttrTypes: CmcBearerTokenValue{}.AttributeTypes(ctx),
+												},
+											},
+											Optional:            true,
+											Description:         "Bearer token authentication",
+											MarkdownDescription: "Bearer token authentication",
+										},
+										"no_security": schema.SingleNestedAttribute{
+											Attributes: map[string]schema.Attribute{},
+											CustomType: CmcNoSecurityType{
+												ObjectType: types.ObjectType{
+													AttrTypes: CmcNoSecurityValue{}.AttributeTypes(ctx),
+												},
+											},
+											Optional:            true,
+											Description:         "No authentication",
+											MarkdownDescription: "No authentication",
+										},
+									},
+									CustomType: CmcSecurityType{
+										ObjectType: types.ObjectType{
+											AttrTypes: CmcSecurityValue{}.AttributeTypes(ctx),
+										},
+									},
+									Optional:            true,
+									Description:         "Authentication for the metrics collector endpoint. Set exactly one of basic_auth, bearer_token, or no_security.",
+									MarkdownDescription: "Authentication for the metrics collector endpoint. Set exactly one of basic_auth, bearer_token, or no_security.",
+								},
+								"url": schema.StringAttribute{
+									Required:            true,
+									Description:         "URL of the metrics collector endpoint",
+									MarkdownDescription: "URL of the metrics collector endpoint",
+								},
+								"vcluster": schema.StringAttribute{
+									Optional:            true,
+									Description:         "Optional virtual cluster name to scope this metrics collector",
+									MarkdownDescription: "Optional virtual cluster name to scope this metrics collector",
+								},
+							},
+							CustomType: ClientMetricsCollectorsType{
+								ObjectType: types.ObjectType{
+									AttrTypes: ClientMetricsCollectorsValue{}.AttributeTypes(ctx),
+								},
+							},
+						},
+						Optional:            true,
+						Description:         "List of external metrics collector endpoints (e.g. Prometheus/Grafana) that Conduktor Console will push Kafka client metrics to.",
+						MarkdownDescription: "List of external metrics collector endpoints (e.g. Prometheus/Grafana) that Conduktor Console will push Kafka client metrics to.",
+					},
 					"color": schema.StringAttribute{
 						Optional:            true,
 						Computed:            true,
@@ -520,6 +615,24 @@ func (t SpecType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue)
 			fmt.Sprintf(`bootstrap_servers expected to be basetypes.StringValue, was: %T`, bootstrapServersAttribute))
 	}
 
+	clientMetricsCollectorsAttribute, ok := attributes["client_metrics_collectors"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`client_metrics_collectors is missing from object`)
+
+		return nil, diags
+	}
+
+	clientMetricsCollectorsVal, ok := clientMetricsCollectorsAttribute.(basetypes.ListValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`client_metrics_collectors expected to be basetypes.ListValue, was: %T`, clientMetricsCollectorsAttribute))
+	}
+
 	colorAttribute, ok := attributes["color"]
 
 	if !ok {
@@ -670,6 +783,7 @@ func (t SpecType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue)
 
 	return SpecValue{
 		BootstrapServers:           bootstrapServersVal,
+		ClientMetricsCollectors:    clientMetricsCollectorsVal,
 		Color:                      colorVal,
 		DisplayName:                displayNameVal,
 		Icon:                       iconVal,
@@ -763,6 +877,24 @@ func NewSpecValue(attributeTypes map[string]attr.Type, attributes map[string]att
 			fmt.Sprintf(`bootstrap_servers expected to be basetypes.StringValue, was: %T`, bootstrapServersAttribute))
 	}
 
+	clientMetricsCollectorsAttribute, ok := attributes["client_metrics_collectors"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`client_metrics_collectors is missing from object`)
+
+		return NewSpecValueUnknown(), diags
+	}
+
+	clientMetricsCollectorsVal, ok := clientMetricsCollectorsAttribute.(basetypes.ListValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`client_metrics_collectors expected to be basetypes.ListValue, was: %T`, clientMetricsCollectorsAttribute))
+	}
+
 	colorAttribute, ok := attributes["color"]
 
 	if !ok {
@@ -913,6 +1045,7 @@ func NewSpecValue(attributeTypes map[string]attr.Type, attributes map[string]att
 
 	return SpecValue{
 		BootstrapServers:           bootstrapServersVal,
+		ClientMetricsCollectors:    clientMetricsCollectorsVal,
 		Color:                      colorVal,
 		DisplayName:                displayNameVal,
 		Icon:                       iconVal,
@@ -994,6 +1127,7 @@ var _ basetypes.ObjectValuable = SpecValue{}
 
 type SpecValue struct {
 	BootstrapServers           basetypes.StringValue `tfsdk:"bootstrap_servers"`
+	ClientMetricsCollectors    basetypes.ListValue   `tfsdk:"client_metrics_collectors"`
 	Color                      basetypes.StringValue `tfsdk:"color"`
 	DisplayName                basetypes.StringValue `tfsdk:"display_name"`
 	Icon                       basetypes.StringValue `tfsdk:"icon"`
@@ -1006,12 +1140,15 @@ type SpecValue struct {
 }
 
 func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
-	attrTypes := make(map[string]tftypes.Type, 9)
+	attrTypes := make(map[string]tftypes.Type, 10)
 
 	var val tftypes.Value
 	var err error
 
 	attrTypes["bootstrap_servers"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["client_metrics_collectors"] = basetypes.ListType{
+		ElemType: ClientMetricsCollectorsValue{}.Type(ctx),
+	}.TerraformType(ctx)
 	attrTypes["color"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["display_name"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["icon"] = basetypes.StringType{}.TerraformType(ctx)
@@ -1033,7 +1170,7 @@ func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) 
 
 	switch v.state {
 	case attr.ValueStateKnown:
-		vals := make(map[string]tftypes.Value, 9)
+		vals := make(map[string]tftypes.Value, 10)
 
 		val, err = v.BootstrapServers.ToTerraformValue(ctx)
 
@@ -1042,6 +1179,14 @@ func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) 
 		}
 
 		vals["bootstrap_servers"] = val
+
+		val, err = v.ClientMetricsCollectors.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["client_metrics_collectors"] = val
 
 		val, err = v.Color.ToTerraformValue(ctx)
 
@@ -1136,6 +1281,35 @@ func (v SpecValue) String() string {
 func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
+	clientMetricsCollectors := types.ListValueMust(
+		ClientMetricsCollectorsType{
+			basetypes.ObjectType{
+				AttrTypes: ClientMetricsCollectorsValue{}.AttributeTypes(ctx),
+			},
+		},
+		v.ClientMetricsCollectors.Elements(),
+	)
+
+	if v.ClientMetricsCollectors.IsNull() {
+		clientMetricsCollectors = types.ListNull(
+			ClientMetricsCollectorsType{
+				basetypes.ObjectType{
+					AttrTypes: ClientMetricsCollectorsValue{}.AttributeTypes(ctx),
+				},
+			},
+		)
+	}
+
+	if v.ClientMetricsCollectors.IsUnknown() {
+		clientMetricsCollectors = types.ListUnknown(
+			ClientMetricsCollectorsType{
+				basetypes.ObjectType{
+					AttrTypes: ClientMetricsCollectorsValue{}.AttributeTypes(ctx),
+				},
+			},
+		)
+	}
+
 	var kafkaFlavorVal basetypes.ObjectValue
 
 	if v.KafkaFlavor.IsNull() {
@@ -1192,7 +1366,10 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 
 	if diags.HasError() {
 		return types.ObjectUnknown(map[string]attr.Type{
-			"bootstrap_servers":            basetypes.StringType{},
+			"bootstrap_servers": basetypes.StringType{},
+			"client_metrics_collectors": basetypes.ListType{
+				ElemType: ClientMetricsCollectorsValue{}.Type(ctx),
+			},
 			"color":                        basetypes.StringType{},
 			"display_name":                 basetypes.StringType{},
 			"icon":                         basetypes.StringType{},
@@ -1226,7 +1403,10 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 
 	if diags.HasError() {
 		return types.ObjectUnknown(map[string]attr.Type{
-			"bootstrap_servers":            basetypes.StringType{},
+			"bootstrap_servers": basetypes.StringType{},
+			"client_metrics_collectors": basetypes.ListType{
+				ElemType: ClientMetricsCollectorsValue{}.Type(ctx),
+			},
 			"color":                        basetypes.StringType{},
 			"display_name":                 basetypes.StringType{},
 			"icon":                         basetypes.StringType{},
@@ -1247,7 +1427,10 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 	}
 
 	attributeTypes := map[string]attr.Type{
-		"bootstrap_servers":            basetypes.StringType{},
+		"bootstrap_servers": basetypes.StringType{},
+		"client_metrics_collectors": basetypes.ListType{
+			ElemType: ClientMetricsCollectorsValue{}.Type(ctx),
+		},
 		"color":                        basetypes.StringType{},
 		"display_name":                 basetypes.StringType{},
 		"icon":                         basetypes.StringType{},
@@ -1278,6 +1461,7 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 		attributeTypes,
 		map[string]attr.Value{
 			"bootstrap_servers":            v.BootstrapServers,
+			"client_metrics_collectors":    clientMetricsCollectors,
 			"color":                        v.Color,
 			"display_name":                 v.DisplayName,
 			"icon":                         v.Icon,
@@ -1307,6 +1491,10 @@ func (v SpecValue) Equal(o attr.Value) bool {
 	}
 
 	if !v.BootstrapServers.Equal(other.BootstrapServers) {
+		return false
+	}
+
+	if !v.ClientMetricsCollectors.Equal(other.ClientMetricsCollectors) {
 		return false
 	}
 
@@ -1355,7 +1543,10 @@ func (v SpecValue) Type(ctx context.Context) attr.Type {
 
 func (v SpecValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 	return map[string]attr.Type{
-		"bootstrap_servers":            basetypes.StringType{},
+		"bootstrap_servers": basetypes.StringType{},
+		"client_metrics_collectors": basetypes.ListType{
+			ElemType: ClientMetricsCollectorsValue{}.Type(ctx),
+		},
 		"color":                        basetypes.StringType{},
 		"display_name":                 basetypes.StringType{},
 		"icon":                         basetypes.StringType{},
@@ -1373,6 +1564,2000 @@ func (v SpecValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 			AttrTypes: SchemaRegistryValue{}.AttributeTypes(ctx),
 		},
 	}
+}
+
+var _ basetypes.ObjectTypable = ClientMetricsCollectorsType{}
+
+type ClientMetricsCollectorsType struct {
+	basetypes.ObjectType
+}
+
+func (t ClientMetricsCollectorsType) Equal(o attr.Type) bool {
+	other, ok := o.(ClientMetricsCollectorsType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t ClientMetricsCollectorsType) String() string {
+	return "ClientMetricsCollectorsType"
+}
+
+func (t ClientMetricsCollectorsType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	ignoreUntrustedCertificateAttribute, ok := attributes["ignore_untrusted_certificate"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`ignore_untrusted_certificate is missing from object`)
+
+		return nil, diags
+	}
+
+	ignoreUntrustedCertificateVal, ok := ignoreUntrustedCertificateAttribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`ignore_untrusted_certificate expected to be basetypes.BoolValue, was: %T`, ignoreUntrustedCertificateAttribute))
+	}
+
+	securityAttribute, ok := attributes["security"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`security is missing from object`)
+
+		return nil, diags
+	}
+
+	securityVal, ok := securityAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`security expected to be basetypes.ObjectValue, was: %T`, securityAttribute))
+	}
+
+	urlAttribute, ok := attributes["url"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`url is missing from object`)
+
+		return nil, diags
+	}
+
+	urlVal, ok := urlAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`url expected to be basetypes.StringValue, was: %T`, urlAttribute))
+	}
+
+	vclusterAttribute, ok := attributes["vcluster"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`vcluster is missing from object`)
+
+		return nil, diags
+	}
+
+	vclusterVal, ok := vclusterAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`vcluster expected to be basetypes.StringValue, was: %T`, vclusterAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return ClientMetricsCollectorsValue{
+		IgnoreUntrustedCertificate: ignoreUntrustedCertificateVal,
+		Security:                   securityVal,
+		Url:                        urlVal,
+		Vcluster:                   vclusterVal,
+		state:                      attr.ValueStateKnown,
+	}, diags
+}
+
+func NewClientMetricsCollectorsValueNull() ClientMetricsCollectorsValue {
+	return ClientMetricsCollectorsValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewClientMetricsCollectorsValueUnknown() ClientMetricsCollectorsValue {
+	return ClientMetricsCollectorsValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewClientMetricsCollectorsValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (ClientMetricsCollectorsValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing ClientMetricsCollectorsValue Attribute Value",
+				"While creating a ClientMetricsCollectorsValue value, a missing attribute value was detected. "+
+					"A ClientMetricsCollectorsValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("ClientMetricsCollectorsValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid ClientMetricsCollectorsValue Attribute Type",
+				"While creating a ClientMetricsCollectorsValue value, an invalid attribute value was detected. "+
+					"A ClientMetricsCollectorsValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("ClientMetricsCollectorsValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("ClientMetricsCollectorsValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra ClientMetricsCollectorsValue Attribute Value",
+				"While creating a ClientMetricsCollectorsValue value, an extra attribute value was detected. "+
+					"A ClientMetricsCollectorsValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra ClientMetricsCollectorsValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewClientMetricsCollectorsValueUnknown(), diags
+	}
+
+	ignoreUntrustedCertificateAttribute, ok := attributes["ignore_untrusted_certificate"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`ignore_untrusted_certificate is missing from object`)
+
+		return NewClientMetricsCollectorsValueUnknown(), diags
+	}
+
+	ignoreUntrustedCertificateVal, ok := ignoreUntrustedCertificateAttribute.(basetypes.BoolValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`ignore_untrusted_certificate expected to be basetypes.BoolValue, was: %T`, ignoreUntrustedCertificateAttribute))
+	}
+
+	securityAttribute, ok := attributes["security"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`security is missing from object`)
+
+		return NewClientMetricsCollectorsValueUnknown(), diags
+	}
+
+	securityVal, ok := securityAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`security expected to be basetypes.ObjectValue, was: %T`, securityAttribute))
+	}
+
+	urlAttribute, ok := attributes["url"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`url is missing from object`)
+
+		return NewClientMetricsCollectorsValueUnknown(), diags
+	}
+
+	urlVal, ok := urlAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`url expected to be basetypes.StringValue, was: %T`, urlAttribute))
+	}
+
+	vclusterAttribute, ok := attributes["vcluster"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`vcluster is missing from object`)
+
+		return NewClientMetricsCollectorsValueUnknown(), diags
+	}
+
+	vclusterVal, ok := vclusterAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`vcluster expected to be basetypes.StringValue, was: %T`, vclusterAttribute))
+	}
+
+	if diags.HasError() {
+		return NewClientMetricsCollectorsValueUnknown(), diags
+	}
+
+	return ClientMetricsCollectorsValue{
+		IgnoreUntrustedCertificate: ignoreUntrustedCertificateVal,
+		Security:                   securityVal,
+		Url:                        urlVal,
+		Vcluster:                   vclusterVal,
+		state:                      attr.ValueStateKnown,
+	}, diags
+}
+
+func NewClientMetricsCollectorsValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) ClientMetricsCollectorsValue {
+	object, diags := NewClientMetricsCollectorsValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewClientMetricsCollectorsValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t ClientMetricsCollectorsType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewClientMetricsCollectorsValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewClientMetricsCollectorsValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewClientMetricsCollectorsValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewClientMetricsCollectorsValueMust(ClientMetricsCollectorsValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t ClientMetricsCollectorsType) ValueType(ctx context.Context) attr.Value {
+	return ClientMetricsCollectorsValue{}
+}
+
+var _ basetypes.ObjectValuable = ClientMetricsCollectorsValue{}
+
+type ClientMetricsCollectorsValue struct {
+	IgnoreUntrustedCertificate basetypes.BoolValue   `tfsdk:"ignore_untrusted_certificate"`
+	Security                   basetypes.ObjectValue `tfsdk:"security"`
+	Url                        basetypes.StringValue `tfsdk:"url"`
+	Vcluster                   basetypes.StringValue `tfsdk:"vcluster"`
+	state                      attr.ValueState
+}
+
+func (v ClientMetricsCollectorsValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 4)
+
+	var val tftypes.Value
+	var err error
+
+	attrTypes["ignore_untrusted_certificate"] = basetypes.BoolType{}.TerraformType(ctx)
+	attrTypes["security"] = basetypes.ObjectType{
+		AttrTypes: CmcSecurityValue{}.AttributeTypes(ctx),
+	}.TerraformType(ctx)
+	attrTypes["url"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["vcluster"] = basetypes.StringType{}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 4)
+
+		val, err = v.IgnoreUntrustedCertificate.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["ignore_untrusted_certificate"] = val
+
+		val, err = v.Security.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["security"] = val
+
+		val, err = v.Url.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["url"] = val
+
+		val, err = v.Vcluster.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["vcluster"] = val
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v ClientMetricsCollectorsValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v ClientMetricsCollectorsValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v ClientMetricsCollectorsValue) String() string {
+	return "ClientMetricsCollectorsValue"
+}
+
+func (v ClientMetricsCollectorsValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	var securityVal basetypes.ObjectValue
+
+	if v.Security.IsNull() {
+		securityVal = types.ObjectNull(
+			CmcSecurityValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if v.Security.IsUnknown() {
+		securityVal = types.ObjectUnknown(
+			CmcSecurityValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if !v.Security.IsNull() && !v.Security.IsUnknown() {
+		securityVal = types.ObjectValueMust(
+			CmcSecurityValue{}.AttributeTypes(ctx),
+			v.Security.Attributes(),
+		)
+	}
+
+	attributeTypes := map[string]attr.Type{
+		"ignore_untrusted_certificate": basetypes.BoolType{},
+		"security": basetypes.ObjectType{
+			AttrTypes: CmcSecurityValue{}.AttributeTypes(ctx),
+		},
+		"url":      basetypes.StringType{},
+		"vcluster": basetypes.StringType{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{
+			"ignore_untrusted_certificate": v.IgnoreUntrustedCertificate,
+			"security":                     securityVal,
+			"url":                          v.Url,
+			"vcluster":                     v.Vcluster,
+		})
+
+	return objVal, diags
+}
+
+func (v ClientMetricsCollectorsValue) Equal(o attr.Value) bool {
+	other, ok := o.(ClientMetricsCollectorsValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	if !v.IgnoreUntrustedCertificate.Equal(other.IgnoreUntrustedCertificate) {
+		return false
+	}
+
+	if !v.Security.Equal(other.Security) {
+		return false
+	}
+
+	if !v.Url.Equal(other.Url) {
+		return false
+	}
+
+	if !v.Vcluster.Equal(other.Vcluster) {
+		return false
+	}
+
+	return true
+}
+
+func (v ClientMetricsCollectorsValue) Type(ctx context.Context) attr.Type {
+	return ClientMetricsCollectorsType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v ClientMetricsCollectorsValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"ignore_untrusted_certificate": basetypes.BoolType{},
+		"security": basetypes.ObjectType{
+			AttrTypes: CmcSecurityValue{}.AttributeTypes(ctx),
+		},
+		"url":      basetypes.StringType{},
+		"vcluster": basetypes.StringType{},
+	}
+}
+
+var _ basetypes.ObjectTypable = CmcSecurityType{}
+
+type CmcSecurityType struct {
+	basetypes.ObjectType
+}
+
+func (t CmcSecurityType) Equal(o attr.Type) bool {
+	other, ok := o.(CmcSecurityType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t CmcSecurityType) String() string {
+	return "CmcSecurityType"
+}
+
+func (t CmcSecurityType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	basicAuthAttribute, ok := attributes["basic_auth"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`basic_auth is missing from object`)
+
+		return nil, diags
+	}
+
+	basicAuthVal, ok := basicAuthAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`basic_auth expected to be basetypes.ObjectValue, was: %T`, basicAuthAttribute))
+	}
+
+	bearerTokenAttribute, ok := attributes["bearer_token"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`bearer_token is missing from object`)
+
+		return nil, diags
+	}
+
+	bearerTokenVal, ok := bearerTokenAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`bearer_token expected to be basetypes.ObjectValue, was: %T`, bearerTokenAttribute))
+	}
+
+	noSecurityAttribute, ok := attributes["no_security"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`no_security is missing from object`)
+
+		return nil, diags
+	}
+
+	noSecurityVal, ok := noSecurityAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`no_security expected to be basetypes.ObjectValue, was: %T`, noSecurityAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return CmcSecurityValue{
+		BasicAuth:   basicAuthVal,
+		BearerToken: bearerTokenVal,
+		NoSecurity:  noSecurityVal,
+		state:       attr.ValueStateKnown,
+	}, diags
+}
+
+func NewCmcSecurityValueNull() CmcSecurityValue {
+	return CmcSecurityValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewCmcSecurityValueUnknown() CmcSecurityValue {
+	return CmcSecurityValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewCmcSecurityValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (CmcSecurityValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing CmcSecurityValue Attribute Value",
+				"While creating a CmcSecurityValue value, a missing attribute value was detected. "+
+					"A CmcSecurityValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("CmcSecurityValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid CmcSecurityValue Attribute Type",
+				"While creating a CmcSecurityValue value, an invalid attribute value was detected. "+
+					"A CmcSecurityValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("CmcSecurityValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("CmcSecurityValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra CmcSecurityValue Attribute Value",
+				"While creating a CmcSecurityValue value, an extra attribute value was detected. "+
+					"A CmcSecurityValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra CmcSecurityValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewCmcSecurityValueUnknown(), diags
+	}
+
+	basicAuthAttribute, ok := attributes["basic_auth"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`basic_auth is missing from object`)
+
+		return NewCmcSecurityValueUnknown(), diags
+	}
+
+	basicAuthVal, ok := basicAuthAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`basic_auth expected to be basetypes.ObjectValue, was: %T`, basicAuthAttribute))
+	}
+
+	bearerTokenAttribute, ok := attributes["bearer_token"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`bearer_token is missing from object`)
+
+		return NewCmcSecurityValueUnknown(), diags
+	}
+
+	bearerTokenVal, ok := bearerTokenAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`bearer_token expected to be basetypes.ObjectValue, was: %T`, bearerTokenAttribute))
+	}
+
+	noSecurityAttribute, ok := attributes["no_security"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`no_security is missing from object`)
+
+		return NewCmcSecurityValueUnknown(), diags
+	}
+
+	noSecurityVal, ok := noSecurityAttribute.(basetypes.ObjectValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`no_security expected to be basetypes.ObjectValue, was: %T`, noSecurityAttribute))
+	}
+
+	if diags.HasError() {
+		return NewCmcSecurityValueUnknown(), diags
+	}
+
+	return CmcSecurityValue{
+		BasicAuth:   basicAuthVal,
+		BearerToken: bearerTokenVal,
+		NoSecurity:  noSecurityVal,
+		state:       attr.ValueStateKnown,
+	}, diags
+}
+
+func NewCmcSecurityValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) CmcSecurityValue {
+	object, diags := NewCmcSecurityValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewCmcSecurityValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t CmcSecurityType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewCmcSecurityValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewCmcSecurityValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewCmcSecurityValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewCmcSecurityValueMust(CmcSecurityValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t CmcSecurityType) ValueType(ctx context.Context) attr.Value {
+	return CmcSecurityValue{}
+}
+
+var _ basetypes.ObjectValuable = CmcSecurityValue{}
+
+type CmcSecurityValue struct {
+	BasicAuth   basetypes.ObjectValue `tfsdk:"basic_auth"`
+	BearerToken basetypes.ObjectValue `tfsdk:"bearer_token"`
+	NoSecurity  basetypes.ObjectValue `tfsdk:"no_security"`
+	state       attr.ValueState
+}
+
+func (v CmcSecurityValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 3)
+
+	var val tftypes.Value
+	var err error
+
+	attrTypes["basic_auth"] = basetypes.ObjectType{
+		AttrTypes: CmcBasicAuthValue{}.AttributeTypes(ctx),
+	}.TerraformType(ctx)
+	attrTypes["bearer_token"] = basetypes.ObjectType{
+		AttrTypes: CmcBearerTokenValue{}.AttributeTypes(ctx),
+	}.TerraformType(ctx)
+	attrTypes["no_security"] = basetypes.ObjectType{
+		AttrTypes: CmcNoSecurityValue{}.AttributeTypes(ctx),
+	}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 3)
+
+		val, err = v.BasicAuth.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["basic_auth"] = val
+
+		val, err = v.BearerToken.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["bearer_token"] = val
+
+		val, err = v.NoSecurity.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["no_security"] = val
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v CmcSecurityValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v CmcSecurityValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v CmcSecurityValue) String() string {
+	return "CmcSecurityValue"
+}
+
+func (v CmcSecurityValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	var basicAuthVal basetypes.ObjectValue
+
+	if v.BasicAuth.IsNull() {
+		basicAuthVal = types.ObjectNull(
+			CmcBasicAuthValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if v.BasicAuth.IsUnknown() {
+		basicAuthVal = types.ObjectUnknown(
+			CmcBasicAuthValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if !v.BasicAuth.IsNull() && !v.BasicAuth.IsUnknown() {
+		basicAuthVal = types.ObjectValueMust(
+			CmcBasicAuthValue{}.AttributeTypes(ctx),
+			v.BasicAuth.Attributes(),
+		)
+	}
+
+	var bearerTokenVal basetypes.ObjectValue
+
+	if v.BearerToken.IsNull() {
+		bearerTokenVal = types.ObjectNull(
+			CmcBearerTokenValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if v.BearerToken.IsUnknown() {
+		bearerTokenVal = types.ObjectUnknown(
+			CmcBearerTokenValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if !v.BearerToken.IsNull() && !v.BearerToken.IsUnknown() {
+		bearerTokenVal = types.ObjectValueMust(
+			CmcBearerTokenValue{}.AttributeTypes(ctx),
+			v.BearerToken.Attributes(),
+		)
+	}
+
+	var noSecurityVal basetypes.ObjectValue
+
+	if v.NoSecurity.IsNull() {
+		noSecurityVal = types.ObjectNull(
+			CmcNoSecurityValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if v.NoSecurity.IsUnknown() {
+		noSecurityVal = types.ObjectUnknown(
+			CmcNoSecurityValue{}.AttributeTypes(ctx),
+		)
+	}
+
+	if !v.NoSecurity.IsNull() && !v.NoSecurity.IsUnknown() {
+		noSecurityVal = types.ObjectValueMust(
+			CmcNoSecurityValue{}.AttributeTypes(ctx),
+			v.NoSecurity.Attributes(),
+		)
+	}
+
+	attributeTypes := map[string]attr.Type{
+		"basic_auth": basetypes.ObjectType{
+			AttrTypes: CmcBasicAuthValue{}.AttributeTypes(ctx),
+		},
+		"bearer_token": basetypes.ObjectType{
+			AttrTypes: CmcBearerTokenValue{}.AttributeTypes(ctx),
+		},
+		"no_security": basetypes.ObjectType{
+			AttrTypes: CmcNoSecurityValue{}.AttributeTypes(ctx),
+		},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{
+			"basic_auth":   basicAuthVal,
+			"bearer_token": bearerTokenVal,
+			"no_security":  noSecurityVal,
+		})
+
+	return objVal, diags
+}
+
+func (v CmcSecurityValue) Equal(o attr.Value) bool {
+	other, ok := o.(CmcSecurityValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	if !v.BasicAuth.Equal(other.BasicAuth) {
+		return false
+	}
+
+	if !v.BearerToken.Equal(other.BearerToken) {
+		return false
+	}
+
+	if !v.NoSecurity.Equal(other.NoSecurity) {
+		return false
+	}
+
+	return true
+}
+
+func (v CmcSecurityValue) Type(ctx context.Context) attr.Type {
+	return CmcSecurityType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v CmcSecurityValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"basic_auth": basetypes.ObjectType{
+			AttrTypes: CmcBasicAuthValue{}.AttributeTypes(ctx),
+		},
+		"bearer_token": basetypes.ObjectType{
+			AttrTypes: CmcBearerTokenValue{}.AttributeTypes(ctx),
+		},
+		"no_security": basetypes.ObjectType{
+			AttrTypes: CmcNoSecurityValue{}.AttributeTypes(ctx),
+		},
+	}
+}
+
+var _ basetypes.ObjectTypable = CmcBasicAuthType{}
+
+type CmcBasicAuthType struct {
+	basetypes.ObjectType
+}
+
+func (t CmcBasicAuthType) Equal(o attr.Type) bool {
+	other, ok := o.(CmcBasicAuthType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t CmcBasicAuthType) String() string {
+	return "CmcBasicAuthType"
+}
+
+func (t CmcBasicAuthType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	passwordAttribute, ok := attributes["password"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`password is missing from object`)
+
+		return nil, diags
+	}
+
+	passwordVal, ok := passwordAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`password expected to be basetypes.StringValue, was: %T`, passwordAttribute))
+	}
+
+	usernameAttribute, ok := attributes["username"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`username is missing from object`)
+
+		return nil, diags
+	}
+
+	usernameVal, ok := usernameAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`username expected to be basetypes.StringValue, was: %T`, usernameAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return CmcBasicAuthValue{
+		Password: passwordVal,
+		Username: usernameVal,
+		state:    attr.ValueStateKnown,
+	}, diags
+}
+
+func NewCmcBasicAuthValueNull() CmcBasicAuthValue {
+	return CmcBasicAuthValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewCmcBasicAuthValueUnknown() CmcBasicAuthValue {
+	return CmcBasicAuthValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewCmcBasicAuthValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (CmcBasicAuthValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing CmcBasicAuthValue Attribute Value",
+				"While creating a CmcBasicAuthValue value, a missing attribute value was detected. "+
+					"A CmcBasicAuthValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("CmcBasicAuthValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid CmcBasicAuthValue Attribute Type",
+				"While creating a CmcBasicAuthValue value, an invalid attribute value was detected. "+
+					"A CmcBasicAuthValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("CmcBasicAuthValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("CmcBasicAuthValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra CmcBasicAuthValue Attribute Value",
+				"While creating a CmcBasicAuthValue value, an extra attribute value was detected. "+
+					"A CmcBasicAuthValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra CmcBasicAuthValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewCmcBasicAuthValueUnknown(), diags
+	}
+
+	passwordAttribute, ok := attributes["password"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`password is missing from object`)
+
+		return NewCmcBasicAuthValueUnknown(), diags
+	}
+
+	passwordVal, ok := passwordAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`password expected to be basetypes.StringValue, was: %T`, passwordAttribute))
+	}
+
+	usernameAttribute, ok := attributes["username"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`username is missing from object`)
+
+		return NewCmcBasicAuthValueUnknown(), diags
+	}
+
+	usernameVal, ok := usernameAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`username expected to be basetypes.StringValue, was: %T`, usernameAttribute))
+	}
+
+	if diags.HasError() {
+		return NewCmcBasicAuthValueUnknown(), diags
+	}
+
+	return CmcBasicAuthValue{
+		Password: passwordVal,
+		Username: usernameVal,
+		state:    attr.ValueStateKnown,
+	}, diags
+}
+
+func NewCmcBasicAuthValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) CmcBasicAuthValue {
+	object, diags := NewCmcBasicAuthValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewCmcBasicAuthValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t CmcBasicAuthType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewCmcBasicAuthValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewCmcBasicAuthValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewCmcBasicAuthValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewCmcBasicAuthValueMust(CmcBasicAuthValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t CmcBasicAuthType) ValueType(ctx context.Context) attr.Value {
+	return CmcBasicAuthValue{}
+}
+
+var _ basetypes.ObjectValuable = CmcBasicAuthValue{}
+
+type CmcBasicAuthValue struct {
+	Password basetypes.StringValue `tfsdk:"password"`
+	Username basetypes.StringValue `tfsdk:"username"`
+	state    attr.ValueState
+}
+
+func (v CmcBasicAuthValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 2)
+
+	var val tftypes.Value
+	var err error
+
+	attrTypes["password"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["username"] = basetypes.StringType{}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 2)
+
+		val, err = v.Password.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["password"] = val
+
+		val, err = v.Username.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["username"] = val
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v CmcBasicAuthValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v CmcBasicAuthValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v CmcBasicAuthValue) String() string {
+	return "CmcBasicAuthValue"
+}
+
+func (v CmcBasicAuthValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributeTypes := map[string]attr.Type{
+		"password": basetypes.StringType{},
+		"username": basetypes.StringType{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{
+			"password": v.Password,
+			"username": v.Username,
+		})
+
+	return objVal, diags
+}
+
+func (v CmcBasicAuthValue) Equal(o attr.Value) bool {
+	other, ok := o.(CmcBasicAuthValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	if !v.Password.Equal(other.Password) {
+		return false
+	}
+
+	if !v.Username.Equal(other.Username) {
+		return false
+	}
+
+	return true
+}
+
+func (v CmcBasicAuthValue) Type(ctx context.Context) attr.Type {
+	return CmcBasicAuthType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v CmcBasicAuthValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"password": basetypes.StringType{},
+		"username": basetypes.StringType{},
+	}
+}
+
+var _ basetypes.ObjectTypable = CmcBearerTokenType{}
+
+type CmcBearerTokenType struct {
+	basetypes.ObjectType
+}
+
+func (t CmcBearerTokenType) Equal(o attr.Type) bool {
+	other, ok := o.(CmcBearerTokenType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t CmcBearerTokenType) String() string {
+	return "CmcBearerTokenType"
+}
+
+func (t CmcBearerTokenType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributes := in.Attributes()
+
+	tokenAttribute, ok := attributes["token"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`token is missing from object`)
+
+		return nil, diags
+	}
+
+	tokenVal, ok := tokenAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`token expected to be basetypes.StringValue, was: %T`, tokenAttribute))
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return CmcBearerTokenValue{
+		Token: tokenVal,
+		state: attr.ValueStateKnown,
+	}, diags
+}
+
+func NewCmcBearerTokenValueNull() CmcBearerTokenValue {
+	return CmcBearerTokenValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewCmcBearerTokenValueUnknown() CmcBearerTokenValue {
+	return CmcBearerTokenValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewCmcBearerTokenValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (CmcBearerTokenValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing CmcBearerTokenValue Attribute Value",
+				"While creating a CmcBearerTokenValue value, a missing attribute value was detected. "+
+					"A CmcBearerTokenValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("CmcBearerTokenValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid CmcBearerTokenValue Attribute Type",
+				"While creating a CmcBearerTokenValue value, an invalid attribute value was detected. "+
+					"A CmcBearerTokenValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("CmcBearerTokenValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("CmcBearerTokenValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra CmcBearerTokenValue Attribute Value",
+				"While creating a CmcBearerTokenValue value, an extra attribute value was detected. "+
+					"A CmcBearerTokenValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra CmcBearerTokenValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewCmcBearerTokenValueUnknown(), diags
+	}
+
+	tokenAttribute, ok := attributes["token"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`token is missing from object`)
+
+		return NewCmcBearerTokenValueUnknown(), diags
+	}
+
+	tokenVal, ok := tokenAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`token expected to be basetypes.StringValue, was: %T`, tokenAttribute))
+	}
+
+	if diags.HasError() {
+		return NewCmcBearerTokenValueUnknown(), diags
+	}
+
+	return CmcBearerTokenValue{
+		Token: tokenVal,
+		state: attr.ValueStateKnown,
+	}, diags
+}
+
+func NewCmcBearerTokenValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) CmcBearerTokenValue {
+	object, diags := NewCmcBearerTokenValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewCmcBearerTokenValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t CmcBearerTokenType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewCmcBearerTokenValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewCmcBearerTokenValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewCmcBearerTokenValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewCmcBearerTokenValueMust(CmcBearerTokenValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t CmcBearerTokenType) ValueType(ctx context.Context) attr.Value {
+	return CmcBearerTokenValue{}
+}
+
+var _ basetypes.ObjectValuable = CmcBearerTokenValue{}
+
+type CmcBearerTokenValue struct {
+	Token basetypes.StringValue `tfsdk:"token"`
+	state attr.ValueState
+}
+
+func (v CmcBearerTokenValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 1)
+
+	var val tftypes.Value
+	var err error
+
+	attrTypes["token"] = basetypes.StringType{}.TerraformType(ctx)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 1)
+
+		val, err = v.Token.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["token"] = val
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v CmcBearerTokenValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v CmcBearerTokenValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v CmcBearerTokenValue) String() string {
+	return "CmcBearerTokenValue"
+}
+
+func (v CmcBearerTokenValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributeTypes := map[string]attr.Type{
+		"token": basetypes.StringType{},
+	}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{
+			"token": v.Token,
+		})
+
+	return objVal, diags
+}
+
+func (v CmcBearerTokenValue) Equal(o attr.Value) bool {
+	other, ok := o.(CmcBearerTokenValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	if !v.Token.Equal(other.Token) {
+		return false
+	}
+
+	return true
+}
+
+func (v CmcBearerTokenValue) Type(ctx context.Context) attr.Type {
+	return CmcBearerTokenType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v CmcBearerTokenValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{
+		"token": basetypes.StringType{},
+	}
+}
+
+var _ basetypes.ObjectTypable = CmcNoSecurityType{}
+
+type CmcNoSecurityType struct {
+	basetypes.ObjectType
+}
+
+func (t CmcNoSecurityType) Equal(o attr.Type) bool {
+	other, ok := o.(CmcNoSecurityType)
+
+	if !ok {
+		return false
+	}
+
+	return t.ObjectType.Equal(other.ObjectType)
+}
+
+func (t CmcNoSecurityType) String() string {
+	return "CmcNoSecurityType"
+}
+
+func (t CmcNoSecurityType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue) (basetypes.ObjectValuable, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return CmcNoSecurityValue{
+		state: attr.ValueStateKnown,
+	}, diags
+}
+
+func NewCmcNoSecurityValueNull() CmcNoSecurityValue {
+	return CmcNoSecurityValue{
+		state: attr.ValueStateNull,
+	}
+}
+
+func NewCmcNoSecurityValueUnknown() CmcNoSecurityValue {
+	return CmcNoSecurityValue{
+		state: attr.ValueStateUnknown,
+	}
+}
+
+func NewCmcNoSecurityValue(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) (CmcNoSecurityValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Reference: https://github.com/hashicorp/terraform-plugin-framework/issues/521
+	ctx := context.Background()
+
+	for name, attributeType := range attributeTypes {
+		attribute, ok := attributes[name]
+
+		if !ok {
+			diags.AddError(
+				"Missing CmcNoSecurityValue Attribute Value",
+				"While creating a CmcNoSecurityValue value, a missing attribute value was detected. "+
+					"A CmcNoSecurityValue must contain values for all attributes, even if null or unknown. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("CmcNoSecurityValue Attribute Name (%s) Expected Type: %s", name, attributeType.String()),
+			)
+
+			continue
+		}
+
+		if !attributeType.Equal(attribute.Type(ctx)) {
+			diags.AddError(
+				"Invalid CmcNoSecurityValue Attribute Type",
+				"While creating a CmcNoSecurityValue value, an invalid attribute value was detected. "+
+					"A CmcNoSecurityValue must use a matching attribute type for the value. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("CmcNoSecurityValue Attribute Name (%s) Expected Type: %s\n", name, attributeType.String())+
+					fmt.Sprintf("CmcNoSecurityValue Attribute Name (%s) Given Type: %s", name, attribute.Type(ctx)),
+			)
+		}
+	}
+
+	for name := range attributes {
+		_, ok := attributeTypes[name]
+
+		if !ok {
+			diags.AddError(
+				"Extra CmcNoSecurityValue Attribute Value",
+				"While creating a CmcNoSecurityValue value, an extra attribute value was detected. "+
+					"A CmcNoSecurityValue must not contain values beyond the expected attribute types. "+
+					"This is always an issue with the provider and should be reported to the provider developers.\n\n"+
+					fmt.Sprintf("Extra CmcNoSecurityValue Attribute Name: %s", name),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return NewCmcNoSecurityValueUnknown(), diags
+	}
+
+	if diags.HasError() {
+		return NewCmcNoSecurityValueUnknown(), diags
+	}
+
+	return CmcNoSecurityValue{
+		state: attr.ValueStateKnown,
+	}, diags
+}
+
+func NewCmcNoSecurityValueMust(attributeTypes map[string]attr.Type, attributes map[string]attr.Value) CmcNoSecurityValue {
+	object, diags := NewCmcNoSecurityValue(attributeTypes, attributes)
+
+	if diags.HasError() {
+		// This could potentially be added to the diag package.
+		diagsStrings := make([]string, 0, len(diags))
+
+		for _, diagnostic := range diags {
+			diagsStrings = append(diagsStrings, fmt.Sprintf(
+				"%s | %s | %s",
+				diagnostic.Severity(),
+				diagnostic.Summary(),
+				diagnostic.Detail()))
+		}
+
+		panic("NewCmcNoSecurityValueMust received error(s): " + strings.Join(diagsStrings, "\n"))
+	}
+
+	return object
+}
+
+func (t CmcNoSecurityType) ValueFromTerraform(ctx context.Context, in tftypes.Value) (attr.Value, error) {
+	if in.Type() == nil {
+		return NewCmcNoSecurityValueNull(), nil
+	}
+
+	if !in.Type().Equal(t.TerraformType(ctx)) {
+		return nil, fmt.Errorf("expected %s, got %s", t.TerraformType(ctx), in.Type())
+	}
+
+	if !in.IsKnown() {
+		return NewCmcNoSecurityValueUnknown(), nil
+	}
+
+	if in.IsNull() {
+		return NewCmcNoSecurityValueNull(), nil
+	}
+
+	attributes := map[string]attr.Value{}
+
+	val := map[string]tftypes.Value{}
+
+	err := in.As(&val)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range val {
+		a, err := t.AttrTypes[k].ValueFromTerraform(ctx, v)
+
+		if err != nil {
+			return nil, err
+		}
+
+		attributes[k] = a
+	}
+
+	return NewCmcNoSecurityValueMust(CmcNoSecurityValue{}.AttributeTypes(ctx), attributes), nil
+}
+
+func (t CmcNoSecurityType) ValueType(ctx context.Context) attr.Value {
+	return CmcNoSecurityValue{}
+}
+
+var _ basetypes.ObjectValuable = CmcNoSecurityValue{}
+
+type CmcNoSecurityValue struct {
+	state attr.ValueState
+}
+
+func (v CmcNoSecurityValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
+	attrTypes := make(map[string]tftypes.Type, 0)
+
+	objectType := tftypes.Object{AttributeTypes: attrTypes}
+
+	switch v.state {
+	case attr.ValueStateKnown:
+		vals := make(map[string]tftypes.Value, 0)
+
+		if err := tftypes.ValidateValue(objectType, vals); err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		return tftypes.NewValue(objectType, vals), nil
+	case attr.ValueStateNull:
+		return tftypes.NewValue(objectType, nil), nil
+	case attr.ValueStateUnknown:
+		return tftypes.NewValue(objectType, tftypes.UnknownValue), nil
+	default:
+		panic(fmt.Sprintf("unhandled Object state in ToTerraformValue: %s", v.state))
+	}
+}
+
+func (v CmcNoSecurityValue) IsNull() bool {
+	return v.state == attr.ValueStateNull
+}
+
+func (v CmcNoSecurityValue) IsUnknown() bool {
+	return v.state == attr.ValueStateUnknown
+}
+
+func (v CmcNoSecurityValue) String() string {
+	return "CmcNoSecurityValue"
+}
+
+func (v CmcNoSecurityValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	attributeTypes := map[string]attr.Type{}
+
+	if v.IsNull() {
+		return types.ObjectNull(attributeTypes), diags
+	}
+
+	if v.IsUnknown() {
+		return types.ObjectUnknown(attributeTypes), diags
+	}
+
+	objVal, diags := types.ObjectValue(
+		attributeTypes,
+		map[string]attr.Value{})
+
+	return objVal, diags
+}
+
+func (v CmcNoSecurityValue) Equal(o attr.Value) bool {
+	other, ok := o.(CmcNoSecurityValue)
+
+	if !ok {
+		return false
+	}
+
+	if v.state != other.state {
+		return false
+	}
+
+	if v.state != attr.ValueStateKnown {
+		return true
+	}
+
+	return true
+}
+
+func (v CmcNoSecurityValue) Type(ctx context.Context) attr.Type {
+	return CmcNoSecurityType{
+		basetypes.ObjectType{
+			AttrTypes: v.AttributeTypes(ctx),
+		},
+	}
+}
+
+func (v CmcNoSecurityValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
+	return map[string]attr.Type{}
 }
 
 var _ basetypes.ObjectTypable = KafkaFlavorType{}

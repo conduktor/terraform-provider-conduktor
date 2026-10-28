@@ -21,15 +21,93 @@ func (r KafkaClusterMetadata) String() string {
 }
 
 type KafkaClusterSpec struct {
-	BootstrapServers           string                `json:"bootstrapServers"`
-	Color                      string                `json:"color,omitempty"`
-	DisplayName                string                `json:"displayName"`
-	Icon                       string                `json:"icon,omitempty"`
-	IgnoreUntrustedCertificate bool                  `json:"ignoreUntrustedCertificate"`
-	KafkaFlavor                *KafkaFlavor          `json:"kafkaFlavor,omitempty"`
-	PoliciesRef                []string              `json:"policiesRef,omitempty"`
-	Properties                 map[string]string     `json:"properties,omitempty"`
-	SchemaRegistry             *model.SchemaRegistry `json:"schemaRegistry,omitempty"`
+	BootstrapServers           string                   `json:"bootstrapServers"`
+	ClientMetricsCollectors    []ClientMetricsCollector `json:"clientMetricsCollectors,omitempty"`
+	Color                      string                   `json:"color,omitempty"`
+	DisplayName                string                   `json:"displayName"`
+	Icon                       string                   `json:"icon,omitempty"`
+	IgnoreUntrustedCertificate bool                     `json:"ignoreUntrustedCertificate"`
+	KafkaFlavor                *KafkaFlavor             `json:"kafkaFlavor,omitempty"`
+	PoliciesRef                []string                 `json:"policiesRef,omitempty"`
+	Properties                 map[string]string        `json:"properties,omitempty"`
+	SchemaRegistry             *model.SchemaRegistry    `json:"schemaRegistry,omitempty"`
+}
+
+type ClientMetricsCollectorSecurityType string
+
+const (
+	CMC_BASIC_AUTH   ClientMetricsCollectorSecurityType = "BasicAuth"
+	CMC_BEARER_TOKEN ClientMetricsCollectorSecurityType = "BearerToken"
+	CMC_NO_SECURITY  ClientMetricsCollectorSecurityType = "NoSecurity"
+)
+
+type ClientMetricsCollectorBasicAuth struct {
+	Type     string `json:"type"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+type ClientMetricsCollectorBearerToken struct {
+	Type  string `json:"type"`
+	Token string `json:"token"`
+}
+
+type ClientMetricsCollectorNoSecurity struct {
+	Type string `json:"type"`
+}
+
+type ClientMetricsCollectorSecurity struct {
+	BasicAuth   *ClientMetricsCollectorBasicAuth
+	BearerToken *ClientMetricsCollectorBearerToken
+	NoSecurity  *ClientMetricsCollectorNoSecurity
+}
+
+func (dst *ClientMetricsCollectorSecurity) UnmarshalJSON(data []byte) error {
+	var disc model.Discriminable
+	if err := json.Unmarshal(data, &disc); err != nil {
+		return err
+	}
+	switch ClientMetricsCollectorSecurityType(disc.Type) {
+	case CMC_BASIC_AUTH:
+		var v ClientMetricsCollectorBasicAuth
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		dst.BasicAuth = &v
+	case CMC_BEARER_TOKEN:
+		var v ClientMetricsCollectorBearerToken
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		dst.BearerToken = &v
+	case CMC_NO_SECURITY:
+		var v ClientMetricsCollectorNoSecurity
+		if err := json.Unmarshal(data, &v); err != nil {
+			return err
+		}
+		dst.NoSecurity = &v
+	default:
+		return fmt.Errorf("unknown ClientMetricsCollectorSecurity type %s", disc.Type)
+	}
+	return nil
+}
+
+func (src *ClientMetricsCollectorSecurity) MarshalJSON() ([]byte, error) {
+	if src.BasicAuth != nil {
+		return json.Marshal(src.BasicAuth)
+	} else if src.BearerToken != nil {
+		return json.Marshal(src.BearerToken)
+	} else if src.NoSecurity != nil {
+		return json.Marshal(src.NoSecurity)
+	}
+	return nil, fmt.Errorf("unknown ClientMetricsCollectorSecurity type")
+}
+
+type ClientMetricsCollector struct {
+	Url                        string                          `json:"url"`
+	IgnoreUntrustedCertificate bool                            `json:"ignoreUntrustedCertificate,omitempty"`
+	Vcluster                   string                          `json:"vcluster,omitempty"`
+	Security                   *ClientMetricsCollectorSecurity `json:"security,omitempty"`
 }
 
 type KafkaFlavorType string

@@ -226,6 +226,7 @@ Required:
 
 Optional:
 
+- `client_metrics_collectors` (Attributes List) List of external metrics collector endpoints (e.g. Prometheus/Grafana) that Conduktor Console will push Kafka client metrics to. (see [below for nested schema](#nestedatt--spec--client_metrics_collectors))
 - `color` (String) Kafka cluster icon color in hexadecimal format like `#FF0000`
 - `icon` (String) Kafka cluster icon. List of available icons can be found [here](https://docs.conduktor.io/platform/reference/resource-reference/console/#icon-sets)
 - `ignore_untrusted_certificate` (Boolean) Ignore untrusted certificate for Kafka cluster
@@ -233,6 +234,51 @@ Optional:
 - `policies_ref` (Set of String) References to resource policies to apply to this Kafka cluster. NOTE: this field has been introduced with Console 1.42.0 and will not work with previous versions
 - `properties` (Map of String) Kafka cluster properties
 - `schema_registry` (Attributes) Schema registry configuration. One of `confluent_like`, `glue` (see [below for nested schema](#nestedatt--spec--schema_registry))
+
+<a id="nestedatt--spec--client_metrics_collectors"></a>
+### Nested Schema for `spec.client_metrics_collectors`
+
+Required:
+
+- `url` (String) URL of the metrics collector endpoint
+
+Optional:
+
+- `ignore_untrusted_certificate` (Boolean) If true, TLS certificate errors will be ignored when connecting to this metrics collector
+- `security` (Attributes) Authentication for the metrics collector endpoint. Set exactly one of basic_auth, bearer_token, or no_security. (see [below for nested schema](#nestedatt--spec--client_metrics_collectors--security))
+- `vcluster` (String) Optional virtual cluster name to scope this metrics collector
+
+<a id="nestedatt--spec--client_metrics_collectors--security"></a>
+### Nested Schema for `spec.client_metrics_collectors.security`
+
+Optional:
+
+- `basic_auth` (Attributes) HTTP Basic authentication (see [below for nested schema](#nestedatt--spec--client_metrics_collectors--security--basic_auth))
+- `bearer_token` (Attributes) Bearer token authentication (see [below for nested schema](#nestedatt--spec--client_metrics_collectors--security--bearer_token))
+- `no_security` (Attributes) No authentication (see [below for nested schema](#nestedatt--spec--client_metrics_collectors--security--no_security))
+
+<a id="nestedatt--spec--client_metrics_collectors--security--basic_auth"></a>
+### Nested Schema for `spec.client_metrics_collectors.security.basic_auth`
+
+Required:
+
+- `password` (String, Sensitive) Password
+- `username` (String) Username
+
+
+<a id="nestedatt--spec--client_metrics_collectors--security--bearer_token"></a>
+### Nested Schema for `spec.client_metrics_collectors.security.bearer_token`
+
+Required:
+
+- `token` (String, Sensitive) Bearer token value
+
+
+<a id="nestedatt--spec--client_metrics_collectors--security--no_security"></a>
+### Nested Schema for `spec.client_metrics_collectors.security.no_security`
+
+
+
 
 <a id="nestedatt--spec--kafka_flavor"></a>
 ### Nested Schema for `spec.kafka_flavor`
