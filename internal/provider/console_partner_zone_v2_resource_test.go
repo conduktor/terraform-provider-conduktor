@@ -223,3 +223,37 @@ func createBackingTopic(t *testing.T, client *client.Client, name, cluster strin
 		t.Fatalf("Error creating backing topic: %s", err)
 	}
 }
+
+// partnerZoneUnderlyingClusterMinimumVersion is the first Console version that returns
+// underlyingCluster and vclusterName on PartnerZone resources.
+const partnerZoneUnderlyingClusterMinimumVersion = "v1.37.0"
+
+func TestAccPartnerZoneV2UnderlyingCluster(t *testing.T) {
+	test.CheckEnterpriseEnabled(t)
+	v, err := fetchClientVersion(client.CONSOLE)
+	if err != nil {
+		t.Fatalf("Error fetching current version: %s", err)
+	}
+	test.CheckMinimumVersionRequirement(t, v, partnerZoneUnderlyingClusterMinimumVersion)
+	v, err = fetchClientVersion(client.GATEWAY)
+	if err != nil {
+		t.Fatalf("Error fetching current version: %s", err)
+	}
+	test.CheckMinimumVersionRequirement(t, v, partnerZoneMininumGatewayVersion)
+
+	resourceRef := "conduktor_console_partner_zone_v2.minimal"
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { test.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: providerConfigConsole + test.TestAccTestdata(t, "console/partner_zone_v2/resource_minimal.tf"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceRef, "name", "minimal"),
+					// underlying_cluster is auto-populated by the API with the cluster value
+					resource.TestCheckResourceAttr(resourceRef, "spec.underlying_cluster", "gw-cluster"),
+				),
+			},
+		},
+	})
+}
