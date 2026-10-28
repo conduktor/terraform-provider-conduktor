@@ -65,7 +65,7 @@ func ConsoleTopicTemplateV2ResourceSchema(ctx context.Context) schema.Schema {
 										Description:         "Default topic name. Supports Handlebars variable interpolation, e.g. `topic-{{department}}`",
 										MarkdownDescription: "Default topic name. Supports Handlebars variable interpolation, e.g. `topic-{{department}}`",
 										Validators: []validator.String{
-											stringvalidator.RegexMatches(regexp.MustCompile("^([^{]|\\{(?!\\{)|\\{\\{[A-Za-z_][A-Za-z0-9_]*\\}\\})*$"), "Topic name supports plain text and Handlebars variables like {{department}}"),
+											stringvalidator.RegexMatches(regexp.MustCompile("^[^{}]*(\\{\\{[A-Za-z_][A-Za-z0-9_]*\\}\\}[^{}]*)*$"), "Topic name supports plain text and Handlebars variables like {{department}}"),
 										},
 									},
 								},

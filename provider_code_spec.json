@@ -3904,7 +3904,7 @@
                                           "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
                                         }
                                       ],
-                                      "schema_definition": "stringvalidator.RegexMatches(regexp.MustCompile(\"^([^{]|\\\\{(?!\\\\{)|\\\\{\\\\{[A-Za-z_][A-Za-z0-9_]*\\\\}\\\\})*$\"), \"Topic name supports plain text and Handlebars variables like {{department}}\")"
+                                      "schema_definition": "stringvalidator.RegexMatches(regexp.MustCompile(\"^[^{}]*(\\\\{\\\\{[A-Za-z_][A-Za-z0-9_]*\\\\}\\\\}[^{}]*)*$\"), \"Topic name supports plain text and Handlebars variables like {{department}}\")"
                                     }
                                   }
                                 ]
