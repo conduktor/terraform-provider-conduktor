@@ -16,7 +16,7 @@ import (
 )
 
 const topicTemplateV2ApiPath = "/public/console/v2/topic-template"
-const topicTemplateV2MinimumVersion = "v1.26.0"
+const topicTemplateV2MinimumVersion = "v1.46.0"
 
 var _ resource.Resource = &TopicTemplateV2Resource{}
 var _ resource.ResourceWithImportState = &TopicTemplateV2Resource{}
