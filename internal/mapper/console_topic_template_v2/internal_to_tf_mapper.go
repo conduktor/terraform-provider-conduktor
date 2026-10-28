@@ -93,6 +93,10 @@ func defaultsInternalModelToTerraform(ctx context.Context, r *console.TopicTempl
 }
 
 func defaultsMetaInternalModelToTerraform(ctx context.Context, r *console.TopicTemplateDefaultsMetadata) (schema.MetadataValue, error) {
+	if r.Name == "" && r.Labels == nil {
+		return schema.NewMetadataValueNull(), nil
+	}
+
 	unknownMetaObj, diag := schema.NewMetadataValueUnknown().ToObjectValue(ctx)
 	if diag.HasError() {
 		return schema.MetadataValue{}, mapper.WrapDiagError(diag, "defaults.metadata", mapper.IntoTerraform)
@@ -116,6 +120,10 @@ func defaultsMetaInternalModelToTerraform(ctx context.Context, r *console.TopicT
 }
 
 func defaultsSpecInternalModelToTerraform(ctx context.Context, r *console.TopicTemplateDefaultsSpec) (schema.DefaultsSpecValue, error) {
+	if r.Partitions == nil && r.ReplicationFactor == nil && r.Configs == nil {
+		return schema.NewDefaultsSpecValueNull(), nil
+	}
+
 	unknownSpecObj, diag := schema.NewDefaultsSpecValueUnknown().ToObjectValue(ctx)
 	if diag.HasError() {
 		return schema.DefaultsSpecValue{}, mapper.WrapDiagError(diag, "defaults.spec", mapper.IntoTerraform)
