@@ -56,6 +56,9 @@ func ConsoleTopicTemplateV2ResourceSchema(ctx context.Context) schema.Schema {
 										Optional:            true,
 										Description:         "Default labels for topics created from this template",
 										MarkdownDescription: "Default labels for topics created from this template",
+										Validators: []validator.Map{
+											validation.Labels(),
+										},
 									},
 									"name": schema.StringAttribute{
 										Optional:            true,

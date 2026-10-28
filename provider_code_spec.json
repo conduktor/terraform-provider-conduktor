@@ -3917,7 +3917,19 @@
                                 "computed_optional_required": "optional",
                                 "element_type": {
                                   "string": {}
-                                }
+                                },
+                                "validators": [
+                                  {
+                                    "custom": {
+                                      "imports": [
+                                        {
+                                          "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
+                                        }
+                                      ],
+                                      "schema_definition": "validation.Labels()"
+                                    }
+                                  }
+                                ]
                               }
                             }
                           ]
