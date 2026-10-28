@@ -205,6 +205,7 @@ Optional:
 
 Read-Only:
 
+- `guid` (String) Unique string identifier assigned by the server
 - `id` (Number) Kafka subject ID
 - `version` (Number) Kafka subject version
 

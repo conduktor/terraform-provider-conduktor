@@ -1,0 +1,25 @@
+---
+page_title: "Conduktor : conduktor_console_topic_template_v2"
+subcategory: "console/v2"
+description: |-
+    Resource for managing Conduktor Console topic templates.
+    This resource allows you to create, read, update and delete topic templates in Conduktor.
+---
+
+# {{ .Name }}
+
+Resource for managing Conduktor topic templates.
+
+Topic templates define reusable blueprints for Kafka topic creation — including default partitions, replication factor, configs, and a naming pattern with [Handlebars variable interpolation](https://docs.conduktor.io/guide/reference/console-reference) (e.g. `topic-{{"{{"}}department{{"}}"}}`).
+
+Requires Conduktor Console >= `1.26.0` and an enterprise plan.
+
+## Example Usage
+
+### Simple topic template
+{{tffile "examples/resources/conduktor_console_topic_template_v2/simple.tf"}}
+
+### Complex topic template
+{{tffile "examples/resources/conduktor_console_topic_template_v2/complex.tf"}}
+
+{{ .SchemaMarkdown | trimspace }}
