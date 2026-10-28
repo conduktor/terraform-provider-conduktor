@@ -228,7 +228,43 @@ func TestAccKafkaClusterV2ExampleResource(t *testing.T) {
 	})
 }
 
+func TestAccKafkaClusterV2ClientMetricsCollectors(t *testing.T) {
+	test.CheckEnterpriseEnabled(t)
+	v, err := fetchClientVersion(client.CONSOLE)
+	if err != nil {
+		t.Fatalf("Error fetching current version: %s", err)
+	}
+	test.CheckMinimumVersionRequirement(t, v, kafkaClusterV2ClientMetricsCollectorsMinimumVersion)
+
+	resourceRef := "conduktor_console_kafka_cluster_v2.test_cmc"
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { test.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: providerConfigConsole + test.TestAccTestdata(t, "console/kafka_cluster_v2/resource_client_metrics_collectors.tf"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceRef, "name", "kafka-cluster-with-cmc"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.client_metrics_collectors.#", "1"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.client_metrics_collectors.0.url", "https://prometheus.example.com/api/v1/write"),
+				),
+			},
+			{
+				ResourceName:                         resourceRef,
+				ImportState:                          true,
+				ImportStateVerify:                    true,
+				ImportStateId:                        "kafka-cluster-with-cmc",
+				ImportStateVerifyIdentifierAttribute: "name",
+			},
+		},
+	})
+}
+
 const kafkaClusterV2PoliciesRefMinimumVersion = "v1.42.0"
+
+// clientMetricsCollectors was not present in any published Console OpenAPI spec up to v1.48.1.
+// Update this constant to the actual release version once the field ships in the API.
+const kafkaClusterV2ClientMetricsCollectorsMinimumVersion = "v1.49.0"
 
 func TestAccKafkaClusterV2PoliciesRef(t *testing.T) {
 	test.CheckEnterpriseEnabled(t)
