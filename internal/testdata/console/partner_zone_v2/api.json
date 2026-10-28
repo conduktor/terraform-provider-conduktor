@@ -9,6 +9,8 @@
 	},
 	"spec": {
 		"cluster": "mycluster",
+		"underlyingCluster": "underlying-kafka-cluster",
+		"vclusterName": "partner-vcluster",
 		"displayName": "Partner Zone",
 		"description": "This is a partner zone",
 		"url": "https://partnerzone.example.com",
