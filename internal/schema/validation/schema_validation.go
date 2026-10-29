@@ -77,14 +77,20 @@ var ValidAppGroupPermissions = []string{
 	"kafkaConnectorCreate",
 	"kafkaConnectPauseResume",
 	"kafkaConnectRestart",
+	"kafkaConnectorStop",
+	"kafkaConnectorOffsetsView",
+	"kafkaConnectorOffsetsManage",
+	"kafkaConnectorMetadataManage",
 	"consumerGroupView",
 	"consumerGroupReset",
 	"consumerGroupDelete",
 	"consumerGroupCreate",
+	"consumerGroupMetadataManage",
 	"subjectCreateUpdate",
 	"subjectEditCompatibility",
 	"subjectDelete",
 	"subjectView",
+	"subjectMetadataManage",
 	"topicViewConfig",
 	"topicEmpty",
 	"topicConsume",
@@ -94,6 +100,7 @@ var ValidAppGroupPermissions = []string{
 	"topicAddPartition",
 	"topicDelete",
 	"topicDataQualityManage",
+	"topicMetadataManage",
 }
 
 var ValidAppGroupInstancePermissions = []string{
