@@ -17,6 +17,7 @@ import (
 
 const connectorTemplateV2ApiPath = "/public/console/v2/connector-template"
 const connectorTemplateV2MinimumVersion = "v1.46.0"
+const connectorTemplateV2EnterpriseOnlyVersion = "v1.46.0"
 
 var _ resource.Resource = &ConnectorTemplateV2Resource{}
 var _ resource.ResourceWithImportState = &ConnectorTemplateV2Resource{}
@@ -74,7 +75,7 @@ func (r *ConnectorTemplateV2Resource) Configure(ctx context.Context, req resourc
 		return
 	}
 
-	checkEnterprisePlanRequirement(ctx, data.Client, consoleVersion, connectorTemplateV2MinimumVersion, &resp.Diagnostics)
+	checkEnterprisePlanRequirement(ctx, data.Client, consoleVersion, connectorTemplateV2EnterpriseOnlyVersion, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
 	}
