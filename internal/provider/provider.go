@@ -165,6 +165,7 @@ func (p *ConduktorProvider) Resources(ctx context.Context) []func() resource.Res
 		NewApplicationInstancePermissionV1Resource,
 		NewApplicationGroupV1Resource,
 		NewConnectorV2Resource,
+		NewConnectorTemplateV2Resource,
 		NewUserV2Resource,
 		NewGroupV2Resource,
 		NewGenericResource,
