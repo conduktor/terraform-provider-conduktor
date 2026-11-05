@@ -1,0 +1,30 @@
+{
+  "kind": "TopicTemplate",
+  "apiVersion": "v2",
+  "metadata": {
+    "name": "my-template",
+    "labels": {
+      "env": "prod"
+    }
+  },
+  "spec": {
+    "displayName": "My Topic Template",
+    "description": "A template for production topics",
+    "defaults": {
+      "metadata": {
+        "name": "topic-{{department}}",
+        "labels": {
+          "throughput": "high"
+        }
+      },
+      "spec": {
+        "partitions": 6,
+        "replicationFactor": 3,
+        "configs": {
+          "retention.ms": "604800000",
+          "cleanup.policy": "delete"
+        }
+      }
+    }
+  }
+}
