@@ -2254,6 +2254,13 @@
                   }
                 },
                 {
+                  "name": "guid",
+                  "string": {
+                    "description": "Unique string identifier assigned by the server",
+                    "computed_optional_required": "computed"
+                  }
+                },
+                {
                   "name": "references",
                   "set_nested": {
                     "description": "Array of objects (SchemaReference)",

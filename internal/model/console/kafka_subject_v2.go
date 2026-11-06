@@ -28,6 +28,7 @@ type KafkaSubjectSpec struct {
 	Version       *int                     `json:"version,omitempty"`
 	Compatibility string                   `json:"compatibility,omitempty"`
 	Id            *int                     `json:"id,omitempty"`
+	Guid          string                   `json:"guid,omitempty"`
 	References    []KafkaSubjectReferences `json:"references,omitempty"`
 }
 

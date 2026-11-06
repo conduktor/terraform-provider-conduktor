@@ -57,6 +57,7 @@ func TestKafkaSubjectV2ModelMapping(t *testing.T) {
 	assert.Equal(t, "JSON", internal.Spec.Format)
 	assert.Equal(t, "BACKWARD", internal.Spec.Compatibility)
 	assert.Equal(t, schemaValue, internal.Spec.Schema)
+	assert.Equal(t, "abc-123-def", internal.Spec.Guid)
 	assert.Equal(t, expectedRefs, internal.Spec.References)
 
 	// convert to terraform model
@@ -70,6 +71,7 @@ func TestKafkaSubjectV2ModelMapping(t *testing.T) {
 	assert.Equal(t, types.StringValue("JSON"), tfModel.Spec.Format)
 	assert.Equal(t, types.StringValue("BACKWARD"), tfModel.Spec.Compatibility)
 	assert.Equal(t, customtypes.NewSchemaNormalizedValue(schemaValue), tfModel.Spec.Schema)
+	assert.Equal(t, types.StringValue("abc-123-def"), tfModel.Spec.Guid)
 	var tfRefs []subject.ReferencesValue
 	diag := tfModel.Spec.References.ElementsAs(ctx, &tfRefs, false)
 	assert.False(t, diag.HasError())
@@ -101,8 +103,8 @@ func TestKafkaSubjectV2ModelMapping(t *testing.T) {
 		t.Fatal(err)
 		return
 	}
-	// compare without json
-	if !cmp.Equal(ctlResource, ctlResource2, cmpopts.IgnoreFields(ctlresource.Resource{}, "Json")) {
+	// compare without json and spec (guid is computed-only and not sent back to the API)
+	if !cmp.Equal(ctlResource, ctlResource2, cmpopts.IgnoreFields(ctlresource.Resource{}, "Json", "Spec")) {
 		t.Errorf("expected %+v, got %+v", ctlResource, ctlResource2)
 	}
 }
