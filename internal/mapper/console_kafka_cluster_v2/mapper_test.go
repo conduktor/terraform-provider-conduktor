@@ -2,6 +2,7 @@ package console_kafka_cluster_v2
 
 import (
 	"context"
+	"encoding/json"
 	"testing"
 
 	ctlresource "github.com/conduktor/ctl/resource"
@@ -268,4 +269,113 @@ func TestMinimalKafkaClusterV2ModelMapping(t *testing.T) {
 	if !cmp.Equal(ctlResource, ctlResource2, cmpopts.IgnoreFields(ctlresource.Resource{}, "Json")) {
 		t.Errorf("expected %+v, got %+v", ctlResource, ctlResource2)
 	}
+}
+
+func TestClientMetricsCollectorsKafkaClusterV2ModelMapping(t *testing.T) {
+	ctx := context.Background()
+
+	jsonKafkaClusterV2Resource := []byte(test.TestAccTestdata(t, "console/kafka_cluster_v2/api_client_metrics_collectors.json"))
+
+	ctlResource := ctlresource.Resource{}
+	err := ctlResource.UnmarshalJSON(jsonKafkaClusterV2Resource)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	assert.Equal(t, "KafkaCluster", ctlResource.Kind)
+	assert.Equal(t, "v2", ctlResource.Version)
+	assert.Equal(t, "cluster-with-metrics", ctlResource.Name)
+	assert.Equal(t, jsonKafkaClusterV2Resource, ctlResource.Json)
+
+	// convert into internal model
+	internal, err := console.NewKafkaClusterResourceFromClientResource(ctlResource)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	assert.Equal(t, "KafkaCluster", internal.Kind)
+	assert.Equal(t, "v2", internal.ApiVersion)
+	assert.Equal(t, "cluster-with-metrics", internal.Metadata.Name)
+	assert.Equal(t, "Cluster with Metrics Collectors", internal.Spec.DisplayName)
+	assert.Equal(t, "localhost:9092", internal.Spec.BootstrapServers)
+	assert.Equal(t, 3, len(internal.Spec.ClientMetricsCollectors))
+
+	// first collector: BasicAuth
+	c0 := internal.Spec.ClientMetricsCollectors[0]
+	assert.Equal(t, "https://prometheus.example.com/api/v1/write", c0.Url)
+	assert.Equal(t, "", c0.Vcluster)
+	assert.NotNil(t, c0.Security)
+	assert.NotNil(t, c0.Security.BasicAuth)
+	assert.Equal(t, "admin", c0.Security.BasicAuth.Username)
+	assert.Equal(t, "secret", c0.Security.BasicAuth.Password)
+	assert.Nil(t, c0.Security.BearerToken)
+	assert.Nil(t, c0.Security.NoSecurity)
+
+	// second collector: BearerToken
+	c1 := internal.Spec.ClientMetricsCollectors[1]
+	assert.Equal(t, "https://grafana.example.com/api/push", c1.Url)
+	assert.Equal(t, true, c1.IgnoreUntrustedCertificate)
+	assert.Equal(t, "my-vcluster", c1.Vcluster)
+	assert.NotNil(t, c1.Security)
+	assert.NotNil(t, c1.Security.BearerToken)
+	assert.Equal(t, "bearer-token-value", c1.Security.BearerToken.Token)
+	assert.Nil(t, c1.Security.BasicAuth)
+	assert.Nil(t, c1.Security.NoSecurity)
+
+	// third collector: NoSecurity
+	c2 := internal.Spec.ClientMetricsCollectors[2]
+	assert.Equal(t, "https://internal-metrics.example.com/push", c2.Url)
+	assert.NotNil(t, c2.Security)
+	assert.NotNil(t, c2.Security.NoSecurity)
+	assert.Nil(t, c2.Security.BasicAuth)
+	assert.Nil(t, c2.Security.BearerToken)
+
+	// convert to terraform model
+	tfModel, err := InternalModelToTerraform(ctx, &internal)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	assert.Equal(t, types.StringValue("cluster-with-metrics"), tfModel.Name)
+	assert.Equal(t, false, tfModel.Spec.IsNull())
+	assert.Equal(t, false, tfModel.Spec.IsUnknown())
+	assert.Equal(t, false, tfModel.Spec.ClientMetricsCollectors.IsNull())
+	assert.Equal(t, 3, len(tfModel.Spec.ClientMetricsCollectors.Elements()))
+
+	// convert back to internal model
+	internal2, err := TFToInternalModel(ctx, &tfModel)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	assert.Equal(t, internal, internal2)
+
+	// convert back to ctl model and verify JSON round-trip
+	ctlResource2, err := internal2.ToClientResource()
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	// compare without json
+	if !cmp.Equal(ctlResource, ctlResource2, cmpopts.IgnoreFields(ctlresource.Resource{}, "Json")) {
+		t.Errorf("expected %+v, got %+v", ctlResource, ctlResource2)
+	}
+
+	// verify JSON re-serialization preserves collector count
+	var original, reserialised map[string]interface{}
+	if err := json.Unmarshal(ctlResource.Json, &original); err != nil {
+		t.Fatal(err)
+	}
+	if err := json.Unmarshal(ctlResource2.Json, &reserialised); err != nil {
+		t.Fatal(err)
+	}
+	originalSpec, ok := original["spec"].(map[string]interface{})
+	assert.True(t, ok, "original spec should be a map")
+	reserialisedSpec, ok := reserialised["spec"].(map[string]interface{})
+	assert.True(t, ok, "reserialised spec should be a map")
+	originalCollectors, ok := originalSpec["clientMetricsCollectors"].([]interface{})
+	assert.True(t, ok, "original clientMetricsCollectors should be a list")
+	reserialisedCollectors, ok := reserialisedSpec["clientMetricsCollectors"].([]interface{})
+	assert.True(t, ok, "reserialised clientMetricsCollectors should be a list")
+	assert.Equal(t, len(originalCollectors), len(reserialisedCollectors))
 }
