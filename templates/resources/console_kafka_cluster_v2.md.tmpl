@@ -36,4 +36,8 @@ This example creates a Conduktor Gateway Kafka Cluster and Schema Registry defin
 The Schema Registry authentication uses a bearer token.
 {{tffile "examples/resources/conduktor_console_kafka_cluster_v2/gateway.tf"}}
 
+## Notes
+
+- The `client_metrics_collectors` attribute requires Conduktor Console **1.49 or later**. It will be ignored or cause an error on earlier versions.
+
 {{ .SchemaMarkdown | trimspace }}
