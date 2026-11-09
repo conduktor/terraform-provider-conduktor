@@ -50,9 +50,15 @@ func specTFToInternalModel(ctx context.Context, r *schema.SpecValue) (console.Ka
 		return console.KafkaClusterSpec{}, mapper.WrapDiagError(diag, "policies_ref", mapper.FromTerraform)
 	}
 
+	clientMetricsCollectors, err := clientMetricsCollectorsTFToInternalModel(ctx, r.ClientMetricsCollectors)
+	if err != nil {
+		return console.KafkaClusterSpec{}, err
+	}
+
 	return console.KafkaClusterSpec{
 		DisplayName:                r.DisplayName.ValueString(),
 		BootstrapServers:           r.BootstrapServers.ValueString(),
+		ClientMetricsCollectors:    clientMetricsCollectors,
 		Color:                      r.Color.ValueString(),
 		Icon:                       r.Icon.ValueString(),
 		IgnoreUntrustedCertificate: r.IgnoreUntrustedCertificate.ValueBool(),
@@ -61,6 +67,59 @@ func specTFToInternalModel(ctx context.Context, r *schema.SpecValue) (console.Ka
 		PoliciesRef:                policiesRef,
 		SchemaRegistry:             schemaRegistry,
 	}, nil
+}
+
+func clientMetricsCollectorsTFToInternalModel(ctx context.Context, list basetypes.ListValue) ([]console.ClientMetricsCollector, error) {
+	if list.IsNull() || list.IsUnknown() {
+		return nil, nil
+	}
+	var tfItems []schema.ClientMetricsCollectorsValue
+	diag := list.ElementsAs(ctx, &tfItems, false)
+	if diag.HasError() {
+		return nil, mapper.WrapDiagError(diag, "client_metrics_collectors", mapper.FromTerraform)
+	}
+	collectors := make([]console.ClientMetricsCollector, 0, len(tfItems))
+	for _, item := range tfItems {
+		c := console.ClientMetricsCollector{
+			Url:                        item.Url.ValueString(),
+			IgnoreUntrustedCertificate: item.IgnoreUntrustedCertificate.ValueBool(),
+			Vcluster:                   item.Vcluster.ValueString(),
+		}
+		if schemaUtils.AttrIsSet(item.Security) {
+			secVal, diag := schema.NewCmcSecurityValue(item.Security.AttributeTypes(ctx), item.Security.Attributes())
+			if diag.HasError() {
+				return nil, mapper.WrapDiagError(diag, "client_metrics_collectors.security", mapper.FromTerraform)
+			}
+			var sec console.ClientMetricsCollectorSecurity
+			if schemaUtils.AttrIsSet(secVal.BasicAuth) {
+				baVal, diag := schema.NewCmcBasicAuthValue(secVal.BasicAuth.AttributeTypes(ctx), secVal.BasicAuth.Attributes())
+				if diag.HasError() {
+					return nil, mapper.WrapDiagError(diag, "client_metrics_collectors.security.basic_auth", mapper.FromTerraform)
+				}
+				sec.BasicAuth = &console.ClientMetricsCollectorBasicAuth{
+					Type:     string(console.CMC_BASIC_AUTH),
+					Username: baVal.Username.ValueString(),
+					Password: baVal.Password.ValueString(),
+				}
+			} else if schemaUtils.AttrIsSet(secVal.BearerToken) {
+				btVal, diag := schema.NewCmcBearerTokenValue(secVal.BearerToken.AttributeTypes(ctx), secVal.BearerToken.Attributes())
+				if diag.HasError() {
+					return nil, mapper.WrapDiagError(diag, "client_metrics_collectors.security.bearer_token", mapper.FromTerraform)
+				}
+				sec.BearerToken = &console.ClientMetricsCollectorBearerToken{
+					Type:  string(console.CMC_BEARER_TOKEN),
+					Token: btVal.Token.ValueString(),
+				}
+			} else if schemaUtils.AttrIsSet(secVal.NoSecurity) {
+				sec.NoSecurity = &console.ClientMetricsCollectorNoSecurity{
+					Type: string(console.CMC_NO_SECURITY),
+				}
+			}
+			c.Security = &sec
+		}
+		collectors = append(collectors, c)
+	}
+	return collectors, nil
 }
 
 func kafkaFlavorTFToInternalModel(ctx context.Context, r *basetypes.ObjectValue) (*console.KafkaFlavor, error) {
