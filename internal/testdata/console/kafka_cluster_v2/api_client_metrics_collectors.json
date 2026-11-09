@@ -1,0 +1,37 @@
+{
+  "apiVersion": "v2",
+  "kind": "KafkaCluster",
+  "metadata": {
+    "name": "cluster-with-metrics"
+  },
+  "spec": {
+    "bootstrapServers": "localhost:9092",
+    "displayName": "Cluster with Metrics Collectors",
+    "ignoreUntrustedCertificate": false,
+    "clientMetricsCollectors": [
+      {
+        "url": "https://prometheus.example.com/api/v1/write",
+        "security": {
+          "username": "admin",
+          "password": "secret",
+          "type": "BasicAuth"
+        }
+      },
+      {
+        "url": "https://grafana.example.com/api/push",
+        "ignoreUntrustedCertificate": true,
+        "vcluster": "my-vcluster",
+        "security": {
+          "token": "bearer-token-value",
+          "type": "BearerToken"
+        }
+      },
+      {
+        "url": "https://internal-metrics.example.com/push",
+        "security": {
+          "type": "NoSecurity"
+        }
+      }
+    ]
+  }
+}

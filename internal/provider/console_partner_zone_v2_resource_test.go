@@ -53,6 +53,9 @@ func TestAccPartnerZoneV2Resource(t *testing.T) {
 				ImportStateVerify:                    true,
 				ImportStateId:                        "partner-zone",
 				ImportStateVerifyIdentifierAttribute: "name",
+				// underlying_cluster is auto-populated by the API when not set in config;
+				// it legitimately differs between pre-apply state and imported state.
+				ImportStateVerifyIgnore: []string{"spec.underlying_cluster"},
 			},
 			// Update and Read testing
 			{
