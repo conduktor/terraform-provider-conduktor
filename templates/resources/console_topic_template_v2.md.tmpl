@@ -23,3 +23,15 @@ Requires Conduktor Console >= `1.26.0` and an enterprise plan.
 {{tffile "examples/resources/conduktor_console_topic_template_v2/complex.tf"}}
 
 {{ .SchemaMarkdown | trimspace }}
+
+## Import
+
+In order to import a Topic Template into Conduktor, you need to know the Topic Template name.
+
+For example, using an [`import` block](https://developer.hashicorp.com/terraform/language/import) :
+{{tffile "examples/resources/conduktor_console_topic_template_v2/import.tf"}}
+
+Using the `terraform import` command:
+```shell
+terraform import conduktor_console_topic_template_v2.example my-topic-template
+```

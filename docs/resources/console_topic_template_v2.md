@@ -116,3 +116,20 @@ Optional:
 - `configs` (Map of String) Default Kafka topic configuration key-value pairs, e.g. `{"retention.ms": "604800000"}`
 - `partitions` (Number) Default number of partitions
 - `replication_factor` (Number) Default replication factor
+
+## Import
+
+In order to import a Topic Template into Conduktor, you need to know the Topic Template name.
+
+For example, using an [`import` block](https://developer.hashicorp.com/terraform/language/import) :
+```terraform
+import {
+  to = conduktor_console_topic_template_v2.example
+  id = "my-topic-template"
+}
+```
+
+Using the `terraform import` command:
+```shell
+terraform import conduktor_console_topic_template_v2.example my-topic-template
+```
