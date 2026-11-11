@@ -16,12 +16,17 @@ func TFToInternalModel(ctx context.Context, r *schema.ConsoleConnectorTemplateV2
 		return console.ConnectorTemplateResource{}, mapper.WrapDiagError(diag, "labels", mapper.FromTerraform)
 	}
 
+	managedLabels, diag := schemaUtils.MapValueToStringMap(ctx, r.ManagedLabels)
+	if diag.HasError() {
+		return console.ConnectorTemplateResource{}, mapper.WrapDiagError(diag, "managed_labels", mapper.FromTerraform)
+	}
+
 	spec, err := specTFToInternalModel(ctx, &r.Spec)
 	if err != nil {
 		return console.ConnectorTemplateResource{}, err
 	}
 
-	return console.NewConnectorTemplateResource(r.Name.ValueString(), labels, spec), nil
+	return console.NewConnectorTemplateResource(r.Name.ValueString(), mapper.MergeLabels(managedLabels, labels), spec), nil
 }
 
 func specTFToInternalModel(ctx context.Context, r *schema.SpecValue) (console.ConnectorTemplateSpec, error) {

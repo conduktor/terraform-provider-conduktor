@@ -27,11 +27,18 @@ func ConsoleConnectorTemplateV2ResourceSchema(ctx context.Context) schema.Schema
 			"labels": schema.MapAttribute{
 				ElementType:         types.StringType,
 				Optional:            true,
+				Computed:            true,
 				Description:         "Connector template labels",
 				MarkdownDescription: "Connector template labels",
 				Validators: []validator.Map{
 					validation.Labels(),
 				},
+			},
+			"managed_labels": schema.MapAttribute{
+				ElementType:         types.StringType,
+				Computed:            true,
+				Description:         "Read-only Conduktor managed labels for the connector template resource.",
+				MarkdownDescription: "Read-only Conduktor managed labels for the connector template resource.",
 			},
 			"name": schema.StringAttribute{
 				Required:            true,
@@ -135,9 +142,10 @@ func ConsoleConnectorTemplateV2ResourceSchema(ctx context.Context) schema.Schema
 }
 
 type ConsoleConnectorTemplateV2Model struct {
-	Labels types.Map    `tfsdk:"labels"`
-	Name   types.String `tfsdk:"name"`
-	Spec   SpecValue    `tfsdk:"spec"`
+	Labels        types.Map    `tfsdk:"labels"`
+	ManagedLabels types.Map    `tfsdk:"managed_labels"`
+	Name          types.String `tfsdk:"name"`
+	Spec          SpecValue    `tfsdk:"spec"`
 }
 
 var _ basetypes.ObjectTypable = SpecType{}

@@ -1313,7 +1313,7 @@
             "name": "labels",
             "map": {
               "description": "Connector template labels",
-              "computed_optional_required": "optional",
+              "computed_optional_required": "computed_optional",
               "element_type": {
                 "string": {}
               },
@@ -1329,6 +1329,16 @@
                   }
                 }
               ]
+            }
+          },
+          {
+            "name": "managed_labels",
+            "map": {
+              "description": "Read-only Conduktor managed labels for the connector template resource.",
+              "computed_optional_required": "computed",
+              "element_type": {
+                "string": {}
+              }
             }
           },
           {

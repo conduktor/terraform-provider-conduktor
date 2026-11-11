@@ -35,7 +35,7 @@ func TestConnectorTemplateV2ModelMapping(t *testing.T) {
 	assert.Equal(t, "ConnectorTemplate", internal.Kind)
 	assert.Equal(t, "v2", internal.ApiVersion)
 	assert.Equal(t, "my-connector-template", internal.Metadata.Name)
-	assert.Equal(t, map[string]string{"env": "prod"}, internal.Metadata.Labels)
+	assert.Equal(t, map[string]string{"env": "prod", "conduktor.io/managed": "true"}, internal.Metadata.Labels)
 	assert.Equal(t, "My Connector Template", internal.Spec.DisplayName)
 	assert.Equal(t, "A template for S3 sink connectors", internal.Spec.Description)
 	assert.Equal(t, "connector-{{team}}", internal.Spec.Defaults.Metadata.Name)
@@ -49,6 +49,8 @@ func TestConnectorTemplateV2ModelMapping(t *testing.T) {
 		t.Fatal(err)
 	}
 	assert.Equal(t, types.StringValue("my-connector-template"), tfModel.Name)
+	assert.False(t, tfModel.Labels.IsNull())
+	assert.False(t, tfModel.ManagedLabels.IsNull())
 	assert.False(t, tfModel.Spec.IsNull())
 	assert.False(t, tfModel.Spec.IsUnknown())
 	assert.Equal(t, types.StringValue("My Connector Template"), tfModel.Spec.DisplayName)

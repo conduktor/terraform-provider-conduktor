@@ -90,6 +90,10 @@ resource "conduktor_console_connector_template_v2" "complex" {
 
 - `labels` (Map of String) Connector template labels
 
+### Read-Only
+
+- `managed_labels` (Map of String) Read-only Conduktor managed labels for the connector template resource.
+
 <a id="nestedatt--spec"></a>
 ### Nested Schema for `spec`
 
