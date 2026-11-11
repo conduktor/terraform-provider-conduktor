@@ -49,6 +49,8 @@ func TFToInternalModel(ctx context.Context, r *partnerZone.ConsolePartnerZoneV2M
 		},
 		console.PartnerZoneConsoleSpec{
 			Cluster:                r.Spec.Cluster.ValueString(),
+			UnderlyingCluster:      r.Spec.UnderlyingCluster.ValueString(),
+			VclusterName:           r.Spec.VclusterName.ValueString(),
 			DisplayName:            r.Spec.DisplayName.ValueString(),
 			Description:            r.Spec.Description.ValueString(),
 			Url:                    r.Spec.Url.ValueString(),

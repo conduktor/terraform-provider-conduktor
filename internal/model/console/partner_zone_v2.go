@@ -62,6 +62,8 @@ type PartnerZoneHeaders struct {
 
 type PartnerZoneConsoleSpec struct {
 	Cluster                string                             `json:"cluster"`
+	UnderlyingCluster      string                             `json:"underlyingCluster,omitempty"`
+	VclusterName           string                             `json:"vclusterName,omitempty"`
 	DisplayName            string                             `json:"displayName,omitempty"`
 	Description            string                             `json:"description,omitempty"`
 	Url                    string                             `json:"url,omitempty"`

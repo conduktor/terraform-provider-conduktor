@@ -72,6 +72,11 @@ func ConsoleKafkaSubjectV2ResourceSchema(ctx context.Context) schema.Schema {
 							stringvalidator.OneOf(validation.ValidKafkaSubjectFormat...),
 						},
 					},
+					"guid": schema.StringAttribute{
+						Computed:            true,
+						Description:         "Unique string identifier assigned by the server",
+						MarkdownDescription: "Unique string identifier assigned by the server",
+					},
 					"id": schema.Int64Attribute{
 						Computed:            true,
 						Description:         "Kafka subject ID",
@@ -201,6 +206,24 @@ func (t SpecType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue)
 			fmt.Sprintf(`format expected to be basetypes.StringValue, was: %T`, formatAttribute))
 	}
 
+	guidAttribute, ok := attributes["guid"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`guid is missing from object`)
+
+		return nil, diags
+	}
+
+	guidVal, ok := guidAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`guid expected to be basetypes.StringValue, was: %T`, guidAttribute))
+	}
+
 	idAttribute, ok := attributes["id"]
 
 	if !ok {
@@ -280,6 +303,7 @@ func (t SpecType) ValueFromObject(ctx context.Context, in basetypes.ObjectValue)
 	return SpecValue{
 		Compatibility: compatibilityVal,
 		Format:        formatVal,
+		Guid:          guidVal,
 		Id:            idVal,
 		References:    referencesVal,
 		Schema:        schemaVal,
@@ -387,6 +411,24 @@ func NewSpecValue(attributeTypes map[string]attr.Type, attributes map[string]att
 			fmt.Sprintf(`format expected to be basetypes.StringValue, was: %T`, formatAttribute))
 	}
 
+	guidAttribute, ok := attributes["guid"]
+
+	if !ok {
+		diags.AddError(
+			"Attribute Missing",
+			`guid is missing from object`)
+
+		return NewSpecValueUnknown(), diags
+	}
+
+	guidVal, ok := guidAttribute.(basetypes.StringValue)
+
+	if !ok {
+		diags.AddError(
+			"Attribute Wrong Type",
+			fmt.Sprintf(`guid expected to be basetypes.StringValue, was: %T`, guidAttribute))
+	}
+
 	idAttribute, ok := attributes["id"]
 
 	if !ok {
@@ -466,6 +508,7 @@ func NewSpecValue(attributeTypes map[string]attr.Type, attributes map[string]att
 	return SpecValue{
 		Compatibility: compatibilityVal,
 		Format:        formatVal,
+		Guid:          guidVal,
 		Id:            idVal,
 		References:    referencesVal,
 		Schema:        schemaVal,
@@ -544,6 +587,7 @@ var _ basetypes.ObjectValuable = SpecValue{}
 type SpecValue struct {
 	Compatibility basetypes.StringValue        `tfsdk:"compatibility"`
 	Format        basetypes.StringValue        `tfsdk:"format"`
+	Guid          basetypes.StringValue        `tfsdk:"guid"`
 	Id            basetypes.Int64Value         `tfsdk:"id"`
 	References    basetypes.SetValue           `tfsdk:"references"`
 	Schema        customtypes.SchemaNormalized `tfsdk:"schema"`
@@ -552,13 +596,14 @@ type SpecValue struct {
 }
 
 func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) {
-	attrTypes := make(map[string]tftypes.Type, 6)
+	attrTypes := make(map[string]tftypes.Type, 7)
 
 	var val tftypes.Value
 	var err error
 
 	attrTypes["compatibility"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["format"] = basetypes.StringType{}.TerraformType(ctx)
+	attrTypes["guid"] = basetypes.StringType{}.TerraformType(ctx)
 	attrTypes["id"] = basetypes.Int64Type{}.TerraformType(ctx)
 	attrTypes["references"] = basetypes.SetType{
 		ElemType: ReferencesValue{}.Type(ctx),
@@ -570,7 +615,7 @@ func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) 
 
 	switch v.state {
 	case attr.ValueStateKnown:
-		vals := make(map[string]tftypes.Value, 6)
+		vals := make(map[string]tftypes.Value, 7)
 
 		val, err = v.Compatibility.ToTerraformValue(ctx)
 
@@ -587,6 +632,14 @@ func (v SpecValue) ToTerraformValue(ctx context.Context) (tftypes.Value, error) 
 		}
 
 		vals["format"] = val
+
+		val, err = v.Guid.ToTerraformValue(ctx)
+
+		if err != nil {
+			return tftypes.NewValue(objectType, tftypes.UnknownValue), err
+		}
+
+		vals["guid"] = val
 
 		val, err = v.Id.ToTerraformValue(ctx)
 
@@ -681,6 +734,7 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 	attributeTypes := map[string]attr.Type{
 		"compatibility": basetypes.StringType{},
 		"format":        basetypes.StringType{},
+		"guid":          basetypes.StringType{},
 		"id":            basetypes.Int64Type{},
 		"references": basetypes.SetType{
 			ElemType: ReferencesValue{}.Type(ctx),
@@ -702,6 +756,7 @@ func (v SpecValue) ToObjectValue(ctx context.Context) (basetypes.ObjectValue, di
 		map[string]attr.Value{
 			"compatibility": v.Compatibility,
 			"format":        v.Format,
+			"guid":          v.Guid,
 			"id":            v.Id,
 			"references":    references,
 			"schema":        v.Schema,
@@ -731,6 +786,10 @@ func (v SpecValue) Equal(o attr.Value) bool {
 	}
 
 	if !v.Format.Equal(other.Format) {
+		return false
+	}
+
+	if !v.Guid.Equal(other.Guid) {
 		return false
 	}
 
@@ -765,6 +824,7 @@ func (v SpecValue) AttributeTypes(ctx context.Context) map[string]attr.Type {
 	return map[string]attr.Type{
 		"compatibility": basetypes.StringType{},
 		"format":        basetypes.StringType{},
+		"guid":          basetypes.StringType{},
 		"id":            basetypes.Int64Type{},
 		"references": basetypes.SetType{
 			ElemType: ReferencesValue{}.Type(ctx),

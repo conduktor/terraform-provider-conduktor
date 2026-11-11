@@ -272,3 +272,29 @@ func checkMinimalVersion(t *testing.T) {
 	}
 	test.CheckMinimumVersionRequirement(t, v, kafkaSubjectMininumVersion)
 }
+
+// kafkaSubjectGuidMinimumVersion is the first Console version that returns the guid field on subjects.
+const kafkaSubjectGuidMinimumVersion = "v1.47.0"
+
+func TestAccKafkaSubjectV2Guid(t *testing.T) {
+	checkMinimalVersion(t)
+	v, err := fetchClientVersion(client.CONSOLE)
+	if err != nil {
+		t.Fatalf("Error fetching current version: %s", err)
+	}
+	test.CheckMinimumVersionRequirement(t, v, kafkaSubjectGuidMinimumVersion)
+
+	resourceRef := "conduktor_console_kafka_subject_v2.test"
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { test.TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: providerConfigConsole + test.TestAccTestdata(t, "console/kafka_subject_v2/resource_create.tf"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttrSet(resourceRef, "spec.guid"),
+				),
+			},
+		},
+	})
+}
