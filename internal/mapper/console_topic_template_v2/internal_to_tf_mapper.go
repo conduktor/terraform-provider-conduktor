@@ -12,9 +12,16 @@ import (
 )
 
 func InternalModelToTerraform(ctx context.Context, r *console.TopicTemplateResource) (schema.ConsoleTopicTemplateV2Model, error) {
-	labels, diag := schemaUtils.StringMapToMapValue(ctx, r.Metadata.Labels)
+	var modelUserLabels, modelManagedLabels = mapper.SplitLabels(r.Metadata.Labels)
+
+	labels, diag := schemaUtils.StringMapToMapValue(ctx, modelUserLabels)
 	if diag.HasError() {
 		return schema.ConsoleTopicTemplateV2Model{}, mapper.WrapDiagError(diag, "labels", mapper.IntoTerraform)
+	}
+
+	managedLabels, diag := schemaUtils.StringMapToMapValue(ctx, modelManagedLabels)
+	if diag.HasError() {
+		return schema.ConsoleTopicTemplateV2Model{}, mapper.WrapDiagError(diag, "managed_labels", mapper.IntoTerraform)
 	}
 
 	specValue, err := specInternalModelToTerraform(ctx, &r.Spec)
@@ -23,9 +30,10 @@ func InternalModelToTerraform(ctx context.Context, r *console.TopicTemplateResou
 	}
 
 	return schema.ConsoleTopicTemplateV2Model{
-		Name:   types.StringValue(r.Metadata.Name),
-		Labels: labels,
-		Spec:   specValue,
+		Name:          types.StringValue(r.Metadata.Name),
+		Labels:        labels,
+		ManagedLabels: managedLabels,
+		Spec:          specValue,
 	}, nil
 }
 

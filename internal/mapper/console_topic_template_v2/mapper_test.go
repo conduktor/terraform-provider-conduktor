@@ -35,7 +35,7 @@ func TestTopicTemplateV2ModelMapping(t *testing.T) {
 	assert.Equal(t, "TopicTemplate", internal.Kind)
 	assert.Equal(t, "v2", internal.ApiVersion)
 	assert.Equal(t, "my-template", internal.Metadata.Name)
-	assert.Equal(t, map[string]string{"env": "prod"}, internal.Metadata.Labels)
+	assert.Equal(t, map[string]string{"env": "prod", "conduktor.io/managed": "true"}, internal.Metadata.Labels)
 	assert.Equal(t, "My Topic Template", internal.Spec.DisplayName)
 	assert.Equal(t, "A template for production topics", internal.Spec.Description)
 	assert.Equal(t, "topic-{{department}}", internal.Spec.Defaults.Metadata.Name)
@@ -50,6 +50,8 @@ func TestTopicTemplateV2ModelMapping(t *testing.T) {
 		t.Fatal(err)
 	}
 	assert.Equal(t, types.StringValue("my-template"), tfModel.Name)
+	assert.False(t, tfModel.Labels.IsNull())
+	assert.False(t, tfModel.ManagedLabels.IsNull())
 	assert.False(t, tfModel.Spec.IsNull())
 	assert.False(t, tfModel.Spec.IsUnknown())
 	assert.Equal(t, types.StringValue("My Topic Template"), tfModel.Spec.DisplayName)

@@ -4,7 +4,8 @@
   "metadata": {
     "name": "my-template",
     "labels": {
-      "env": "prod"
+      "env": "prod",
+      "conduktor.io/managed": "true"
     }
   },
   "spec": {
