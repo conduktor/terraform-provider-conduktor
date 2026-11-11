@@ -96,6 +96,8 @@ func TestKafkaSubjectV2ModelMapping(t *testing.T) {
 	assert.Equal(t, "BACKWARD", internal2.Spec.Compatibility)
 	assert.Equal(t, schemaValue, internal2.Spec.Schema)
 	assert.Equal(t, expectedRefs, internal2.Spec.References)
+	// guid is server-assigned and must not be sent back to the API
+	assert.Equal(t, "", internal2.Spec.Guid)
 
 	// convert back to ctl model
 	ctlResource2, err := internal2.ToClientResource()
@@ -103,7 +105,8 @@ func TestKafkaSubjectV2ModelMapping(t *testing.T) {
 		t.Fatal(err)
 		return
 	}
-	// compare without json and spec (guid is computed-only and not sent back to the API)
+	// compare metadata/kind/version only; guid is server-assigned (omitempty) so it is absent
+	// from the re-serialised payload and Spec, which are intentionally excluded from this check.
 	if !cmp.Equal(ctlResource, ctlResource2, cmpopts.IgnoreFields(ctlresource.Resource{}, "Json", "Spec")) {
 		t.Errorf("expected %+v, got %+v", ctlResource, ctlResource2)
 	}
