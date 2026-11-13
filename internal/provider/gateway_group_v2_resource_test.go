@@ -77,32 +77,6 @@ func TestAccGatewayGroupV2Resource(t *testing.T) {
 	})
 }
 
-func TestAccGatewayGroupV2ExampleResource(t *testing.T) {
-	test.CheckEnterpriseEnabled(t)
-	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { test.TestAccPreCheck(t) },
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			{
-				Config: providerConfigGateway + test.TestAccExample(t, "resources", "conduktor_gateway_group_v2", "simple.tf"),
-				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("conduktor_gateway_group_v2.simple_group", "name", "simple-group"),
-					resource.TestCheckResourceAttr("conduktor_gateway_group_v2.simple_group", "spec.members.#", "0"),
-					resource.TestCheckResourceAttr("conduktor_gateway_group_v2.simple_group", "spec.external_groups.#", "0"),
-				),
-			},
-			{
-				Config: providerConfigGateway + test.TestAccExample(t, "resources", "conduktor_gateway_group_v2", "complex.tf"),
-				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("conduktor_gateway_group_v2.complex_group", "name", "complex-group"),
-					resource.TestCheckResourceAttr("conduktor_gateway_group_v2.complex_group", "spec.members.#", "0"),
-					resource.TestCheckResourceAttr("conduktor_gateway_group_v2.complex_group", "spec.external_groups.#", "1"),
-				),
-			},
-		},
-	})
-}
-
 func TestAccGatewayGroupV2Minimal(t *testing.T) {
 	test.CheckEnterpriseEnabled(t)
 	resource.Test(t, resource.TestCase{

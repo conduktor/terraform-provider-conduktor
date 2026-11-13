@@ -28,7 +28,7 @@ type GatewayServiceAccountId struct {
 }
 
 type GatewayGroupSpec struct {
-	Members        []GatewayServiceAccountId `json:"members,omitempty"`
+	Members        []GatewayServiceAccountId `json:"members"`
 	ExternalGroups []string                  `json:"externalGroups,omitempty"`
 }
 

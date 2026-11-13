@@ -36,7 +36,7 @@ func TFToInternalModel(ctx context.Context, r *schema.GatewayGroupV2Model) (gate
 
 func listValueToMembers(ctx context.Context, list basetypes.ListValue) ([]gateway.GatewayServiceAccountId, error) {
 	if list.IsNull() || list.IsUnknown() {
-		return nil, nil
+		return []gateway.GatewayServiceAccountId{}, nil
 	}
 	var membersValue []schema.MembersValue
 	diags := list.ElementsAs(ctx, &membersValue, false)
@@ -94,7 +94,7 @@ func specInternalModelToTerraform(ctx context.Context, r *gateway.GatewayGroupSp
 func membersToListValue(ctx context.Context, members []gateway.GatewayServiceAccountId) (basetypes.ListValue, error) {
 	if len(members) == 0 {
 		memberType := schema.MembersValue{}.Type(ctx)
-		return types.ListNull(memberType), nil
+		return types.ListValueMust(memberType, []attr.Value{}), nil
 	}
 
 	tfMembers := make([]attr.Value, 0, len(members))

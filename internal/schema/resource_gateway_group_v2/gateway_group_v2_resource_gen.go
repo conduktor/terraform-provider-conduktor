@@ -27,8 +27,8 @@ func GatewayGroupV2ResourceSchema(ctx context.Context) schema.Schema {
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
 				Required:            true,
-				Description:         "The name of the gateway group, must be unique, acts as an ID for import",
-				MarkdownDescription: "The name of the gateway group, must be unique, acts as an ID for import",
+				Description:         "The name of the gateway group, must be unique, acts as an ID for import.",
+				MarkdownDescription: "The name of the gateway group, must be unique, acts as an ID for import.",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
@@ -42,8 +42,8 @@ func GatewayGroupV2ResourceSchema(ctx context.Context) schema.Schema {
 						ElementType:         types.StringType,
 						Optional:            true,
 						Computed:            true,
-						Description:         "Set of external group names (LDAP, OIDC, etc.) mapped to this gateway group",
-						MarkdownDescription: "Set of external group names (LDAP, OIDC, etc.) mapped to this gateway group",
+						Description:         "Set of external group names (LDAP, OIDC, etc.) mapped to this gateway group.",
+						MarkdownDescription: "Set of external group names (LDAP, OIDC, etc.) mapped to this gateway group.",
 						Default:             setdefault.StaticValue(basetypes.NewSetValueMust(types.StringType, []attr.Value{})),
 					},
 					"members": schema.ListNestedAttribute{
@@ -51,13 +51,13 @@ func GatewayGroupV2ResourceSchema(ctx context.Context) schema.Schema {
 							Attributes: map[string]schema.Attribute{
 								"name": schema.StringAttribute{
 									Required:            true,
-									Description:         "The name of the service account",
-									MarkdownDescription: "The name of the service account",
+									Description:         "The name of the service account.",
+									MarkdownDescription: "The name of the service account.",
 								},
 								"vcluster": schema.StringAttribute{
 									Optional:            true,
-									Description:         "The virtual cluster the service account belongs to. If not set, the passthrough virtual cluster is assumed",
-									MarkdownDescription: "The virtual cluster the service account belongs to. If not set, the passthrough virtual cluster is assumed",
+									Description:         "The virtual cluster the service account belongs to. If not set, the passthrough virtual cluster is assumed.",
+									MarkdownDescription: "The virtual cluster the service account belongs to. If not set, the passthrough virtual cluster is assumed.",
 								},
 							},
 							CustomType: MembersType{
@@ -68,8 +68,8 @@ func GatewayGroupV2ResourceSchema(ctx context.Context) schema.Schema {
 						},
 						Optional:            true,
 						Computed:            true,
-						Description:         "List of service accounts that are members of this group",
-						MarkdownDescription: "List of service accounts that are members of this group",
+						Description:         "List of service accounts that are members of this group.",
+						MarkdownDescription: "List of service accounts that are members of this group.",
 						Default:             listdefault.StaticValue(basetypes.NewListValueMust(types.ObjectType{AttrTypes: map[string]attr.Type{"name": types.StringType, "vcluster": types.StringType}}, []attr.Value{})),
 					},
 				},
@@ -79,8 +79,8 @@ func GatewayGroupV2ResourceSchema(ctx context.Context) schema.Schema {
 					},
 				},
 				Required:            true,
-				Description:         "Gateway group specification",
-				MarkdownDescription: "Gateway group specification",
+				Description:         "Gateway group specification.",
+				MarkdownDescription: "Gateway group specification.",
 			},
 		},
 	}
