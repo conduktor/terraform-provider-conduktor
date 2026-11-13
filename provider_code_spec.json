@@ -5293,7 +5293,7 @@
           {
             "name": "name",
             "string": {
-              "description": "The name of the gateway group, must be unique, acts as an ID for import.",
+              "description": "The name of the gateway group, must be unique, acts as an ID for import",
               "computed_optional_required": "required",
               "plan_modifiers": [
                 {
@@ -5328,26 +5328,26 @@
             "name": "spec",
             "single_nested": {
               "computed_optional_required": "required",
-              "description": "Gateway group specification.",
+              "description": "Gateway group specification",
               "attributes": [
                 {
                   "name": "members",
                   "list_nested": {
                     "computed_optional_required": "computed_optional",
-                    "description": "List of service accounts that are members of this group.",
+                    "description": "List of service accounts that are members of this group",
                     "nested_object": {
                       "attributes": [
                         {
                           "name": "name",
                           "string": {
-                            "description": "The name of the service account.",
+                            "description": "The name of the service account",
                             "computed_optional_required": "required"
                           }
                         },
                         {
                           "name": "vcluster",
                           "string": {
-                            "description": "The virtual cluster the service account belongs to. If not set, the passthrough virtual cluster is assumed.",
+                            "description": "The virtual cluster the service account belongs to. If not set, the passthrough virtual cluster is assumed",
                             "computed_optional_required": "optional"
                           }
                         }
@@ -5375,7 +5375,7 @@
                   "name": "external_groups",
                   "set": {
                     "computed_optional_required": "computed_optional",
-                    "description": "Set of external group names (LDAP, OIDC, etc.) mapped to this gateway group.",
+                    "description": "Set of external group names (LDAP, OIDC, etc.) mapped to this gateway group",
                     "element_type": {
                       "string": {}
                     },
