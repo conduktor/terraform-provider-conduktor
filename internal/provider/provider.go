@@ -178,6 +178,7 @@ func (p *ConduktorProvider) Resources(ctx context.Context) []func() resource.Res
 		NewTopicV2Resource,
 		NewTopicTemplateV2Resource,
 		NewTopicPolicyV1Resource,
+		NewGatewayGroupV2Resource,
 		NewGatewayServiceAccountV2Resource,
 		NewGatewayTokenV2Resource,
 		NewGatewayInterceptorV2Resource,
