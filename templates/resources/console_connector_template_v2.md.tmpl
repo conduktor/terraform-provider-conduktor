@@ -1,0 +1,42 @@
+---
+page_title: "Conduktor : conduktor_console_connector_template_v2 "
+subcategory: "kafka/v2"
+description: |-
+    Resource for managing Conduktor Console connector templates.
+    This resource allows you to create, read, update and delete connector templates in Conduktor.
+---
+
+# {{ .Name }}
+
+Resource for managing Conduktor Console connector templates.
+This resource allows you to create, read, update and delete connector templates in Conduktor.
+
+Connector templates allow platform teams to define reusable connector configurations with default
+values and metadata, enabling application teams to quickly create connectors with pre-filled settings.
+
+## Requirements
+
+- Conduktor Console version `1.46.0` or later.
+- Enterprise plan required.
+
+## Example Usage
+
+### Simple connector template
+{{tffile "examples/resources/conduktor_console_connector_template_v2/simple.tf"}}
+
+### Complex connector template
+{{tffile "examples/resources/conduktor_console_connector_template_v2/complex.tf"}}
+
+{{ .SchemaMarkdown | trimspace }}
+
+## Import
+
+In order to import a Connector Template into Conduktor, you need to know the Connector Template name.
+
+For example, using an [`import` block](https://developer.hashicorp.com/terraform/language/import) :
+{{tffile "examples/resources/conduktor_console_connector_template_v2/import.tf"}}
+
+Using the `terraform import` command:
+```shell
+terraform import conduktor_console_connector_template_v2.example my-connector-template
+```
