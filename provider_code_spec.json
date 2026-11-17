@@ -1272,6 +1272,191 @@
       }
     },
     {
+      "name": "console_connector_template_v2",
+      "schema": {
+        "attributes": [
+          {
+            "name": "name",
+            "string": {
+              "description": "Connector template name, must be unique, acts as an ID for import",
+              "computed_optional_required": "required",
+              "plan_modifiers": [
+                {
+                  "custom": {
+                    "imports": [
+                      {
+                        "path": "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+                      }
+                    ],
+                    "schema_definition": "stringplanmodifier.RequiresReplace()"
+                  }
+                }
+              ],
+              "validators": [
+                {
+                  "custom": {
+                    "imports": [
+                      {
+                        "path": "regexp"
+                      },
+                      {
+                        "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                      }
+                    ],
+                    "schema_definition": "stringvalidator.RegexMatches(regexp.MustCompile(\"^[0-9a-z\\\\_\\\\-.]+$\"), \"\")"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "labels",
+            "map": {
+              "description": "Connector template labels",
+              "computed_optional_required": "computed_optional",
+              "element_type": {
+                "string": {}
+              },
+              "validators": [
+                {
+                  "custom": {
+                    "imports": [
+                      {
+                        "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
+                      }
+                    ],
+                    "schema_definition": "validation.Labels()"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "managed_labels",
+            "map": {
+              "description": "Read-only Conduktor managed labels for the connector template resource.",
+              "computed_optional_required": "computed",
+              "element_type": {
+                "string": {}
+              }
+            }
+          },
+          {
+            "name": "spec",
+            "single_nested": {
+              "computed_optional_required": "required",
+              "description": "Connector template specification",
+              "attributes": [
+                {
+                  "name": "display_name",
+                  "string": {
+                    "description": "Connector template display name",
+                    "computed_optional_required": "required"
+                  }
+                },
+                {
+                  "name": "description",
+                  "string": {
+                    "description": "Connector template description",
+                    "computed_optional_required": "optional"
+                  }
+                },
+                {
+                  "name": "defaults",
+                  "single_nested": {
+                    "computed_optional_required": "required",
+                    "description": "Default values applied when creating a connector from this template",
+                    "attributes": [
+                      {
+                        "name": "metadata",
+                        "single_nested": {
+                          "computed_optional_required": "optional",
+                          "description": "Default metadata for connectors created from this template",
+                          "attributes": [
+                            {
+                              "name": "name",
+                              "string": {
+                                "description": "Default connector name. Supports Handlebars variable interpolation, e.g. `connector-{{team}}`",
+                                "computed_optional_required": "optional",
+                                "validators": [
+                                  {
+                                    "custom": {
+                                      "imports": [
+                                        {
+                                          "path": "regexp"
+                                        },
+                                        {
+                                          "path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+                                        }
+                                      ],
+                                      "schema_definition": "stringvalidator.RegexMatches(regexp.MustCompile(\"^[^{}]*(\\\\{\\\\{[A-Za-z_][A-Za-z0-9_]*\\\\}\\\\}[^{}]*)*$\"), \"Connector name supports plain text and Handlebars variables like {{team}}\")"
+                                    }
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "name": "labels",
+                              "map": {
+                                "description": "Default labels for connectors created from this template",
+                                "computed_optional_required": "optional",
+                                "element_type": {
+                                  "string": {}
+                                },
+                                "validators": [
+                                  {
+                                    "custom": {
+                                      "imports": [
+                                        {
+                                          "path": "github.com/conduktor/terraform-provider-conduktor/internal/schema/validation"
+                                        }
+                                      ],
+                                      "schema_definition": "validation.Labels()"
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "name": "spec",
+                        "single_nested": {
+                          "custom_type_name": "connector_defaults_spec",
+                          "computed_optional_required": "required",
+                          "description": "Default spec for connectors created from this template",
+                          "attributes": [
+                            {
+                              "name": "class",
+                              "string": {
+                                "description": "Connector class name, e.g. `io.confluent.connect.s3.S3SinkConnector`",
+                                "computed_optional_required": "required"
+                              }
+                            },
+                            {
+                              "name": "config",
+                              "map": {
+                                "description": "Default connector configuration key-value pairs",
+                                "computed_optional_required": "required",
+                                "element_type": {
+                                  "string": {}
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "console_group_v2",
       "schema": {
         "attributes": [

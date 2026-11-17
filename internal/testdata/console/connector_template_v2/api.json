@@ -1,0 +1,30 @@
+{
+  "kind": "ConnectorTemplate",
+  "apiVersion": "v2",
+  "metadata": {
+    "name": "my-connector-template",
+    "labels": {
+      "env": "prod",
+      "conduktor.io/managed": "true"
+    }
+  },
+  "spec": {
+    "displayName": "My Connector Template",
+    "description": "A template for S3 sink connectors",
+    "defaults": {
+      "metadata": {
+        "name": "connector-{{team}}",
+        "labels": {
+          "managed-by": "terraform"
+        }
+      },
+      "spec": {
+        "class": "io.confluent.connect.s3.S3SinkConnector",
+        "config": {
+          "tasks.max": "1",
+          "s3.bucket.name": "my-bucket"
+        }
+      }
+    }
+  }
+}
