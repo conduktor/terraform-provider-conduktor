@@ -1,0 +1,15 @@
+{
+  "kind": "GatewayGroup",
+  "apiVersion": "gateway/v2",
+  "metadata": {
+    "name": "test-group"
+  },
+  "spec": {
+    "members": [
+      { "name": "sa1", "vCluster": "vc1" }
+    ],
+    "externalGroups": [
+      "ldap-admins"
+    ]
+  }
+}
