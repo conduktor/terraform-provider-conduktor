@@ -30,7 +30,9 @@ func TestAccGatewayGroupV2Resource(t *testing.T) {
 				Config: providerConfigGateway + test.TestAccTestdata(t, "gateway/group_v2/resource_create.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceRef, "name", "test-group"),
-					resource.TestCheckResourceAttr(resourceRef, "spec.members.#", "0"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.members.#", "1"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.members.0.name", "admin"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.members.0.vcluster", "vcluster_sa"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.external_groups.#", "1"),
 				),
 			},
@@ -70,6 +72,7 @@ func TestAccGatewayGroupV2Resource(t *testing.T) {
 				Config: providerConfigGateway + test.TestAccTestdata(t, "gateway/group_v2/resource_update.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceRef, "name", "test-group"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.members.#", "2"),
 					resource.TestCheckResourceAttr(resourceRef, "spec.external_groups.#", "2"),
 				),
 			},
@@ -95,7 +98,7 @@ func TestAccGatewayGroupV2ExampleResource(t *testing.T) {
 				Config: providerConfigGateway + test.TestAccExample(t, "resources", "conduktor_gateway_group_v2", "complex.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("conduktor_gateway_group_v2.complex_group", "name", "complex-group"),
-					resource.TestCheckResourceAttr("conduktor_gateway_group_v2.complex_group", "spec.members.#", "0"),
+					resource.TestCheckResourceAttr("conduktor_gateway_group_v2.complex_group", "spec.members.#", "1"),
 					resource.TestCheckResourceAttr("conduktor_gateway_group_v2.complex_group", "spec.external_groups.#", "1"),
 				),
 			},
