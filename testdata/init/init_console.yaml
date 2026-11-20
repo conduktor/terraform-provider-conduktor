@@ -47,21 +47,3 @@ spec:
   displayName: My kafka connect
   urls: http://kafka-connect:8083
   ignoreUntrustedCertificate: true
----
-apiVersion: v2
-kind: Topic
-metadata:
-  name: my-topic
-  cluster: kafka-cluster
-spec:
-  partitions: 1
-  replicationFactor: 1
----
-apiVersion: v2
-kind: Topic
-metadata:
-  name: my-other-topic
-  cluster: kafka-cluster
-spec:
-  partitions: 1
-  replicationFactor: 1

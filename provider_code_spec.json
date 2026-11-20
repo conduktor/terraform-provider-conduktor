@@ -5560,7 +5560,7 @@
                   "name": "physical_cluster",
                   "string": {
                     "description": "The physical Kafka cluster hosting the physical topic; only needed for Partner virtual clusters, omit for Standard virtual clusters",
-                    "computed_optional_required": "optional"
+                    "computed_optional_required": "computed_optional"
                   }
                 }
               ]

@@ -38,6 +38,7 @@ func GatewayAliasTopicV2ResourceSchema(ctx context.Context) schema.Schema {
 				Attributes: map[string]schema.Attribute{
 					"physical_cluster": schema.StringAttribute{
 						Optional:            true,
+						Computed:            true,
 						Description:         "The physical Kafka cluster hosting the physical topic; only needed for Partner virtual clusters, omit for Standard virtual clusters",
 						MarkdownDescription: "The physical Kafka cluster hosting the physical topic; only needed for Partner virtual clusters, omit for Standard virtual clusters",
 					},

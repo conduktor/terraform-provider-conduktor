@@ -31,7 +31,7 @@ func TestAccGatewayAliasTopicV2Resource(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceRef, "name", "test-alias"),
 					resource.TestCheckResourceAttr(resourceRef, "vcluster", "vcluster_sa"),
-					resource.TestCheckResourceAttr(resourceRef, "spec.physical_name", "my-topic"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.physical_name", "docker-connect-configs"),
 				),
 			},
 			// Import
@@ -75,7 +75,7 @@ func TestAccGatewayAliasTopicV2Resource(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceRef, "name", "test-alias"),
 					resource.TestCheckResourceAttr(resourceRef, "vcluster", "vcluster_sa"),
-					resource.TestCheckResourceAttr(resourceRef, "spec.physical_name", "my-other-topic"),
+					resource.TestCheckResourceAttr(resourceRef, "spec.physical_name", "docker-connect-offsets"),
 				),
 			},
 		},
@@ -93,7 +93,7 @@ func TestAccGatewayAliasTopicV2Minimal(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("conduktor_gateway_alias_topic_v2.minimal", "name", "minimal-alias"),
 					resource.TestCheckResourceAttr("conduktor_gateway_alias_topic_v2.minimal", "vcluster", "passthrough"),
-					resource.TestCheckResourceAttr("conduktor_gateway_alias_topic_v2.minimal", "spec.physical_name", "my-topic"),
+					resource.TestCheckResourceAttr("conduktor_gateway_alias_topic_v2.minimal", "spec.physical_name", "docker-connect-configs"),
 				),
 			},
 		},
@@ -110,7 +110,7 @@ func TestAccGatewayAliasTopicV2ExampleResource(t *testing.T) {
 				Config: providerConfigGateway + test.TestAccExample(t, "resources", "conduktor_gateway_alias_topic_v2", "simple.tf"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("conduktor_gateway_alias_topic_v2.simple_alias", "name", "simple-alias"),
-					resource.TestCheckResourceAttr("conduktor_gateway_alias_topic_v2.simple_alias", "spec.physical_name", "my-topic"),
+					resource.TestCheckResourceAttr("conduktor_gateway_alias_topic_v2.simple_alias", "spec.physical_name", "docker-connect-configs"),
 				),
 			},
 			{
@@ -118,7 +118,7 @@ func TestAccGatewayAliasTopicV2ExampleResource(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("conduktor_gateway_alias_topic_v2.complex_alias", "name", "complex-alias"),
 					resource.TestCheckResourceAttr("conduktor_gateway_alias_topic_v2.complex_alias", "vcluster", "vcluster_sa"),
-					resource.TestCheckResourceAttr("conduktor_gateway_alias_topic_v2.complex_alias", "spec.physical_name", "my-topic"),
+					resource.TestCheckResourceAttr("conduktor_gateway_alias_topic_v2.complex_alias", "spec.physical_name", "docker-connect-configs"),
 					resource.TestCheckResourceAttr("conduktor_gateway_alias_topic_v2.complex_alias", "spec.physical_cluster", "main"),
 				),
 			},
