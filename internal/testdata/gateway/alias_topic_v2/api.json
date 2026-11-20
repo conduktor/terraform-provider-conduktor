@@ -1,0 +1,12 @@
+{
+  "kind": "AliasTopic",
+  "apiVersion": "gateway/v2",
+  "metadata": {
+    "name": "my-alias",
+    "vCluster": "vcluster_sa"
+  },
+  "spec": {
+    "physicalName": "real-topic",
+    "physicalCluster": "main"
+  }
+}
