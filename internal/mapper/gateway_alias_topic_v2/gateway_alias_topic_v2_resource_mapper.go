@@ -40,9 +40,14 @@ func InternalModelToTerraform(ctx context.Context, r *gateway.GatewayAliasTopicR
 		return gwaliasTopics.GatewayAliasTopicV2Model{}, mapper.WrapDiagError(diag, "spec", mapper.IntoTerraform)
 	}
 
+	vcluster := r.Metadata.VCluster
+	if vcluster == "" {
+		vcluster = "passthrough"
+	}
+
 	return gwaliasTopics.GatewayAliasTopicV2Model{
 		Name:     types.StringValue(r.Metadata.Name),
-		Vcluster: types.StringValue(r.Metadata.VCluster),
+		Vcluster: types.StringValue(vcluster),
 		Spec:     specValue,
 	}, nil
 }
