@@ -112,17 +112,10 @@ func (r *GatewayAliasTopicV2Resource) Create(ctx context.Context, req resource.C
 	}
 	tflog.Debug(ctx, fmt.Sprintf("Gateway alias topic created with result: %s", apply.UpsertResult))
 
-	var gatewayRes gateway.GatewayAliasTopicResource
-	err = gatewayRes.FromRawJsonInterface(apply.Resource)
+	// The upsert response does not include the full resource; read back to get server-populated fields.
+	data, err = r.readAliasTopicState(ctx, data.Name.ValueString(), data.Vcluster.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Unmarshall Error", fmt.Sprintf("Response resource can't be cast as gateway alias topic: %v, got error: %s", apply.Resource, err))
-		return
-	}
-	tflog.Debug(ctx, fmt.Sprintf("New gateway alias topic state: %+v", gatewayRes))
-
-	data, err = mapper.InternalModelToTerraform(ctx, &gatewayRes)
-	if err != nil {
-		resp.Diagnostics.AddError("Model Error", fmt.Sprintf("Unable to read gateway alias topic, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read gateway alias topic after create, got error: %s", err))
 		return
 	}
 
@@ -225,24 +218,43 @@ func (r *GatewayAliasTopicV2Resource) Update(ctx context.Context, req resource.U
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update gateway alias topic, got error: %s", err))
 		return
 	}
-	tflog.Debug(ctx, fmt.Sprintf("Gateway alias topic updated with result: %s", apply))
+	tflog.Debug(ctx, fmt.Sprintf("Gateway alias topic updated with result: %s", apply.UpsertResult))
 
-	var gatewayRes gateway.GatewayAliasTopicResource
-	err = gatewayRes.FromRawJsonInterface(apply.Resource)
+	// The upsert response does not include the full resource; read back to get server-populated fields.
+	data, err = r.readAliasTopicState(ctx, data.Name.ValueString(), data.Vcluster.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Unmarshall Error", fmt.Sprintf("Response resource can't be cast as gateway alias topic: %v, got error: %s", apply.Resource, err))
-		return
-	}
-	tflog.Debug(ctx, fmt.Sprintf("New gateway alias topic state: %+v", gatewayRes))
-
-	data, err = mapper.InternalModelToTerraform(ctx, &gatewayRes)
-	if err != nil {
-		resp.Diagnostics.AddError("Model Error", fmt.Sprintf("Unable to read gateway alias topic, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read gateway alias topic after update, got error: %s", err))
 		return
 	}
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+}
+
+// readAliasTopicState fetches the current alias topic from the API and returns the TF model.
+// Used after create/update since the upsert response does not include the full resource body.
+func (r *GatewayAliasTopicV2Resource) readAliasTopicState(ctx context.Context, name, vcluster string) (schema.GatewayAliasTopicV2Model, error) {
+	queryString := "name=" + name + "&vcluster=" + vcluster
+	get, err := r.apiClient.Describe(ctx, fmt.Sprintf("%s?%s", gatewayAliasTopicV2ApiPath, queryString))
+	if err != nil {
+		return schema.GatewayAliasTopicV2Model{}, err
+	}
+
+	var gatewayResult []gateway.GatewayAliasTopicResource
+	if err := json.Unmarshal(get, &gatewayResult); err != nil {
+		return schema.GatewayAliasTopicV2Model{}, err
+	}
+
+	for _, res := range gatewayResult {
+		nameMatch := res.Metadata.Name == name
+		vclusterMatch := res.Metadata.VCluster == vcluster
+		passthroughMatch := res.Metadata.VCluster == "" && vcluster == "passthrough"
+		if nameMatch && (vclusterMatch || passthroughMatch) {
+			return mapper.InternalModelToTerraform(ctx, &res)
+		}
+	}
+
+	return schema.GatewayAliasTopicV2Model{}, fmt.Errorf("alias topic %s/%s not found after upsert", name, vcluster)
 }
 
 func (r *GatewayAliasTopicV2Resource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
