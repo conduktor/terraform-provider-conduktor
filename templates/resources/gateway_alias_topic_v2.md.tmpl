@@ -1,0 +1,41 @@
+---
+page_title: "Conduktor : conduktor_gateway_alias_topic_v2 "
+subcategory: "gateway/v2"
+description: |-
+    Resource for managing Conduktor Gateway Alias Topics.
+    This resource allows you to create, read, update and delete alias topics in Conduktor Gateway.
+    For a full description of what Gateway alias topics are, refer to our [docs site](https://docs.conduktor.io/guide/conduktor-concepts/logical-topics#alias-topics).
+---
+
+# {{ .Name }}
+
+Resource for managing Conduktor Gateway Alias Topics.
+This resource allows you to create, read, update and delete alias topics in Conduktor Gateway.
+
+## Example Usage
+
+### Simple alias topic on the passthrough virtual cluster
+{{tffile "examples/resources/conduktor_gateway_alias_topic_v2/simple.tf"}}
+
+### Complex alias topic on a virtual cluster with an explicit physical cluster
+{{tffile "examples/resources/conduktor_gateway_alias_topic_v2/complex.tf"}}
+
+### Alias topic on a Partner virtual cluster
+Partner virtual clusters require `physical_cluster` to be set explicitly.
+{{tffile "examples/resources/conduktor_gateway_alias_topic_v2/partner.tf"}}
+
+{{ .SchemaMarkdown | trimspace }}
+
+## Import
+
+In order to import an existing Conduktor Gateway Alias Topic, you need to know the alias topic name and virtual cluster name pair.
+
+The import ID is constructed as follows: `<alias_topic_name>/<vcluster>`.
+
+For example, using an [`import` block](https://developer.hashicorp.com/terraform/language/import) :
+{{tffile "examples/resources/conduktor_gateway_alias_topic_v2/import.tf"}}
+
+Using the `terraform import` command:
+```shell
+terraform import conduktor_gateway_alias_topic_v2.example alias_topic_name/vcluster_name
+```
