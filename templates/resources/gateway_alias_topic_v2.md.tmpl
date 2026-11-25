@@ -20,6 +20,10 @@ This resource allows you to create, read, update and delete alias topics in Cond
 ### Complex alias topic on a virtual cluster with an explicit physical cluster
 {{tffile "examples/resources/conduktor_gateway_alias_topic_v2/complex.tf"}}
 
+### Alias topic on a Partner virtual cluster
+Partner virtual clusters require `physical_cluster` to be set explicitly.
+{{tffile "examples/resources/conduktor_gateway_alias_topic_v2/partner.tf"}}
+
 {{ .SchemaMarkdown | trimspace }}
 
 ## Import
